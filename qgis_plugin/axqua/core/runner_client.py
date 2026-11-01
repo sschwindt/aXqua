@@ -202,7 +202,7 @@ def _probe(path: str) -> str:
 
 
 #: The oldest axqua this plugin works with. An older one presented as a series of unexplained parse failures; since 1.0 the plugin also calls commands that 0.5 does not have (``docs``, ``cleanup``), and since 1.1 commands that 1.0 does not have (``hydrology``), so plugin and program are released together.
-MINIMUM_VERSION = (1, 1)
+MINIMUM_VERSION = (1, 2)
 
 
 def _require_minimum(version: str) -> None:
@@ -471,6 +471,18 @@ class RunnerClient:
         return self.call(["profile", "locate", str(program), str(folder)],
                          timeout=60).data or {}
 
+    def profile_inspect(self, solver: str, script: str | os.PathLike) -> dict:
+        """What the installation that *script* sets up can do: ``{valid, verdict,
+        modules, findings, folder, ...}``. Writes nothing."""
+        return self.call(["profile", "inspect", str(solver), str(script)],
+                         timeout=180).data or {}
+
+    def profile_use(self, solver: str, script: str | os.PathLike) -> dict:
+        """``profile_inspect``, and the script entered in the profile unless the
+        installation is unusable (``entered``)."""
+        return self.call(["profile", "use", str(solver), str(script)],
+                         timeout=240).data or {}
+
     # -- validation ---------------------------------------------------------------
     def validation_info(self, case: str | os.PathLike) -> dict:
         """``{situations, boundaries, outflow_condition, calibrated, reports}``: what
@@ -515,6 +527,37 @@ class RunnerClient:
                 "--step", f"{step:g}", "--distribution", distribution]
         args += ["--file", str(file)] if file else ["--pairs", pairs]
         return self.call(args, timeout=120).data or {}
+
+    def hydrology_lines(self, case: str | os.PathLike,
+                        changes: list | None = None) -> dict:
+        """``{lines, outlet_condition, outlets}``: the liquid-boundary lines of a case.
+        With *changes* (``[{row, kind, discharge, outlet}]``), a copy of the layer with
+        them is written, and ``settings`` points the case at it."""
+        args = ["hydrology", "lines", str(case)]
+        if changes is not None:
+            args += ["--set", json.dumps(changes)]
+        return self.call(args, timeout=120).data or {}
+
+    def hydrology_sediment(self, case: str | os.PathLike, *, soil: str = "texture",
+                           texture: str = "", shares: Sequence[float] = (),
+                           d50_mm: float | None = None,
+                           thickness: float | None = None,
+                           slope: float | None = None) -> dict:
+        """``{model, title, settings, reasons, warnings, slope}``: the GAIA setup the
+        library recommends for the soil and the slope of the case."""
+        args = ["hydrology", "sediment", str(case), "--soil", soil]
+        if texture:
+            args += ["--texture", texture]
+        if soil == "shares":
+            for name, value in zip(("sand", "silt", "clay"), shares):
+                args += [f"--{name}", f"{float(value):g}"]
+        if d50_mm is not None:
+            args += ["--d50", f"{float(d50_mm):g}"]
+        if thickness is not None:
+            args += ["--thickness", f"{float(thickness):g}"]
+        if slope is not None:                     # known: the terrain is not read again
+            args += ["--slope", f"{float(slope):.6g}"]
+        return self.call(args, timeout=300).data or {}
 
     def hydrology_fetch(self, case: str | os.PathLike, what: str, **options) -> dict:
         """Download ``event``, ``moisture``, ``soil`` or ``sealed`` for the case."""

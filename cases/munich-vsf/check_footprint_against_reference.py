@@ -134,7 +134,7 @@ def exclusion_check(union, ref):
 
 
 def terrain_check(union, ref, solids):
-    """Is raised BED being typed as structure? the second workstation's class of bug, made testable.
+    """Is raised BED being typed as structure? The second workstation's class of bug, made testable.
 
     A drape or column test asks "is there CAD material above the local bed here", and
     a weir, an invert, a ramp and an exit apron all answer yes - so bed becomes wall,

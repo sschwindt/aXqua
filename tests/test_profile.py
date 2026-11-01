@@ -509,7 +509,9 @@ def test_another_openfoam_release_is_a_warning_with_the_release_named(
         tmp_path, fake_bashrc, monkeypatch):
     profile = profiles.AxquaProfile(
         solvers={"openfoam": profiles.SolverBinding(setup_script=fake_bashrc)})
-    monkeypatch.setattr(profiles, "OPENFOAM_RELEASE", "9999")
+    from axqua.core import installation
+
+    monkeypatch.setattr(installation, "OPENFOAM_RELEASE", "9999")
     findings = profiles.check(profile, probe=True)
     version = [f for f in findings if f.code == "axqua.environment.openfoam_version"]
     assert version and version[0].severity == WARNING and "v9999" in version[0].message
@@ -884,7 +886,7 @@ def test_every_code_of_the_profile_check_is_explained_in_the_documentation():
     root = Path(__file__).resolve().parent.parent
     # the check of the profile and the check of a case: both end as triangles
     source = "".join((root / "src" / "axqua" / "core" / name).read_text(encoding="utf-8")
-                     for name in ("profile.py", "casecheck.py"))
+                     for name in ("profile.py", "casecheck.py", "installation.py"))
     # and what the case settings of the plugin add on Save
     source += (root / "qgis_plugin" / "axqua" / "gui" / "case_editor.py").read_text(
         encoding="utf-8")

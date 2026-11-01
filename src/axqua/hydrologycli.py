@@ -1,6 +1,6 @@
 """``axqua hydrology``: the data of a hydrology case, and its checkup.
 
-``info``      where the catchment is, its countries and what the case has so far ``portals``   where rain, soil and weather data come from: national agencies, then global ``textures``  the Green-Ampt parameters of the USDA texture classes (Rawls et al., 1983) ``rainfall``  turn a rain record into the series the case reads ``design``    a design storm from a depth-duration table (Euler II, alternating, block) ``fetch``     download ``event`` (rain and weather), ``moisture``, ``soil`` or ``sealed`` ``check``     the hydrology checkup, the terrain analysis included
+``info``      where the catchment is, its countries and what the case has so far ``portals``   where rain, soil and weather data come from: national agencies, then global ``textures``  the Green-Ampt parameters of the USDA texture classes (Rawls et al., 1983) ``rainfall``  turn a rain record into the series the case reads ``design``    a design storm from a depth-duration table (Euler II, alternating, block) ``fetch``     download ``event`` (rain and weather), ``moisture``, ``soil`` or ``sealed`` ``check``     the hydrology checkup, the terrain analysis included ``lines``     the liquid-boundary lines (a river through the catchment); with ``--set`` a copy with their discharge and outlet changed ``sediment``  the GAIA setup for the soil and the slope of the catchment (sediment transport)
 
 The data wizard of the plugin is a form over these commands. Each command that writes a file answers with ``settings``: the case keys that point at it, which the wizard puts into the case file through ``axqua case write``. Files go into ``<case folder>/user-sources/hydrology`` unless ``--out`` says otherwise.
 """
@@ -13,7 +13,8 @@ from pathlib import Path
 
 from axqua.jobcli import _common, _setup_logging, emit, fail, parse_args
 
-ACTIONS = ("info", "portals", "textures", "rainfall", "design", "fetch", "check")
+ACTIONS = ("info", "portals", "textures", "rainfall", "design", "fetch", "check",
+           "lines", "sediment")
 FETCHES = ("event", "moisture", "soil", "sealed")
 
 
@@ -62,6 +63,25 @@ def run_hydrology(argv: list[str]) -> int:
                         choices=("euler2", "alternating", "block"))
     parser.add_argument("--peak", type=float, default=None,
                         help="design, alternating: position of the peak (0 to 1)")
+    parser.add_argument("--set", dest="set_lines", default=None,
+                        help="lines: the changes as JSON, a list of {row, kind, "
+                             "discharge, outlet}")
+    parser.add_argument("--soil", default="texture",
+                        choices=("texture", "clay", "sand", "shares", "grain"),
+                        help="sediment: how the soil is described")
+    parser.add_argument("--texture", default=None,
+                        help="sediment: a USDA texture class (default: the case's)")
+    parser.add_argument("--sand", type=float, default=None, help="sediment: sand [%%]")
+    parser.add_argument("--silt", type=float, default=None, help="sediment: silt [%%]")
+    parser.add_argument("--clay", type=float, default=None, help="sediment: clay [%%]")
+    parser.add_argument("--d50", type=float, default=None,
+                        help="sediment: median grain size [mm]")
+    parser.add_argument("--slope", type=float, default=None,
+                        help="sediment: the median slope of the catchment [-], when it is "
+                             "known already (else it is read from the terrain model)")
+    parser.add_argument("--thickness", type=float, default=None,
+                        help="sediment: thickness of the soil that can erode [m] "
+                             "(default 0.3, the plough layer)")
     parser.add_argument("--no-terrain", action="store_true",
                         help="check: leave out the analysis of the terrain model")
     args = parse_args(_common(parser), argv, "hydrology")
@@ -112,6 +132,10 @@ def _dispatch(args) -> tuple[dict, list[str]]:
         return _design(args)
     if args.action == "fetch":
         return _fetch(args)
+    if args.action == "lines":
+        return _lines(args)
+    if args.action == "sediment":
+        return _sediment(args)
     return _check(args)
 
 
@@ -139,11 +163,24 @@ def _info(args) -> tuple[dict, list[str]]:
             "infiltration": h.infiltration, "green_ampt": h.green_ampt,
             "evaporation": h.evaporation, "wind": bool(h.wind),
             "initial_water_content": h.initial_water_content,
+            "soil_texture": h.soil_texture or "",
+            "sediment": _sediment_state(cfg),
             "out_dir": str(_out_dir(args))}
     lines = [f"catchment at {lat:.4f} N {lon:.4f} E, {area / 1e6:.3f} km2, "
              f"countries {', '.join(data['countries']) or 'none listed'}"]
     lines += [f"{k}: {v or '(not set)'}" for k, v in files.items()]
     return data, lines
+
+
+def _sediment_state(cfg) -> dict:
+    """What the case says about sediment transport, for the box and the wizard."""
+    m = cfg.morphodynamics
+    return {"decided": "morphodynamics" in (cfg.declared_blocks or ()) or m.enabled,
+            "enabled": bool(m.enabled), "soil": m.soil or "",
+            "layer_thickness": m.layer_thickness,
+            "classes": len(m.sediment_classes or []),
+            "bedload_formula": m.bedload_formula if m.bedload else None,
+            "suspension": bool(m.suspended_load)}
 
 
 def _rainfall(args) -> tuple[dict, list[str]]:
@@ -255,6 +292,55 @@ def _fetch(args) -> tuple[dict, list[str]]:
     data["settings"] = {"hydrology.sealed_surfaces": rel(data["sealed_surfaces"])}
     return data, [f"sealed surfaces -> {data['sealed_surfaces']}: "
                   f"{100 * data['sealed_share']:.1f} % of the catchment"]
+
+
+def _lines(args) -> tuple[dict, list[str]]:
+    import json
+
+    from axqua.hydrology import river
+
+    cfg = _need_case(args)
+    data: dict = {"outlet_condition": cfg.outflow_condition,
+                  "outlets": list(river.HYDROLOGY_OUTLETS)}
+    if args.set_lines is not None:
+        changes = json.loads(args.set_lines)
+        if not isinstance(changes, list):
+            raise ValueError("--set takes a JSON list of changes, one per line")
+        path = river.write_lines(cfg, changes, _out_dir(args))
+        data["layer"] = str(path)
+        data["settings"] = {"boundaries.liquid_boundaries": _relative(path, args.case)}
+        # what the layer says now: the copy, read back as the case will read it
+        cfg.boundaries.liquid_boundaries = path
+        cfg.__dict__.pop("_geodata", None)      # the layer read before is the old one
+    data["lines"] = river.lines(cfg)
+    rows = [f"{line['row']:>3} {line['kind']:<8} {line['length']:>9.1f} m"
+            + (f"  Q {line['discharge']:g} m3/s" if line["discharge"] is not None else "")
+            + (f"  outlet {line['outlet']}" if line["outlet"] else "")
+            for line in data["lines"]]
+    if "layer" in data:
+        rows.append(f"-> {data['layer']}")
+    return data, rows
+
+
+def _sediment(args) -> tuple[dict, list[str]]:
+    from axqua.hydrology import sediment
+
+    options: dict = {"soil": args.soil}
+    if args.texture:
+        options["texture"] = args.texture
+    if args.soil == "shares":
+        if None in (args.sand, args.silt, args.clay):
+            raise ValueError("--soil shares needs --sand, --silt and --clay (in %)")
+        options["shares"] = (args.sand, args.silt, args.clay)
+    if args.d50 is not None:
+        options["d50"] = args.d50 / 1000.0
+    options["layer_thickness"] = (args.thickness if args.thickness is not None
+                                  else sediment.LAYER_THICKNESS)
+    found = (sediment.recommend_for_case(_need_case(args), slope=args.slope, **options)
+             if args.case else sediment.recommend(slope=args.slope, **options))
+    data = found.as_dict()
+    lines = [found.title, *found.reasons, *(f"note: {w}" for w in found.warnings)]
+    return data, lines
 
 
 def _check(args) -> tuple[dict, list[str]]:

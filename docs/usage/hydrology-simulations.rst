@@ -24,7 +24,7 @@ The hydrology mode is TELEMAC only. It is switched on in the case settings, with
      - Hydrology case
    * - What drives the flow
      - The discharge at the inflow lines and the water level at the outflow lines (:ref:`case-boundaries`).
-     - The rain on every node. The case needs outflow lines only; inflow lines are optional.
+     - The rain on every node. The case needs outflow lines only. Inflow lines are optional, for example for a river that flows through the catchment with a discharge of its own (:ref:`river through the catchment <hydrology-river>`).
    * - Model outline
      - The region of interest around the wetted area (:ref:`case-geodata`).
      - The drainage divide of the catchment, or the edges of a field (:ref:`hydrology-outlet`).
@@ -51,7 +51,7 @@ The hydrology mode is TELEMAC only. It is switched on in the case settings, with
      - Not available; a manual procedure replaces it (:ref:`hydrology-mesh-calibration`).
    * - Sediment transport
      - Available (:doc:`morphodynamic-simulations`).
-     - Not available; the build refuses a case that asks for it.
+     - Available and strongly recommended: GAIA is coupled into the hydrology run, and the *Sediment transport wizard...* recommends the setup for the soil and the slope (:ref:`hydrology-sediment`).
    * - Calibration and validation
      - Available (:doc:`calibration-validation`).
      - Not yet available (:ref:`hydrology-mesh-calibration`).
@@ -62,11 +62,12 @@ The hydrology mode is TELEMAC only. It is switched on in the case settings, with
 
    axqua example get example-agrohydrology --folder <folder>
 
-**The workflow in brief.** A hydrology case is set up and run in six steps, each of which is explained in a subsection below:
+**The workflow in brief.** A hydrology case is set up and run in seven steps, each of which is explained in a subsection below:
 
 #. Create the case on the *Case Setup* tab and switch on *Hydrology mode* in its settings (:ref:`hydrology-case-setup`).
 #. Collect rain, soil and weather data with the *Data wizard...* on the sub-tab *Simulations > Hydrology* (:ref:`hydrology-data-setup`, :ref:`hydrology-weather`).
-#. Draw the outflow lines and select the outlet condition (:ref:`hydrology-outlet`).
+#. Draw the outflow lines and select the outlet condition (:ref:`hydrology-outlet`). Optionally, draw a river that flows through the catchment, with the discharge it brings and an outlet of its own, on the tab *River* of the data wizard (:ref:`river through the catchment <hydrology-river>`).
+#. Set up sediment transport with the *Sediment transport wizard...* on the same sub-tab, which recommends a transport formula for the soil and the slope of the catchment (:ref:`hydrology-sediment`).
 #. Check the data and build the model on the *Preprocessing* tab (:ref:`hydrology-preprocessing`).
 #. Run the storm with *Submit* on the sub-tab *Simulations > Hydrology* (:ref:`hydrology-run`).
 #. Load the result, read the hydrograph and the water balance, and check the mesh resolution (:ref:`hydrology-run`, :ref:`hydrology-mesh-calibration`).
@@ -150,7 +151,7 @@ The pages of the case settings are those of a river case, in the same order. Wha
 
 *Geodata* (:ref:`case-geodata`). The terrain model (``dem_initial``) and the outline of the catchment (``boundary``) are required. The outline follows the drainage divide, which QGIS derives from the terrain model and the position of the outlet with the tools of its *Processing Toolbox* (for example *GRASS > r.water.outlet*); draw it on a hillshade of the terrain model and check it with the hydrology checkup (:ref:`hydrology-preprocessing`). Mesh zones (``mesh_zones``) are optional and set a finer or coarser mesh in parts of the catchment, through their field ``Max Edge Length (m)``. Streams and ditches drawn as ``breaklines`` receive a finer mesh along them. Roughness zones (``roughness_zones`` and ``roughness_table``) give different surfaces their own roughness. The channel centerline is not used. Structures (``structures``), such as embankments, walls and buildings, are applied to the terrain as in a river case.
 
-*Liquid boundaries* (:ref:`case-boundaries`). The layer ``liquid_boundaries`` holds the outflow lines, with the word ``outflow`` in the field ``Type (inflow/outflow)``, as in a river case. A hydrology case needs no discharge and no water level. Where to place the outflow lines, and which condition they get, is explained in :ref:`hydrology-outlet`. An inflow line brings the water of a catchment upstream that is not part of the model: it takes the constant discharge ``boundaries.prescribed_flowrate`` or the hydrograph ``boundaries.inflow`` (a table of time and discharge), which the hydrology run follows. Without any outflow line, the catchment is closed and keeps all of its rain, and the checkup says so.
+*Liquid boundaries* (:ref:`case-boundaries`). The layer ``liquid_boundaries`` holds the outflow lines, with the word ``outflow`` in the field ``Type (inflow/outflow)``, as in a river case. A hydrology case needs no discharge and no water level. Where to place the outflow lines, and which condition they get, is explained in :ref:`hydrology-outlet`. An inflow line brings the water of a catchment upstream that is not part of the model, or of a river that flows through the catchment: it takes its own discharge from the field ``Target flow`` of the layer, the constant discharge ``boundaries.prescribed_flowrate``, or the hydrograph ``boundaries.inflow`` (a table of time and discharge), which the hydrology run follows. An outflow line may have an outlet of its own in the field ``Outlet`` of the layer (:ref:`river through the catchment <hydrology-river>`); without it, the line takes ``hydrology.outlet_condition``. Without any outflow line, the catchment is closed and keeps all of its rain, and the checkup says so.
 
 *Initial conditions* (:ref:`case-initialization`). The catchment starts dry. Only an inflow line gets the short stretch of water of the dry start, because TELEMAC cannot prescribe a discharge through a dry section. The pre-wetted channel and the drying of thin films of a river case are not available in the hydrology mode. The initial condition that matters is the water content of the soil (:ref:`hydrology-data-setup`).
 
@@ -230,7 +231,9 @@ The pages of the case settings are those of a river case, in the same order. Wha
      - ``finite-volumes``
      - The numerical kernel: ``finite-volumes`` or ``finite-elements`` (:ref:`hydrology-concept`).
 
-*Morphodynamic simulation*, *OpenFOAM* and *Calibration and validation*. Sediment transport with GAIA, the exchange with a porous body and the internal source regions of a river case are refused in the hydrology mode, because the hydrology run writes none of them. OpenFOAM has no hydrology mode. The calibration is not yet available for hydrology runs (:ref:`hydrology-mesh-calibration`).
+*Morphodynamic simulation*. The block ``morphodynamics`` sets up sediment transport with GAIA, which the hydrology run couples (:ref:`hydrology-sediment`). The *Sediment transport wizard...* writes it, so the page needs no editing by hand.
+
+*OpenFOAM* and *Calibration and validation*. The exchange with a porous body and the internal source regions of a river case are refused in the hydrology mode, because the hydrology run writes neither of them. OpenFOAM has no hydrology mode. The calibration is not yet available for hydrology runs (:ref:`hydrology-mesh-calibration`).
 
 .. _hydrology-data-setup:
 
@@ -259,6 +262,8 @@ A hydrology case needs a terrain model, the outline of the catchment, a rain ser
      - The weather series, whether its wind is applied, and how evaporation is computed.
    * - Outlet
      - The condition of the outflow lines and the numerical kernel (see below).
+   * - River
+     - Optional. The lines of the liquid boundaries in a table: the discharge of each inflow line and the outlet of each outflow line, for a river that flows through the catchment (:ref:`river through the catchment <hydrology-river>`). *Use these lines* writes a copy of the layer with the fields ``Target flow`` and ``Outlet`` into ``user-sources/hydrology``; the layer as drawn stays as it is. A hydrograph of the river can be selected below the table.
 
 .. figure:: ../img/gui-hydrology-wizard.png
    :alt: The data wizard of the hydrology mode on its tab Rain
@@ -382,9 +387,109 @@ A free outlet appears to be the natural choice, since zero gradient on a uniform
 
 **A field instead of a catchment.** A field, a plot or a terrace is often the object of a study, and its outline is no divide: water leaves it over whole edges, wherever the terrain falls away beyond them. These edges are outflow lines, and ``overfall`` is their condition. TELEMAC sets the depth at a node of a prescribed level to the level minus the bed elevation, and to zero where that is negative. aXqua therefore prescribes a level 1 m below the lowest node of the mesh, and every node of the lines gets a depth of zero. The finite-volume kernel takes that depth as a dry state outside the line, so water flows out of a wet cell the way it flows into dry land, and no water can come in. The finite-element kernel holds the nodes of the lines dry, which on the example field also let no water in. A Z(Q) curve does not fit such an edge, because one level for an edge that runs across the slope is the level of its lowest point only. The free outlet copies the state inside the domain to the outside, so water flows in wherever the velocity at the edge points into the domain. On the arable field of the example case ``example-agrohydrology``, a free outlet took in 2.7 m³/s through the lower edge of the field 16 minutes after the runoff began. The other edges of a field stay walls, so the field receives no run-on from its neighbors. The hydrology checkup shows whether any of its own water still crosses a wall.
 
+.. _hydrology-river:
+
+**A river through the catchment.** The runoff of a catchment usually drains into a river that already carries water where it enters the model. How much water and sediment the slopes deliver to that river is often the question of the study, and the river is optional in the hydrology mode. It is two lines of the layer of the liquid boundaries, where it crosses the outline: an **inflow** line where it enters, and an **outflow** line where it leaves. The inflow line carries the discharge of the river in the field ``Target flow`` [m³/s], or the case gives it as ``boundaries.prescribed_flowrate`` or as the hydrograph ``boundaries.inflow``. The outflow line carries an outlet of its own in the field ``Outlet``: ``normal_depth`` for a river that continues downstream, or ``elevation`` where it flows into a lake or a larger river. The other outflow lines keep ``hydrology.outlet_condition``, for example ``overfall`` along the lower edges of a field beside the river. The tab *River* of the data wizard fills both fields in a table, so the layer needs no editing of its attributes in QGIS:
+
+.. code-block:: text
+
+   Type (inflow/outflow)   Target flow   Outlet
+   inflow                  1.5
+   outflow                               normal_depth
+   outflow                                               (the edge of a field: the outlet of the case)
+
+Where two outflow lines with different outlets touch, the build turns two nodes of the outline between them into walls. TELEMAC starts a new boundary only where the codes of neighboring nodes differ, so two touching lines with the same code would otherwise become one boundary with one level, and it accepts neither a single wall node between two liquid ones nor a single liquid node between two wall ones. The two nodes are taken from the longer of the two lines, so that a narrow river keeps its nodes; the log of the build names how many there were. The hydrology checkup warns when a river enters but every outflow line is free or an overfall, because the river would then leave the model as over a brink (:ref:`axqua-hydrology-river-without-outlet`).
+
+The Green-Ampt infiltration applies to every node, also to the bed of the river. A river bed is saturated and takes up little water, so give the river channel a soil zone with :math:`K_s` = 0, or draw it as a sealed surface (``hydrology.sealed_surfaces``). On a test catchment with a river of 0.2 m³/s, the bed without such a zone took up 105 m³ of river water in 25 minutes, three times the rain on the catchment. The result reports the volume through each line in ``boundary-volumes.csv`` (:ref:`hydrology-run`): the water the catchment delivers to the river is the volume that leaves through the outflow line of the river minus the volume that enters through its inflow line.
+
 **Roughness of the outlet.** The level of ``normal_depth`` depends on the roughness of the outlet section. With Manning's equation, :math:`h \sim (n Q / (b \sqrt{S}))^{3/5}`, so that an error of 20 % in :math:`n` changes the depth at the outlet by about 12 %. The disturbance fades upstream over a length of about :math:`h/S`: 50 m for a depth of 0.5 m on a slope of 1 %, 1 km for a depth of 1 m on a slope of 0.1 %. The outlet therefore belongs a few such lengths downstream of where results are read. The roughness is that of the roughness zones at the outlet, or of ``friction.default_law`` and ``default_coefficient``. The keyword ``LAW OF FRICTION ON LATERAL BOUNDARIES`` plays no part: TELEMAC applies it to solid walls only.
 
 **Why not a depth from the local velocity.** A condition that sets the depth at each outlet node from the local velocity with Manning's equation prescribes a depth that goes to zero wherever the velocity is small, which drains ponded water at the start and during the recession, and it feeds the velocity back into the prescribed depth, which oscillates in subcritical flow. The Z(Q) curve of the whole section has the same physics without that feedback.
+
+.. _hydrology-sediment:
+
+Sediment transport
+------------------
+
+The runoff of a catchment carries soil: the flow detaches it where its shear stress exceeds what the soil resists, carries it downslope in suspension and as bed load, and deposits it where it slows down. How much soil leaves a field, or reaches a river that flows through the catchment, is often the question of a hydrology study, so aXqua strongly recommends sediment transport in the hydrology mode. It uses GAIA, TELEMAC's module for sediment transport and bed evolution, coupled into the hydrology run: GAIA computes the transport at every time step from the flow of TELEMAC-2D, with the finite-volume kernel of the hydrology mode as with the finite elements. The checkup asks for sediment transport as long as the case has not decided (:ref:`axqua-hydrology-sediment-undecided`).
+
+.. _help-sediment-wizard:
+
+**The Sediment transport wizard.** *Sediment transport wizard...* on the sub-tab *Simulations > Hydrology* opens a window with four tabs:
+
+#. **Soil layer**: the thickness of the soil that can erode, above a bed that does not. On a field this is the plough layer, about 0.3 m on the subsoil; on a hillslope, the topsoil on the rock or on a compacted layer. Where the flow has removed the whole layer, erosion stops.
+#. **Grain sizes**: what the soil is made of: a USDA texture class (the one the case gives for the infiltration, ``hydrology.soil_texture``, comes first), *Clay*, *Sand*, the shares of sand, silt and clay, or the median grain size :math:`d_{50}` from a sieve analysis. A texture class stands for the shares at the middle of its field in the texture triangle, so the shares or :math:`d_{50}` of the soil itself are better.
+#. **Recommendation**: the transport formula and the sediment classes that aXqua recommends for the soil and the median slope of the catchment, with the reasons and what to look out for. The check box *Transport sediment (strongly recommended)* is ticked.
+#. **Save** writes the block ``morphodynamics`` into the case file. With the check box unticked, the case is saved with ``enabled: false`` and remains hydraulic only; the checkup then no longer asks. Build the case again after a change.
+
+.. figure:: ../img/gui-sediment-wizard.png
+   :alt: The Sediment transport wizard on its tab Recommendation
+   :width: 80%
+
+   The *Sediment transport wizard* on its tab *Recommendation*. (1) One tab for the soil layer, the grain sizes, the recommendation and saving. (2) The recommended transport and the median slope of the catchment. (3) Why: the soil, the classes and the range of the formulas. (4) What to look out for. (5) The settings Save writes. (6) *Transport sediment*, ticked by default.
+
+In a terminal, ``axqua hydrology sediment <case-file> --soil texture --texture "silt loam" --thickness 0.3`` gives the same recommendation (``--soil`` is one of ``texture``, ``clay``, ``sand``, ``shares`` with ``--sand``, ``--silt`` and ``--clay`` in %, or ``grain`` with ``--d50`` in mm).
+
+**The recommendation.** The soil decides how it moves. Sand grains move one by one, rolling and saltating near the bed (bed load) or lifted into the flow (suspension), at a rate that depends on the grain size and the shear stress of the flow. Clay and fine silt stick together: they erode as aggregates once the shear stress exceeds a critical value, travel in suspension and settle where the flow slows. Most soils are a mixture of both. aXqua chooses among GAIA's formulas as follows:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 36 40
+
+   * - Soil
+     - Sediment classes
+     - Transport
+   * - Sand (at least 70 % sand, or :math:`d_{50}` from 0.062 to 2 mm)
+     - One non-cohesive class: 0.25 mm, or :math:`d_{50}`
+     - Bed load after van Rijn (1984a, GAIA formula 7) and, up to :math:`d_{50}` = 0.5 mm, suspension with the equilibrium concentration of van Rijn (1984b, formula 3)
+   * - Clay (at least 40 % clay, or :math:`d_{50}` below 0.062 mm)
+     - One cohesive class: 0.005 mm where clay dominates, 0.02 mm where silt does
+     - Suspension only: erosion after Partheniades (1965) above a critical shear stress, deposition after Krone (1962)
+   * - Loams and silts (everything between)
+     - A cohesive class of the silt and clay share, and a non-cohesive class of 0.15 mm for the sand share
+     - The sand after van Rijn, the fines after Partheniades and Krone
+   * - Gravel (:math:`d_{50}` above 2 mm)
+     - One non-cohesive class of :math:`d_{50}`
+     - Bed load after Meyer-Peter and Müller (1948, formula 1), no suspension
+
+van Rijn derived his bed-load formula for grains of 0.2 to 2 mm and his suspended load for 0.1 to 0.5 mm, which is the sand of soils; Meyer-Peter and Müller derived theirs for gravel and coarse sand, which is why the gravel takes it. Where the median slope of the catchment exceeds 2 %, the slope effect of Koch and Flokstra (1981) turns the bed load downhill. Above 20 % the formulas, which were derived for rivers, are far outside their range, and the wizard says so: read such results as an order of magnitude. GAIA computes the settling velocity of each class from its diameter.
+
+A cohesive soil needs three parameters that a texture class does not give: the critical shear stress for erosion (0.5 N/m²) and the Partheniades constant (0.001 kg/m²/s), which are GAIA's defaults, and the dry density of the soil (1300 kg/m³, typical of arable topsoil). They are starting values. The erodibility of real soils spans orders of magnitude, so a study that reads absolute masses calibrates them against measured sediment yields.
+
+**What the build writes.** With ``morphodynamics.enabled``, the build writes the GAIA steering file ``gaia.cas`` beside ``hydrology2d.cas`` and couples it (``COUPLING WITH : 'GAIA'``). The suspended classes are tracers of TELEMAC-2D: the build declares that the rain carries none of them, and gives the inflow and outflow lines their codes for tracers, so that suspended sediment can leave the model. A river through the catchment (:ref:`river through the catchment <hydrology-river>`) brings the bed load that its flow can carry, GAIA's equilibrium at an inflow, and clear water without suspended sediment. The entries of the block that the wizard sets:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Entry
+     - Meaning
+   * - ``enabled``
+     - Sediment transport on or off.
+   * - ``sediment_classes``
+     - The classes, each with ``diameter`` [m], ``density`` [kg/m³], ``type`` (``CO`` cohesive, ``NCO`` non-cohesive) and ``fraction`` of the soil.
+   * - ``bedload``, ``bedload_formula``
+     - Bed load of the non-cohesive classes, and its formula (7 van Rijn, 1 Meyer-Peter and Müller).
+   * - ``suspended_load``, ``suspension_formula``
+     - Suspension of the non-cohesive classes, and the formula of their equilibrium concentration (3 van Rijn). Cohesive classes are always in suspension.
+   * - ``layer_thickness``
+     - The thickness of the soil that can erode [m].
+   * - ``mud_erosion_shear``, ``partheniades``, ``mud_concentration``
+     - The critical shear stress [N/m²], the Partheniades constant [kg/m²/s] and the dry density [kg/m³] of a cohesive soil.
+   * - ``slope_effect``
+     - The slope effect of Koch and Flokstra on the bed load.
+   * - ``soil``
+     - What the wizard was given, to start from when it is opened again.
+
+The other entries of the block, described in :doc:`morphodynamic-simulations`, keep their defaults.
+
+**With a river.** A river that flows into the model narrows the sediment setups that TELEMAC v9.1.1 can run. The river brings clear water over a bed that its flow erodes at its full capacity, and the finite-volume kernel applies GAIA's erosion and deposition explicitly, with a deposition rate that grows with the grain size. Measured on a test catchment with a river of 0.2 and 1 m³/s: suspended sand of 0.1 and 0.15 mm runs, also together with a cohesive class, as the wizard sets it up for a loam; suspended sand of 0.25 to 0.5 mm runs only without a cohesive class and when the river enters at GAIA's equilibrium concentration (``morphodynamics.equilibrium_inflow``, which the wizard switches on for a sand), and coarser suspended sand stops TELEMAC also then; bed load without any class in suspension, which the wizard recommends for gravel, ends in a crash of GAIA. Without a river, all of these soils run. The checkup therefore refuses a case with a river whose sediment setup lies outside what ran (:ref:`axqua-hydrology-sediment-with-river`), and the wizard says so in its recommendation. Neither the number of bed layers nor the mixture of clay and sand as such is the cause: GAIA allows any combination of cohesive and non-cohesive classes.
+
+**Results.** *Load results* adds the bed change of GAIA (``rgaia.slf``, in meters, negative where the soil eroded) and the bed shear stress, and the concentration of each suspended class in g/l from ``r2d-hydrology.slf``. The report of the run writes ``sediment-budget.csv`` into ``postprocessing/hydrology``: the mass eroded into suspension, the mass deposited again, the suspended mass carried out through the liquid boundaries and the mass still in suspension at the end, all in kg; ``boundary-volumes.csv`` gains the bed load through each boundary in kg (column ``bedload_kg``, positive entering). For a river through the catchment, the sediment that the catchment delivers to the river is the suspended load that leaves plus the bed load that leaves through the outflow line of the river minus the bed load that enters through its inflow line.
+
+The suspended load comes from TELEMAC's balance of its tracers, summed over every time step. TELEMAC books the erosion of GAIA as the quantity created by the source term and has no line for the deposition, so the quantity it reports as lost, with a large relative error, is the deposited mass; aXqua reports it as such. The bed load comes from GAIA's flux through each boundary at every listing printout, integrated over time. GAIA's own final sediment balance appears only when the last time step is a planned step number, which a run with a variable time step does not reach.
+
+**Limits.** GAIA detaches soil by the shear stress of the flow only. The detachment by raindrops, which dominates on bare soil under sheet flow a few millimeters deep, and the erosion of rills are not represented, so the model underestimates the erosion of interrill areas and is best used for where the eroded soil goes. The transport formulas were derived for rivers, and their parameters for a soil are starting values to be calibrated against measured sediment yields.
 
 .. _hydrology-preprocessing:
 
@@ -395,8 +500,8 @@ The preprocessing builds a hydrology case with the same five steps as a river ca
 
 #. **Terrain.** The terrain model is converted to the coordinate reference system of the case and cut to the outline.
 #. **Mesh.** Gmsh (Geuzaine and Remacle 2009) divides the catchment into near-equal triangles with its Frontal-Delaunay algorithm, and each node receives its bed elevation from the terrain model, its roughness zone and its soil: :math:`K_s` (``KS``), the product of suction head and moisture deficit (``GA SUCTION A``) and the moisture deficit (``GA DELTA THETA``), which TELEMAC reads from the geometry file. As in a river case, two builds from identical inputs give meshes that differ by less than 1 % in the number of nodes (:ref:`preprocessing-meshing`).
-#. **Boundaries.** The nodes on the outflow lines get the code ``5 4 4`` (a prescribed level) or, with a free outlet, ``4 4 4``; the nodes on inflow lines ``4 5 5``; all other nodes of the outline are walls (``2 2 2``).
-#. **Simulation settings.** aXqua writes the forcing (rain and evaporation, ``forcing.txt``), the wind (``atmosphere.txt``), the outlet curves of ``normal_depth``, the generated infiltration routine (``user_fortran/runoff_greenampt.f``) and the steering file ``hydrology2d.cas``. No ``steady2d.cas`` is written, because a catchment has no steady state.
+#. **Boundaries.** The nodes on the outflow lines get the code ``5 4 4`` (a prescribed level) or, with a free outlet, ``4 4 4``, each line by its own outlet; the nodes on inflow lines ``4 5 5``; all other nodes of the outline are walls (``2 2 2``). Between two touching outflow lines with different outlets, two nodes become walls (:ref:`river through the catchment <hydrology-river>`).
+#. **Simulation settings.** aXqua writes the forcing (rain and evaporation, ``forcing.txt``), the wind (``atmosphere.txt``), the outlet curves of ``normal_depth``, the generated infiltration routine (``user_fortran/runoff_greenampt.f``), the steering file ``hydrology2d.cas`` and, with sediment transport, the GAIA steering file ``gaia.cas`` (:ref:`hydrology-sediment`). No ``steady2d.cas`` is written, because a catchment has no steady state.
 #. **Measurements.** Field measurements of the case are compiled as in a river case; the calibration that reads them is not yet available for hydrology runs.
 
 The model is written to ``axqua-case/simulation/``. As for a river case, the log file ``axqua.log`` in that folder reports the quality of the mesh with its shortest edge, which limits the time step of the whole run, and the soil that each zone received.
@@ -406,6 +511,7 @@ The model is written to ``axqua-case/simulation/``. As for a river case, the log
 * reads the rain series and the weather series, and names gaps, an unusually intense rain, rain from a reanalysis and weather that does not cover the run;
 * checks the soil zones and their values against the texture classes of Rawls et al. (1983), and names a missing initial water content;
 * names a closed catchment without an outflow line, a free outlet, the finite-element kernel and a drain time that is short for the size of the catchment, and estimates the number of elements of the mesh;
+* names a river through the catchment without an outflow line that holds its level, an unknown outlet in the column ``Outlet``, a case that has not decided on sediment transport, a sediment setup that TELEMAC cannot run with a river inflow, and a grain size outside the range of the chosen transport formula;
 * routes the water of every cell of the terrain model to the outline (priority flood, Barnes et al. 2014) and names every stretch of a wall over which a large area drains, where the outline does not follow the divide;
 * fills the closed depressions of the terrain model to their spill level and names the largest ones with their volume, because a depression keeps the rain until it is full. That is right for a pond and wrong where the terrain model blocks a culvert or the opening of a bridge, which then has to be cut into the terrain model or modeled as an outflow line.
 
@@ -422,14 +528,16 @@ The run starts dry and lasts until ``drain_time`` after the last rain. *Submit* 
    :alt: The sub-tab Hydrology of the tab Simulations
    :width: 70%
 
-   The sub-tab *Hydrology* of the tab *Simulations*. (1) The sub-tab. (2) *Build* prepares the case, *Submit* runs it as a job. (3) The data of the case, with the position and the area of the catchment. (4) The findings of the hydrology checkup. (5) *Data wizard...* opens the wizard (figure above); *Check* runs the checkup again, including the analysis of the terrain model.
+   The sub-tab *Hydrology* of the tab *Simulations*. (1) The sub-tab. (2) *Build* prepares the case, *Submit* runs it as a job. (3) The data of the case, with the position and the area of the catchment and whether it transports sediment. (4) The findings of the hydrology checkup. (5) *Data wizard...* opens the data wizard (figure above), *Sediment transport wizard...* the setup of the sediment (:ref:`hydrology-sediment`); *Check* runs the checkup again, including the analysis of the terrain model.
 
 After the run, aXqua writes into ``postprocessing/hydrology``:
 
 * ``hydrograph.csv`` and ``hydrograph.png``: the rain above, the discharge at the outlet below, over one time axis;
-* ``water-balance.csv``: rain, inflow, outflow, infiltrated and evaporated volumes, the water left on the catchment, TELEMAC's mass error, the runoff coefficient (outflow over rain) and the peak discharge with its time.
+* ``water-balance.csv``: rain, inflow, outflow, infiltrated and evaporated volumes, the water left on the catchment, TELEMAC's mass error, the runoff coefficient and the peak discharge with its time. The runoff coefficient is the net outflow (outflow minus inflow) over the rain, which for a catchment without inflow lines is the outflow over the rain;
+* ``boundary-volumes.csv``: the volume through each liquid boundary over the run, positive entering, with its kind and outlet, and with sediment transport the bed load in kg. For a river through the catchment, the volume out at its outflow line minus the volume in at its inflow line is what the catchment delivers to it;
+* ``sediment-budget.csv``, with sediment transport: the sediment budget of the run (:ref:`hydrology-sediment`).
 
-The volumes come from TELEMAC's own water balance and from the line ``AXQUA HYDROLOGY`` that the generated routine writes into the listing. The water balance takes the place of the flux balance of a river case (:ref:`hydraulics-dry-runs`): rain and inflow equal infiltration, evaporation, outflow and the water left on the catchment, and the remainder is the error of the volume. On the test catchments and the example case it closes to less than 0.001 % of the rain. Water left on the catchment at the end points to depressions or to a drain time that was too short.
+The volumes come from TELEMAC's own water balance and from the line ``AXQUA HYDROLOGY`` that the generated routine writes into the listing. The water balance takes the place of the flux balance of a river case (:ref:`hydraulics-dry-runs`): rain and inflow equal infiltration, evaporation, outflow and the water left on the catchment, and the remainder is the error of the volume, given relative to the water that entered (rain and inflow). On the test catchments and the example case it closes to less than 0.001 % of the rain. With a river, the error also includes the integration of the boundary fluxes between two listing printouts, which grows with the discharge of the river. Water left on the catchment at the end points to depressions or to a drain time that was too short.
 
 **Maps.** *Load results* adds the water depth, the velocity, the infiltrated depth and TELEMAC's high water mark and highest velocity of the run to QGIS (the high water mark drawn as the highest water depth, the mark minus the bed), with the styles of :ref:`help-postprocessing-qgis`. The map of the water depth shows water from 1 mm on, because the sheet flow of a hillslope is millimeters deep; a river case starts at 1 cm. The threshold is ``hydrodynamics.wet_depth``, which a case may set to another value. TELEMAC itself records its maxima only where the water is deeper than 1 cm (``preres_telemac2d.f``), so that on a hillslope the high water mark and the highest velocity show the furrows, channels and ponds, and not the sheet flow between them. The result holds one map every ``printout_period``. The *Temporal Controller* of QGIS steps through them, and *aXqua > Export movie* turns them into a video of the storm (:ref:`help-postprocessing-qgis`). For ParaView and VisIt, ``axqua export <case-file> --result r2d-hydrology.slf`` converts the result into VTK files (:ref:`Export of TELEMAC results <export-telemac-results>`).
 
@@ -463,8 +571,14 @@ Mesh resolution, calibration and limits
 * Geuzaine, C. and Remacle, J.-F. (2009). Gmsh: A 3-D finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering, 79, 1309-1331. https://doi.org/10.1002/nme.2579
 * Green, W. H. and Ampt, G. A. (1911). Studies on soil physics. The Journal of Agricultural Science, 4(1), 1-24.
 * Hervouet, J.-M. (2007). Hydrodynamics of Free Surface Flows: Modelling with the Finite Element Method. Wiley, Chichester.
+* Koch, F. G. and Flokstra, C. (1981). Bed level computations for curved alluvial channels. Proceedings of the XIXth Congress of the IAHR, New Delhi.
+* Krone, R. B. (1962). Flume studies of the transport of sediment in estuarial shoaling processes. Final report, Hydraulic Engineering Laboratory and Sanitary Engineering Research Laboratory, University of California, Berkeley.
 * Mein, R. G. and Larson, C. L. (1973). Modeling infiltration during a steady rain. Water Resources Research, 9(2), 384-394.
+* Meyer-Peter, E. and Müller, R. (1948). Formulas for bed-load transport. Proceedings of the 2nd Meeting of the IAHR, Stockholm, 39-64.
+* Partheniades, E. (1965). Erosion and deposition of cohesive soils. Journal of the Hydraulics Division, ASCE, 91(HY1), 105-139.
 * Rawls, W. J., Brakensiek, D. L. and Miller, N. (1983). Green-Ampt infiltration parameters from soils data. Journal of Hydraulic Engineering, 109(1), 62-70.
 * Sadeghi, S. H., Loescher, H. W., Jacoby, P. W. and Sullivan, P. L. (2024). A simple, accurate, and explicit form of the Green-Ampt model to estimate infiltration, sorptivity, and hydraulic conductivity. Vadose Zone Journal, 23(4).
 * Toro, E. F., Spruce, M. and Speares, W. (1994). Restoration of the contact surface in the HLL-Riemann solver. Shock Waves, 4, 25-34. https://doi.org/10.1007/BF01414629
 * Travert, J.-P., Taccone, F. and Bacchi, V. (2022). Modelling runoff for extreme rainfall events on large catchments using TELEMAC-2D. Proceedings of the XXVIIIth TELEMAC User Conference, Paris-Saclay, 131-139.
+* Van Rijn, L. C. (1984a). Sediment transport, part I: bed load transport. Journal of Hydraulic Engineering, 110(10), 1431-1456.
+* Van Rijn, L. C. (1984b). Sediment transport, part II: suspended load transport. Journal of Hydraulic Engineering, 110(11), 1613-1641.

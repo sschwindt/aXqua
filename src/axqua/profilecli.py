@@ -12,6 +12,8 @@ profile all go through here and come back as one JSON document.
 ``check``    everything that is wrong with it, as findings; never fails on a finding
 ``write``    replace it with a JSON document read from standard input
 ``locate``   ``locate <program> <folder>``: what aXqua runs of a program in that folder
+``inspect``  ``inspect <telemac|openfoam> <script>``: whether the installation that script sets up is usable, and which aXqua modules it lacks; writes nothing
+``use``      ``use <telemac|openfoam> <script>``: ``inspect``, and enter the script and its installation folder in the profile unless the installation is unusable
 """
 
 from __future__ import annotations
@@ -26,7 +28,10 @@ from axqua.jobcli import _common, _setup_logging, emit, fail, parse_args
 
 log = logging.getLogger("axqua")
 
-ACTIONS = ("show", "path", "detect", "init", "check", "write", "locate")
+ACTIONS = ("show", "path", "detect", "init", "check", "write", "locate", "inspect", "use")
+
+#: The codes whose installation ``inspect`` and ``use`` look into.
+INSPECTED = ("telemac", "openfoam")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -39,9 +44,11 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("action", nargs="?", default="show", choices=ACTIONS)
     p.add_argument("file", nargs="?", type=Path,
                    help="a profile file (default: the active profile); for locate: "
-                        "the program, one of telemac, openfoam, paraview, visit")
+                        "the program, one of telemac, openfoam, paraview, visit; for "
+                        "inspect and use: telemac or openfoam")
     p.add_argument("folder", nargs="?", type=Path,
-                   help="locate: the folder the program is installed in")
+                   help="locate: the folder the program is installed in; inspect and "
+                        "use: the environment script of the installation")
     p.add_argument("--force", action="store_true",
                    help="init: overwrite an existing profile")
     p.add_argument("--no-probe", action="store_true",
@@ -85,6 +92,9 @@ def run_profile(argv: list[str]) -> int:
                                   "script": str(chosen or ""),
                                   "candidates": [str(path) for path in found]},
                         as_json=args.as_json, lines=lines)
+
+        if args.action in ("inspect", "use"):
+            return _inspect(args, command)
 
         if args.action == "detect":
             found = profiles.detect()
@@ -145,6 +155,54 @@ def run_profile(argv: list[str]) -> int:
                     as_json=args.as_json, lines=lines)
     except BaseException as exc:  # noqa: BLE001
         return fail(command, exc, as_json=args.as_json, verbose=args.verbose)
+
+
+def _inspect(args, command: str) -> int:
+    """``inspect`` and ``use``: what an installation can do, and entering it."""
+    from axqua.core.errors import ConfigError
+    from axqua.core.installation import inspect
+
+    solver = str(args.file or "")
+    if solver not in INSPECTED or args.folder is None:
+        raise ConfigError(
+            f"'{args.action}' needs a simulation code and its environment script",
+            subject="program",
+            remedy=f"For example: axqua profile {args.action} telemac "
+                   "/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh. Codes: "
+                   + ", ".join(INSPECTED))
+    from axqua.core import profile as profiles
+
+    # one file named two ways (relative, with ~) is one file, in the check and in the profile
+    script = profiles.absolute_script(args.folder)
+    binding = None
+    if args.action == "use":
+        # the check enters the script as the jobs will after bind: with the entry of the profile, without what belonged to another installation (profiles.rebound)
+        current = profiles.load_active()
+        if current is not None and current.solvers.get(solver) is not None:
+            binding = profiles.rebound(current, solver, script)
+    found = inspect(solver, script, binding=binding)
+    answer = found.as_dict()
+    lines = [found.verdict()] + [
+        f"  {'ok     ' if m.available else 'missing' if m.available is False else '?      '}"
+        f" {m.title}: {m.detail}" for m in found.modules]
+    if args.action == "use":
+        answer["entered"] = False
+        if found.valid:
+            from axqua.install.runner import bind
+
+            # the inspection has just entered the environment: bind checks the files only
+            written, findings, _known = bind(
+                {f"solvers.{solver}.setup_script": str(found.script)}, probe=False)
+            # all findings of the inspection, the ambient one too: a script that only works because the terminal set the code up already is what a detached job then cannot reach
+            seen = {(f.code, f.message) for f in found.findings}
+            answer.update(entered=True, path=str(written),
+                          findings=[f.as_dict() for f in found.findings]
+                          + [f.as_dict() for f in findings
+                             if (f.code, f.message) not in seen])
+            lines.append(f"entered in {written}")
+        else:
+            lines.append("not entered in the profile: the installation is not usable")
+    return emit(command, answer, as_json=args.as_json, lines=lines)
 
 
 def _yaml_lines(profile) -> list[str]:

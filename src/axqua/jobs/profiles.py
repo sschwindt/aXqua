@@ -304,8 +304,9 @@ def implicit(cfg: Any, solver: str = "telemac") -> Profile:
     installation than the one its case was built with. The profile then still says how
     this computer enters an environment and how many processes it runs. The script is
     the one that outranks it, and what the profile holds for its own installation (the
-    systel configuration, the variables) is not applied to another one.
+    systel configuration, the variables, a shell it ships) is not applied to another one.
     """
+    import copy
     from dataclasses import replace
 
     from axqua.core import machine
@@ -317,10 +318,12 @@ def implicit(cfg: Any, solver: str = "telemac") -> Profile:
         return from_config(cfg, solver)
     chosen = machine.resolve(solver, case_dir=getattr(cfg, "config_dir", None))
     if chosen.path is None or chosen.source == str(active.path) \
-            or Path(chosen.path) == found.setup_script:
+            or plugin_profile.same_script(chosen.path, found.setup_script):
         return found
+    # the script of another installation: without what the profile holds for its own (core.profile.INSTALLATION_FIELDS)
     return replace(found, name=f"{found.name}, script from {chosen.source}",
-                   setup_script=Path(chosen.path), config_name=None, overrides={})
+                   setup_script=Path(chosen.path),
+                   **{k: copy.copy(v) for k, v in plugin_profile.INSTALLATION_FIELDS.items()})
 
 
 def from_config(cfg: Any, solver: str = "telemac") -> Profile:

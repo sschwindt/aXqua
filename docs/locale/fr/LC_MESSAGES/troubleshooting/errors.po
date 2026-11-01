@@ -147,9 +147,9 @@ msgstr "Une installation pour tous les utilisateurs a besoin du mot de passe d'u
 msgid "The OpenFOAM installer installs into a new folder or continues an installation of its own. Select a folder that does not exist yet."
 msgstr "L'installateur OpenFOAM installe dans un nouveau dossier ou poursuit une installation propre. Sélectionnez un dossier qui n'existe pas encore."
 
-# machine translation: argos 47fbdc513e84
-msgid "The OpenFOAM installer continues only what the same version of it started with the same OpenFOAM. Open the wizard with *Install OpenFOAM...*, answer *Yes* to the question whether to install again, and select *Remove the existing installation and install it again in its folder*, or select a new folder."
-msgstr "L'installateur OpenFOAM continue seulement ce que la même version a commencé avec le même OpenFOAM. Ouvrez l'assistant avec *Install OpenFOAM...*, répondez *Yes* à la question de savoir s'il faut installer à nouveau et sélectionnez *Remove the existing installation and install it again in its folder*, ou sélectionnez un nouveau dossier."
+# machine translation: argos 70b9f2fed787
+msgid "The OpenFOAM installer continues only what the same version of it started with the same OpenFOAM. Open the *Setup Wizard* of OpenFOAM, select *Install OpenFOAM*, answer *Yes* to the question whether to install again, and select *Remove the existing installation and install it again in its folder*, or select a new folder."
+msgstr "L'installateur OpenFOAM continue seulement ce que la même version a commencé avec le même OpenFOAM. Ouvrez le *Setup Wizard* d'OpenFOAM, sélectionnez *Install OpenFOAM*, répondez *Yes* à la question de savoir s'il faut installer à nouveau, et sélectionnez *Remove the existing installation and install it again in its folder*, ou sélectionnez un nouveau dossier."
 
 # machine translation: argos 72cb67e6e23e
 msgid "*Remove the existing installation* was selected for a folder that holds no installation that an installer of aXqua made. aXqua removes only such installations. Select the folder of the existing installation, or install into a new folder."
@@ -259,6 +259,18 @@ msgstr "Le fichier de ``hydrology.rainfall`` est manquant, n'a pas de colonne de
 msgid "Wind or evaporation is switched on, but ``hydrology.weather`` is missing or lacks the columns the choice needs: wind needs ``wind_speed_10m`` and ``wind_direction_10m``, evaporation ``et0`` needs ``et0``, ``penman`` needs radiation, temperature, humidity and wind with dates, and ``series`` needs ``evaporation``."
 msgstr "Le vent ou l'évaporation est activé, mais ``hydrology.weather`` manque ou manque les colonnes dont le choix a besoin : le vent a besoin ``wind_speed_10m`` et ``wind_direction_10m``, l'évaporation ``et0`` needs ``et0``, ``penman`` a besoin de rayonnement, de température, d'humidité et de vent avec des dates, et ``series`` needs ``evaporation``."
 
+# machine translation: argos e9b79d525f8f
+msgid "The column ``Outlet`` of the liquid boundaries gives an outflow line an outlet of its own, and the text in it is none of ``normal_depth``, ``free``, ``elevation`` or ``overfall``. Correct the text, or leave the cell empty, and the line takes ``hydrology.outlet_condition`` (:ref:`hydrology-outlet`). The data wizard writes the column on its tab *River*."
+msgstr "La colonne ``Outlet`` des frontières liquides donne une ligne de sortie propre, et le texte en elle n'est pas ``normal_depth``, ``free``, ``elevation`` ou ``overfall``. Corriger le texte, ou laisser la cellule vide, et la ligne prend ``hydrology.outlet_condition`` (:ref:`hydrology-outlet`). L'assistant de données écrit la colonne sur son onglet *River*."
+
+# machine translation: argos f3f75cc667f9
+msgid "``Bed load without any class in suspension stops GAIA at a river inflow`` or ``Suspended sand of ... mm ... stops TELEMAC at a river inflow``"
+msgstr "``Bed load without any class in suspension stops GAIA at a river inflow`` ou ``Suspended sand of ... mm ... stops TELEMAC at a river inflow``"
+
+# machine translation: argos a2fd855489c0
+msgid "The case has a river that flows into the model through an inflow line, and its sediment setup is one that TELEMAC v9.1.1 cannot run there. The river brings clear water over a bed that the flow erodes at its full capacity, and the finite-volume kernel applies GAIA's erosion and deposition explicitly, so the concentration of coarse suspended sand overshoots beyond 1000 g/l within the first time steps and TELEMAC stops at its limit values; bed load without any class in suspension ends in a crash of GAIA. With a river, the suspended sand can be 0.15 mm at most when the soil also has a cohesive class or the river brings clear water, and 0.5 mm at most when the soil is sand only and the river enters at equilibrium (``morphodynamics.equilibrium_inflow``). Follow the remedy of the message, or leave the river line out of the liquid boundaries. Without a river, all these soils run (:ref:`hydrology-sediment`)."
+msgstr "Le cas a une rivière qui s'écoule dans le modèle à travers une ligne d'entrée, et sa configuration de sédiments est celle que TELEMAC v9.1.1 ne peut pas y courir. La rivière apporte de l'eau claire sur un lit que l'écoulement érode à sa pleine capacité, et le noyau à volume fini applique explicitement l'érosion et le dépôt de GAIA, de sorte que la concentration de dépassements de sable en suspension grossiers au-delà de 1000 g/l dans le premier pas de temps et TELEMAC s'arrête à ses valeurs limites ; Le charriage sans aucune classe en suspension se termine par un accident de GAIA. Avec une rivière, le sable suspendu peut être 0,15 mm au maximum lorsque le sol a aussi une classe cohésive ou que la rivière apporte de l'eau claire, et 0,5 mm au plus lorsque le sol est seulement sable et que la rivière entre à l'équilibre (``morphodynamics.equilibrium_inflow``). Suivez le remède du message, ou laissez la ligne de rivière hors des frontières liquides. Sans rivière, tous ces sols fonctionnent (:ref:`hydrology-sediment`)."
+
 # machine translation: argos f3f75cc667f9
 msgid "``Soil zone ...`` or ``The soil cannot be read``"
 msgstr "``Soil zone ...`` ou ``The soil cannot be read``"
@@ -271,9 +283,9 @@ msgstr "Une valeur de la table du sol est impossible (un K négatif, une tête d
 msgid "Profile of this computer"
 msgstr "Profil de cet ordinateur"
 
-# machine translation: argos 7cb1c5efb2e6
-msgid "The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) reports the following errors. The plugin shows each of them as a dark red triangle next to the entry concerned. An error does not prevent saving the profile, but the function that depends on the entry does not work until the entry is corrected."
-msgstr "La vérification du profil (*Check* sur l'onglet *Configuration*, ou ``axqua profile check``) signale les erreurs suivantes. L'extension montre chacun d'eux comme un triangle rouge foncé à côté de l'entrée concernée. Une erreur n'empêche pas l'enregistrement du profil, mais la fonction qui dépend de l'entrée ne fonctionne pas avant que l'entrée soit corrigée."
+# machine translation: argos 5dd90f1cee2f
+msgid "The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) and the check of an existing installation in the *Setup Wizard* (``axqua profile inspect``) report the following errors. The plugin shows each of them as a dark red triangle next to the entry concerned. An error does not prevent saving the profile, but the function that depends on the entry does not work until the entry is corrected."
+msgstr "La vérification du profil (*Check* sur l'onglet *Configuration* ou ``axqua profile check``) et la vérification d'une installation existante dans le *Setup Wizard* (``axqua profile inspect``) indiquent les erreurs suivantes. L'extension montre chacun d'eux comme un triangle rouge foncé à côté de l'entrée concernée. Une erreur n'empêche pas l'enregistrement du profil, mais la fonction qui dépend de l'entrée ne fonctionne pas avant que l'entrée soit corrigée."
 
 # machine translation: argos 9efeeeb8caa7
 msgid "``the ... does not exist``, ``the ... launcher ... is not executable`` or ``the ... program was not found in the installation folder ...``"
@@ -290,6 +302,10 @@ msgstr "Le profil nomme un script d'environnement qui n'est pas sur cet ordinate
 # machine translation: argos 199c5a83b800
 msgid "aXqua loaded the environment script and could not start the simulation program. The message states what is missing. Verify in a terminal that the installation works by itself, and that the profile names the environment script of this installation."
 msgstr "aXqua a chargé le script environnement et n'a pas pu démarrer le programme de simulation. Le message indique ce qui manque. Vérifiez dans un terminal que l'installation fonctionne par elle-même, et que le profil nomme le script environnement de cette installation."
+
+# machine translation: argos 542ef3306b05
+msgid "The environment script sets up the variables of the simulation program, but a part that every simulation needs is not there: TELEMAC-2D in the build folder of TELEMAC, or ``interFoam``, ``checkMesh``, ``decomposePar`` or ``reconstructPar`` of OpenFOAM. The installation is incomplete, for example because its compilation stopped. The *Setup Wizard* does not enter such an installation in the profile. Select the environment script of a complete build, or install the program again with the *Setup Wizard*."
+msgstr "Le script environnement définit les variables du programme de simulation, mais une partie dont chaque simulation a besoin n'est pas là : TELEMAC-2D dans la compilation dossier de TELEMAC, ou ``interFoam``, ``checkMesh``, ``decomposePar`` ou ``reconstructPar`` d'OpenFOAM. L'installation est incomplète, par exemple parce que sa compilation a cessé. Le *Setup Wizard* n'entre pas une telle installation dans le profil. Sélectionnez le script d'environnement d'une compilation complète, ou installez le programme à nouveau avec le *Setup Wizard*."
 
 # machine translation: argos 10e0a8a35bff
 msgid "aXqua cannot create files in the folder for jobs. Select a folder on a drive with write access and sufficient free space."

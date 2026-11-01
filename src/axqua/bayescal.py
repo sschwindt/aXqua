@@ -85,18 +85,18 @@ def ensure_graphic_output(cas_path: Path, code: str = "M") -> bool:
     cas_path = Path(cas_path)
     if not cas_path.exists():
         raise SystemExit(f"no built case at {cas_path}; run preprocessing.py first")
-    import re
-    text = cas_path.read_text()
-    m = re.search(r"(VARIABLES FOR GRAPHIC PRINTOUTS\s*:\s*')([^']*)(')", text)
-    if not m:
+    from axqua.solvers.telemac.steering import read_cas_values, set_keyword
+
+    key = "VARIABLES FOR GRAPHIC PRINTOUTS"
+    value = read_cas_values(cas_path, key)[key]
+    if not value:
         print(f"  warning: no VARIABLES FOR GRAPHIC PRINTOUTS in {cas_path.name}")
         return False
-    codes = [c.strip() for c in m.group(2).split(",") if c.strip()]
+    codes = [c.strip() for c in value.strip().strip("'\"").split(",") if c.strip()]
     if code in codes:
         return False
     codes.append(code)
-    cas_path.write_text(text[:m.start()] + m.group(1) + ",".join(codes)
-                        + m.group(3) + text[m.end():])
+    cas_path.write_text(set_keyword(cas_path.read_text(), key, "'" + ",".join(codes) + "'"))
     print(f"  added graphic printout {code!r} to {cas_path.name}")
     return True
 
@@ -385,23 +385,18 @@ class FlowSpec:
 
 
 def _patch_cas(text: str, key: str, value: str) -> str:
-    import re
-    new, n = re.subn(rf"^{re.escape(key)}\s*:.*$", f"{key} : {value}", text,
-                     count=1, flags=re.M)
-    if n != 1:
-        raise ValueError(f"keyword {key!r} not found in the base steering file")
-    return new
+    """*text* of a steering file with *key* set to *value* (:func:`axqua.solvers.telemac.steering.set_keyword`); a keyword the file does not have raises."""
+    from axqua.solvers.telemac.steering import set_keyword
+
+    return set_keyword(text, key, value)
 
 
 def _set_cas(text: str, key: str, value: str) -> str:
     """Like :func:`_patch_cas` but appends the keyword when the base case has no
     such line (a hotstart adds keywords a pre-wet start never carried)."""
-    import re
-    new, n = re.subn(rf"^{re.escape(key)}\s*:.*$", f"{key} : {value}", text,
-                     count=1, flags=re.M)
-    if n == 1:
-        return new
-    return text.rstrip("\n") + f"\n{key} : {value}\n"
+    from axqua.solvers.telemac.steering import set_keyword
+
+    return set_keyword(text, key, value, append=True)
 
 
 def outflow_stage(cfg: Config, discharge: float, out_dir: Path) -> float:

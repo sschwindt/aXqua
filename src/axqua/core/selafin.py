@@ -253,6 +253,7 @@ def write_initial_state(
     *,
     velocity_u: np.ndarray | None = None,
     velocity_v: np.ndarray | None = None,
+    bottom: np.ndarray | None = None,
     title: str = "axqua initial conditions",
     date: Sequence[int] = (2026, 1, 1, 0, 0, 0),
     double_precision: bool = True,
@@ -272,6 +273,10 @@ def write_initial_state(
     depth : (NPOIN,) float array of initial water depths (m).
     velocity_u, velocity_v : optional (NPOIN,) initial velocity components (m/s);
         default to zero (a still pre-wetted pond, the usual hotstart).
+    bottom : optional (NPOIN,) bed elevation (m), written as BOTTOM. TELEMAC coupled
+        with GAIA continues only from a file that holds the bed
+        (``telemac2d_init.F``: "THE BOTTOM MUST BE IN THE PREVIOUS COMPUTATION FILE"),
+        and takes the bed of the file whenever it is there.
     """
     depth = np.asarray(depth, dtype=float)
     npoin = depth.size
@@ -282,6 +287,8 @@ def write_initial_state(
         ("VELOCITY V", "M/S", v),
         ("WATER DEPTH", "M", depth),
     ]
+    if bottom is not None:
+        variables.append(("BOTTOM", "M", np.asarray(bottom, dtype=float)))
     return _write_selafin(Path(path), x, y, ikle, ipobo, variables,
                           title=title, date=date, double_precision=double_precision)
 

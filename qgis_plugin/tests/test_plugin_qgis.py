@@ -2762,6 +2762,15 @@ def test_an_installed_program_is_installed_again_only_after_a_question(dock,
     monkeypatch.setattr(configuration_tab, "InstallWizard",
                         lambda *a, **k: opened.append(k) or object())
     monkeypatch.setattr(configuration_tab, "exec_dialog", lambda _w: 0)
+    setups = []
+
+    class _Setup:                              # the user chose to install the program
+        choice = "install"
+
+        def __init__(self, *args, **kwargs):
+            setups.append(kwargs)
+
+    monkeypatch.setattr(configuration_tab, "SetupWizard", _Setup)
     asked = []
     no = configuration_tab.enum_value(QMessageBox, "StandardButton.No", "No")
     yes = configuration_tab.enum_value(QMessageBox, "StandardButton.Yes", "Yes")
@@ -2773,9 +2782,16 @@ def test_an_installed_program_is_installed_again_only_after_a_question(dock,
     monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: yes)
     tab.open_wizard("openfoam")
     assert opened[-1]["reinstall"] is True
+    # the Setup Wizard came first, with the environment script that was found
+    assert setups[-1]["found"] == "/usr/lib/openfoam/openfoam2406/etc/bashrc"
     asked.clear()
+    count = len(setups)
     tab.open_wizard("postprocessors")                            # nothing to ask
     assert asked == [] and opened[-1]["reinstall"] is False
+    assert len(setups) == count                                  # no Setup Wizard there
+    _Setup.choice = ""                                           # an existing one, entered
+    tab.open_wizard("telemac")
+    assert len(opened) == 2 and len(setups) == count + 1
 
 
 def test_a_wizard_for_an_installed_program_says_what_happens_to_it(qgis_app,
@@ -2821,13 +2837,122 @@ def test_the_configuration_tab_says_what_is_installed_and_what_is_running(dock):
         "The installation is running, step 2 of 2 (12 min)."
     assert tab._program_buttons["telemac"].text() == "Show the installation..."
     assert tab._program_labels["openfoam"].text().endswith("openfoam2406/etc/bashrc")
-    assert tab._program_buttons["openfoam"].text() == "Install OpenFOAM..."
+    assert tab._program_buttons["openfoam"].text() == "Setup Wizard..."
+    assert tab._program_buttons["postprocessors"].text() == "Install ParaView and VisIt..."
     assert "failed" in tab._program_labels["postprocessors"].text()
     assert tab.install_timer.isActive()                          # it keeps looking
     tab.show_software(_overview())
     assert not tab.install_timer.isActive()
-    assert tab._program_buttons["telemac"].text() == "Install TELEMAC..."
+    assert tab._program_buttons["telemac"].text() == "Setup Wizard..."
     assert describe_program({}) == "Not found on this computer."
+
+
+# ------------------------------------------------------------- the Setup Wizard
+
+
+def _inspection(*, valid=True, missing=()):
+    names = ("telemac2d", "telemac3d", "gaia", "parallel", "fortran")
+    return {"solver": "telemac", "valid": valid, "folder": "/opt/telemac",
+            "verdict": ("TELEMAC was found and the installation is valid, but some aXqua "
+                        "modules will not work:\n- The morphodynamics (GAIA not found)")
+            if missing else "TELEMAC was found and the installation is valid and complete."
+            if valid else "This is not a usable installation of TELEMAC: it is broken",
+            "modules": [{"name": name, "title": name.upper(), "required": name == "telemac2d",
+                         "available": (name not in missing) if valid or name != "telemac2d"
+                         else False, "needed_for": "x"} for name in names],
+            "findings": [{"severity": "warning", "code": "axqua.environment.module_missing",
+                          "message": "telemac has no GAIA", "anchor": "x",
+                          "subject": "solvers.telemac.setup_script"}] if missing else []}
+
+
+class _SetupClient:
+    def __init__(self, answers):
+        self.answers = dict(answers)
+        self.calls: list[tuple] = []
+
+    def profile_inspect(self, solver, script):
+        self.calls.append(("inspect", solver, script))
+        return self.answers[script]
+
+    def profile_use(self, solver, script):
+        self.calls.append(("use", solver, script))
+        answer = dict(self.answers[script])
+        answer.update(entered=answer["valid"], path="/home/x/.config/axqua/default.axq-profile")
+        return answer
+
+
+def _setup_now(monkeypatch):
+    from axqua_plugin.gui import setup_wizard
+
+    def now(title, call, on_success=None, on_error=None, owner=None):
+        try:
+            answer = call()
+        except Exception as exc:                 # noqa: BLE001 - as the task would
+            on_error(exc)
+        else:
+            on_success(answer)
+
+    monkeypatch.setattr(setup_wizard, "run_async", now)
+    return setup_wizard
+
+
+def test_the_setup_wizard_asks_first_how_the_program_is_found(qgis_app, monkeypatch):
+    setup_wizard = _setup_now(monkeypatch)
+    fresh = setup_wizard.SetupWizard(_SetupClient({}), "telemac")
+    assert fresh.tabs.tabText(0) == "Setup" and fresh.tabs.tabText(1) == \
+        "Existing installation"
+    assert fresh.existing_button.text() == "Select existing config file"
+    assert fresh.install_button.text() == "Install TELEMAC"
+    assert fresh.selected() == "install"                  # nothing found: install it
+    assert not fresh.tabs.isTabEnabled(1)
+    assert fresh.next_button.text() == "Install TELEMAC..."
+    fresh.go_next()
+    assert fresh.choice == "install" and fresh.result() == 1
+    fresh.deleteLater()
+
+    found = setup_wizard.SetupWizard(_SetupClient({}), "openfoam",
+                                     found="/usr/lib/openfoam/openfoam2406/etc/bashrc")
+    assert found.selected() == "existing" and found.tabs.isTabEnabled(1)
+    assert found.script_edit.text().endswith("etc/bashrc")
+    found.go_next()
+    assert found.tabs.currentIndex() == 1 and found.choice == ""
+    # which file it is, with folder and file name, for each program
+    assert "shell-rc.sh" in found.pattern_label.text()
+    assert "etc/bashrc" in found.pattern_label.text()
+    assert "pysource." in setup_wizard.PATTERNS["telemac"]
+    found.deleteLater()
+
+
+def test_an_existing_installation_is_checked_and_entered(qgis_app, monkeypatch):
+    setup_wizard = _setup_now(monkeypatch)
+    good, partial, broken = "/opt/t/pysource.a.sh", "/opt/t/pysource.b.sh", "/x.sh"
+    client = _SetupClient({good: _inspection(), partial: _inspection(missing=("gaia",)),
+                           broken: _inspection(valid=False)})
+    entered = []
+    wizard = setup_wizard.SetupWizard(client, "telemac", found=broken,
+                                      on_entered=entered.append)
+    wizard.check()
+    assert not wizard.use_button.isEnabled()              # unusable: never entered
+    assert "not a usable installation" in wizard.verdict_label.text()
+
+    wizard.script_edit.setText(partial)
+    assert wizard.verdict_label.text() == setup_wizard.NOT_CHECKED
+    wizard.check()
+    assert wizard.use_button.isEnabled()                  # valid, with modules missing
+    assert "some aXqua modules will not work" in wizard.verdict_label.text()
+    assert "#2e014b" in wizard.verdict_label.styleSheet()
+    assert "missing" in wizard.modules_label.text()
+    assert wizard.finding_list.findings[0].code == "axqua.environment.module_missing"
+
+    wizard.script_edit.setText(good)                     # another file: check again first
+    assert not wizard.use_button.isEnabled()
+    wizard.check()
+    assert "#1b5e20" in wizard.verdict_label.styleSheet()
+    wizard.use()
+    assert client.calls[-1] == ("use", "telemac", good)
+    assert entered and entered[0]["entered"]
+    assert wizard.close_button.text() == "Setup complete"
+    wizard.deleteLater()
 
 
 # ------------------------------------------------- results for ParaView and VisIt
@@ -3300,6 +3425,20 @@ class _HydroClient:
                 "weather": "user-sources/hydrology/weather.csv",
                 "caution": "Reanalysis underestimates short rain intensities."}
 
+    def hydrology_lines(self, case, changes=None):
+        lines = [{"row": 0, "kind": "outflow", "type": "outflow", "length": 25.0,
+                  "discharge": None, "outlet": ""},
+                 {"row": 1, "kind": "outflow", "type": "outflow", "length": 12.0,
+                  "discharge": None, "outlet": ""},
+                 {"row": 2, "kind": "inflow", "type": "inflow", "length": 12.0,
+                  "discharge": None, "outlet": ""}]
+        answer = {"lines": lines, "outlet_condition": "overfall"}
+        if changes is not None:
+            self.changes = changes
+            answer["settings"] = {
+                "boundaries.liquid_boundaries": "user-sources/hydrology/liquid-boundaries.gpkg"}
+        return answer
+
     def case_read(self, case):
         return {"data": {"project": {"name": "c"}, "hydrology": {"enabled": False}}}
 
@@ -3324,7 +3463,7 @@ def test_the_data_wizard_lists_the_agency_first_and_saves_what_was_chosen(
     ctx.client = client
     wizard = hydrology_wizard.HydrologyWizard(ctx, tmp_path / "c.axq-case")
     assert [wizard.tabs.tabText(i) for i in range(wizard.tabs.count())] == [
-        "Rain", "Soil", "Initial moisture", "Wind and sun", "Outlet", "Save"]
+        "Rain", "Soil", "Initial moisture", "Wind and sun", "Outlet", "River", "Save"]
     rain_links = next(label.text() for label, offers in wizard._portal_labels
                       if offers == "rain")
     assert rain_links.index("DWD RADOLAN") < rain_links.index("Open-Meteo")
@@ -3341,6 +3480,149 @@ def test_the_data_wizard_lists_the_agency_first_and_saves_what_was_chosen(
     assert written["project"] == {"name": "c"}               # the rest is kept
     assert wizard.saved
     wizard.deleteLater()
+
+
+def test_the_river_tab_gives_a_line_its_discharge_or_its_own_outlet(
+        qgis_app, tmp_path, monkeypatch):
+    """Optional: a river through the catchment is an inflow line with the discharge it brings and an outflow line with an outlet of its own; the copy of the layer is what Save points the case at."""
+    from axqua_plugin.gui import hydrology_wizard
+
+    monkeypatch.setattr(hydrology_wizard, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    client = _HydroClient()
+
+    class _Ctx:
+        pass
+
+    ctx = _Ctx()
+    ctx.client = client
+    wizard = hydrology_wizard.HydrologyWizard(ctx, tmp_path / "c.axq-case")
+    assert "Optional" in hydrology_wizard.RIVER_INTRO
+    wizard.tabs.setCurrentIndex(hydrology_wizard.TABS.index("River"))   # reads the lines
+    table = wizard.river_table
+    assert table.rowCount() == 3 and "overfall" in wizard.river_note.text()
+    assert not table.cellWidget(0, 3).isEnabled()             # an outflow: no discharge
+    assert not table.cellWidget(2, 4).isEnabled()             # an inflow: no outlet
+    table.cellWidget(1, 4).setCurrentIndex(table.cellWidget(1, 4).findData("normal_depth"))
+    table.cellWidget(2, 3).setValue(1.5)
+    wizard.use_lines()
+    assert client.changes == [
+        {"row": 0, "kind": "outflow", "discharge": None, "outlet": ""},
+        {"row": 1, "kind": "outflow", "discharge": None, "outlet": "normal_depth"},
+        {"row": 2, "kind": "inflow", "discharge": 1.5, "outlet": ""}]
+    wizard.save()
+    assert client.written[-1]["boundaries"]["liquid_boundaries"] == \
+        "user-sources/hydrology/liquid-boundaries.gpkg"
+    wizard.deleteLater()
+
+
+class _SedimentClient(_HydroClient):
+    def __init__(self):
+        super().__init__()
+        self.asked = []
+
+    def hydrology_sediment(self, case, **choices):
+        self.slopes = getattr(self, "slopes", []) + [choices.pop("slope", None)]
+        self.asked.append(choices)
+        return {"model": "mixed", "title": "Sand after van Rijn with cohesive fines",
+                "slope": 0.054, "reasons": ["The soil is a mixture."],
+                "warnings": ["The erosion parameters are GAIA's defaults."],
+                "settings": {"morphodynamics.enabled": True,
+                             "morphodynamics.soil": "texture silt loam",
+                             "morphodynamics.layer_thickness": choices["thickness"],
+                             "morphodynamics.bedload_formula": 7,
+                             "morphodynamics.prescribed_solid_discharges": None,
+                             "morphodynamics.sediment_classes": [
+                                 {"diameter": 2e-5, "type": "CO", "fraction": 0.8},
+                                 {"diameter": 1.5e-4, "type": "NCO", "fraction": 0.2}]}}
+
+    def case_read(self, case):
+        return {"data": {"project": {"name": "c"}, "hydrology": {"enabled": True},
+                         "morphodynamics": {"prescribed_solid_discharges": [0.0],
+                                            "gaia_results_base": "rgaia"}}}
+
+
+def test_the_sediment_wizard_recommends_and_saves_or_switches_off(
+        qgis_app, tmp_path, monkeypatch):
+    """Strongly recommended, so ticked by default; the recommendation is the library's, asked again when the soil changes; unticked, the case says enabled: false."""
+    from axqua_plugin.gui import sediment_wizard
+
+    monkeypatch.setattr(sediment_wizard, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    client = _SedimentClient()
+
+    class _Ctx:
+        pass
+
+    ctx = _Ctx()
+    ctx.client = client
+    wizard = sediment_wizard.SedimentWizard(
+        ctx, tmp_path / "c.axq-case", {"soil_texture": "silt loam"})
+    assert [wizard.tabs.tabText(i) for i in range(wizard.tabs.count())] == [
+        "Soil layer", "Grain sizes", "Recommendation", "Save"]
+    assert "strongly recommended" in sediment_wizard.INTRO
+    assert wizard.texture.currentData() == "silt loam"         # the case's soil
+    assert wizard.transport.isChecked()
+    wizard.thickness.setValue(0.25)
+    wizard.tabs.setCurrentIndex(2)
+    assert client.asked[-1] == {"soil": "texture", "thickness": 0.25,
+                                "texture": "silt loam"}
+    assert "van Rijn" in wizard.title_label.text() and "5.4 %" in wizard.title_label.text()
+    assert "20 %" in wizard.settings_label.text()
+    asked = len(client.asked)
+    wizard.tabs.setCurrentIndex(3)
+    assert len(client.asked) == asked                          # same soil: not again
+    wizard.save()
+    block = client.written[-1]["morphodynamics"]
+    assert block["enabled"] is True and block["layer_thickness"] == 0.25
+    assert "prescribed_solid_discharges" not in block          # None removes it
+    assert block["gaia_results_base"] == "rgaia"               # the rest is kept
+    assert wizard.saved
+    wizard.soil_buttons["clay"].setChecked(True)
+    wizard.tabs.setCurrentIndex(2)
+    assert client.asked[-1]["soil"] == "clay"                  # another soil: asked again
+    assert client.slopes[0] is None and client.slopes[-1] == 0.054   # the terrain once
+    wizard.transport.setChecked(False)
+    assert wizard.off_note.isVisibleTo(wizard)
+    wizard.save()
+    assert client.written[-1]["morphodynamics"]["enabled"] is False
+    wizard.deleteLater()
+    # opened again, it starts from what the case says it was given
+    for soil, button in (("texture clay loam", "texture"), ("clay", "clay"),
+                         ("d50 0.8 mm", "grain"),
+                         ("sand 30 %, silt 50 %, clay 20 %", "shares")):
+        again = sediment_wizard.SedimentWizard(
+            ctx, tmp_path / "c.axq-case", {"sediment": {"soil": soil}})
+        assert again.soil_buttons[button].isChecked(), soil
+        again.deleteLater()
+    again = sediment_wizard.SedimentWizard(
+        ctx, tmp_path / "c.axq-case", {"sediment": {"soil": "texture clay loam"}})
+    assert again.texture.currentData() == "clay loam"
+    assert again.choices()["texture"] == "clay loam"
+    again.deleteLater()
+
+
+def test_the_box_names_the_sediment_state_and_opens_its_wizard(qgis_app):
+    from axqua_plugin.gui import hydrology_box
+
+    base = {"latitude": 48.5, "longitude": 13.1, "area_m2": 5.6e4, "files": {}}
+    text = hydrology_box.summarize({**base, "sediment": {"decided": False,
+                                                         "enabled": False}})
+    assert "Sediment transport: not set up (strongly recommended)" in text
+    on = hydrology_box.summarize({**base, "sediment": {"decided": True, "enabled": True,
+                                                       "soil": "texture loam"}})
+    assert "Sediment transport: on (texture loam)" in on
+    off = hydrology_box.summarize({**base, "sediment": {"decided": True,
+                                                        "enabled": False}})
+    assert "Sediment transport: off" in off
+
+    class _Ctx:
+        client = None
+    box = hydrology_box.HydrologyDataBox(_Ctx())
+    assert box.sediment_button.text() == "Sediment transport wizard..."
+    box.deleteLater()
 
 
 def test_the_outflow_level_of_a_catchment_is_required_when_its_outlet_is_a_lake(

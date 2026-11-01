@@ -62,7 +62,7 @@ two buttons of the plugin's first tab, so nobody who tried the plugin got past t
 `[sys.executable, "-m", "axqua", "execute", job_dir]`). It used to start whichever `axqua`
 came first on `PATH`, which is another program as soon as two environments carry aXqua - the
 plugin calls one by its full path, `PATH` offers the other - and the job then ran with a
-different Python and different package versions, silently. on the main workstation a calibration submitted
+different Python and different package versions, silently. On the main workstation a calibration submitted
 from `axqua-env` (HydroBayesCal 1.9) ran in the miniforge base environment against a 1.7
 checkout.
 

@@ -6,7 +6,8 @@ One window with a tab per kind of data, visited in any order, with *Back* and *N
 * **Soil**: one's own soil map and table, one texture class for the whole catchment, or SoilGrids textures; sealed surfaces from one's own layer or ESA WorldCover;
 * **Initial moisture**: a number, or ERA5-Land at the start of the event;
 * **Wind and sun**: the weather series and what of it the run uses;
-* **Outlet**: the condition of the outflow lines and the numerical kernel.
+* **Outlet**: the condition of the outflow lines and the numerical kernel;
+* **River** (optional): a river that flows through the catchment, with the discharge it brings and an outlet of its own (:mod:`axqua.hydrology.river` of the library).
 
 Nothing is written into the case file before *Save*; the files a route writes go into ``user-sources/hydrology`` at once. The window decides nothing: every route is a call of ``axqua hydrology`` and its answer says which case settings point at the file.
 """
@@ -27,7 +28,21 @@ from ..core.tasks import run_async
 from . import help as help_pages
 from .case_editor import stored_path
 
-TABS = ("Rain", "Soil", "Initial moisture", "Wind and sun", "Outlet", "Save")
+TABS = ("Rain", "Soil", "Initial moisture", "Wind and sun", "Outlet", "River", "Save")
+
+RIVER_INTRO = (
+    "<b>Optional.</b> A catchment often drains into a river that already carries "
+    "water when it enters the model, and that is what makes the runoff and the "
+    "sediment of the slopes interesting: how much of both reaches the river. Draw the "
+    "river as two lines in the layer of the liquid boundaries, where it crosses the "
+    "outline: an <b>inflow</b> line where it enters, and an <b>outflow</b> line where "
+    "it leaves. Give the inflow line the discharge of the river, and the outflow line "
+    "an outlet of its own, usually <i>normal depth</i>. The other outflow lines keep "
+    "the outlet of the case. Without a river, leave this tab as it is.")
+
+#: The outlets an outflow line can have of its own; the empty one is the case's.
+LINE_OUTLETS = (("", "as the case"), ("normal_depth", "normal depth"),
+                ("elevation", "elevation"), ("free", "free"), ("overfall", "overfall"))
 
 AGENCY_FIRST = (
     "<b>Check your national meteorological agency first.</b> Its rain gauges and radar "
@@ -60,6 +75,11 @@ def _label(text: str, *, rich: bool = False) -> QLabel:
     if rich:
         label.setOpenExternalLinks(True)
     return label
+
+
+def _resize_mode(header_view, name: str):
+    from ..compat import enum_value
+    return enum_value(header_view, f"ResizeMode.{name}", name)
 
 
 def _scrolling(body: QWidget) -> QScrollArea:
@@ -111,7 +131,8 @@ class HydrologyWizard(QDialog):
         self.tabs = QTabWidget()
         for title, page in zip(TABS, (self._rain_page(), self._soil_page(),
                                       self._moisture_page(), self._weather_page(),
-                                      self._outlet_page(), self._save_page())):
+                                      self._outlet_page(), self._river_page(),
+                                      self._save_page())):
             self.tabs.addTab(_scrolling(page), title)
         self.tabs.currentChanged.connect(self._tab_changed)
         outer.addWidget(self.tabs, 1)
@@ -396,6 +417,118 @@ class HydrologyWizard(QDialog):
         layout.addStretch(1)
         return page
 
+    def _river_page(self) -> QWidget:
+        from qgis.PyQt.QtWidgets import QHeaderView, QTableWidget
+
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.addWidget(_label(RIVER_INTRO, rich=True))
+        self.river_table = QTableWidget(0, 5)
+        self.river_table.setHorizontalHeaderLabels(
+            ["Line", "Type", "Length (m)", "Discharge (m³/s)", "Outlet"])
+        self.river_table.verticalHeader().setVisible(False)
+        header = self.river_table.horizontalHeader()
+        header.setSectionResizeMode(_resize_mode(QHeaderView, "Stretch"))
+        self.river_table.setMinimumHeight(160)
+        layout.addWidget(self.river_table)
+        self.river_note = _label("")
+        layout.addWidget(self.river_note)
+        row = QHBoxLayout()
+        reload_button = QPushButton("Read the lines again")
+        reload_button.clicked.connect(self.load_lines)
+        row.addWidget(reload_button)
+        self.river_button = QPushButton("Use these lines")
+        self.river_button.clicked.connect(self.use_lines)
+        row.addWidget(self.river_button)
+        row.addStretch(1)
+        layout.addLayout(row)
+        form = QFormLayout()
+        self.hydrograph, holder = self._file_row(
+            "Hydrograph of the river", "Tables (*.csv *.txt *.xlsx);;All files (*)")
+        form.addRow("Hydrograph (optional)", holder)
+        use = QPushButton("Use this hydrograph")
+        use.clicked.connect(lambda: self._set_file("boundaries.inflow",
+                                                   self.hydrograph.text()))
+        form.addRow(use)
+        layout.addLayout(form)
+        layout.addWidget(_label(
+            "A hydrograph (time and discharge) replaces the constant discharge: the run "
+            "then follows it, split over the inflow lines like their discharges. "
+            "Sediment the river brings is taken in equilibrium with its flow."))
+        layout.addStretch(1)
+        self._lines: list[dict] = []
+        return page
+
+    def load_lines(self) -> None:
+        client, case = self.client, self.case
+        self.river_note.setText("Reading the liquid boundaries...")
+        run_async("aXqua: reading the liquid boundaries",
+                  lambda: client.hydrology_lines(case),
+                  on_success=self.show_lines,
+                  on_error=lambda exc: self.river_note.setText(user_text(exc)),
+                  owner=self)
+
+    def show_lines(self, answer: dict) -> None:
+        """The lines of the layer, one row each: the type, and the discharge of an inflow line or the outlet of an outflow line."""
+        from qgis.PyQt.QtWidgets import QTableWidgetItem
+
+        answer = answer or {}
+        self._lines = [line for line in answer.get("lines") or []
+                       if line.get("kind") in ("inflow", "outflow")]
+        self.river_table.setRowCount(len(self._lines))
+        for i, line in enumerate(self._lines):
+            self.river_table.setItem(i, 0, QTableWidgetItem(str(line["row"] + 1)))
+            kind = QComboBox()
+            kind.addItem("inflow", "inflow")
+            kind.addItem("outflow", "outflow")
+            kind.setCurrentIndex(0 if line["kind"] == "inflow" else 1)
+            self.river_table.setCellWidget(i, 1, kind)
+            self.river_table.setItem(i, 2, QTableWidgetItem(f"{line['length']:.1f}"))
+            flow = QDoubleSpinBox()
+            flow.setDecimals(3)
+            flow.setRange(0.0, 100000.0)
+            flow.setSpecialValueText("as the case")
+            flow.setValue(float(line.get("discharge") or 0.0))
+            self.river_table.setCellWidget(i, 3, flow)
+            outlet = QComboBox()
+            for value, text in LINE_OUTLETS:
+                outlet.addItem(text, value)
+            outlet.setCurrentIndex(max(outlet.findData(line.get("outlet") or ""), 0))
+            self.river_table.setCellWidget(i, 4, outlet)
+            kind.currentIndexChanged.connect(lambda _=0, row=i: self._kind_changed(row))
+            self._kind_changed(i)
+        case_outlet = answer.get("outlet_condition") or ""
+        self.river_note.setText(
+            (f"The outlet of the case is {case_outlet}. " if case_outlet else "")
+            + ("An inflow line takes the discharge; an outflow line an outlet of its "
+               "own, or that of the case." if self._lines else
+               "The layer of the liquid boundaries has no inflow or outflow line yet."))
+
+    def _kind_changed(self, row: int) -> None:
+        inflow = self.river_table.cellWidget(row, 1).currentData() == "inflow"
+        self.river_table.cellWidget(row, 3).setEnabled(inflow)
+        self.river_table.cellWidget(row, 4).setEnabled(not inflow)
+
+    def line_changes(self) -> list[dict]:
+        """What the table says, for ``axqua hydrology lines --set``."""
+        changes = []
+        for i, line in enumerate(self._lines):
+            kind = self.river_table.cellWidget(i, 1).currentData()
+            flow = self.river_table.cellWidget(i, 3).value()
+            outlet = self.river_table.cellWidget(i, 4).currentData()
+            changes.append({"row": line["row"], "kind": kind,
+                            "discharge": flow if kind == "inflow" and flow > 0 else None,
+                            "outlet": outlet if kind == "outflow" else ""})
+        return changes
+
+    def use_lines(self) -> None:
+        if not self._lines:
+            self.status.setText("There are no lines to use; draw them first.")
+            return
+        client, case, changes = self.client, self.case, self.line_changes()
+        self._run("writing the lines of the river",
+                  lambda: client.hydrology_lines(case, changes), "lines of the river")
+
     def _save_page(self) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
@@ -465,7 +598,8 @@ class HydrologyWizard(QDialog):
                 self.pending[key] = None
             elif isinstance(value, str) and value and key in (
                     "hydrology.rainfall", "hydrology.weather", "hydrology.soil_zones",
-                    "hydrology.soil_table", "hydrology.sealed_surfaces"):
+                    "hydrology.soil_table", "hydrology.sealed_surfaces",
+                    "boundaries.inflow"):
                 self.pending[key] = stored_path(value, self.case.parent)
             else:
                 self.pending[key] = value
@@ -571,6 +705,8 @@ class HydrologyWizard(QDialog):
     def _tab_changed(self, index: int) -> None:
         self.back_button.setVisible(index > 0)
         self.next_button.setVisible(index < len(TABS) - 1)
+        if TABS[index] == "River" and not self._lines:
+            self.load_lines()
         if index == len(TABS) - 1:
             self._show_summary()
 

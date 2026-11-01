@@ -12,7 +12,7 @@ command when the plugin changes::
 The case has to be built and to have a completed steady job, so that the tabs show
 what a user sees while working: the job list with its jobs, the checkup table, the
 results. The figures of the hydrology mode need a case in that mode and are taken on
-their own: ``--only "hydrology editor,hydrology,hydrology wizard"``. A case with the blocks ``calibration``, ``openfoam`` and ``fine_sediment``
+their own: ``--only "hydrology editor,hydrology,hydrology wizard,hydrology sediment wizard"``. A case with the blocks ``calibration``, ``openfoam`` and ``fine_sediment``
 shows those boxes filled, and the figure of the fine sediment simulation needs that
 block. The script fails, and says which figure, when a widget that a caption explains
 is not on the screen: a figure whose numbers no longer match its caption is worse than
@@ -274,6 +274,30 @@ def take_screenshots() -> None:
             window.next_button])
         window.close()
 
+    def setup_wizard() -> None:
+        """The tab Existing installation, for the OpenFOAM that a login shell of the
+        computer carries (another release, no sediment solvers): the verdict that a
+        valid installation lacks aXqua modules. AXQUA_SHOTS_OPENFOAM names another."""
+        from axqua.gui.setup_wizard import SetupWizard
+        script = os.environ.get("AXQUA_SHOTS_OPENFOAM",
+                                "/home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc")
+        window = SetupWizard(client, "openfoam", found=script)
+        window.resize(792, 860)
+        window.show()
+        window.go_next()
+        window.check()
+        until(lambda: window.answer is not None, 120)
+        wait(500)
+        # the neutral folders written into the field must not count as another file
+        window.script_edit.blockSignals(True)
+        shot(window, "gui-setup-wizard", [
+            window.tabs.tabBar(),
+            window.pattern_label,
+            window.script_edit.parentWidget(),
+            [window.verdict_label, window.modules_label],
+            window.use_button])
+        window.close()
+
     # ---- Case Setup --------------------------------------------------------------
     def case_setup() -> None:
         dock.show_section("case")
@@ -449,7 +473,8 @@ def take_screenshots() -> None:
         shot(dock, "gui-hydrology", [
             sub_tab_bar("hydraulics"), [inner.build_button, inner.submit_button],
             page.data.summary, page.data.finding_list,
-            [page.data.wizard_button, page.data.check_button]])
+            [page.data.wizard_button, page.data.sediment_button,
+             page.data.check_button]])
 
     def hydrology_wizard() -> None:
         from axqua.gui.hydrology_wizard import HydrologyWizard
@@ -465,6 +490,23 @@ def take_screenshots() -> None:
             first(rain, QGroupBox, "A rain record"),
             first(rain, QGroupBox, "A design storm"),
             first(rain, QGroupBox, "A past event"), window.next_button])
+        window.close()
+
+    def sediment_wizard() -> None:
+        """The Sediment transport wizard on its tab Recommendation."""
+        from axqua.gui.sediment_wizard import SedimentWizard
+        dock.show_section("hydraulics", "hydrology")    # the box reads the case's data
+        page = dock.page("hydraulics", "hydrology")
+        until(lambda: bool((page.data.info or {}).get("sediment")), 60)
+        window = SedimentWizard(dock.ctx, case, page.data.info)
+        window.resize(860, 900)
+        window.show()
+        window.tabs.setCurrentIndex(2)                 # asks for the recommendation
+        until(lambda: window.answer is not None, 120)
+        wait(500)
+        shot(window, "gui-sediment-wizard", [
+            window.tabs.tabBar(), window.title_label, window.reasons_label,
+            window.warnings_label, window.settings_label, window.transport])
         window.close()
 
     def batch() -> None:
@@ -514,6 +556,7 @@ def take_screenshots() -> None:
 
     for name, action in (("configuration", configuration),
                          ("profile editor", profile_editor), ("wizard", wizard),
+                         ("setup wizard", setup_wizard),
                          ("case setup", case_setup), ("case editor", case_editor),
                          ("preprocessing", preprocessing), ("hydraulics", hydraulics),
                          ("mesh convergence", mesh_convergence),
@@ -522,7 +565,8 @@ def take_screenshots() -> None:
                          ("batch", batch), ("window", window),
                          ("hydrology editor", hydrology_editor),
                          ("hydrology", hydrology),
-                         ("hydrology wizard", hydrology_wizard)):
+                         ("hydrology wizard", hydrology_wizard),
+                         ("hydrology sediment wizard", sediment_wizard)):
         if only and name not in only:
             continue
         if not only and name.startswith("hydrology"):

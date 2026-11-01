@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import math
+import numbers
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -61,15 +62,18 @@ def parse_decimal(value) -> float | None:
     before parsing. Returns ``None`` for blanks / NaN / unparseable values so the
     caller can fall back to a configured default.
     """
-    if value is None:
+    if value is None or isinstance(value, bool):
         return None
-    if isinstance(value, (int, float)):
-        return None if (isinstance(value, float) and math.isnan(value)) else float(value)
-    text = str(value).strip().replace(",", ".")
-    try:
-        return float(text) if text else None
-    except ValueError:
-        return None
+    if isinstance(value, numbers.Real):
+        number = float(value)
+    else:
+        text = str(value).strip().replace(",", ".")
+        try:
+            number = float(text) if text else None
+        except ValueError:
+            return None
+    # NaN in any form (a float, a numpy float32, the text 'nan') is no value, nor is infinity
+    return number if number is not None and math.isfinite(number) else None
 
 
 def classify_zone(name: str) -> str:
@@ -310,13 +314,16 @@ class Dataset:
         return xy, matids
 
     def liquid_boundaries(self):
-        """The raw inflow/outflow (and internal) boundary-line layer.
+        """The inflow/outflow (and internal) boundary-line layer, with its discharge column as numbers (:func:`axqua.core.boundaries.numeric_flow_column`); ``layer("liquid_boundaries")`` is the layer as read.
 
-        One of the most re-read layers in the codebase: the steering writer, the
-        boundary classifier, the water-table fit and both meshers all want it, and
-        each used to open it again.
+        One of the most re-read layers in the codebase: the steering writer, the boundary classifier, the water-table fit and both meshers all want it, and each used to open it again. The converted copy depends on the layer alone and is kept with the other derived results, which :meth:`set_layer` clears.
         """
-        return self.layer("liquid_boundaries", self.cfg.boundaries.liquid_boundaries)
+        from axqua.core.boundaries import numeric_flow_column
+
+        if "liquid_boundaries" not in self._derived:
+            self._derived["liquid_boundaries"] = numeric_flow_column(
+                self.layer("liquid_boundaries", self.cfg.boundaries.liquid_boundaries))
+        return self._derived["liquid_boundaries"]
 
     def structures(self):
         """The raw dam / weir / wall / building layer."""

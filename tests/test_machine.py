@@ -175,6 +175,17 @@ def test_no_tracked_source_or_test_hard_codes_a_home_directory():
     assert not offenders, "hard-coded home directory:\n" + "\n".join(offenders)
 
 
+def test_no_tracked_file_names_a_computer_of_the_developers():
+    """The host names of the developers' computers are private and the repository is public (the user's order of 2026-11-01). Text speaks of the main and the second workstation instead. The pattern is put together here so that this file does not name them itself. Tracked files only: git grep."""
+    import subprocess
+
+    root = Path(__file__).resolve().parent.parent
+    pattern = "lw" + "w-?13[0-9]"
+    out = subprocess.run(["git", "grep", "-n", "-i", "-I", "-E", pattern],
+                         cwd=root, capture_output=True, text=True).stdout
+    assert not out, "a private host name in a tracked file:\n" + out
+
+
 def test_a_synthesisable_outflow_rating_is_not_a_validation_error(tmp_path):
     """`rating_method` exists to say how a MISSING rating is synthesized, so refusing
     to validate without one contradicted the config's own documented behavior.

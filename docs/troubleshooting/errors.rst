@@ -99,7 +99,7 @@ The *Check* tab of an installation wizard, the *Installation* tab of a failed in
 .. _axqua-install-installer-changed:
 
 ``... holds an installation made by another version of the installer or against another OpenFOAM``
-    The OpenFOAM installer continues only what the same version of it started with the same OpenFOAM. Open the wizard with *Install OpenFOAM...*, answer *Yes* to the question whether to install again, and select *Remove the existing installation and install it again in its folder*, or select a new folder.
+    The OpenFOAM installer continues only what the same version of it started with the same OpenFOAM. Open the *Setup Wizard* of OpenFOAM, select *Install OpenFOAM*, answer *Yes* to the question whether to install again, and select *Remove the existing installation and install it again in its folder*, or select a new folder.
 
 .. _axqua-install-nothing-to-replace:
 
@@ -201,6 +201,16 @@ The hydrology checkup of a case in hydrology mode (*Check* on the sub-tab *Simul
 ``The weather series cannot be used``
     Wind or evaporation is switched on, but ``hydrology.weather`` is missing or lacks the columns the choice needs: wind needs ``wind_speed_10m`` and ``wind_direction_10m``, evaporation ``et0`` needs ``et0``, ``penman`` needs radiation, temperature, humidity and wind with dates, and ``series`` needs ``evaporation``.
 
+.. _axqua-hydrology-outlet-unknown:
+
+``An outflow line has the outlet ... in the column Outlet``
+    The column ``Outlet`` of the liquid boundaries gives an outflow line an outlet of its own, and the text in it is none of ``normal_depth``, ``free``, ``elevation`` or ``overfall``. Correct the text, or leave the cell empty, and the line takes ``hydrology.outlet_condition`` (:ref:`hydrology-outlet`). The data wizard writes the column on its tab *River*.
+
+.. _axqua-hydrology-sediment-with-river:
+
+``Bed load without any class in suspension stops GAIA at a river inflow`` or ``Suspended sand of ... mm ... stops TELEMAC at a river inflow``
+    The case has a river that flows into the model through an inflow line, and its sediment setup is one that TELEMAC v9.1.1 cannot run there. The river brings clear water over a bed that the flow erodes at its full capacity, and the finite-volume kernel applies GAIA's erosion and deposition explicitly, so the concentration of coarse suspended sand overshoots beyond 1000 g/l within the first time steps and TELEMAC stops at its limit values; bed load without any class in suspension ends in a crash of GAIA. With a river, the suspended sand can be 0.15 mm at most when the soil also has a cohesive class or the river brings clear water, and 0.5 mm at most when the soil is sand only and the river enters at equilibrium (``morphodynamics.equilibrium_inflow``). Follow the remedy of the message, or leave the river line out of the liquid boundaries. Without a river, all these soils run (:ref:`hydrology-sediment`).
+
 .. _axqua-hydrology-soil-invalid:
 
 ``Soil zone ...`` or ``The soil cannot be read``
@@ -209,7 +219,7 @@ The hydrology checkup of a case in hydrology mode (*Check* on the sub-tab *Simul
 Profile of this computer
 ------------------------
 
-The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) reports the following errors. The plugin shows each of them as a dark red triangle next to the entry concerned. An error does not prevent saving the profile, but the function that depends on the entry does not work until the entry is corrected.
+The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) and the check of an existing installation in the *Setup Wizard* (``axqua profile inspect``) report the following errors. The plugin shows each of them as a dark red triangle next to the entry concerned. An error does not prevent saving the profile, but the function that depends on the entry does not work until the entry is corrected.
 
 .. _axqua-environment-program-missing:
 
@@ -225,6 +235,11 @@ The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile
 
 ``... cannot be reached``
     aXqua loaded the environment script and could not start the simulation program. The message states what is missing. Verify in a terminal that the installation works by itself, and that the profile names the environment script of this installation.
+
+.. _axqua-environment-solver-incomplete:
+
+``...: the environment was entered, but ... is missing``
+    The environment script sets up the variables of the simulation program, but a part that every simulation needs is not there: TELEMAC-2D in the build folder of TELEMAC, or ``interFoam``, ``checkMesh``, ``decomposePar`` or ``reconstructPar`` of OpenFOAM. The installation is incomplete, for example because its compilation stopped. The *Setup Wizard* does not enter such an installation in the profile. Select the environment script of a complete build, or install the program again with the *Setup Wizard*.
 
 .. _axqua-environment-job-root-not-writable:
 

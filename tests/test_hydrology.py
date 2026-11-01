@@ -783,7 +783,6 @@ def test_a_dry_run_of_a_hydrology_case_launches_its_own_steering_file(tmp_path,
 
 
 @pytest.mark.parametrize("change, word", [
-    (lambda cfg: setattr(cfg.morphodynamics, "enabled", True), "morphodynamics"),
     (lambda cfg: setattr(cfg.boundaries, "internal_sources", True), "internal_sources"),
     (lambda cfg: setattr(cfg.gain_lose, "enabled", True), "gain-lose"),
 ])
@@ -1106,3 +1105,628 @@ def test_a_gap_survives_the_file_the_wizard_writes_and_is_named(tmp_path, capsys
     assert "1 intervals" in answer["caution"]
     written = rainfall.read_series(answer["rainfall"])      # the canonical file
     assert written.gaps == 1 and written.total_mm == pytest.approx(20.0)
+
+
+# --------------------------------------------------------------------------- #
+# a river through the catchment: outflow lines with outlets of their own
+# --------------------------------------------------------------------------- #
+
+
+def _river(root: Path, *, edges: str = "", river: str = "normal_depth",
+           case_outlet: str = "overfall", flow: float = 0.2) -> Path:
+    """The V-catchment with a river: it enters through an inflow line across the channel at the north edge (``Target flow``) and leaves through its own outflow line across the channel at the south edge; the rest of the south edge is the lower edge of a field."""
+    import geopandas as gpd
+    from shapely.geometry import LineString
+
+    case = _catchment(root, extra=f"  outlet_condition: {case_outlet}\n")
+    lines = [LineString([(X0 - 1, Y0), (X0 + 24, Y0)]),
+             LineString([(X0 + 24, Y0), (X0 + 36, Y0)]),
+             LineString([(X0 + 36, Y0), (X0 + 61, Y0)]),
+             LineString([(X0 + 24, Y0 + 50), (X0 + 36, Y0 + 50)])]
+    gpd.GeoDataFrame({"Type (inflow/outflow)": ["outflow", "outflow", "outflow", "inflow"],
+                      "Target flow": [None, None, None, flow],
+                      "Outlet": [edges, river, edges, ""]}, geometry=lines,
+                     crs="EPSG:25832").to_file(root / "user-sources" / "liquid-boundaries.gpkg")
+    return case
+
+
+def _cas_values(cas: str, key: str) -> list[float]:
+    text = cas.split(key, 1)[1].split(":", 1)[1].split("\n")[0]
+    return [float(v) for v in text.split(";") if v.strip()]
+
+
+def test_a_river_through_the_catchment_has_an_outlet_of_its_own(tmp_path):
+    """The river leaves on its Z(Q) curve, the edges of the field as over a brink: one curve, its own level, and the two field edges below the mesh. A wall node keeps TELEMAC from joining the lines into one boundary."""
+    import json
+
+    from axqua.config import load_config
+    from axqua.core.selafin import SelafinFile
+    from axqua.solvers.telemac import pipeline
+
+    cfg = load_config(_river(tmp_path))
+    pipeline.run(cfg, validate_env=False, log_to_file=False)
+    model = Path(cfg.model_dir)
+    saved = json.loads((model / "liquid-boundaries.json").read_text())
+    outflows = [b for b in saved if b["kind"] == "outflow"]
+    assert len(outflows) == 3 and [b["condition"] for b in outflows].count("normal_depth") == 1
+    assert [b["discharge"] for b in saved if b["kind"] == "inflow"] == [pytest.approx(0.2)]
+    cas = (model / "hydrology2d.cas").read_text()
+    flags = cas.split("STAGE-DISCHARGE CURVES :", 1)[1].split("\n")[0].strip().split(";")
+    assert flags.count("1") == 1 and len(flags) == len(saved)
+    curves = (model / cfg.outlet_rating_file).read_text()
+    assert curves.count("Q(") == 1
+    bed = float(SelafinFile(model / "geometry.slf").frame(0)["BOTTOM"].min())
+    levels = dict(zip([b["index"] for b in sorted(saved, key=lambda b: b["index"])],
+                      _cas_values(cas, "PRESCRIBED ELEVATIONS")))
+    river = next(b["index"] for b in outflows if b["condition"] == "normal_depth")
+    edges = [b["index"] for b in outflows if b["index"] != river]
+    assert all(levels[i] == pytest.approx(bed - 1.0, abs=1e-3) for i in edges)
+    assert levels[river] > bed - 0.5                    # the thalweg of its section
+    flows = _cas_values(cas, "PRESCRIBED FLOWRATES")
+    assert pytest.approx(0.2) in flows
+
+
+def test_free_field_edges_beside_a_river_get_their_own_code(tmp_path):
+    from axqua.config import load_config
+    from axqua.solvers.telemac import pipeline
+
+    cfg = load_config(_river(tmp_path, edges="free", case_outlet="normal_depth"))
+    pipeline.run(cfg, validate_env=False, log_to_file=False)
+    codes = {" ".join(line.split()[:3]) for line in
+             (Path(cfg.model_dir) / "boundaries.cli").read_text().splitlines()}
+    assert {"4 4 4", "5 4 4", "4 5 5", "2 2 2"} <= codes
+
+
+def test_the_checkup_names_a_river_without_an_outlet_and_an_unknown_outlet(tmp_path):
+    from axqua.config import load_config
+    from axqua.hydrology.checks import run_checks
+
+    def codes(case):
+        return {f.code for f in run_checks(load_config(case))}
+
+    assert "axqua.hydrology.river_without_outlet" not in codes(_river(tmp_path / "a"))
+    over = _river(tmp_path / "b", river="")                   # all lines overfall
+    assert "axqua.hydrology.river_without_outlet" in codes(over)
+    dry = _river(tmp_path / "c", river="", flow=0.0)          # no discharge: no river
+    assert "axqua.hydrology.river_without_outlet" not in codes(dry)
+    wrong = _river(tmp_path / "d", river="weir")
+    assert "axqua.hydrology.outlet_unknown" in codes(wrong)
+
+
+def test_the_wizard_writes_a_copy_of_the_lines_with_the_river(tmp_path, capsys):
+    import json
+
+    import geopandas as gpd
+
+    from axqua import cli
+
+    case = _catchment(tmp_path)
+    original = (tmp_path / "user-sources" / "liquid-boundaries.gpkg").read_bytes()
+    assert cli.main(["hydrology", "lines", str(case), "--json"]) == 0
+    listed = json.loads(capsys.readouterr().out)["data"]
+    assert [(line["row"], line["kind"], line["outlet"]) for line in listed["lines"]] == \
+        [(0, "outflow", "")]
+    assert listed["outlet_condition"] == "normal_depth"
+    change = json.dumps([{"row": 0, "outlet": "Normal depth"}])
+    assert cli.main(["hydrology", "lines", str(case), "--set", change, "--json"]) == 0
+    answer = json.loads(capsys.readouterr().out)["data"]
+    assert answer["settings"] == {"boundaries.liquid_boundaries":
+                                  "user-sources/hydrology/liquid-boundaries.gpkg"}
+    assert answer["lines"][0]["outlet"] == "normal_depth"
+    copy = gpd.read_file(tmp_path / "user-sources" / "hydrology" / "liquid-boundaries.gpkg")
+    assert list(copy["Outlet"]) == ["normal_depth"] and "Target flow" in copy.columns
+    # the layer the user drew stays as it is
+    assert (tmp_path / "user-sources" / "liquid-boundaries.gpkg").read_bytes() == original
+    bad = json.dumps([{"row": 0, "outlet": "weir"}])
+    assert cli.main(["hydrology", "lines", str(case), "--set", bad, "--json"]) != 0
+    capsys.readouterr()
+
+
+# --------------------------------------------------------------------------- #
+# sediment transport: GAIA coupled into the hydrology run
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize("options, model, bedload, suspension", [
+    ({"soil": "sand"}, "sand", 7, 3),
+    ({"soil": "texture", "texture": "loamy sand"}, "sand", 7, 3),
+    ({"soil": "clay"}, "clay", None, None),
+    ({"soil": "texture", "texture": "silty clay"}, "clay", None, None),
+    ({"soil": "texture", "texture": "silt loam"}, "mixed", 7, 3),
+    ({"soil": "shares", "shares": (40, 40, 20)}, "mixed", 7, 3),
+    ({"soil": "grain", "d50": 0.005}, "gravel", 1, None),
+    ({"soil": "grain", "d50": 0.00003}, "clay", None, None),
+    ({"soil": "grain", "d50": 0.001}, "sand", 7, None),       # too coarse to suspend
+])
+def test_the_sediment_wizard_recommends_after_the_soil(options, model, bedload,
+                                                       suspension):
+    from axqua.hydrology import sediment
+
+    found = sediment.recommend(**options)
+    s = found.settings
+    assert found.model == model and s["morphodynamics.enabled"] is True
+    assert s["morphodynamics.layer_thickness"] == sediment.LAYER_THICKNESS
+    assert (s["morphodynamics.bedload_formula"] if s["morphodynamics.bedload"]
+            else None) == bedload
+    assert s.get("morphodynamics.suspension_formula") == suspension
+    types = [c["type"] for c in s["morphodynamics.sediment_classes"]]
+    assert sum(c["fraction"] for c in s["morphodynamics.sediment_classes"]) == \
+        pytest.approx(1.0)
+    if model in ("clay", "mixed"):
+        assert "CO" in types and s["morphodynamics.partheniades"] > 0
+        assert not s["morphodynamics.equilibrium_inflow"]      # a river brings clear water
+    if model == "mixed":
+        assert types == ["CO", "NCO"]                           # GAIA: cohesive first
+    assert found.reasons
+
+
+def test_the_slope_switches_the_slope_effect_and_warns_on_steep_terrain():
+    from axqua.hydrology import sediment
+
+    flat = sediment.recommend(soil="sand", slope=0.01)
+    hill = sediment.recommend(soil="sand", slope=0.08)
+    cliff = sediment.recommend(soil="sand", slope=0.35)
+    assert not flat.settings["morphodynamics.slope_effect"]
+    assert hill.settings["morphodynamics.slope_effect"] and not hill.warnings
+    assert any("outside their range" in w for w in cliff.warnings)
+    with pytest.raises(ValueError, match="texture class"):
+        sediment.recommend(soil="texture", texture="peat")
+    with pytest.raises(ValueError, match="thickness"):
+        sediment.recommend(soil="sand", layer_thickness=0.0)
+
+
+def _with_sediment(case: Path, *extra: str) -> Path:
+    """The case with the settings the sediment wizard writes for *extra* (CLI options)."""
+    import json
+
+    import yaml
+
+    from axqua import cli
+
+    import contextlib
+    import io
+
+    buffer = io.StringIO()
+    with contextlib.redirect_stdout(buffer):
+        assert cli.main(["hydrology", "sediment", str(case), *extra, "--json"]) == 0
+    settings = json.loads(buffer.getvalue())["data"]["settings"]
+    data = yaml.safe_load(case.read_text())
+    for key, value in settings.items():
+        block, name = key.split(".", 1)
+        data.setdefault(block, {})
+        if value is not None:
+            data[block][name] = value
+    case.write_text(yaml.safe_dump(data, sort_keys=False))
+    return case
+
+
+def test_gaia_is_coupled_into_the_hydrology_run(tmp_path):
+    """What the first real runs needed: no COUPLING PERIOD FOR GAIA (TELEMAC v9.1.1 has none), clean rain for every suspended class, the bed in the start file, and tracer codes 5/4 at the inflow and outflow lines so suspended sediment can leave."""
+    from axqua.config import load_config
+    from axqua.core.selafin import read_slf
+    from axqua.solvers.telemac import pipeline
+
+    case = _with_sediment(_river(tmp_path), "--soil", "texture", "--texture", "silt loam")
+    cfg = load_config(case)
+    assert cfg.morphodynamics.enabled and cfg.morphodynamics.suspended_classes == 2
+    pipeline.run(cfg, validate_env=False, log_to_file=False)
+    model = Path(cfg.model_dir)
+    cas = (model / "hydrology2d.cas").read_text()
+    assert "COUPLING WITH : 'GAIA'" in cas and "GAIA STEERING FILE : gaia.cas" in cas
+    assert "COUPLING PERIOD FOR GAIA" not in cas
+    assert "VALUES OF TRACERS IN THE RAIN : 0.;0." in cas
+    assert ",T*" in cas.split("VARIABLES FOR GRAPHIC PRINTOUTS", 1)[1][:200]
+    gaia = (model / "gaia.cas").read_text()
+    for line in ("CLASSES TYPE OF SEDIMENT : 'CO';'NCO'",
+                 "CLASSES INITIAL FRACTION : 0.8;0.2",
+                 "BED-LOAD TRANSPORT FORMULA FOR ALL SANDS : 7",
+                 "SUSPENSION TRANSPORT FORMULA FOR ALL SANDS : 3",
+                 "LAYERS INITIAL THICKNESS : 0.3",
+                 "LAYERS PARTHENIADES CONSTANT : 0.001",
+                 "LAYERS MUD CONCENTRATION : 1300"):
+        assert line in gaia
+    assert "EQUILIBRIUM INFLOW CONCENTRATION" not in gaia
+    codes = {(r.split()[0], r.split()[7]) for r in
+             (model / "boundaries.cli").read_text().splitlines()}
+    assert ("4", "5") in codes and ("5", "4") in codes and ("2", "2") in codes
+    start = read_slf(model / "initial-conditions.slf")
+    assert "BOTTOM" in start["values"]
+
+
+def test_without_suspension_the_files_stay_as_they_were(tmp_path):
+    """No tracers, no new codes: a case without GAIA writes its .cli and start file as before."""
+    from axqua.config import load_config
+    from axqua.core.selafin import read_slf
+    from axqua.solvers.telemac import pipeline
+
+    cfg = load_config(_river(tmp_path))
+    pipeline.run(cfg, validate_env=False, log_to_file=False)
+    model = Path(cfg.model_dir)
+    tracer = {r.split()[7] for r in (model / "boundaries.cli").read_text().splitlines()}
+    assert tracer == {"2"}
+    assert "BOTTOM" not in read_slf(model / "initial-conditions.slf")["values"]
+    assert "VALUES OF TRACERS IN THE RAIN" not in (model / "hydrology2d.cas").read_text()
+
+
+def test_the_checkup_asks_for_sediment_transport_until_the_case_decides(tmp_path):
+    from axqua.config import load_config
+    from axqua.hydrology.checks import run_checks
+
+    case = _catchment(tmp_path)
+    codes = {f.code for f in run_checks(load_config(case))}
+    assert "axqua.hydrology.sediment_undecided" in codes
+    case.write_text(case.read_text() + "morphodynamics:\n  enabled: false\n")
+    codes = {f.code for f in run_checks(load_config(case))}
+    assert "axqua.hydrology.sediment_undecided" not in codes
+    coarse = case.read_text().replace(
+        "morphodynamics:\n  enabled: false\n",
+        "morphodynamics:\n  enabled: true\n  bedload_formula: 7\n  sediment_classes:\n"
+        "  - {diameter: 0.01, density: 2650}\n")
+    case.write_text(coarse)
+    codes = {f.code for f in run_checks(load_config(case))}
+    assert "axqua.hydrology.sediment_out_of_range" in codes
+
+
+LISTING = """
+                    GAIA MASS-BALANCE OF SEDIMENTS OVER ALL CLASSES:
+     CUMULATED BED EVOLUTIONS                  =   -0.5213106E-02  ( KG )
+     BOUNDARIES BEDLOAD FLUX                   =     0.000000      ( KG/S  >0 = ENTERING )
+     BEDLOAD FLUX BOUNDARY    1                =   -0.010000      ( KG/S  >0 = ENTERING )
+     BEDLOAD FLUX BOUNDARY    2                =    0.020000      ( KG/S  >0 = ENTERING )
+     EROSION FLUX                              =    0.7020082E-01  ( KG/S )
+
+     RELATIVE ERROR IN VOLUME AT T =        100.0     S :    0.1705163E-15
+
+                     BALANCE OF TRACER COH SEDIMENT1   g/l
+
+     QUANTITY OF TRACER:    3.000000     TRACER UNIT M3
+     QUANTITY CREATED BY SOURCE TERM:      0.6574889E-02
+
+     RELATIVE ERROR CUMULATED ON TRACER:     14.47239
+     QUANTITY ENTERED THROUGH LIQ. BND.:   -2.000000      ( IF <0 EXIT )
+     QUANTITY CREATED BY SOURCE TERM   :     50.00000
+                   FINAL BALANCE OF TRACER  1
+
+     INITIAL QUANTITY OF TRACER        :     0.000000
+     FINAL QUANTITY                    :     3.000000
+"""
+
+
+def test_the_sediment_budget_is_read_from_the_listing(tmp_path):
+    """The suspended load from TELEMAC's cumulated tracer balance (whose "lost" mass is the deposited mass), the bed load per boundary from GAIA's printouts."""
+    from axqua.hydrology import report
+
+    listing = tmp_path / "run.sortie"
+    listing.write_text(LISTING)
+    found = report.read_sediment(listing)
+    budget = report.sediment_budget(found)
+    item = budget["classes"]["COH SEDIMENT1"]
+    assert item["eroded"] == pytest.approx(50.0)
+    assert item["deposited"] == pytest.approx(45.0)        # 50 - 2 out - 3 left
+    assert budget["suspended_out_kg"] == pytest.approx(2.0)
+    assert budget["bedload_kg"] == pytest.approx([-0.5, 1.0])   # 0 at t = 0, trapezoid
+    assert budget["out_kg"] == pytest.approx(2.0 - 0.5)
+    plain = tmp_path / "plain.sortie"
+    plain.write_text("     RELATIVE ERROR IN VOLUME AT T =  10.0 S :  0.0\n")
+    assert report.read_sediment(plain) is None
+
+
+def test_numbers_as_fortran_prints_them_are_read():
+    """An exponent of three digits drops the E (found in the listing of the example)."""
+    from axqua.hydrology.report import fortran_float
+
+    assert fortran_float("0.6076331-116") == pytest.approx(6.076331e-117, rel=1e-12)
+    assert fortran_float("1.5D-03") == pytest.approx(0.0015)
+    assert fortran_float("-0.1E+03") == -100.0
+    with pytest.raises(ValueError):
+        fortran_float("NaNx")
+
+
+def test_review_fixes_clay_fractions_and_an_empty_discharge(tmp_path):
+    """A cohesive-only GAIA file has SKIN FRICTION CORRECTION 0 (GAIA stops otherwise), fractions sum to 1 exactly, and an empty Target flow cell is no discharge."""
+    from axqua.config import load_config
+    from axqua.core.boundaries import liquid_line_details
+    from axqua.solvers.telemac import steering
+
+    assert abs(sum(float(v) for v in steering._fractions(
+        [{"fraction": 0.33335}, {"fraction": 0.66665}])) - 1.0) < 1e-8
+    case = _with_sediment(_catchment(tmp_path), "--soil", "clay")
+    cfg = load_config(case)
+    Path(cfg.model_dir).mkdir(parents=True, exist_ok=True)
+    gaia = steering.write_gaia_cas(cfg).read_text()
+    assert "SKIN FRICTION CORRECTION : 0" in gaia
+    river = _river(tmp_path / "r", flow=float("nan"))
+    details = liquid_line_details(load_config(river))
+    assert all(d["discharge"] is None for d in details if d["kind"] == "inflow")
+
+
+def test_the_bed_load_of_a_single_class_is_read_from_its_own_block(tmp_path):
+    """GAIA prints the block over all classes only for more than one class (mass_balance.f); a sand or gravel soil has one."""
+    from axqua.hydrology import report
+
+    listing = tmp_path / "one.sortie"
+    listing.write_text("""
+                    GAIA MASS-BALANCE OF SEDIMENTS PER CLASS:
+     SEDIMENT CLASS NUMBER                     =        1
+     BEDLOAD FLUX BOUNDARY    1                =   -0.020000      ( KG/S  >0 = ENTERING )
+
+     RELATIVE ERROR IN VOLUME AT T =        100.0     S :    0.1E-15
+""")
+    found = report.read_sediment(listing)
+    assert found is not None                       # a gravel run has no tracers
+    assert report.sediment_budget(found)["bedload_kg"] == pytest.approx([-1.0])
+
+
+def test_the_river_tab_reads_a_text_discharge_column(tmp_path, capsys):
+    """A Target flow field of type text, as QGIS writes one: "1,6" is 1.6, "" and "-" are none."""
+    import json
+
+    import geopandas as gpd
+    from shapely.geometry import LineString
+
+    from axqua import cli
+
+    case = _catchment(tmp_path)
+    lines = [LineString([(X0 + 24, Y0), (X0 + 36, Y0)]),
+             LineString([(X0 + 24, Y0 + 50), (X0 + 36, Y0 + 50)]),
+             LineString([(X0, Y0 + 20), (X0, Y0 + 30)])]
+    gpd.GeoDataFrame({"Type (inflow/outflow)": ["outflow", "inflow", "inflow"],
+                      "Target flow": ["-", "1,6", ""]}, geometry=lines,
+                     crs="EPSG:25832").to_file(tmp_path / "user-sources" / "liquid-boundaries.gpkg")
+    change = json.dumps([{"row": 0, "outlet": "normal_depth"}])
+    assert cli.main(["hydrology", "lines", str(case), "--set", change, "--json"]) == 0
+    answer = json.loads(capsys.readouterr().out)["data"]
+    assert [line["discharge"] for line in answer["lines"]] == [None, pytest.approx(1.6), None]
+
+
+def test_a_sand_after_a_loam_leaves_no_cohesive_settings(tmp_path):
+    from axqua.config import load_config
+
+    case = _with_sediment(_catchment(tmp_path), "--soil", "texture", "--texture", "loam")
+    assert load_config(case).morphodynamics.partheniades is not None
+    import yaml
+
+    from axqua.hydrology import sediment
+
+    data = yaml.safe_load(case.read_text())
+    for key, value in sediment.recommend(soil="sand").settings.items():
+        name = key.split(".", 1)[1]
+        if value is None:
+            data["morphodynamics"].pop(name, None)       # as the wizard's Save does
+        else:
+            data["morphodynamics"][name] = value
+    case.write_text(yaml.safe_dump(data, sort_keys=False))
+    m = load_config(case).morphodynamics
+    assert m.partheniades is None and m.mud_concentration is None
+    assert m.mud_erosion_shear is None
+
+
+def test_second_review_tracer_order_fractions_keyword_and_text_column(tmp_path):
+    """Tracers in class order, each kind numbered on its own (lecdon_telemac2d_gaia.f); fractions that are no composition are refused; a case's own SKIN FRICTION CORRECTION is not written twice; a text discharge column is numbers for every reader."""
+    import geopandas as gpd
+    from shapely.geometry import LineString
+
+    from axqua.config import Morphodynamics, load_config
+    from axqua.core.geodata import dataset
+    from axqua.solvers.telemac import steering
+
+    m = Morphodynamics(enabled=True, suspended_load=True, sediment_classes=[
+        {"type": "NCO"}, {"type": "CO"}, {"type": "NCO"}])
+    assert m.tracer_names == ["NCOH SEDIMENT1", "COH SEDIMENT1", "NCOH SEDIMENT2"]
+    m.suspended_load = False
+    assert m.tracer_names == ["COH SEDIMENT1"]
+
+    shares = steering._fractions([{"fraction": 0.4999995}, {"fraction": 0.5000005},
+                                  {"fraction": 0.0}])
+    assert all(float(v) >= 0 for v in shares)
+    assert abs(sum(float(v) for v in shares) - 1.0) < 1e-8
+    with pytest.raises(ValueError, match="fractions"):
+        steering._fractions([{"fraction": 0}, {"fraction": 0}])
+
+    case = _with_sediment(_catchment(tmp_path), "--soil", "clay")
+    cfg = load_config(case)
+    cfg.morphodynamics.extra_keywords = {"SKIN FRICTION CORRECTION": 0}
+    Path(cfg.model_dir).mkdir(parents=True, exist_ok=True)
+    assert steering.write_gaia_cas(cfg).read_text().count("SKIN FRICTION CORRECTION") == 1
+
+    gpd.GeoDataFrame({"Type (inflow/outflow)": ["outflow", "inflow"],
+                      "Target flow": ["", "0,065"]},
+                     geometry=[LineString([(X0 + 24, Y0), (X0 + 36, Y0)]),
+                               LineString([(X0 + 24, Y0 + 50), (X0 + 36, Y0 + 50)])],
+                     crs="EPSG:25832").to_file(tmp_path / "user-sources" / "liquid-boundaries.gpkg")
+    layer = dataset(load_config(case)).liquid_boundaries()
+    assert layer["Target flow"].dtype == "float64"
+    assert layer["Target flow"].iloc[1] == pytest.approx(0.065)
+
+
+def test_third_review_gaia_lines_fit_damocles_and_a_case_keyword_wins(tmp_path):
+    """DAMOCLES reads 72 columns: longer value lists go on lines of their own. A class of fraction 0 stays 0. Any keyword the case names in extra_keywords is written once, as the case gives it."""
+    from axqua.config import load_config
+    from axqua.solvers.telemac import steering
+
+    assert steering._fractions([{"fraction": 0.1}, {"fraction": 0.2}, {"fraction": 0.0}])[-1] == "0"
+    lines = steering._keyword("CLASSES INITIAL FRACTION",
+                              steering._fractions([{"fraction": f} for f in (0.1, 0.2, 0.3, 0.3)]))
+    assert len(lines) > 1 and all(len(line) <= 72 for line in lines)
+    assert sum(float(v) for line in lines[1:] for v in line.strip(";").split(";")) \
+        == pytest.approx(1.0, abs=1e-8)
+    assert steering._keyword("KEY", ["1", "2"]) == ["KEY : 1;2"]          # fits: as before
+
+    case = _with_sediment(_catchment(tmp_path), "--soil", "texture", "--texture", "loam")
+    cfg = load_config(case)
+    cfg.morphodynamics.extra_keywords = {"MORPHOLOGICAL FACTOR": 5,
+                                         "CLASSES INITIAL FRACTION": "0.5;0.5"}
+    Path(cfg.model_dir).mkdir(parents=True, exist_ok=True)
+    gaia = steering.write_gaia_cas(cfg).read_text()
+    assert gaia.count("MORPHOLOGICAL FACTOR") == 1 and "MORPHOLOGICAL FACTOR : 5" in gaia
+    assert gaia.count("CLASSES INITIAL FRACTION") == 1 and "0.5;0.5" in gaia
+    assert all(len(line) <= 72 for line in gaia.splitlines() if not line.startswith("/"))
+
+
+def test_the_case_check_names_fractions_that_are_no_composition(tmp_path):
+    from axqua.config import load_config
+    from axqua.core.casecheck import check_case as check
+
+    case = _catchment(tmp_path)
+    case.write_text(case.read_text() + "morphodynamics:\n  enabled: true\n"
+                    "  sediment_classes:\n  - {diameter: 0.0001, fraction: 0}\n"
+                    "  - {diameter: 0.001, fraction: 0}\n")
+    with pytest.raises(ValueError, match="fractions"):
+        load_config(case).validate()
+    found = check(case)
+    assert any("fractions" in f.message and f.subject.startswith("morphodynamics")
+               for f in found), [f.as_dict() for f in found]
+
+
+def test_fourth_review_every_steering_line_fits_and_continued_keywords_are_read(tmp_path):
+    """A continued line ends with ';' inside the 72 columns. Every multi-value keyword of GAIA (per layer, solid discharges, a case's own) and of TELEMAC is fitted; the readers and the patcher of aXqua take a keyword over all its lines."""
+    from axqua import bayescal
+    from axqua.config import load_config
+    from axqua.solvers.telemac import steering
+
+    for width in range(1, 30):
+        values = ["9" * width] * 11
+        lines = steering._keyword("CLASSES SEDIMENT DIAMETERS", values)
+        assert all(len(line) <= 72 for line in lines), (width, lines)
+        assert ";".join(line.split(":", 1)[-1].strip() for line in lines).replace(";;", ";") \
+            .strip(";").split(";") == values
+    lines = steering._keyword("CLASSES SEDIMENT DIAMETERS",
+                              ["0.1234567891"] * 5 + ["0.00015", "0.002"])
+    assert all(len(line) <= 72 for line in lines)
+
+    case = _with_sediment(_catchment(tmp_path), "--soil", "clay")
+    cfg = load_config(case)
+    m = cfg.morphodynamics
+    m.bed_layers, m.mud_erosion_shear = 4, 0.125
+    m.prescribed_solid_discharges = [0.00125] * 6
+    m.extra_keywords = {"CLASSES HIDING FACTOR": ";".join(["1.2345678"] * 10)}
+    Path(cfg.model_dir).mkdir(parents=True, exist_ok=True)
+    path = steering.write_gaia_cas(cfg)
+    assert all(len(line) <= 72 for line in path.read_text().splitlines())
+    read = steering.read_cas_values(path, "LAYERS CRITICAL EROSION SHEAR STRESS OF THE MUD",
+                                    "PRESCRIBED SOLID DISCHARGES", "CLASSES HIDING FACTOR")
+    assert read["LAYERS CRITICAL EROSION SHEAR STRESS OF THE MUD"].split(";") == ["0.125"] * 4
+    assert read["PRESCRIBED SOLID DISCHARGES"].split(";") == ["0.00125"] * 6
+    assert read["CLASSES HIDING FACTOR"].split(";") == ["1.2345678"] * 10
+    assert {"PRESCRIBED SOLID DISCHARGES", "CLASSES HIDING FACTOR"} <= \
+        steering.continued_keywords(path)
+
+    # TELEMAC: a long PRESCRIBED ELEVATIONS, patched by the validation and calibration route
+    text = "TITLE : 'x'\nPRESCRIBED ELEVATIONS :\n0.;0.;432.1234;432.1234;432.1234;432.1234;\n" \
+           "432.1234;432.1234\nDURATION : 10\n&ETA\n"
+    cas = tmp_path / "long.cas"
+    cas.write_text(text)
+    assert steering.read_cas_values(cas, "PRESCRIBED ELEVATIONS")["PRESCRIBED ELEVATIONS"] \
+        .split(";") == ["0.", "0."] + ["432.1234"] * 6
+    patched = bayescal._patch_cas(text, "PRESCRIBED ELEVATIONS", ";".join(["1.5"] * 3))
+    assert "PRESCRIBED ELEVATIONS : 1.5;1.5;1.5\nDURATION : 10" in patched
+    longer = bayescal._patch_cas(text, "PRESCRIBED ELEVATIONS", ";".join(["432.12345"] * 9))
+    assert all(len(line) <= 72 for line in longer.splitlines())
+    assert "432.1234;432.1234\n" not in longer                       # the old values are gone
+    assert steering.fit_line("VARIABLES FOR GRAPHIC PRINTOUTS : '" + ",".join("UVSBHMQFKE" * 4)
+                             + "'")[0] == "VARIABLES FOR GRAPHIC PRINTOUTS :"
+
+
+def test_fourth_review_a_calibration_refuses_a_keyword_written_on_several_lines(tmp_path):
+    """HydroBayesCal rewrites the first line of a keyword only, which would leave the old values on the next ones."""
+    from axqua.calibration import _refuse_continued_keywords
+    from axqua.config import load_config
+
+    case = _with_sediment(_catchment(tmp_path), "--soil", "clay")
+    cfg = load_config(case)
+    Path(cfg.model_dir).mkdir(parents=True, exist_ok=True)
+    cfg.model_path(cfg.gaia_cas).write_text(
+        "CLASSES SHIELDS PARAMETERS :\n0.047;0.047;\n0.047\nMPM COEFFICIENT : 8\n")
+    cfg.model_path(cfg.cas_file).write_text("TITLE : 'x'\n")
+    _refuse_continued_keywords(cfg, ["zone1", "gaiaMPM COEFFICIENT"], cfg.cas_file)
+    with pytest.raises(ValueError, match="CLASSES SHIELDS PARAMETERS 2"):
+        _refuse_continued_keywords(cfg, ["gaiaCLASSES SHIELDS PARAMETERS 2"], cfg.cas_file)
+
+
+def test_fourth_review_fractions_types_layer_cache_and_discharges(tmp_path):
+    """The largest class takes the rounding remainder, so zero stays zero wherever it is. A wrong sediment_type is named also without classes. set_layer replaces what every reader of the boundary layer sees. 'nan' is no discharge. A layer of 'Target flow' alone has no type column."""
+    import geopandas as gpd
+    import numpy as np
+    from shapely.geometry import LineString
+
+    from axqua.config import Morphodynamics, load_config
+    from axqua.core.boundaries import _type_column, parse_discharge
+    from axqua.core.geodata import dataset
+    from axqua.hydrology import river
+    from axqua.solvers.telemac import steering
+
+    assert steering._fractions([{"fraction": 1}] * 3 + [{"fraction": 0}])[-1] == "0"
+    with pytest.raises(ValueError, match="sediment_type"):
+        Morphodynamics(enabled=True, sediment_type="SAND").validate()
+
+    for text in ("nan", "NaN", np.float32("nan"), float("inf"), " ", "-"):
+        assert parse_discharge(text) is None, text
+    assert parse_discharge(np.float32(1.5)) == pytest.approx(1.5)
+
+    case = _catchment(tmp_path)
+    cfg = load_config(case)
+    data = dataset(cfg)
+    first = data.liquid_boundaries()
+    edited = first.iloc[:1].copy()
+    data.set_layer("liquid_boundaries", edited)
+    assert len(data.liquid_boundaries()) == 1
+
+    layer = gpd.GeoDataFrame({"Target flow": ["1,6"]},
+                             geometry=[LineString([(X0 + 24, Y0), (X0 + 36, Y0)])],
+                             crs="EPSG:25832")
+    assert _type_column(layer) is None
+    path = tmp_path / "user-sources" / "liquid-boundaries.gpkg"
+    layer.to_file(path)
+    cfg = load_config(case)
+    assert river.lines(cfg)[0]["discharge"] == pytest.approx(1.6)
+    written = gpd.read_file(river.write_lines(cfg, [{"row": 0, "discharge": 2.0}], tmp_path / "out"))
+    assert written["Target flow"].iloc[0] == pytest.approx(2.0)
+    assert written[river.TYPE_COLUMN].iloc[0] == "inflow"
+
+
+def test_a_river_inflow_refuses_the_sediment_setups_telemac_cannot_run(tmp_path):
+    """Measured with TELEMAC v9.1.1 on the test catchment with a river (2026-11-01): bed load without a suspended class crashes GAIA; suspended sand above 0.15 mm stops with a cohesive class (also at equilibrium) or with clear water; above 0.5 mm also at equilibrium. Without a river every soil runs, so nothing is refused."""
+    import geopandas as gpd
+    from shapely.geometry import LineString
+
+    from axqua.config import Morphodynamics, load_config
+    from axqua.hydrology import sediment
+    from axqua.hydrology.checks import run_checks
+
+    def m(classes, **kw):
+        return Morphodynamics(**{"enabled": True, "sediment_classes": classes, **kw})
+
+    co = {"diameter": 2e-5, "type": "CO", "fraction": 0.5}
+    def nco(d):
+        return {"diameter": d, "type": "NCO", "fraction": 0.5}
+    runs = [m([co, nco(1.5e-4)], bedload=True, suspended_load=True),            # loam
+            m([co], bedload=False, suspended_load=True),                         # clay
+            m([nco(1e-4)], bedload=True, suspended_load=True),
+            m([nco(2.5e-4)], bedload=True, suspended_load=True, equilibrium_inflow=True),
+            m([nco(5e-4)], bedload=True, suspended_load=True, equilibrium_inflow=True),
+            m([nco(2.5e-4)], enabled=False)]
+    stops = [m([nco(5e-3)], bedload=True, suspended_load=False),                 # gravel
+             m([nco(1e-4)], bedload=True, suspended_load=False),
+             m([co, nco(4e-4)], bedload=True, suspended_load=True, equilibrium_inflow=True),
+             m([nco(2.5e-4)], bedload=True, suspended_load=True),
+             m([nco(1e-3)], bedload=True, suspended_load=True, equilibrium_inflow=True)]
+    for setup in runs:
+        assert sediment.river_conflicts(setup) == [], setup
+    for setup in stops:
+        assert sediment.river_conflicts(setup), setup
+
+    case = _with_sediment(_catchment(tmp_path), "--soil", "grain", "--d50", "5")
+    assert not any(f.code == "axqua.hydrology.sediment_with_river"
+                   for f in run_checks(load_config(case)))                  # no river: runs
+    gpd.GeoDataFrame({"Type (inflow/outflow)": ["outflow", "inflow"],
+                      "Target flow": [None, 0.2]},
+                     geometry=[LineString([(X0 + 24, Y0), (X0 + 36, Y0)]),
+                               LineString([(X0 + 24, Y0 + 50), (X0 + 36, Y0 + 50)])],
+                     crs="EPSG:25832").to_file(tmp_path / "user-sources" / "liquid-boundaries.gpkg")
+    cfg = load_config(case)
+    found = [f for f in run_checks(cfg) if f.code == "axqua.hydrology.sediment_with_river"]
+    assert found and found[0].severity == "error" and "crash" in found[0].message
+    answer = sediment.recommend_for_case(cfg, soil="grain", d50=0.005, slope=0.05)
+    assert any("river inflow" in w for w in answer.warnings)
+    loam = sediment.recommend_for_case(cfg, soil="texture", texture="loam", slope=0.05)
+    assert not any("river inflow" in w for w in loam.warnings)

@@ -335,3 +335,33 @@ def test_unknown_post_processing_entries_are_refused():
                   {"map_style": "rainbow"}, {"scenes": ["sky"]}):
         with pytest.raises(ValueError):
             PostProcessing(**wrong).validate()
+
+
+def test_the_sediment_of_a_hydrology_run_is_offered_to_qgis(tmp_path):
+    """GAIA's bed change and shear stress, and a map of each suspended class (TELEMAC's tracers, named COH SEDIMENTi / NCOH SEDIMENTi), cohesive classes first."""
+    from types import SimpleNamespace
+
+    from axqua.config import Morphodynamics
+    from axqua.solvers.telemac.backend import TelemacBackend
+
+    for name in ("geometry.slf", "r2d-hydrology.slf", "rgaia.slf"):
+        (tmp_path / name).write_bytes(b"")
+    morpho = Morphodynamics(enabled=True, suspended_load=True, sediment_classes=[
+        {"diameter": 2e-5, "type": "CO"}, {"diameter": 1.5e-4, "type": "NCO"}])
+    cfg = SimpleNamespace(
+        results_slf=None, results_unsteady_slf=None, results3d_slf=None,
+        results2d_from_3d_slf=None, results_hydrology_slf="r2d-hydrology.slf",
+        geometry_slf="geometry.slf", model_path=lambda name: tmp_path / name,
+        postprocessing_dir=tmp_path / "post", calibration_dir=tmp_path,
+        calibration_csv="calibration.csv", postproc=None, morphodynamics=morpho)
+    recorded = {}
+    ctx = SimpleNamespace(record=lambda name, path, **kw: recorded.setdefault(name, kw))
+    TelemacBackend().export_qgis_results(cfg, ctx)
+    assert recorded["GAIA result - bed change [m]"]["variable"] == "CUMUL BED EVOL"
+    assert recorded["TELEMAC result (hydrology) - coh sediment1 [g/l]"]["variable"] == \
+        "COH SEDIMENT1"
+    assert "TELEMAC result (hydrology) - ncoh sediment1 [g/l]" in recorded
+    morpho.enabled = False
+    recorded.clear()
+    TelemacBackend().export_qgis_results(cfg, ctx)
+    assert not [name for name in recorded if "GAIA" in name or "sediment" in name]

@@ -334,6 +334,34 @@ def telemac_parameters(cfg: Config) -> list:
     return keep
 
 
+def _refuse_continued_keywords(cfg: Config, names: list[str], control_file: str) -> None:
+    """Stop before a calibration of a keyword that the built steering file writes on several lines: HydroBayesCal rewrites the first line only (``update_gaia_class_line``), so the old values on the next ones would be read as keywords and every run would stop."""
+    import re
+
+    from axqua.solvers.telemac.steering import continued_keywords
+
+    files = {"telemac": cfg.model_path(control_file)}
+    if cfg.morphodynamics.enabled:
+        files["gaia"] = cfg.model_path(cfg.gaia_cas)
+    continued = {kind: continued_keywords(path) for kind, path in files.items()
+                 if path.is_file()}
+    problems = []
+    for name in names:
+        text = str(name).strip()
+        if re.fullmatch(r"zone\d+", text, re.I) or text.startswith("f."):
+            continue
+        kind = "gaia" if text.lower().startswith("gaia") else "telemac"
+        keyword = re.sub(r"\s+\d+$", "", text[4:] if kind == "gaia" else text).strip().upper()
+        if keyword in continued.get(kind, set()):
+            problems.append(f"{name} ({files[kind].name})")
+    if problems:
+        raise ValueError(
+            "HydroBayesCal cannot calibrate a keyword written on more than one line "
+            f"of the steering file: {', '.join(problems)}. The values of these keywords "
+            "do not fit TELEMAC's 72 columns; calibrate fewer sediment classes or other "
+            "parameters")
+
+
 def emit_hbc_config(cfg: Config, calibration_csv: Path | None) -> Path:
     """Emit a HydroBayesCal ``config_Telemac.py`` for the produced case."""
     c = cfg.calibration
@@ -343,6 +371,7 @@ def emit_hbc_config(cfg: Config, calibration_csv: Path | None) -> Path:
     # which case HydroBayesCal drives: the built steady 2D case by default, or the
     # 3D steering file when calibrating vertical profiles (calibration.solver_name)
     control_file = c.control_file or cfg.cas_file
+    _refuse_continued_keywords(cfg, params, control_file)
     if c.results_base:
         results_base = c.results_base
     elif c.solver_name == "Telemac3d":

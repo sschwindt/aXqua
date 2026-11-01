@@ -220,7 +220,7 @@ def gravity() -> str:
 
 #: The library of the boundary conditions of the BAW that the OpenFOAM installation of
 #: aXqua builds (``BAW_LIBRARY`` of its installer), with ``waterLevel_alpha_prgh``.
-BAW_LIBRARY = "lib_BAW_public_BCs_v2412_20260813.so"
+from axqua.core.installation import BAW_LIBRARY  # noqa: E402  (one name, also checked there)
 
 
 def uses_rating_outlet(cfg) -> bool:

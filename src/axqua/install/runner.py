@@ -579,9 +579,8 @@ def bind(outputs: dict[str, str], *, probe: bool = True
         for key, value in outputs.items():
             section, name = key.split(".")[:2]
             if section == "solvers":
-                binding = current.solvers.get(name) or profiles.SolverBinding()
-                binding.setup_script = Path(value)
-                current.solvers[name] = binding
+                # another installation: nothing of the old one is carried over
+                current.solvers[name] = profiles.rebound(current, name, value)
                 subjects.append(f"solvers.{name}")
             elif section == "postprocessors":
                 current.postprocessors[name] = Path(value)

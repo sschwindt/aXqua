@@ -5,6 +5,24 @@ Plugin setup
 
 The plugin setup contains everything that describes the **computer** and not the simulation project, that is, where Python and the simulation software are installed, and where simulations will be written. These **settings are made once per computer**. They are kept apart from the description of a reach (:doc:`../usage/case-setup`), so that a case can be copied to another computer without changes.
 
+.. admonition:: Watch this Tutorial on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="Installing aXqua: QGIS Plugin and Python Backend"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/gK83Q8bJCHI>`_.
+
 .. _plugin-profile:
 
 Plugin profile
@@ -22,7 +40,7 @@ All settings of a computer are stored in one file, the **profile**. Its name end
    :alt: The Configuration tab of the plugin
    :width: 70%
 
-   The *Configuration* tab. (1) The ``axqua`` program that the plugin calls, with *Settings...* to select it. (2) The profile of the computer with what it names for each program, *Edit profile...* and *Check*. (3) The box *Simulation & postprocessing software*: the installation wizards, with each program that was found in dark green; a program that was not found is named in bold dark purple. (4) *Help* opens the documentation at the section of the tab that is showing: a copy built on this computer if there is one, else the published documentation, in German or French when QGIS is set to one of them. *Clean Up* to its left removes files that the cases no longer need (:ref:`help-cleanup`).
+   The *Configuration* tab. (1) The ``axqua`` program that the plugin calls, with *Settings...* to select it. (2) The profile of the computer with what it names for each program, *Edit profile...* and *Check*. (3) The box *Simulation & postprocessing software*: the *Setup Wizard* of TELEMAC and of OpenFOAM and the installation wizard of ParaView and VisIt, with each program that was found in dark green; a program that was not found is named in bold dark purple. (4) *Help* opens the documentation at the section of the tab that is showing: a copy built on this computer if there is one, else the published documentation, in German or French when QGIS is set to one of them. *Clean Up* to its left removes files that the cases no longer need (:ref:`help-cleanup`).
 
 Each program has two rows in the editor: its **installation folder**, and below it the file that aXqua runs. For TELEMAC and OpenFOAM this file is the environment script (:ref:`solver-bindings`), and for ParaView and VisIt it is the program file. Selecting the installation folder is sufficient: aXqua searches the folder and enters the file in the row below, where it can still be changed. If a folder contains several environment scripts, the editor lists them, and one of them has to be selected in the row below.
 
@@ -32,7 +50,7 @@ Each program has two rows in the editor: its **installation folder**, and below 
 
    The profile editor. (1) The installation folder of a program, selected with the button next to it. (2) The environment script, here found by aXqua in the installation folder. (3) The number of processor cores for a simulation. (4) *Save*, *Cancel* and *Exit*.
 
-A program that is installed with one of the installation wizards is entered in the profile by the wizard, together with its installation folder (:doc:`simulation-software`). The editor is needed for a program that was installed by other means, and for the remaining settings.
+A program that is installed with one of the installation wizards, or selected as an existing installation in the *Setup Wizard*, is entered in the profile by the wizard, together with its installation folder (:doc:`simulation-software`). The *Setup Wizard* also checks whether the installation has every part aXqua uses. The editor is needed for the remaining settings, and for a program that is entered by hand.
 
 The check never prevents saving. It marks each entry that is not in order with a triangle, orange for a warning and dark red for an error. A click on a triangle opens the message with its remedy and a button that opens this documentation at the explanation of the message (:doc:`../troubleshooting/warnings`, :doc:`../troubleshooting/errors`). The button *Check* on the *Configuration* tab repeats the check at any time.
 

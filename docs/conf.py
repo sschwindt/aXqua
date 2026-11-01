@@ -5,6 +5,8 @@ import re
 import sys
 from datetime import datetime
 
+from docutils import nodes
+
 # make the package importable for autodoc (sources live in ../src)
 sys.path.insert(0, os.path.abspath("../src"))
 
@@ -12,7 +14,7 @@ sys.path.insert(0, os.path.abspath("../src"))
 project = "aXqua"
 author = "Sebastian Schwindt"
 copyright = f"{datetime.now():%Y}, {author}"
-release = "1.1.1"
+release = "1.2.0"
 version = "0.1"
 
 # -- General configuration ----------------------------------------------------
@@ -23,6 +25,7 @@ extensions = [
     "sphinx.ext.viewcode",     # add [source] links
     "sphinx.ext.intersphinx",  # cross-link to numpy/python docs
     "sphinx_design",           # tab-set / tab-item
+    "sphinx_togglebutton",     # collapsible admonitions with the dropdown class
 ]
 
 templates_path = ["_templates"]
@@ -69,8 +72,28 @@ def _literal_absolute_values(app, what, name, obj, options, lines):
         lines[index] = "".join(parts)
 
 
+def _localize_installation_video(app, doctree, docname):
+    """Select the German tutorial on installation pages after gettext."""
+    if not docname.startswith("installation/") or app.config.language != "de":
+        return
+    english_id = "gK83Q8bJCHI"
+    german_id = "oBcTvuRuKyk"
+    for node in doctree.findall(nodes.raw):
+        html = node.astext()
+        if f"https://www.youtube.com/embed/{english_id}" in html:
+            html = html.replace(english_id, german_id).replace(
+                "Installing aXqua: QGIS Plugin and Python Backend",
+                "aXqua installieren: QGIS-Plugin und Python-Backend",
+            )
+            node[0] = nodes.Text(html)
+    for node in doctree.findall(nodes.reference):
+        if node.get("refuri") == f"https://youtu.be/{english_id}":
+            node["refuri"] = f"https://youtu.be/{german_id}"
+
+
 def setup(app):
     app.connect("autodoc-process-docstring", _literal_absolute_values)
+    app.connect("doctree-resolved", _localize_installation_video)
 
 
 # -- Translations -------------------------------------------------------------
@@ -108,6 +131,8 @@ html_theme_options = {
     "sticky_navigation": True,
 }
 html_css_files = ["axqua.css"]
+# local copies of the documentation show a linked thumbnail instead of a YouTube player
+html_js_files = ["video-embed.js"]
 html_baseurl = os.environ.get(
     "READTHEDOCS_CANONICAL_URL", "https://axqua.eu/"
 )

@@ -3,8 +3,9 @@
 Three things, in the order they have to work: the ``axqua`` program the plugin calls,
 the profile of this computer (``*.axq-profile``: where TELEMAC, OpenFOAM, ParaView and
 VisIt are, and where jobs are kept), and the installation of the simulation programs,
-each with a wizard (:mod:`.install_wizard`) that ends by entering the program in the
-profile.
+TELEMAC and OpenFOAM each with a *Setup Wizard* (:mod:`.setup_wizard`) that enters an
+existing installation in the profile or hands over to the installation wizard
+(:mod:`.install_wizard`), which ends by entering the program in the profile.
 
 The profile is edited in a window of its own (:mod:`.profile_editor`). This tab shows
 what the profile says and what its check found.
@@ -23,6 +24,7 @@ from ..core.tasks import run_async
 from . import findings as fnd
 from . import help as help_pages
 from .install_wizard import InstallWizard
+from .setup_wizard import SetupWizard
 from .profile_editor import ProfileEditor, get
 from .style import FOUND_STYLE, MISSING_STYLE
 
@@ -53,9 +55,9 @@ NO_PROFILE = ("This computer has no profile yet. A profile tells aXqua where TEL
               "OpenFOAM and the postprocessing programs are installed. Without one, "
               "aXqua uses what it finds by itself.")
 
-SOFTWARE = ("A wizard installs each program and enters it in the profile. Install "
-            "TELEMAC first: aXqua starts every OpenFOAM simulation from a short "
-            "TELEMAC run.")
+SOFTWARE = ("The Setup Wizard of TELEMAC and of OpenFOAM enters an existing "
+            "installation in the profile, or installs the program. Set up TELEMAC "
+            "first: aXqua starts every OpenFOAM simulation from a short TELEMAC run.")
 
 #: The title of the box with the wizards: it installs the postprocessors too. A group
 #: box reads "&" as the mark of a shortcut key, so the title doubles it.
@@ -70,6 +72,17 @@ NOT_FOUND = "Not found on this computer."
 #: What the wizards install: ``(target, name on the button)``.
 PROGRAMS = (("telemac", "TELEMAC"), ("openfoam", "OpenFOAM"),
             ("postprocessors", "ParaView and VisIt"))
+
+#: The programs whose button opens the Setup Wizard rather than the installation.
+SETUP = ("telemac", "openfoam")
+SETUP_BUTTON = "Setup Wizard..."
+
+
+def button_text(target: str, *, running: bool = False) -> str:
+    """The text of the button of *target* on the Configuration tab."""
+    if running:
+        return "Show the installation..."
+    return SETUP_BUTTON if target in SETUP else f"Install {dict(PROGRAMS)[target]}..."
 
 #: Milliseconds between two looks at a running installation.
 INSTALL_POLL_MS = 15000
@@ -163,7 +176,7 @@ class ConfigurationTab(QWidget):
         for target, name in PROGRAMS:
             state = QLabel("")
             state.setWordWrap(True)
-            button = QPushButton(f"Install {name}...")
+            button = QPushButton(button_text(target))
             button.setEnabled(False)
             button.clicked.connect(lambda _=False, which=target: self.open_wizard(which))
             line = QHBoxLayout()
@@ -329,11 +342,9 @@ class ConfigurationTab(QWidget):
                                 "" if entry.get("running") else MISSING_STYLE)
             button = self._program_buttons[target]
             button.setEnabled(True)
-            name = dict(PROGRAMS)[target]
             active = bool(entry.get("running"))
             running = running or active
-            button.setText("Show the installation..." if active
-                           else f"Install {name}...")
+            button.setText(button_text(target, running=active))
         # an installation outlives the wizard, so the tab keeps looking by itself
         if running and not self.install_timer.isActive():
             self.install_timer.start()
@@ -341,11 +352,25 @@ class ConfigurationTab(QWidget):
             self.install_timer.stop()
 
     def open_wizard(self, target: str) -> None:
-        """The wizard of *target*. A program that is installed already is installed
-        again only after a question, and the wizard then offers what happens to the
-        installation that exists."""
+        """The wizard of *target*: for TELEMAC and OpenFOAM the Setup Wizard first,
+        unless an installation is running, which the installation wizard shows."""
         entry = next((t for t in self.overview.get("targets") or []
                       if t.get("target") == target), {})
+        if target in SETUP and not entry.get("running"):
+            installed = entry.get("installed") or {}
+            found = str(next(iter(installed.values()), "")) if installed else ""
+            setup = SetupWizard(self.ctx.client, target, found=found, parent=self,
+                                on_entered=lambda _answer: self._installed())
+            exec_dialog(setup)
+            if setup.choice != "install":
+                self.load_software()
+                return
+        self.open_installation(target, entry)
+
+    def open_installation(self, target: str, entry: dict) -> None:
+        """The installation wizard of *target*. A program that is installed already is
+        installed again only after a question, and the wizard then offers what happens
+        to the installation that exists."""
         reinstall = bool(entry.get("installed")) and not entry.get("running")
         if reinstall and not self.confirm_reinstall():
             return

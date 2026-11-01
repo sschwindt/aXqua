@@ -17,6 +17,24 @@ Install QGIS
 Install the aXqua plugin (QGIS)
 -------------------------------
 
+.. admonition:: Watch this Tutorial on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="Installing aXqua: QGIS Plugin and Python Backend"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/gK83Q8bJCHI>`_.
+
 Open **QGIS**, then:
 
 * Go to *Plugins > Manage and Install Plugins*.

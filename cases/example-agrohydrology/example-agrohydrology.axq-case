@@ -41,3 +41,20 @@ hydrology:
   outlet_condition: overfall   # the water leaves over the edges as over a brink
   drain_time: 3600             # [s] simulated time after the last rain
   printout_period: 600         # [s] interval of the result maps
+
+# Sediment transport with GAIA, coupled into the hydrology run: what the Sediment transport wizard recommends for a silt loam (the soil table of the original models gives no texture class; silt loam, the loess loam of much arable land in Lower Bavaria, is assumed) and the median slope of the field of 9 %. README.md, step 4, shows the result.
+morphodynamics:
+  enabled: true
+  soil: texture silt loam
+  layer_thickness: 0.3         # [m] the plough layer, above a bed that does not erode
+  sediment_classes:            # silt and clay (cohesive) and the sand of the soil
+  - {diameter: 2.0e-05, density: 2650, type: CO, fraction: 0.8}
+  - {diameter: 0.00015, density: 2650, type: NCO, fraction: 0.2}
+  bedload: true
+  bedload_formula: 7           # van Rijn (1984a)
+  suspended_load: true
+  suspension_formula: 3        # van Rijn (1984b)
+  mud_erosion_shear: 0.5       # [N/m2] GAIA's default, a starting value
+  partheniades: 0.001          # [kg/m2/s] GAIA's default, a starting value
+  mud_concentration: 1300      # [kg/m3] dry density of arable topsoil
+  slope_effect: true           # Koch and Flokstra (1981): the median slope is above 2 %

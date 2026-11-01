@@ -1,7 +1,7 @@
 """The documentation outline is a contract, so it is pinned here.
 
 The outline of sections, subsections and subsubsections was prescribed
-(``docs/restructuring-instructions.md``), and two other things are built on it: the
+(``docs/restructuring-instructions.md``, removed on 2026-10-27 once this file had taken it over), and two other things are built on it: the
 navigation menu, which lists the sections and opens their subsections on demand, and the QGIS plugin,
 whose tabs open the documentation at the ``help-`` labels. A heading that is renamed or
 moved in passing would break both without any build error, so the structure is read back
@@ -50,10 +50,11 @@ OUTLINE: list[tuple[str, str, list[tuple[str, str, list[str] | None]]]] = [
         ("Morphodynamic simulations", "morphodynamic-simulations",
          ["Concept", "TELEMAC-GAIA Setup", "OpenFOAM Setup"]),
         # the hydrology mode, the user's order of 2026-10-24; a section that can be read
-        # on its own, the user's order of 2026-10-25
+        # on its own, the user's order of 2026-10-25; sediment transport, 2026-10-31
         ("Hydrology", "hydrology-simulations",
          ["Concept", "Case setup", "Data setup", "Wind and evaporation",
-          "Boundaries and outlet", "Preprocessing", "Run and results",
+          "Boundaries and outlet", "Sediment transport", "Preprocessing",
+          "Run and results",
           "Mesh resolution, calibration and limits"]),
         ("Calibration & validation", "calibration-validation",
          ["Introduction to Bayesian calibration", "Ground truth data setup",
@@ -85,6 +86,7 @@ HELP_LABELS = [
     "help-postprocessing-qgis", "help-postprocessing-paraview",
     "help-postprocessing-visit", "help-batch", "help-hydrology",
     "help-hydrology-wizard",
+    "help-sediment-wizard",
 ]
 
 
@@ -185,7 +187,7 @@ def test_the_uml_diagrams_show_the_code_as_it_is():
 #: says where in the plugin its subject is set up, and the picture shows the place.
 SCREENSHOTS = {
     "installation/qgis-plugin": ["gui-settings", "gui-qgis-window"],
-    "installation/simulation-software": ["gui-install-wizard"],
+    "installation/simulation-software": ["gui-setup-wizard", "gui-install-wizard"],
     "installation/plugin-setup": ["gui-configuration", "gui-profile-editor"],
     "usage/case-setup": ["gui-case-setup", "gui-case-editor"],
     "usage/preprocessing": ["gui-preprocessing"],
@@ -199,7 +201,7 @@ SCREENSHOTS = {
                              "gui-postprocessing-paraview"],
     "usage/batch-processing": ["gui-batch"],
     "usage/hydrology-simulations": ["gui-case-editor-hydrology", "gui-hydrology-wizard",
-                                    "gui-hydrology"],
+                                    "gui-sediment-wizard", "gui-hydrology"],
 }
 
 

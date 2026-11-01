@@ -150,6 +150,14 @@ PART_OF = {
         "is nothing to submit on this tab."),
 }
 
+#: :data:`PART_OF` for a case in hydrology mode, whose one run carries what is coupled.
+PART_OF_HYDROLOGY = {
+    "morphodynamics": (
+        "Sediment transport is computed together with the runoff, in the hydrology run "
+        "on the sub-tab Hydrology. Its Sediment transport wizard sets up the soil and "
+        "the transport formula. There is nothing to submit on this tab."),
+}
+
 
 @dataclass
 class CapabilityView:
@@ -172,7 +180,11 @@ class CapabilityView:
     @property
     def part_of(self) -> str:
         """The explanation of a capability that is run with another one's jobs."""
-        return "" if self.own else PART_OF.get(self.name, "")
+        if self.own:
+            return ""
+        if self.hydrology_mode and self.name in PART_OF_HYDROLOGY:
+            return PART_OF_HYDROLOGY[self.name]
+        return PART_OF.get(self.name, "")
 
     @property
     def title(self) -> str:

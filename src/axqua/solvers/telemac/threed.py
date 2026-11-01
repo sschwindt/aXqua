@@ -52,6 +52,7 @@ import numpy as np
 from axqua.core import selafin
 from axqua.config import Config
 from axqua.solvers.telemac.steering import TURB_NAMES, _global_friction, select_turbulence_model
+from axqua.solvers.telemac.steering import fit_columns as _fit_columns
 from axqua.solvers.telemac.steering import read_cas_values as _read_cas_values
 
 log = logging.getLogger("axqua")
@@ -506,12 +507,15 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
         # suspended sediment is carried as tracers declared through the coupling.
         lines += ["/", "/ MORPHODYNAMICS (GAIA - bedload / suspended load)",
                   "COUPLING WITH : 'GAIA'",
-                  f"GAIA STEERING FILE : {gaia_cas}",
-                  f"COUPLING PERIOD FOR GAIA : {cfg.morphodynamics.coupling_period}"]
+                  f"GAIA STEERING FILE : {gaia_cas}"]
+        # GAIA runs at every hydraulic step: TELEMAC v9.1.1 has no COUPLING PERIOD FOR GAIA (only one for TOMAWAC), and its steering-file reader stops at an unknown keyword, which every coupled run did until 2026-10-31
+        if cfg.morphodynamics.coupling_period != 1:
+            log.warning("morphodynamics.coupling_period %s is ignored: TELEMAC couples "
+                        "GAIA at every time step", cfg.morphodynamics.coupling_period)
 
     lines.append("&ETA")
     path = model / (out_name or cas3d_name(cfg))
-    path.write_text("\n".join(lines) + "\n")
+    path.write_text("\n".join(_fit_columns(lines)) + "\n")
     return ThreeDSetup(
         cas=path, n_levels=vd.n_levels, dz=vd.dz, dx=vd.dx, depth=vd.depth,
         time_step=dt, n_time_steps=n_steps, h_turbulence=h_turb,

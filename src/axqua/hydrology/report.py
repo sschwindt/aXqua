@@ -5,7 +5,7 @@ Two sources in the listing of the run (``hydrology2d.cas_<date>.sortie``):
 * TELEMAC's water balance at every listing printout (:mod:`axqua.solvers.telemac. sortie`): the volume in the domain and the flux through every liquid boundary, positive entering. The outlet hydrograph is the sum of the exiting fluxes;
 * the line ``AXQUA HYDROLOGY t rain infiltrated evaporated`` that aXqua's runoff routine writes at the same printouts: the volumes of rain, infiltration and evaporation since the start [m3].
 
-The balance closes as ``rain + inflow = outflow + infiltrated + evaporated + storage + error``; ``error`` is what TELEMAC's mass conservation leaves, and is reported relative to the rain. The runoff coefficient is outflow over rain.
+The balance closes as ``rain + inflow = outflow + infiltrated + evaporated + storage + error``; ``error`` is what TELEMAC's mass conservation and the integration of the printed fluxes leave, and is reported relative to the water that entered (rain and inflow). The runoff coefficient is the net outflow (outflow minus inflow) over the rain, which without an inflow line is outflow over rain.
 """
 
 from __future__ import annotations
@@ -70,7 +70,7 @@ class WaterBalance:
             f"evaporated     {self.evaporated_m3:14.1f} m3",
             f"storage        {self.storage_m3:14.1f} m3 (water left on the catchment)",
             f"error          {self.error_m3:14.1f} m3 ({100 * self.relative_error:.3f} % "
-            "of the rain)",
+            "of the water that entered)",
             f"runoff coefficient {self.runoff_coefficient:.3f}",
             f"peak outflow   {self.peak_outflow_m3_s:.3f} m3/s at {self.peak_time_s:.0f} s",
         ]
@@ -161,8 +161,12 @@ def balance(sortie, budget: dict[str, np.ndarray],
         duration_s=float(t[-1]), rain_m3=rain, inflow_m3=in_volume,
         outflow_m3=out_volume, infiltrated_m3=infiltrated, evaporated_m3=evaporated,
         storage_m3=storage, error_m3=error,
-        relative_error=error / rain if rain > 0 else float("nan"),
-        runoff_coefficient=out_volume / rain if rain > 0 else float("nan"),
+        # relative to all water that entered: with a river through the catchment the rain may be a small part of it, and the error of integrating the printed fluxes scales with the river, not with the rain
+        relative_error=(error / (rain + in_volume) if rain + in_volume > 0
+                        else float("nan")),
+        # what the catchment adds: with a river, its own water leaves again
+        runoff_coefficient=((out_volume - in_volume) / rain if rain > 0
+                            else float("nan")),
         peak_outflow_m3_s=float(outflow[k]), peak_time_s=float(t[k]))
 
 
@@ -207,10 +211,142 @@ def plot(path: Path, sortie, forcing_table, title: str) -> Path:
     return path
 
 
+_GAIA_TOTAL = "GAIA MASS-BALANCE OF SEDIMENTS OVER ALL CLASSES"
+_GAIA_CLASS = "GAIA MASS-BALANCE OF SEDIMENTS PER CLASS"
+_TIME = "RELATIVE ERROR IN VOLUME AT T ="
+
+
+def _number_after(line: str, sep: str = "=") -> float:
+    return fortran_float(line.split(sep, 1)[1].split()[0])
+
+
+def fortran_float(text: str) -> float:
+    """A number as Fortran prints it: ``1.5E-03``, ``1.5D-03``, and ``0.6076331-116`` (an exponent of three digits drops the ``E``)."""
+    text = text.strip().upper().replace("D", "E")
+    try:
+        return float(text)
+    except ValueError:
+        import re
+
+        match = re.fullmatch(r"([-+]?\d*\.?\d+)([-+]\d+)", text)
+        if not match:
+            raise
+        return float(f"{match.group(1)}E{match.group(2)}")
+
+
+def read_sediment(path: str | Path) -> dict | None:
+    """The sediment of a run with GAIA, from its listing, or None for a run without GAIA.
+
+    Two sources, because neither has everything. **The suspended load** is TELEMAC's tracers, whose balance blocks are cumulated over every time step: per class the mass eroded into suspension ("QUANTITY CREATED BY SOURCE TERM"), the mass that left through the liquid boundaries, and the mass in suspension at the end. TELEMAC's tracer balance has no deposition term, so the mass it reports as lost is the mass deposited; measured on a test catchment, it grew from 52 to 122 kg when infiltration was switched off, with the erosion. **The bed load** is GAIA's flux through each liquid boundary [kg/s, positive entering] in the block ``GAIA MASS-BALANCE OF SEDIMENTS OVER ALL CLASSES`` that precedes TELEMAC's water balance of each printout, or, for a single class, for which GAIA prints no such block (``mass_balance.f``: ``IF(NSICLA.GT.1)``), in the block of that class; it is integrated over the printouts. GAIA's own cumulated balance is printed only when the last time step is the step number ``NIT``, which a run with a variable time step does not reach, and its erosion and deposition fluxes are values of one step that the printouts sample too coarsely to integrate (twice the erosion of the tracer balance on the test catchment).
+
+    Returns ``time`` and ``bedload`` (printouts x boundaries) and ``suspended``: per tracer name ``{eroded, deposited, through_boundaries, final}`` in kg (concentration in g/l times m3), ``through_boundaries`` positive entering.
+    """
+    rows: list[dict] = []
+    block: dict | None = None
+    # the bed load of the printout being read: over all classes, and summed per class
+    total: dict[int, float] = {}
+    per_class: dict[int, float] = {}
+    seen = False
+    suspended: dict[str, dict] = {}
+    tracer = None
+    for line in Path(path).read_text(errors="replace").splitlines():
+        text = line.strip()
+        if _GAIA_TOTAL in text:
+            block, seen = total, True
+            continue
+        if _GAIA_CLASS in text:
+            block, seen = per_class, True
+            continue
+        if block is not None:
+            if not text:
+                block = None
+            elif text.startswith("BEDLOAD FLUX BOUNDARY"):
+                index = int(text.split("BOUNDARY", 1)[1].split()[0])
+                if block is total:
+                    total[index] = _number_after(text)
+                else:
+                    per_class[index] = per_class.get(index, 0.0) + _number_after(text)
+            continue
+        if text.startswith(_TIME.strip()) and seen:
+            rows.append({"time": float(text.split("=", 1)[1].split()[0]),
+                         "bedload": dict(total or per_class)})
+            total, per_class, seen = {}, {}, False
+        elif text.startswith("BALANCE OF TRACER"):
+            # "BALANCE OF TRACER COH SEDIMENT1   g/l": the name without the unit
+            tracer = " ".join(text[len("BALANCE OF TRACER"):].split()[:-1]) or text
+            suspended.setdefault(tracer, {"eroded": 0.0, "deposited": 0.0,
+                                          "through_boundaries": 0.0, "final": 0.0})
+        elif tracer is None:
+            continue
+        elif text.startswith("QUANTITY OF TRACER:"):
+            suspended[tracer]["final"] = _number_after(text, ":")
+        elif text.startswith("QUANTITY ENTERED THROUGH LIQ. BND."):
+            suspended[tracer]["through_boundaries"] = _number_after(text, ":")
+        elif text.startswith("QUANTITY CREATED BY SOURCE TERM") and "   :" in line:
+            # the cumulated line ("...SOURCE TERM   :"), not the one of the step
+            suspended[tracer]["eroded"] = _number_after(text, ":")
+        elif text.startswith("FINAL BALANCE OF TRACER"):
+            tracer = None
+    for item in suspended.values():
+        # no deposition term in TELEMAC's tracer balance: what it books as lost
+        item["deposited"] = (item["eroded"] + item["through_boundaries"]
+                             - item["final"])
+    if not rows and not suspended:
+        return None
+    n = max((max(r["bedload"]) for r in rows if r["bedload"]), default=0)
+    bedload = np.array([[r["bedload"].get(j, 0.0) for j in range(1, n + 1)]
+                        for r in rows], dtype=float).reshape(len(rows), n)
+    return {"time": np.array([r["time"] for r in rows]), "bedload": bedload,
+            "suspended": suspended}
+
+
+def sediment_budget(sediment: dict) -> dict:
+    """The sediment budget of the run [kg]: the bed load through each boundary (positive entering), and of the suspended load what was eroded into suspension, deposited again, carried out through the liquid boundaries and still in suspension at the end."""
+    t = np.concatenate([[0.0], sediment["time"]])
+    bedload = [_integrate(t, np.concatenate([[0.0], sediment["bedload"][:, j]]))
+               for j in range(sediment["bedload"].shape[1])]
+    classes = sediment["suspended"]
+
+    def total(key: str) -> float:
+        return float(sum(item[key] for item in classes.values()))
+
+    return {"bedload_kg": bedload,
+            "bedload_out_kg": -sum(bedload),
+            "suspended_eroded_kg": total("eroded"),
+            "suspended_deposited_kg": total("deposited"),
+            "suspended_out_kg": -total("through_boundaries"),
+            "suspended_end_kg": total("final"),
+            "out_kg": -total("through_boundaries") - sum(bedload),
+            "classes": {name: {k: float(v) for k, v in item.items()}
+                        for name, item in classes.items()}}
+
+
+def boundary_volumes(cfg, sortie) -> list[dict]:
+    """The volume through each liquid boundary over the run [m3], positive entering, with its kind and outlet from ``liquid-boundaries.json`` of the build: what a river brings in at its inflow line and takes out at its own outflow line, and what leaves over the other outflow lines."""
+    t = np.concatenate([[0.0], np.asarray(sortie.time, dtype=float)])
+    known: dict[int, dict] = {}
+    saved = cfg.model_path(cfg.liquid_boundaries_json)
+    if saved.exists():
+        try:
+            known = {int(b["index"]): b for b in json.loads(saved.read_text())}
+        except (ValueError, KeyError, TypeError):
+            known = {}
+    rows = []
+    for j in range(sortie.n_boundaries):
+        q = np.concatenate([[0.0], np.asarray(sortie.fluxes[:, j], dtype=float)])
+        line = known.get(j + 1, {})
+        rows.append({"boundary": j + 1, "kind": line.get("kind", ""),
+                     "outlet": (line.get("condition") or
+                                (cfg.outflow_condition if line.get("kind") == "outflow"
+                                 else "")),
+                     "volume_m3": _integrate(t, q)})
+    return rows
+
+
 def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
     """Write the hydrograph and the water balance of the last hydrology run.
 
-    Files, in ``<postprocessing>/hydrology/`` unless *out_dir* says otherwise: ``hydrograph.csv`` (time, every boundary flux, outflow), ``hydrograph.png``, ``water-balance.csv`` and ``water-balance.json``. The listing copies of each processor of a parallel run are deleted, as after a steady run: the balance is in the main listing.
+    Files, in ``<postprocessing>/hydrology/`` unless *out_dir* says otherwise: ``hydrograph.csv`` (time, every boundary flux, outflow), ``hydrograph.png``, ``water-balance.csv``, ``water-balance.json`` and ``boundary-volumes.csv`` (the volume through each liquid boundary, :func:`boundary_volumes`). The listing copies of each processor of a parallel run are deleted, as after a steady run: the balance is in the main listing.
     """
     import pandas as pd
 
@@ -240,6 +376,26 @@ def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
          f"{cfg.name}: rain and outlet hydrograph")
     pd.DataFrame([asdict(result)]).to_csv(out / "water-balance.csv", index=False)
     (out / "water-balance.json").write_text(json.dumps(asdict(result), indent=2) + "\n")
+    lines = boundary_volumes(cfg, sortie)
+    sediment = read_sediment(listing)
+    if sediment is not None:
+        budget_kg = sediment_budget(sediment)
+        for line, mass in zip(lines, budget_kg["bedload_kg"]):
+            line["bedload_kg"] = mass
+        (out / "sediment-budget.json").write_text(json.dumps(budget_kg, indent=2) + "\n")
+        pd.DataFrame([{k: v for k, v in budget_kg.items()
+                       if not isinstance(v, (list, dict))}]).to_csv(
+            out / "sediment-budget.csv", index=False)
+        log.info("  sediment: %.1f kg eroded into suspension, %.1f kg deposited again; "
+                 "out through the liquid boundaries %.1f kg in suspension and %.1f kg "
+                 "as bed load (net)", budget_kg["suspended_eroded_kg"],
+                 budget_kg["suspended_deposited_kg"], budget_kg["suspended_out_kg"],
+                 budget_kg["bedload_out_kg"])
+    if lines:
+        pd.DataFrame(lines).to_csv(out / "boundary-volumes.csv", index=False)
+        for line in lines:
+            log.info("  boundary %d (%s%s): %+.1f m3", line["boundary"], line["kind"],
+                     f", {line['outlet']}" if line["outlet"] else "", line["volume_m3"])
     for line in result.lines():
         log.info("  water balance: %s", line)
     copies = processor_sorties(cfg.model_dir, cfg.hydrology_cas_file)
@@ -249,7 +405,7 @@ def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
         log.info("  removed %d per-processor .sortie file(s); kept the main listing",
                  len(copies))
     if np.isfinite(result.relative_error) and abs(result.relative_error) > 0.01:
-        log.warning("  the water balance closes only to %.2f %% of the rain; the "
+        log.warning("  the water balance closes only to %.2f %% of the water that entered; the "
                     "listing printouts may be too far apart for the integral of the "
                     "outflow, or the run lost water", 100 * result.relative_error)
     return result

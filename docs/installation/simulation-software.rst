@@ -1,7 +1,7 @@
 Simulation Software
 ===================
 
-aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed additionally. The plugin installs them with one wizard per program. Install TELEMAC first. OpenFOAM (including postprocessors) is optional and builds on TELEMAC.
+aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed additionally. The plugin has one *Setup Wizard* for TELEMAC and one for OpenFOAM, which either enters an existing installation in the profile of the computer or installs the program. Set up TELEMAC first. OpenFOAM (including postprocessors) is optional and builds on TELEMAC.
 
 .. note::
    On Windows, TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2). The wizards of a QGIS that runs in Windows do not install into WSL. Install a distribution with ``wsl --install -d Ubuntu-24.04`` in a **PowerShell** (similar to Linux **terminal**) with administrator rights, install aXqua inside the distribution, and run ``axqua install start telemac`` in its terminal. Select an installation folder in the Linux file system: a build in a Windows folder (``/mnt/c/...``) is slower by an order of magnitude. This route has not yet been tested on a real Windows installation.
@@ -9,12 +9,31 @@ aXqua prepares and starts simulations, but the numerical codes are separate soft
 Installation wizards (short version)
 ------------------------------------
 
-The wizards are opened on the **Configuration** tab, in the box **Simulation & postprocessing software** showing the operating system that the aXqua *Check* button detected.
+The wizards are opened on the **Configuration** tab, in the box **Simulation & postprocessing software** showing the operating system that the aXqua *Check* button detected. TELEMAC and OpenFOAM each have the button **Setup Wizard...**, and ParaView and VisIt the button **Install ParaView and VisIt...** (:ref:`help-postprocessors`).
 
 .. note::
     If the aXqua program *Check* identified existing TELEMAC, OpenFOAM or postprocessor software installation, the box states for each program where it is installed or that it was not found.
 
-To start the installation of each software, click **Install <software-name>...** and an installation wizard opens. Each wizard has three intuitive tabs in which users make choices according to their needs:
+The first tab of the *Setup Wizard*, **Setup**, asks how aXqua is to find the program:
+
+* **Select existing config file** is the choice for a program that is installed on this computer already. *Next* opens the tab **Existing installation**, which states which file to select: the **environment script** of the installation, which sets all variables the program requires (TELEMAC: :ref:`existing TELEMAC <setup-existing-telemac>`; OpenFOAM: :ref:`existing OpenFOAM <setup-existing-openfoam>`). Select it with *Browse...*, and aXqua checks whether the installation is usable for aXqua. *Use this installation* enters the script and the installation folder in the profile (:ref:`plugin-profile`).
+* **Install <software-name>** is the choice for a computer without the program. The button *Next* reads *Install <software-name>...* and opens the installation wizard.
+
+The check of an existing installation loads the environment script once and looks for every part of the installation that aXqua uses. It answers with one of three verdicts, and lists each part as *found* (dark green) or *missing* (bold dark purple) with what it is needed for:
+
+* *... was found and the installation is valid and complete.*
+* *... was found and the installation is valid, but some aXqua modules will not work:* the program runs, and the list names the aXqua modules that lack a part, for example the morphodynamics without GAIA in TELEMAC, or the fine sediment simulation without Olsen's sediDriftFoam2 in OpenFOAM. Everything else works, and the installation can be entered in the profile.
+* *This is not a usable installation of ...:* the script does not set up the program, or a part that every simulation needs is missing. *Use this installation* stays disabled.
+
+The warnings and errors of the check are explained in :ref:`axqua-environment-module-missing` and :ref:`axqua-environment-solver-incomplete`. The *Check* button of the profile on the *Configuration* tab reports the same for the programs the profile names.
+
+.. figure:: ../img/gui-setup-wizard.png
+   :alt: The tab Existing installation of the Setup Wizard of OpenFOAM
+   :width: 70%
+
+   The tab *Existing installation* of the OpenFOAM *Setup Wizard*, for an OpenFOAM of another release than v2406 and without the sediment solvers. (1) The tab *Setup* with the choice between an existing installation and installing the program. (2) Which file to select. (3) The selected environment script. (4) The verdict and the parts of the installation. (5) *Use this installation* enters it in the profile.
+
+The installation wizard has three intuitive tabs in which users make choices according to their needs:
 
 #. **Settings:** Installation folder and installer choices. Every folder and file is selected in a dialog, so nothing has to be typed. Details on software-specific settings are provided below on this page.
 #. **Check:** aXqua examines the computer and lists the commands that it is about to run, expected duration, and everything that is not in order. An orange triangle marks a warning, with which the installation can be started. A dark red triangle marks an error. To proceed with the installation:
@@ -26,7 +45,7 @@ The tabs can be visited in any order, and *Back* and *Next* at the bottom of the
 
 At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the computer profile (:ref:`plugin-profile`), and starts it once. After a successful installation, the button *Cancel the installation* turns dark gray-green and reads *Installation complete*; a click closes the wizard. No further configuration is required.
 
-In the box **Simulation & postprocessing software**, the path of a program that was found is written in dark green, and *Not found on this computer.* in bold dark purple. Clicking *Install <software-name>...* for a program that is installed already first asks *Software already installed. Continue with re-installation?* *No* returns to the *Configuration* tab. *Yes* opens the wizard, whose *Settings* tab then starts with the setting *Existing installation*:
+In the box **Simulation & postprocessing software**, the path of a program that was found is written in dark green, and *Not found on this computer.* in bold dark purple. For a program that was found, the *Setup Wizard* fills in its environment script and selects *Select existing config file*. Choosing *Install <software-name>* for a program that is installed already first asks *Software already installed. Continue with re-installation?* *No* returns to the *Configuration* tab. *Yes* opens the wizard, whose *Settings* tab then starts with the setting *Existing installation*:
 
 * *Remove the existing installation and install it again in its folder* deletes the earlier installation before the new one is built. aXqua removes only an installation that one of its installers made: the subfolder ``telemac-mascaret`` of TELEMAC, a folder of the OpenFOAM installer, or the VisIt folders of the postprocessors.
 * *Continue in the existing folder* keeps what is downloaded and built and repeats the remaining steps. The OpenFOAM installer refuses to continue a folder that another version of it started; the *Check* tab says so before anything runs.
@@ -65,7 +84,7 @@ TELEMAC
 
 `TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC). Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1.
 
-Click **Install TELEMAC...** on the **Configuration** tab. The wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its *Settings* tab has four settings besides *Install for*:
+Click **Setup Wizard...** in the row of TELEMAC on the **Configuration** tab, and select *Install TELEMAC*. The installation wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its *Settings* tab has four settings besides *Install for*:
 
 .. list-table::
    :header-rows: 1
@@ -90,7 +109,17 @@ The result is the file ``telemac-mascaret/configs/pysource.<system>.sh`` in the 
 
 If the installation fails, the wizard shows the last lines of the installation log and the location of the complete log. After the cause is corrected, start the wizard again with the same folder. The installer continues with what is already downloaded.
 
-A manual installation is described in the `TELEMAC installation tutorial <https://hydro-informatics.com/get-started/install-telemac-autoinstaller.html>`_. Enter the environment script of a manual installation in the profile editor.
+A manual installation is described in the `TELEMAC installation tutorial <https://hydro-informatics.com/get-started/install-telemac-autoinstaller.html>`_.
+
+.. _setup-existing-telemac:
+
+**Use an existing installation of TELEMAC.** Click **Setup Wizard...** in the row of TELEMAC, select *Select existing config file* and click *Next*. Select the environment script of the installation, which is in the folder ``configs`` of TELEMAC and whose name starts with ``pysource.`` and ends with ``.sh``:
+
+.. code-block:: text
+
+   <installation folder>/telemac-mascaret/configs/pysource.<configuration>.sh
+
+for example ``/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh``. A TELEMAC installation has one such script per configuration of its build; select the one of the build you use. A file whose name contains ``template`` is an example and sets up nothing. The check looks for TELEMAC-2D, which every simulation needs, and for TELEMAC-3D (3D simulations and the vertical convergence study), GAIA (morphodynamics, also in the hydrology mode), parallel runs (``partel`` and an MPI launcher) and the Fortran compiler of the build (user Fortran, which the Green-Ampt infiltration of the hydrology mode and the gain-lose exchange compile). The same script can be entered by hand in the profile editor (:ref:`solver-bindings`).
 
 .. _install-openfoam:
 
@@ -103,7 +132,7 @@ OpenFOAM
 
    Install TELEMAC also when OpenFOAM is the code of interest. aXqua starts every OpenFOAM simulation from the result of a short TELEMAC run, which is called the warm-up (:ref:`warm-up-concept`). Without it, OpenFOAM has to fill a dry riverbed with water on its own, which multiplies the computing time.
 
-Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available on Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, on computers with an x86-64 processor. It installs the following components into one folder:
+Click *Setup Wizard...* in the row of OpenFOAM on the *Configuration* tab, and select *Install OpenFOAM*. The installation wizard is available on Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, on computers with an x86-64 processor. It installs the following components into one folder:
 
 * **OpenFOAM v2406**, unless an installation of this version exists already (see the settings below).
 * The sediment transport solvers **sediDriftFoam** (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) and **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_), and a variant of the latter with a stage-discharge outflow, ``sediDriftFoam2Rating``, which the installer marks as not validated.
@@ -138,6 +167,15 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
 A packaged OpenFOAM v2406 saves the hours of compilation. OpenCFD provides packages for Debian and Ubuntu. An administrator installs them according to the `installation instructions of OpenCFD <https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian>`_, which creates the file ``/usr/lib/openfoam/openfoam2406/etc/bashrc``. The wizard finds this installation by itself.
 
 The result is the file ``shell-rc.sh`` in the installation folder. It is the **environment script** of this installation: it loads OpenFOAM v2406 and adds the compiled solvers and the boundary library. The wizard enters it in the profile as the solver binding of OpenFOAM, and enters the selected postprocessors. No existing OpenFOAM installation and no startup file of the user account is changed.
+
+.. _setup-existing-openfoam:
+
+**Use an existing installation of OpenFOAM.** Click **Setup Wizard...** in the row of OpenFOAM, select *Select existing config file* and click *Next*. Select one of two environment scripts:
+
+* ``<installation folder>/shell-rc.sh`` of an OpenFOAM installation that the wizard made, for example ``~/.local/openfoam-sediment-v2406/shell-rc.sh``. This is the recommended choice, because it also sets up the sediment solvers and the outflow boundary of the BAW.
+* ``<OpenFOAM folder>/etc/bashrc`` of an OpenFOAM v2406, a file without an ending, for example ``/usr/lib/openfoam/openfoam2406/etc/bashrc`` of the package of OpenCFD.
+
+The check looks for the solvers that every aXqua simulation uses (``interFoam``, ``checkMesh``, ``decomposePar``, ``reconstructPar``), and for the release v2406, Olsen's ``sediDriftFoam2`` (the fine sediment simulation) and the stage-discharge outflow boundary of the BAW (an outflow on a rating curve). An OpenFOAM without the sediment solvers, or of another release, is reported as valid with the modules that will not work: the free-surface simulations run with it. To add the sediment solvers to an OpenFOAM v2406, select *Install OpenFOAM* and *Use the OpenFOAM v2406 that is installed on this computer*, which compiles only the solvers and the boundary library.
 
 .. note::
 

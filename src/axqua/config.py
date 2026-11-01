@@ -1226,6 +1226,17 @@ class Hydrodynamics:
     extra_keywords: dict[str, Any] = field(default_factory=dict)  # raw .cas overrides
 
 
+def class_fractions(classes: list[dict]) -> list[float] | None:
+    """The ``fraction`` of each sediment class as given, None where no class names one. Fractions that are no composition (one negative, or none above zero) raise, because GAIA would stop at them; the case check and the GAIA writer both ask this."""
+    if not any("fraction" in c for c in classes):
+        return None
+    values = [float(c.get("fraction", 0.0) or 0.0) for c in classes]
+    if any(v < 0 for v in values) or not sum(values) > 0:
+        raise ValueError("morphodynamics.sediment_classes: the fractions must be "
+                         f"zero or more and add up to more than zero, got {values}")
+    return values
+
+
 @dataclass
 class Morphodynamics:
     """GAIA morphodynamic block - extension point, off by default in v1.
@@ -1240,13 +1251,7 @@ class Morphodynamics:
       the suspended sediment classes as TELEMAC **tracers** (no manual NUMBER OF
       TRACERS on the hydro side - GAIA declares them through the coupling).
 
-    When ``enabled`` the hydrodynamic ``.cas`` gets ``COUPLING WITH : 'GAIA'`` +
-    ``GAIA STEERING FILE`` and a ``COUPLING PERIOD FOR GAIA`` (hydro steps per GAIA
-    step). The coupling is wired into **every** hydrodynamic run that can carry it -
-    the steady ``steady2d.cas`` and, most usefully for morphodynamics, the
-    hydrograph-driven ``unsteady2d.cas`` and its 3D twin ``unsteady3d.cas`` (a flood
-    wave is what actually reworks the bed), so the same GAIA steering file drives 2D
-    and 3D bed evolution.
+    When ``enabled`` the hydrodynamic ``.cas`` gets ``COUPLING WITH : 'GAIA'`` + ``GAIA STEERING FILE``. GAIA runs at every hydraulic step: TELEMAC v9.1.1 has no ``COUPLING PERIOD FOR GAIA``, so ``coupling_period`` is kept for old case files and ignored with a warning when it is not 1. The coupling is wired into **every** hydrodynamic run that can carry it - the steady ``steady2d.cas`` and, most usefully for morphodynamics, the hydrograph-driven ``unsteady2d.cas`` and its 3D twin ``unsteady3d.cas`` (a flood wave is what actually reworks the bed), so the same GAIA steering file drives 2D and 3D bed evolution.
 
     Beyond the two transport switches, the block exposes the bed-process capacities a
     real river morphodynamic run needs, all mapped to verified GAIA keywords:
@@ -1270,13 +1275,21 @@ class Morphodynamics:
     * ``sediment_type`` -> ``CLASSES TYPE OF SEDIMENT`` (``NCO`` non-cohesive /
       ``CO`` cohesive), ``mass_balance`` -> ``MASS-BALANCE`` (log the sediment
       budget), ``graphic_printouts`` -> the GAIA ``VARIABLES FOR GRAPHIC PRINTOUTS``.
+
+    For a soil (the hydrology mode, written by its sediment transport wizard, :mod:`axqua.hydrology.sediment`) a class of ``sediment_classes`` may carry its own ``type`` (``NCO``/``CO``, else ``sediment_type``) and ``fraction`` (``CLASSES INITIAL FRACTION``), and the block the layer of soil that can erode:
+
+    * ``suspension_formula`` -> ``SUSPENSION TRANSPORT FORMULA FOR ALL SANDS`` (3 = van Rijn); ``None`` leaves GAIA's default.
+    * ``layer_thickness`` -> ``LAYERS INITIAL THICKNESS`` [m], the erodible soil above a bed that does not erode (for a field, the plough layer).
+    * ``mud_erosion_shear`` / ``partheniades`` / ``mud_concentration`` -> ``LAYERS CRITICAL EROSION SHEAR STRESS OF THE MUD`` [N/m2], ``LAYERS PARTHENIADES CONSTANT`` [kg/m2/s] and ``LAYERS MUD CONCENTRATION`` [g/l], the erosion of a cohesive soil after Partheniades.
+    * ``equilibrium_inflow`` -> ``EQUILIBRIUM INFLOW CONCENTRATION``: the water of an inflow line carries the suspended sediment it can carry.
+    * ``soil``: what the wizard was given, to start from when it is opened again.
     """
 
     enabled: bool = False
     bedload: bool = True                 # BED LOAD FOR ALL SANDS : YES
     suspended_load: bool = False         # SUSPENSION FOR ALL SANDS : YES (carried as tracers)
     bedload_formula: int = 1             # BED-LOAD TRANSPORT FORMULA (1 = Meyer-Peter & Mueller)
-    coupling_period: int = 1             # COUPLING PERIOD FOR GAIA (hydro steps per GAIA step)
+    coupling_period: int = 1             # ignored: TELEMAC has no COUPLING PERIOD FOR GAIA
     gaia_results_base: str = "rgaia"
     sediment_classes: list[dict[str, Any]] = field(default_factory=list)
     # --- bed-process capacities (all verified GAIA keywords; safe defaults) ---
@@ -1292,7 +1305,61 @@ class Morphodynamics:
     prescribed_solid_discharges: list[float] | None = None  # per liquid boundary (FRONT2 order)
     mass_balance: bool = True            # MASS-BALANCE (log the sediment budget)
     graphic_printouts: str | None = None  # GAIA VARIABLES FOR GRAPHIC PRINTOUTS; None -> default set
+    # --- a soil (hydrology mode; see the docstring). None leaves GAIA's default ---
+    suspension_formula: int | None = None   # SUSPENSION TRANSPORT FORMULA FOR ALL SANDS
+    layer_thickness: float | None = None    # LAYERS INITIAL THICKNESS [m]
+    mud_erosion_shear: float | None = None  # LAYERS CRITICAL EROSION SHEAR STRESS OF THE MUD [N/m2]
+    partheniades: float | None = None       # LAYERS PARTHENIADES CONSTANT [kg/m2/s]
+    mud_concentration: float | None = None  # LAYERS MUD CONCENTRATION [g/l]
+    equilibrium_inflow: bool = False        # EQUILIBRIUM INFLOW CONCENTRATION
+    soil: str | None = None                 # what the sediment wizard was given
     extra_keywords: dict[str, Any] = field(default_factory=dict)
+
+    #: The class GAIA is given when the case lists none.
+    DEFAULT_CLASS = {"diameter": 0.001, "density": 2650}
+
+    @property
+    def classes(self) -> list[dict]:
+        """The sediment classes GAIA is given: ``sediment_classes``, else :data:`DEFAULT_CLASS`."""
+        return self.sediment_classes or [dict(self.DEFAULT_CLASS)]
+
+    def class_type(self, c: dict) -> str:
+        """The type of class *c*: its own ``type``, else ``sediment_type``."""
+        return c.get("type") or self.sediment_type
+
+    def fractions(self) -> list[float] | None:
+        """:func:`class_fractions` of the classes GAIA is given."""
+        return class_fractions(self.classes)
+
+    def validate(self) -> None:
+        """What GAIA would stop at, named before a build: fractions of the classes that are no composition, and a type that is neither CO nor NCO (also ``sediment_type`` of the class GAIA is given when the case lists none)."""
+        if not self.enabled:
+            return
+        for c in self.classes:
+            kind = self.class_type(c)
+            if kind not in ("CO", "NCO"):
+                where = ("sediment_classes: the type of a class" if self.sediment_classes
+                         else "sediment_type")
+                raise ValueError(f"morphodynamics.{where} is CO or NCO, got {kind!r}")
+        self.fractions()
+
+    @property
+    def suspended_classes(self) -> int:
+        """How many classes GAIA carries in suspension, which is how many tracers TELEMAC has: the cohesive classes always, the others with ``suspended_load``; 0 when off."""
+        return len(self.tracer_names)
+
+    @property
+    def tracer_names(self) -> list[str]:
+        """The names TELEMAC gives the suspended classes of GAIA, its tracers, in TELEMAC's order: class by class (``lecdon_telemac2d_gaia.f`` adds them in the order of the classes), a cohesive class as ``COH SEDIMENT<n>`` and, with ``suspended_load``, a non-cohesive one as ``NCOH SEDIMENT<n>``, each kind numbered on its own; empty when off."""
+        if not self.enabled:
+            return []
+        names, counts = [], {"CO": 0, "NCO": 0}
+        for c in self.classes:
+            kind = self.class_type(c)
+            if kind == "CO" or (kind == "NCO" and self.suspended_load):
+                counts[kind] += 1
+                names.append(f"{'COH' if kind == 'CO' else 'NCOH'} SEDIMENT{counts[kind]}")
+        return names
 
 
 @dataclass
@@ -2397,6 +2464,7 @@ class Config:
             ("boundaries", self._check_outflow),
             ("initialization", self._check_prewet),
             ("morphodynamics", self._check_bed_change_data),
+            ("morphodynamics", self.morphodynamics.validate),
             ("gain_lose", self.percolation.validate),
             ("machine", self.telemac.environment.validate),
             ("machine", self.openfoam.environment.validate),
@@ -2466,11 +2534,6 @@ class Config:
                 "boundaries.internal_sources adds fixed-rate source regions, which the "
                 "hydrology build does not write. Set it to false or switch the "
                 "hydrology mode off.")
-        if self.morphodynamics.enabled:
-            raise ValueError(
-                "hydrology and morphodynamics (GAIA) cannot be combined yet: the "
-                "hydrology build couples no GAIA steering file. Switch one of them "
-                "off.")
         if self.initialization.prewet_depth is not None:
             raise ValueError(
                 "initialization.prewet_depth seeds the channel of a river reach; a "
@@ -2484,7 +2547,9 @@ class Config:
             )
 
     def _check_bed_change_data(self) -> None:
-        if self.morphodynamics.enabled and self.geodata.dem_target is None \
+        # a hydrology case is not calibrated, so it needs no measured bed change
+        if self.morphodynamics.enabled and not self.hydrology_mode \
+                and self.geodata.dem_target is None \
                 and self.geodata.dem_of_difference is None:
             raise ValueError(
                 "morphodynamics.enabled but no geodata.dem_target / dem_of_difference "

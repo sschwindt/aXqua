@@ -72,6 +72,14 @@ TELEMAC-GAIA Setup
      - Sediment supply at each open boundary.
    * - ``morphological_factor``
      - Factor by which the bed change is accelerated relative to the flow. A value of 10 means that one simulated hour represents ten hours of bed change. Use values above 1 with care, and only for slowly varying discharges.
+   * - ``suspension_formula``
+     - Number of the formula for the equilibrium concentration of the suspended sand in GAIA (3 is the formula of van Rijn); empty for GAIA's default.
+   * - ``layer_thickness``, ``mud_erosion_shear``, ``partheniades``, ``mud_concentration``
+     - The erodible layer of the bed and the erosion of a cohesive bed. The *Sediment transport wizard* of the hydrology mode sets them for a soil (:ref:`hydrology-sediment`).
+
+A class of ``sediment_classes`` may carry its own ``type`` (``CO`` cohesive or ``NCO`` non-cohesive) and ``fraction``. GAIA computes the transport at every time step of the flow; the setting ``coupling_period`` of earlier versions of aXqua is ignored, because TELEMAC v9.1.1 has no such keyword and stopped at it.
+
+**In the hydrology mode**, GAIA is coupled into the hydrology run, and the *Sediment transport wizard...* on the sub-tab *Simulations > Hydrology* recommends the classes and formulas for the soil and the slope of the catchment (:ref:`hydrology-sediment`).
 
 Significant bed changes occur during floods. A morphodynamic simulation is therefore usually run with a discharge time series. Define the time series under ``boundaries.inflow``, enable ``morphodynamics``, repeat the preprocessing and start the unsteady run (:ref:`hydraulics-hotstarts`):
 

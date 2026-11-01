@@ -34,8 +34,8 @@ from axqua.config import Config, outlet_level
 # The liquid-boundary readers are shared with the OpenFOAM backend, so they
 # live in the core; re-exported here because this module published them.
 from axqua.core.boundaries import (  # noqa: F401
-    _flow_column, _is_internal, _normalise_kind, _type_column,
-    liquid_line_details, liquid_lines,
+    HYDROLOGY_OUTLETS, _flow_column, _is_internal, _normalise_kind, _type_column,
+    line_condition, line_conditions, liquid_line_details, liquid_lines, parse_discharge,
 )
 from axqua.solvers.telemac.mesh import Mesh, _anisotropic_enabled
 
@@ -68,10 +68,11 @@ class LiquidBoundary:
     index: int        # 1-based, in contour-appearance order
     kind: str         # "inflow" | "outflow"
     n_nodes: int
-    discharge: float | None = None   # per-line prescribed Q [m3/s]; None -> split the
-                                     # total reach discharge across inflows by node share
-    # the contour nodes of the boundary (0-based), known right after a build; not
-    # serialized (a hydrology outlet reads its own section through them)
+    # per-line prescribed Q [m3/s]; None -> split the total reach discharge across inflows by node share
+    discharge: float | None = None
+    # the outflow condition of this line (the Outlet column of a hydrology case); None -> the case's condition (core.boundaries.line_condition)
+    condition: str | None = None
+    # the contour nodes of the boundary (0-based), known right after a build; not serialized (a hydrology outlet reads its own section through them)
     nodes: tuple = field(default=(), compare=False, repr=False)
 
 
@@ -115,7 +116,7 @@ def dump_liquid_boundaries(liquids: list["LiquidBoundary"], path: str | Path) ->
     path = Path(path)
     path.write_text(json.dumps(
         [{"index": lb.index, "kind": lb.kind, "n_nodes": lb.n_nodes,
-          "discharge": lb.discharge} for lb in liquids],
+          "discharge": lb.discharge, "condition": lb.condition} for lb in liquids],
         indent=2) + "\n")
     return path
 
@@ -128,12 +129,14 @@ def load_liquid_boundaries(path: str | Path) -> list["LiquidBoundary"]:
     return [LiquidBoundary(index=int(d["index"]), kind=str(d["kind"]),
                            n_nodes=int(d["n_nodes"]),
                            discharge=(None if d.get("discharge") is None
-                                      else float(d["discharge"]))) for d in data]
+                                      else float(d["discharge"])),
+                           condition=d.get("condition") or None) for d in data]
 
 
-def _outflow_code(cfg: Config) -> tuple[int, int, int]:
-    """An outflow without a level (free, Neumann) -> 4 4 4; every outflow with one -> 5 4 4."""
-    return OUTFLOW_FREE if outlet_level(cfg.outflow_condition) is None else OUTFLOW_ELEV
+def _outflow_code(cfg: Config, line=None) -> tuple[int, int, int]:
+    """An outflow without a level (free, Neumann) -> 4 4 4; every outflow with one -> 5 4 4. *line* is the liquid boundary, whose own condition holds where it has one."""
+    condition = line_condition(cfg, line) if line is not None else cfg.outflow_condition
+    return OUTFLOW_FREE if outlet_level(condition) is None else OUTFLOW_ELEV
 
 
 
@@ -257,11 +260,10 @@ def load_internal_source_regions(cfg: Config,
     With a *mesh* the nodes inside each region are counted; a region containing no
     node raises (TELEMAC aborts on it at run time).
     """
-    import geopandas as gpd
+    from axqua.core.geodata import dataset
 
-    gdf = gpd.read_file(cfg.boundaries.liquid_boundaries)
-    if gdf.crs and gdf.crs.to_epsg() != cfg.crs_epsg:
-        gdf = gdf.to_crs(epsg=cfg.crs_epsg)
+    # the layer every reader shares: reprojected once, its discharges as numbers
+    gdf = dataset(cfg).liquid_boundaries()
     type_col = _type_column(gdf)
     if type_col is None:
         return []
@@ -293,12 +295,12 @@ def load_internal_source_regions(cfg: Config,
                 "no discharge/flow column to size it (add a 'Target flow' column with "
                 "the exchange in m3/s)."
             )
-        try:
-            magnitude = abs(float(row[flow_col]))
-        except (TypeError, ValueError):
+        value = parse_discharge(row[flow_col])
+        if value is None:                       # text, or an empty cell (NaN)
             raise ValueError(
                 f"internal source line {raw!r} has no numeric {flow_col!r} value."
             )
+        magnitude = abs(value)
         signed = _internal_sign(raw) * magnitude
         geom = row.geometry
         # default region: the line buffered to a thin strip (flat caps)
@@ -628,6 +630,115 @@ def _assign_line_discharges(cfg: Config, mesh: Mesh, liquids: list[LiquidBoundar
         log.info("per-line inflow discharges: %s m3/s (sum %.4f)", shares, total)
 
 
+def _split_outlets(cfg: Config, mesh: Mesh, kinds: list[str]) -> int:
+    """Separate adjacent outflow lines whose outlets differ by one wall node.
+
+    TELEMAC starts a new liquid boundary only where the codes of two neighboring nodes differ (``front2.f``), so an ``overfall`` line that touches a ``normal_depth`` line (both ``5 4 4``) would be one boundary with one level. A segment with a wall node is a wall for TELEMAC ("solid over liquid"), so wall nodes between them make two boundaries, in TELEMAC and in :func:`_front2_runs` alike. They are two: ``front2.f`` stops at a single solid node between two liquid ones ("SOLID POINT BETWEEN TWO LIQUID POINTS", found on the first real run), and at a single liquid node between two solid ones, so a line left with one node becomes wall too. Returns the number of nodes set to wall.
+    """
+    import numpy as np
+    from shapely.geometry import Point
+
+    lines = line_conditions(cfg) if cfg.boundaries.liquid_boundaries is not None else None
+    if not lines or not any(d["condition"] for d in lines):
+        return 0
+    bn = np.asarray(mesh.boundary_nodes)
+    condition = {}
+    for rank, node in enumerate(bn):
+        if kinds[rank] == "outflow":
+            p = Point(float(mesh.x[node]), float(mesh.y[node]))
+            nearest = min(lines, key=lambda d: d["geom"].distance(p))
+            condition[rank] = nearest["condition"] or cfg.outflow_condition
+    loops = getattr(mesh, "boundary_loops", None)
+    lengths = [int(bn.size)] if loops is None or len(loops) == 0 else [int(n) for n in loops]
+    walled = 0
+    off = 0
+    for length in lengths:
+        ranks = [off + j for j in range(length)]
+        off += length
+        # the runs of outflow nodes with one outlet, in contour order (cyclic)
+        position = {rank: j for j, rank in enumerate(ranks)}
+        runs: list[list[int]] = []
+        for j, rank in enumerate(ranks):
+            key = condition.get(rank) if kinds[rank] == "outflow" else None
+            if runs and key is not None and condition.get(runs[-1][-1]) == key \
+                    and j > 0 and runs[-1][-1] == ranks[j - 1]:
+                runs[-1].append(rank)
+            elif key is not None:
+                runs.append([rank])
+        if len(runs) > 1 and runs[0][0] == ranks[0] and runs[-1][-1] == ranks[-1] \
+                and condition[runs[0][0]] == condition[runs[-1][-1]]:
+            runs[0] = runs.pop() + runs[0]
+        # two runs that touch: the two nodes at the junction go to the longer one's expense, so that a short river line keeps its nodes
+        for first, second in zip(runs, runs[1:] + runs[:1]):
+            if first is second or ranks[(position[first[-1]] + 1) % length] != second[0]:
+                continue
+            if len(second) >= len(first):
+                victims = second[:2]
+            else:
+                victims = first[-2:]
+            for rank in victims:
+                if kinds[rank] == "outflow":
+                    kinds[rank] = "wall"
+                    walled += 1
+        # a liquid node alone between two wall nodes is an error of TELEMAC's as well
+        for j in range(length):
+            before, here, after = ranks[j - 1], ranks[j], ranks[(j + 1) % length]
+            if kinds[here] != "wall" and kinds[before] == "wall" == kinds[after]:
+                kinds[here] = "wall"
+                walled += 1
+    kept = {condition[r] for r in condition if kinds[r] == "outflow"}
+    for line in lines:
+        if line["condition"] and line["condition"] not in kept:
+            log.warning("  the outflow line with the outlet %s has no node left between "
+                        "its neighbors; refine the mesh there or lengthen the line",
+                        line["condition"])
+    if walled:
+        log.info("  %d contour node(s) set to wall between outflow lines with different "
+                 "outlets, so that TELEMAC numbers them as boundaries of their own", walled)
+    return walled
+
+
+def _assign_line_conditions(cfg: Config, mesh: Mesh, liquids: list[LiquidBoundary],
+                            node_map: dict[int, list[int]]) -> None:
+    """Give each outflow boundary of a hydrology case the condition of its line (the ``Outlet`` column), matched like the discharges: the nearest outflow line to the centroid of its nodes. No-op without the column; a river case ignores it."""
+    import numpy as np
+    from shapely.geometry import Point
+
+    if cfg.boundaries.liquid_boundaries is None:
+        return
+    lines = line_conditions(cfg)
+    if not lines or not any(d["condition"] for d in lines):
+        return
+    if not getattr(cfg, "hydrology_mode", False):
+        log.warning("  the column Outlet of the liquid boundaries is read in the hydrology "
+                    "mode only; this river case uses boundaries.outflow_condition for "
+                    "every outflow line")
+        return
+    for lb in liquids:
+        if lb.kind != "outflow":
+            continue
+        nds = node_map.get(lb.index, [])
+        if not nds:
+            continue
+        centroid = Point(float(np.mean([mesh.x[i] for i in nds])),
+                         float(np.mean([mesh.y[i] for i in nds])))
+        nearest = min(lines, key=lambda d: d["geom"].distance(centroid))
+        condition = nearest["condition"]
+        if condition is None:
+            continue
+        if condition not in HYDROLOGY_OUTLETS:
+            raise ValueError(
+                f"the outflow line {lb.index} of {Path(cfg.boundaries.liquid_boundaries).name} "
+                f"has the outlet {nearest['value']!r}; the column Outlet takes "
+                f"{', '.join(HYDROLOGY_OUTLETS)}, or nothing for "
+                f"hydrology.outlet_condition ({cfg.outflow_condition})")
+        lb.condition = condition
+    own = [f"{lb.index}: {lb.condition}" for lb in liquids if lb.condition]
+    if own:
+        log.info("  outflow lines with an outlet of their own: %s (the others: %s)",
+                 ", ".join(own), cfg.outflow_condition)
+
+
 def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBoundary]]:
     """Classify contour nodes; return per-node kind list and liquid boundaries.
 
@@ -672,6 +783,8 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
         log.info("  %d contour node(s) excluded from the liquid boundaries: they stand "
                  "on a solid structure", on_solid)
 
+    if hydrology:
+        _split_outlets(cfg, mesh, kinds)
     liquids, node_map = _number_liquid_boundaries(mesh, kinds)
     if not liquids and hydrology:
         log.warning("  no contour node lies on a liquid-boundary line: the catchment "
@@ -684,6 +797,7 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
             f"the matching tolerance (~{tol:.1f} m) suits the mesh resolution."
         )
     _assign_line_discharges(cfg, mesh, liquids, node_map)
+    _assign_line_conditions(cfg, mesh, liquids, node_map)
     _warn_node_balance(liquids, mesh, node_map, hydrology=hydrology)
     return kinds, liquids
 
@@ -691,14 +805,21 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
 def write_cli(cfg: Config, mesh: Mesh) -> tuple[Path, list[LiquidBoundary]]:
     kinds, liquids = classify_nodes(cfg, mesh)
     code = {"wall": WALL, "inflow": INFLOW, "outflow": _outflow_code(cfg)}
+    # an outflow line with an outlet of its own may differ from the case's code
+    own_code = {int(n): _outflow_code(cfg, lb) for lb in liquids
+                if lb.kind == "outflow" and lb.condition for n in lb.nodes}
 
+    # The tracer code (LITBOR, GAIA's LICBOR) matters only where TELEMAC carries tracers, which here are GAIA's suspended classes: a prescribed concentration at an inflow (5), a free one at an outflow (4). With a wall (2) there, suspended sediment could not leave the model. Without tracers the column stays 2, as every case had it.
+    tracer = ({"wall": 2, "inflow": 5, "outflow": 4}
+              if cfg.morphodynamics.suspended_classes else {})
     rows = []
     for rank, (node, kind) in enumerate(zip(mesh.boundary_nodes, kinds), start=1):
-        c = code[kind]
+        c = own_code.get(int(node), code[kind]) if kind == "outflow" else code[kind]
         n_global = int(node) + 1  # SELAFIN/TELEMAC 1-based
         comment = "" if kind == "wall" else kind
         rows.append(
-            f"{c[0]} {c[1]} {c[2]}  0.000 0.000 0.000 0.000  2  0.000 0.000 0.000  "
+            f"{c[0]} {c[1]} {c[2]}  0.000 0.000 0.000 0.000  {tracer.get(kind, 2)}  "
+            "0.000 0.000 0.000  "
             f"{n_global:>10}  {rank:>10}   # {comment}"
         )
     path = cfg.model_path(cfg.boundary_cli)

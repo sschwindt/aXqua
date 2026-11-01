@@ -8,6 +8,24 @@ A working aXqua installation consists of four parts, which are installed in this
 #. **The plugin setup**, which tells aXqua where the simulation software is installed on the computer in use (:doc:`plugin-setup`).
 #. **Postprocessors**, which are VisIt and ParaView for three-dimensional figures. They are optional (:doc:`postprocessors`).
 
+.. admonition:: Watch this Tutorial on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="Installing aXqua: QGIS Plugin and Python Backend"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/gK83Q8bJCHI>`_.
+
 .. toctree::
    :maxdepth: 2
 

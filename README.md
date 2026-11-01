@@ -4,7 +4,7 @@
 
 aXqua builds a **TELEMAC-2D/3D** case (optionally with **GAIA**) or an **OpenFOAM** free-surface case from geodata, runs it as a job that outlives the shell or QGIS that started it, and calibrates it with [HydroBayesCal](https://github.com/Ecohydraulics/hydrobayescal) (surrogate-assisted Bayesian calibration with quantified uncertainty). A **QGIS plugin** drives the whole workflow; everything also works from a terminal.
 
-**Documentation:** [axqua.eu](https://axqua.eu) (English), [axqua.eu/de](https://axqua.eu/de/) (Deutsch), [axqua.eu/fr](https://axqua.eu/fr/) (Français), and [axqua.readthedocs.io](https://axqua.readthedocs.io) (English).
+**Documentation:** [axqua.eu](https://axqua.eu) (English), [axqua.eu/de](https://axqua.eu/de/) (Deutsch), [axqua.eu/fr](https://axqua.eu/fr/) (Français), and [axqua.ch](https://axqua.readthedocs.io) (Switzerland).
 
 ## Install
 
@@ -60,6 +60,7 @@ Build and publish all three languages on GitHub Pages:
 
 ```bash
 mamba env create -f docs/i18n/environment.yml   # once: the environment axqua-docs (Sphinx + Argos Translate)
+mamba activate axqua-docs
 bash deploy.sh                                  # build into docs/_build/site and copy it into the gh-pages worktree
 bash deploy.sh --push                           # ... then push main and gh-pages: the site is live within a minute
 ```
@@ -68,4 +69,4 @@ bash deploy.sh --push                           # ... then push main and gh-page
 
 ## License
 
-aXqua is BSD-3-Clause; the QGIS plugin is GPL-2.0-or-later. The data of the example cases are CC BY 4.0 (`cases/example-*/LICENSE.md`). Coordinates are EPSG:25832 throughout; see `CLAUDE.md` for the notes of the developers.
+aXqua is BSD-3-Clause; the QGIS plugin is GPL-2.0-or-later. The data of the example cases are CC BY 4.0 (`cases/example-*/LICENSE.md`).

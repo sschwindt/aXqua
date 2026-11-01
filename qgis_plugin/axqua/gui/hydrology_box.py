@@ -1,6 +1,6 @@
 """The *Simulations > Hydrology* sub-tab: rainfall-runoff over a catchment.
 
-Above, the box of the capability (Build, Submit, Load results), like every simulation. Below it, the data of the case: where the catchment is, which rain, soil and weather files it has, and the findings of the hydrology checkup. *Data wizard...* opens the window that guides through the data (:mod:`.hydrology_wizard`); *Check* runs the checkup with the analysis of the terrain model, which takes a few seconds.
+Above, the box of the capability (Build, Submit, Load results), like every simulation. Below it, the data of the case: where the catchment is, which rain, soil and weather files it has, whether it transports sediment, and the findings of the hydrology checkup. *Data wizard...* opens the window that guides through the data (:mod:`.hydrology_wizard`), *Sediment transport wizard...* the one that sets up GAIA for the soil (:mod:`.sediment_wizard`); *Check* runs the checkup with the analysis of the terrain model, which takes a few seconds.
 
 The plugin decides nothing here: the answers are those of ``axqua hydrology info`` and ``axqua hydrology check``. Three rules keep them right and cheap. An answer is shown only when it is the newest one asked for the case that is still chosen (a checkup of the terrain takes seconds, and the user may have moved on to another case). A box that is not on the screen asks nothing until its tab is shown, so that one refresh of the case starts one checkup, not one per tab that carries the box. And a question that is still on its way is not asked again while the case file is the one it was asked about: a refresh then waits for its answer, which also keeps a checkup of the terrain the user started; data that have changed since are asked about again, with the terrain if that was the question.
 """
@@ -40,6 +40,12 @@ def summarize(info: dict) -> str:
     moisture = info.get("initial_water_content")
     lines.append("Water content at the start: "
                  + (f"{moisture:g} m³/m³" if moisture is not None else "not set"))
+    sediment = info.get("sediment") or {}
+    if sediment:
+        lines.append("Sediment transport: " + (
+            f"on ({sediment.get('soil') or 'own settings'})" if sediment.get("enabled")
+            else "off" if sediment.get("decided") else
+            "not set up (strongly recommended)"))
     return "\n".join(lines)
 
 
@@ -102,6 +108,12 @@ class HydrologyDataBox(QGroupBox):
                                       "for anywhere")
         self.wizard_button.clicked.connect(self.open_wizard)
         row.addWidget(self.wizard_button)
+        self.sediment_button = QPushButton("Sediment transport wizard...")
+        self.sediment_button.setToolTip("The soil and the transport formula of GAIA, "
+                                        "recommended for the soil and the slope of the "
+                                        "catchment")
+        self.sediment_button.clicked.connect(self.open_sediment_wizard)
+        row.addWidget(self.sediment_button)
         self.check_button = QPushButton("Check")
         self.check_button.setToolTip("The hydrology checkup, with the analysis of the "
                                      "terrain model: where the flow crosses the outline "
@@ -232,6 +244,20 @@ class HydrologyDataBox(QGroupBox):
             # read, and then finds these questions on their way
             data_changed(self.ctx)
         if wizard.saved:
+            self.ctx.refresh_case()
+
+
+    def open_sediment_wizard(self) -> None:
+        if self.case is None:
+            self.ctx.warn("Add a case on the tab Case Setup first.")
+            return
+        from ..compat import exec_dialog
+        from .sediment_wizard import SedimentWizard
+
+        wizard = SedimentWizard(self.ctx, self.case, self.info, parent=self)
+        exec_dialog(wizard)
+        if wizard.saved:
+            data_changed(self.ctx)
             self.ctx.refresh_case()
 
 

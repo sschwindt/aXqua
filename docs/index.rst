@@ -4,7 +4,7 @@ aXqua
 .. admonition:: About
    :class: note
 
-   aXqua is designed as a QGIS plugin to support numerical simulations of surface waters with the open-source codes `TELEMAC <http://www.opentelemac.org/>`_ and `OpenFOAM <https://www.openfoam.com/>`_. This vibe-coded plugin is hosted on `GitHub <https://github.com/sschwindt/aXqua/>`_ and maintained by `Sebastian Schwindt <https://sebastian-schwindt.org/>`_ with the help of `Claude Code <https://claude.com/product/claude-code>`_. Installing the QGIS plugin requires a backend installation of the aXqua code, so please make sure to follow **each step** in the :doc:`installation/qgis-plugin` and :doc:`installation/plugin-setup` sections, including instructions to get ready with TELEMAC and OpenFOAM, as well as `ParaView <https://www.paraview.org/>`_, and `Visit DAV <https://visit-dav.github.io/visit-website/index.html>`_ for post-processing. This documentation is published at `axqua.eu <https://axqua.eu>`_.
+   aXqua is designed as a QGIS plugin to support numerical simulations of surface waters with the open-source codes `TELEMAC <http://www.opentelemac.org/>`_ and `OpenFOAM <https://www.openfoam.com/>`_. aXqua is vibe-coded and hosted on `GitHub <https://github.com/sschwindt/aXqua/>`_. Installing the QGIS plugin requires a backend installation of the aXqua code, so please make sure to follow **each step** in the :doc:`installation/qgis-plugin` and :doc:`installation/plugin-setup` sections, including instructions to get ready with TELEMAC and OpenFOAM, as well as `ParaView <https://www.paraview.org/>`_, and `Visit DAV <https://visit-dav.github.io/visit-website/index.html>`_ for post-processing. This documentation is published at `axqua.eu <https://axqua.eu>`_.
 
 .. _purpose:
 

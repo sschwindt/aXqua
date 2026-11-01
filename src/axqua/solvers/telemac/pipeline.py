@@ -329,6 +329,7 @@ def _write_hydrology(cfg: Config, the_mesh, liquids, inflow, art: Artifacts) -> 
     art.hydrology_cas = written.pop("cas")
     art.user_fortran = written.pop("user_fortran")
     art.liquid_boundaries = written.pop("liquid_boundaries", None)
+    art.gaia_cas = written.pop("gaia_cas", None)
     art.hydrology_files = written
 
 

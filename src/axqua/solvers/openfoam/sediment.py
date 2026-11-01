@@ -69,11 +69,12 @@ from typing import Any
 import numpy as np
 
 from axqua.core import errors
+from axqua.core.installation import FINE_SEDIMENT_SOLVER
 from axqua.solvers.openfoam.layout import time_folders
 
 log = logging.getLogger("axqua")
 
-SOLVER = "sediDriftFoam2"
+SOLVER = FINE_SEDIMENT_SOLVER
 BED_PATCH = "bedWall"
 SURFACE_PATCH = "freeSurface"
 

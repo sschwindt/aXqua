@@ -1,0 +1,89 @@
+name: auto-release
+
+# A new version on main is released without a tag pushed by hand (the user's order of
+# 2026-11-01: "I pushed but the new release is still missing").
+#
+# When the workflow `tests` has passed for a push to main, this reads the version of
+# pyproject.toml. If the tag v<version> does not exist yet, it checks that the four places
+# that name the version agree, creates the tag on the tested commit, and starts the
+# workflow `release` (plugin-release.yml) on that tag. That workflow builds and attaches
+# the plugin zip, and uploads the program to PyPI (trusted publishing, environment pypi).
+#
+# Why the release is started by a dispatch: a tag pushed with the GITHUB_TOKEN of a
+# workflow does not start other workflows (GitHub's rule against loops), but a
+# workflow_dispatch does. The dispatch names the tag as its ref, so `release` runs exactly
+# as for a tag pushed by hand (github.ref is refs/tags/v<version>).
+#
+# A push that does not change the version releases nothing: its tag exists already.
+on:
+  workflow_run:
+    workflows: ["tests"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write      # to push the tag
+  actions: write       # to start the workflow release
+
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # the commit the tests passed for, not whatever main is now
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Read the version and look for its tag
+        id: version
+        run: |
+          version=$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
+            echo "v$version exists already: nothing to release"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "v$version is new"
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: The four places that name the version must agree
+        if: steps.version.outputs.new == 'true'
+        run: |
+          v="${{ steps.version.outputs.version }}"
+          fallback=$(grep -m1 '^_FALLBACK_VERSION = ' src/axqua/__init__.py | cut -d'"' -f2)
+          plugin=$(grep -m1 '^version=' qgis_plugin/axqua/metadata.txt | cut -d= -f2 | tr -d ' ')
+          docs=$(grep -m1 '^release = ' docs/conf.py | cut -d'"' -f2)
+          echo "pyproject=$v fallback=$fallback plugin=$plugin docs=$docs"
+          if [ "$fallback" != "$v" ] || [ "$plugin" != "$v" ] || [ "$docs" != "$v" ]; then
+            echo "::error::the version is not the same everywhere; nothing was tagged"
+            exit 1
+          fi
+          if ! grep -q "^changelog=$v\$" qgis_plugin/axqua/metadata.txt; then
+            echo "::error::the changelog of metadata.txt does not begin with $v"
+            exit 1
+          fi
+
+      - name: Tag the tested commit and start the release
+        if: steps.version.outputs.new == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "aXqua ${{ steps.version.outputs.version }}"
+          git push origin "$tag"
+          gh workflow run plugin-release.yml --ref "$tag"
+          echo "released $tag: see Actions > release"

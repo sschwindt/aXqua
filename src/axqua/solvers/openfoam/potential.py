@@ -2,7 +2,7 @@
 
 Why it is worth the trouble on this case. The two-phase runs spend four cells in
 five on air: munich-vsf leg A is 582,924 cells of which 22% hold water, and the
-time step is set by the air's velocity cap, not by the water. the main workstation measured the
+time step is set by the air's velocity cap, not by the water. The main workstation measured the
 cost of making that case *correct* - doubling the freeboard so the lid stops
 clipping the surface, and adding the layers that go with it - at **3.3x the
 per-step cost for 1.5x the cells**. Resolving the air better is the expensive

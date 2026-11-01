@@ -96,10 +96,13 @@ SOLVERS = (("telemac", "TELEMAC"), ("openfoam", "OpenFOAM"))
 WINDOWS: dict[str, tuple[str, str]] = {
     "install-telemac": ("installation/simulation-software", "install-telemac"),
     "install-openfoam": ("installation/simulation-software", "install-openfoam"),
+    "setup-telemac": ("installation/simulation-software", "setup-existing-telemac"),
+    "setup-openfoam": ("installation/simulation-software", "setup-existing-openfoam"),
     "install-postprocessors": ("installation/postprocessors", "help-postprocessors"),
     "example-case": ("usage/case-setup", "help-example-case"),
     "cleanup": ("troubleshooting/tips-logfiles", "help-cleanup"),
     "hydrology-wizard": ("usage/hydrology-simulations", "help-hydrology-wizard"),
+    "sediment-wizard": ("usage/hydrology-simulations", "help-sediment-wizard"),
 }
 
 #: Where a capability nobody has placed is shown: with the simulations of its solver.

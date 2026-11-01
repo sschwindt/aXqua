@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.1.1
+version=1.2.0
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,23 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.1.1
+changelog=1.2.0
+    - Setup Wizard for TELEMAC and OpenFOAM on the Configuration tab: select an
+      existing environment script, which aXqua checks module by module (a valid
+      installation that lacks GAIA, TELEMAC-3D or sediDriftFoam2 is told apart
+      from an invalid one), or install the program.
+    - Hydrology mode: sediment transport with GAIA, strongly recommended, with the
+      Sediment transport wizard (soil layer, grain sizes, a recommendation after
+      van Rijn and Partheniades for the soil and the slope) and a sediment budget
+      of the run. The checkup refuses sediment setups that TELEMAC cannot run
+      where a river flows into the model.
+    - Hydrology mode: optional river lines, an inflow line with the discharge of a
+      river and its outflow line with an outlet of its own (data wizard, tab
+      River).
+    - The example example-agrohydrology transports sediment.
+    - Steering files keep every line within the 72 columns TELEMAC reads.
+    - Needs the aXqua program 1.2.
+    1.1.1
     - Load results: the layers "infiltrated depth" and "high water mark" of a
       hydrology run showed the water depth of the first time step. Each now shows
       its own variable, and the high water mark is drawn as the highest water

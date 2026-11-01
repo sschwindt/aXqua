@@ -134,7 +134,7 @@ LAUNCHERS = ("auto", "systemd", "posix", "windows", "wsl")
 
 #: The OpenFOAM release aXqua writes dictionaries for. Another one starts, reads a file
 #: it does not understand, and fails far from the cause.
-OPENFOAM_RELEASE = "2406"
+from axqua.core.installation import OPENFOAM_RELEASE  # noqa: E402,F401  (one value, kept here for its users)
 
 __all__ = ["AxquaProfile", "SolverBinding", "active_path", "candidates", "check",
            "default_path", "detect", "file_path", "installation_of", "load",
@@ -644,6 +644,38 @@ def detect(name: str | None = None) -> AxquaProfile:
     return profile
 
 
+#: What the entry of a code holds about its installation rather than about the computer, with the value it has without: dropped when the script of another installation takes the place of the old script (:func:`rebound`, ``jobs.profiles.implicit``).
+INSTALLATION_FIELDS = {"config_name": None, "overrides": {}, "shell": None}
+
+
+def absolute_script(script) -> Path:
+    """*script* as a full path (``~`` expanded, links followed where the file exists), so that one file named two ways is one file."""
+    path = Path(script).expanduser()
+    try:
+        return path.resolve() if path.exists() else path.absolute()
+    except OSError:
+        return path.absolute()
+
+
+def same_script(old, new) -> bool:
+    """Whether *old* and *new* name the same environment script. Only the same script keeps the entry of its installation: another ``pysource.<configuration>.sh`` of the same folder sets another configuration, which the old ``config_name`` would override."""
+    return old is not None and new is not None and absolute_script(old) == absolute_script(new)
+
+
+def rebound(profile: "AxquaProfile | None", solver: str, script) -> "SolverBinding":
+    """The entry with which the environment script *script* of *solver* is entered into *profile*. Where the profile runs that script already (named, or found in its installation folder), its entry with the new spelling of the script. Otherwise the entry without :data:`INSTALLATION_FIELDS` and with what belongs to the computer (environment kind, distribution, MPI launcher and processes), the rule ``jobs.profiles.implicit`` follows too."""
+    import copy
+
+    binding = profile.solvers.get(solver) if profile is not None else None
+    new = copy.deepcopy(binding) if binding is not None else SolverBinding()
+    old = profile.script(solver) if profile is not None else None
+    if not same_script(old, script):
+        for name, empty in INSTALLATION_FIELDS.items():
+            setattr(new, name, copy.copy(empty))
+    new.setup_script = absolute_script(script)
+    return new
+
+
 # ------------------------------------------------------------------------ checking
 
 
@@ -823,36 +855,9 @@ def _check_binding(profile: AxquaProfile, solver: str, *, probe: bool, timeout: 
 
 def _probe(solver: str, binding: SolverBinding, script: Path, subject: str,
            timeout: float) -> list[Finding]:
-    """Enter the environment and see whether the code is really there."""
-    from axqua.core.environment import SolverEnvironment, default_kind
+    """Enter the environment and see whether the code, and each part of it that aXqua
+    uses, is really there (:func:`axqua.core.installation.inspect`)."""
+    from axqua.core.installation import inspect
 
-    overrides = dict(binding.overrides)
-    if binding.config_name:
-        overrides.setdefault("USETELCFG", binding.config_name)
-    environment = SolverEnvironment(
-        kind=binding.environment or default_kind(), setup_script=script,
-        shell=binding.shell, distro=binding.distro, mpi_launcher=binding.mpi_launcher,
-        overrides=overrides)
-    status = environment.validate(solver, timeout=timeout)
-    if not status.ok:
-        return [Finding(ERROR, "axqua.environment.solver_unreachable",
-                        f"{solver} cannot be reached: {status.detail}", subject=subject,
-                        remedy="Check that this is the environment script of a working "
-                               "installation.")]
-    out: list[Finding] = []
-    if status.ambient:
-        out.append(Finding(
-            WARNING, "axqua.environment.ambient",
-            f"the variables of {solver} were already set before its environment script "
-            "ran, so the script may not be what provides them", subject=subject,
-            remedy="A job does not inherit the settings of a terminal. Make sure the "
-                   "script itself sets up the installation."))
-    if solver == "openfoam":
-        release = str(status.variables.get("WM_PROJECT_VERSION", ""))
-        if OPENFOAM_RELEASE not in release:
-            out.append(Finding(
-                WARNING, "axqua.environment.openfoam_version",
-                f"this is OpenFOAM {release or 'of an unknown version'}; aXqua writes "
-                f"input files for v{OPENFOAM_RELEASE}", subject=subject,
-                remedy=f"Bind the environment script of OpenFOAM v{OPENFOAM_RELEASE}."))
-    return out
+    return inspect(solver, script, binding=binding, subject=subject,
+                   timeout=timeout).findings

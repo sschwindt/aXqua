@@ -21,4 +21,4 @@ v1 scenes: **`free-surface`** (isosurface of `alpha.water=0.5`; under a rigid li
 
 Names stay TELEMAC's (`WATER DEPTH`, with the space): they match QGIS and the TELEMAC manuals, and both programs select them from a list. Components that belong together also become a vector (`vector_groups`: `VELOCITY` from `U`, `V`, `W`; `FRICTION VELOCITY` is not a component of anything).
 
-on the main workstation the link `visit/current` in the shared modeling folder points at a `3.4.2` that is not there, so that launcher answers "Version 3.4.2 of VisIt does not exist"; the VisIt used for the checks is the 3.5.0 the installation wizard installs.
+On the main workstation the link `visit/current` in the shared modeling folder points at a `3.4.2` that is not there, so that launcher answers "Version 3.4.2 of VisIt does not exist"; the VisIt used for the checks is the 3.5.0 the installation wizard installs.

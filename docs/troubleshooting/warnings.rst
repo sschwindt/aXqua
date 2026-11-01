@@ -143,6 +143,21 @@ The hydrology checkup of a case in hydrology mode reports the following warnings
 ``A free outlet holds only where the flow leaves supercritical``
     A free outlet prescribes nothing. At a slower outlet the water fills up into a pond, or the finite-element kernel becomes unstable, and the finite-volume kernel lets water in wherever the velocity at the outflow line points into the domain. Use ``normal_depth`` unless the outlet is steep and smooth, and ``overfall`` at the lower edge of a field over which the terrain falls away (:ref:`hydrology-outlet`).
 
+.. _axqua-hydrology-river-without-outlet:
+
+``Water flows into the catchment through an inflow line, but every outflow line is free or an overfall``
+    The case has a river that flows through the catchment: an inflow line carries a discharge into the model. A free outflow line or an overfall holds no level, so the river leaves the model as over a brink, and its water level drops toward the outflow line far more than in nature. Give the outflow line of the river its own outlet in the column ``Outlet`` of the liquid boundaries: ``normal_depth``, or ``elevation`` where the river flows into a lake or a larger river. The other outflow lines, for example the edges of a field, keep the outlet of the case (:ref:`hydrology-outlet`).
+
+.. _axqua-hydrology-sediment-undecided:
+
+``The case does not transport sediment``
+    The case in hydrology mode has no block ``morphodynamics``, so the hydrology run computes water only. The runoff of a catchment carries soil, and how much of it reaches the outlet or a river is often the question of the study, so aXqua strongly recommends sediment transport in the hydrology mode. Open the *Sediment transport wizard...* on the sub-tab *Simulations > Hydrology*, which recommends a setup for the soil and the slope of the catchment (:ref:`hydrology-sediment`). To keep the case hydraulic only, untick *Transport sediment* in the wizard and save: the case then says ``enabled: false`` and the checkup no longer asks.
+
+.. _axqua-hydrology-sediment-out-of-range:
+
+``A class of ... mm is coarser than the 2 mm ...`` or ``... is finer than the gravel and coarse sand ...``
+    The bed-load formula does not fit the grain size of a sediment class: van Rijn (1984) derived his formula for sand of 0.2 to 2 mm, Meyer-Peter and Müller (1948) theirs for gravel and coarse sand. Choose the formula the message names, or let the *Sediment transport wizard...* recommend one (:ref:`hydrology-sediment`).
+
 .. _axqua-hydrology-finite-elements:
 
 ``The finite-element kernel lets thin films drain slowly``
@@ -176,7 +191,7 @@ The hydrology checkup of a case in hydrology mode reports the following warnings
 Profile of this computer
 ------------------------
 
-The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) reports the following warnings. The plugin shows each of them as an orange triangle next to the entry concerned. A click on the triangle opens the message. A warning does not prevent saving the profile.
+The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) and the check of an existing installation in the *Setup Wizard* (``axqua profile inspect``) report the following warnings. The plugin shows each of them as an orange triangle next to the entry concerned. A click on the triangle opens the message. A warning does not prevent saving the profile.
 
 .. _axqua-environment-solver-unbound:
 
@@ -215,6 +230,16 @@ The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile
 
 ``this is OpenFOAM ...; aXqua writes input files for v2406``
     The environment script belongs to another OpenFOAM version. aXqua writes its input files for the version v2406, and other versions may reject them. Enter the environment script of OpenFOAM v2406 in the profile.
+
+.. _axqua-environment-module-missing:
+
+``... has no ..., so ... will not work``
+    The installation works, but a part of it that one aXqua module needs is missing, for example GAIA or TELEMAC-3D in a TELEMAC build, or Olsen's sediDriftFoam2 or the stage-discharge outflow boundary of the BAW in an OpenFOAM installation. Every other module works. The message names the module that does not. If it is needed, build TELEMAC with the missing module, or install OpenFOAM with the *Setup Wizard* (*Install OpenFOAM*), which compiles the sediment solvers and the outflow boundary and enters its ``shell-rc.sh`` in the profile (:ref:`install-openfoam`).
+
+.. _axqua-environment-unusual-script:
+
+``... is not named like an environment script of ...``
+    The selected file does not have the name of an environment script: ``pysource.<configuration>.sh`` in the folder ``configs`` of TELEMAC, ``etc/bashrc`` of OpenFOAM, or ``shell-rc.sh`` of the OpenFOAM installation of aXqua. aXqua still loads it and reports what it finds. Verify that the file is the script that sets up the installation and not, for example, a script of another program.
 
 Installation of the simulation software
 ---------------------------------------

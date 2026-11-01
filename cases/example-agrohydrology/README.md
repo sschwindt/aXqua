@@ -1,6 +1,6 @@
 # Example: arable field in QGIS, rainfall-runoff with Green-Ampt infiltration
 
-This example runs the hydrology mode of aXqua from the QGIS plugin. Rain falls on every node of a two-dimensional (2D) TELEMAC model of an arable field, part of it infiltrates into the soil after Green-Ampt, and the rest flows over the field as sheet flow and leaves it over its lower edges. The example checks the input data, builds the model, runs the storm, loads the result into QGIS, and repeats the storm on a second soil. Every step is a button in the plugin. The same steps are listed as terminal commands at the end.
+This example runs the hydrology mode of aXqua from the QGIS plugin. Rain falls on every node of a two-dimensional (2D) TELEMAC model of an arable field, part of it infiltrates into the soil after Green-Ampt, and the rest flows over the field as sheet flow and leaves it over its lower edges, carrying soil with it (sediment transport with GAIA). The example checks the input data, builds the model, runs the storm, loads the result into QGIS, and repeats the storm on a second soil. Every step is a button in the plugin. The same steps are listed as terminal commands at the end.
 
 ## What the example computes
 
@@ -17,6 +17,7 @@ The field covers 5.6 ha on a hillslope in Lower Bavaria, between 388 and 425 m a
 | Mesh | about 16,600 nodes and 32,600 triangles of near-equal sides, edge length 2 m |
 | Numerical kernel | finite volumes (HLLC) with the hydrostatic reconstruction of Chen and Noelle, the default of the hydrology mode |
 | Outlet | three outflow lines on the north, west and southeast edges of the field, with the condition `overfall` |
+| Sediment transport | GAIA coupled into the run, as the *Sediment transport wizard* recommends for a silt loam on a median slope of 8.7 %: a cohesive class of silt and clay (0.02 mm, 80 %) eroded after Partheniades, and the sand of the soil (0.15 mm, 20 %) as bed load and in suspension after van Rijn, in a plough layer of 0.3 m. The soil table of the original models gives no texture class; silt loam, the loess loam of much arable land in Lower Bavaria, is assumed. |
 
 **Where the water leaves the field.** A field is no catchment: its outline is not a drainage divide, and the water leaves it over whole edges. The outflow lines of this example follow the edges over which the terrain falls away beyond the outline. Routed over the terrain model, 78 % of the field drains over the north edge toward the stream, 11 % over the west edge, where the terrain drops down a steep bank, and 9 % over the southeast edge into a furrow 5 m outside the field. The other parts of the outline are walls. The hydrology checkup finds 0.3 % of the field draining across them, in stretches of at most 25 m², and names no wall that the flow crosses. The condition `overfall` lets the water leave over the outflow lines as over a brink, at critical flow at most, and lets none come back (documentation, section *Hydrology simulations*, *Boundaries and outlet*).
 
@@ -28,7 +29,7 @@ Measured run times with 4 processor cores on a workstation with 32 cores:
 | --- | --- | --- |
 | Hydrology checkup | *Preprocessing* > *Hydrology checkup* > *Check* | 1 s |
 | Build the model | *Preprocessing* > *Build* | 3 s |
-| Rainfall-runoff simulation | *Simulations* > *Hydrology* > *Submit* | 7 to 8 min |
+| Rainfall-runoff simulation with sediment transport | *Simulations* > *Hydrology* > *Submit* | about 25 min (7 to 8 min without sediment transport) |
 
 ## Where the data come from
 
@@ -69,22 +70,25 @@ Start QGIS and open the panel with the aXqua button in the toolbar or with *Plug
 1. Go to the tab *Preprocessing*. The box *Hydrology checkup* lists what is not in order with the rain, the soil, the outlet and the terrain. Click *Check* to include the analysis of the terrain model, which routes the water of every cell of the field to the outline. For this example, the checkup finds nothing.
 2. Click *Build*. The job appears in the list of jobs below the tabs. Wait until its state is `COMPLETED`.
 
+**How the sediment transport was chosen.** On the tab *Simulations*, sub-tab *Hydrology*, click *Sediment transport wizard...*. The tab *Soil layer* holds the plough layer of 0.3 m, the tab *Grain sizes* the texture class silt loam, and the tab *Recommendation* shows what aXqua recommends for that soil and the slope of the field, with the reasons: the transport formulas of van Rijn for the sand and the erosion law of Partheniades for the silt and clay, with the slope effect, because the field is steeper than 2 %. The case file carries this recommendation already, so close the window without saving, or try another soil and click *Save* on the last tab before the build. Unticking *Transport sediment (strongly recommended)* and saving makes the run hydraulic only.
+
 The build generates the mesh, interpolates the bed elevation and the soil onto the mesh nodes, assigns the boundary conditions, and writes the TELEMAC input files into `axqua-case/simulation/`:
 
 | File | Content |
 | --- | --- |
 | `geometry.slf` | the mesh with the bed elevation and, per node, K_s, the product of suction head and moisture deficit (`GA SUCTION A`) and the moisture deficit (`GA DELTA THETA`) |
-| `boundaries.cli` | the boundary conditions: `5 4 4` on the outflow lines, `2 2 2` on the walls |
+| `boundaries.cli` | the boundary conditions: `5 4 4` on the outflow lines, `2 2 2` on the walls, and the code `4` for the suspended sediment on the outflow lines, so that it can leave |
 | `forcing.txt` | rain and evaporation as intervals of constant intensity |
 | `user_fortran/runoff_greenampt.f` | the infiltration routine that aXqua generates for TELEMAC |
 | `hydrology2d.cas` | the TELEMAC steering file of the hydrology run |
+| `gaia.cas` | the GAIA steering file of the sediment transport |
 
 The file `axqua.log` in the same folder reports the mesh quality, the soil of the nodes and the duration of the run.
 
 ## Step 3: Run the storm
 
 1. Go to the tab *Simulations*, sub-tab *Hydrology*. In the box *Hydrology (rainfall-runoff)*, click *Submit*.
-2. In the list of jobs, the column *Progress* shows the simulated share of the 8 hours. The run takes 7 to 8 min with 4 processor cores.
+2. In the list of jobs, the column *Progress* shows the simulated share of the 8 hours. The run takes about 25 min with 4 processor cores; the sediment transport triples the time of the runoff alone.
 
 When the run has ended, aXqua writes the outlet hydrograph and the water balance into `axqua-case/postprocessing/hydrology/`:
 
@@ -93,6 +97,8 @@ When the run has ended, aXqua writes the outlet hydrograph and the water balance
 | `hydrograph.png` | the rain and the discharge over all outflow lines |
 | `hydrograph.csv` | the discharge through each outflow line over time |
 | `water-balance.csv`, `water-balance.json` | rain, infiltrated and evaporated volumes, outflow, the water left on the field, the error of the volume, the runoff coefficient and the peak discharge |
+| `boundary-volumes.csv` | the volume of water and the bed load through each outflow line |
+| `sediment-budget.csv`, `sediment-budget.json` | the soil eroded into suspension, deposited again, and carried off the field |
 
 For this example, the water balance reads:
 
@@ -105,6 +111,17 @@ For this example, the water balance reads:
 | Error of the volume | 0.001 m³ (0.00005 % of the rain) |
 | Runoff coefficient (outflow over rain) | 0.63 |
 | Peak discharge | 0.123 m³/s, 6 hours after the start |
+
+The sediment budget of the storm reads:
+
+| Quantity | Value |
+| --- | --- |
+| Soil eroded into suspension | 96 kg |
+| Deposited again on the field | 74 kg |
+| Carried off the field in suspension | 21 kg |
+| Bed load over the edges | 0 kg |
+
+These masses are small for 42 mm of rain on 5.6 ha of arable land, and they are not a prediction of its soil loss. GAIA detaches soil by the shear stress of the flow only, while on a bare field most soil is detached by the impact of raindrops and in rills, which the model does not represent; and the erosion parameters of the soil are GAIA's defaults, which need calibrating against measured sediment yields. The model shows where the flow picks up soil and where it deposits it.
 
 The hydrograph follows each hour of rain within about 20 minutes, the response time of a field of this size and slope. In the fourth hour, the rain of 1.7 mm/h hardly exceeds the infiltration capacity, and the outflow falls almost to zero. After the last rain, the field drains within about 15 minutes.
 
@@ -119,6 +136,9 @@ Select the completed job in the list and click *Load results* below the list. QG
 | *TELEMAC result (hydrology) - infiltrated depth* | the depth that has infiltrated since the start [m] |
 | *TELEMAC result (hydrology) - high water mark* | the highest water depth of the run [m]: TELEMAC's high water mark minus the bed, where the water was deeper than 1 cm (the level itself is the dataset *high water mark* of the layer) |
 | *TELEMAC result (hydrology) - highest velocity* | the highest flow velocity of the run, where the water was deeper than 1 cm |
+| *TELEMAC result (hydrology) - coh sediment1 [g/l]*, *... ncoh sediment1 [g/l]* | the concentration of the suspended silt and clay, and of the suspended sand |
+| *GAIA result - bed change [m]* | how much the bed rose (deposition) or fell (erosion) |
+| *GAIA result - bed shear stress [N/m2]* | the shear stress of the flow on the soil, which drives the erosion |
 | *Mesh geometry* | the mesh with the bed elevation and the soil |
 
 The result holds a map every 10 minutes (`hydrology.printout_period`). The time controller of QGIS steps through them. At the peak of the storm, the water on the field is a film of 1.2 mm in the median, and 99 % of the field carries less than 5 mm. Deeper water stands only in small depressions along a line parallel to the southeast edge and near the northeast corner, at most 9 cm. TELEMAC records its high water mark and its highest velocity only where the water is deeper than 1 cm, so these two layers show the depressions and leave the sheet flow out.
@@ -136,12 +156,18 @@ The second model of the field has a more permeable soil with a larger pore volum
 | Infiltrated | 15.6 mm | 28.7 mm |
 | Runoff coefficient | 0.63 | 0.32 |
 | Peak discharge | 0.123 m³/s | 0.089 m³/s |
+| Soil eroded into suspension | 96 kg | 15 kg |
+| Carried off the field | 21 kg | 3 kg |
 
-On the more permeable soil, half as much of the rain leaves the field, and the peak discharge is 28 % lower. The results of the first soil are overwritten. To keep both, copy the folder `axqua-case/` before the second build, or copy the case file under another name and set another `sim_dir` in its block `project`.
+On the more permeable soil, half as much of the rain leaves the field, and the peak discharge is 28 % lower. The sediment drops more than the water: the flow erodes a sixth of the soil and carries a seventh of it off the field. The results of the first soil are overwritten. To keep both, copy the folder `axqua-case/` before the second build, or copy the case file under another name and set another `sim_dir` in its block `project`.
 
 ## Optional steps
 
 **TELEMAC's own Green-Ampt equations.** Set `green_ampt: travert` in the block `hydrology` of the case file, or *Green-Ampt solution* to `travert` on the page *Hydrology*, and repeat steps 2 and 3. The infiltration then follows the equations that TELEMAC releases, as in the original models, and the water that ponds after the rain no longer infiltrates.
+
+**Without sediment transport.** In the *Sediment transport wizard...*, untick *Transport sediment (strongly recommended)* and click *Save* on the tab *Save*, then build and run again. The run then takes 7 to 8 min.
+
+**A river through the catchment.** This field has no river, but a catchment often drains into one that already carries water where it enters the model. The tab *River* of the *Data wizard...* gives an inflow line the discharge of the river and its outflow line an outlet of its own, while the edges of the field keep `overfall` (documentation, section *Hydrology*, *Boundaries and outlet*).
 
 **Data of one's own catchment.** *Data wizard...* on the sub-tab *Simulations > Hydrology* guides through rain, soil, initial moisture, wind and sun, and the outlet, with the data portals of the national agencies first. It can download a rain event, the soil moisture at its start, soil textures and sealed surfaces for any place on Earth. This example does not need it.
 
@@ -152,6 +178,7 @@ Run the commands in the folder of the example:
 ```bash
 axqua profile check
 axqua hydrology check example-agrohydrology.axq-case
+axqua hydrology sediment example-agrohydrology.axq-case --soil texture --texture "silt loam" --thickness 0.3
 axqua submit example-agrohydrology.axq-case --kind preprocessing
 axqua submit example-agrohydrology.axq-case --kind hydrology
 axqua list

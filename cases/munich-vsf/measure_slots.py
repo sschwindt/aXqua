@@ -1,6 +1,6 @@
 """The acceptance gate: the realised slot at all 14 baffles of the built mesh.
 
-the main workstation's criterion, and the one that decides whether anything downstream is worth
+The main workstation's criterion, and the one that decides whether anything downstream is worth
 running. Measured as the shortest distance between DISTINCT raised regions - a
 perpendicular ray cannot see a diagonal slot, which cost three wrong answers.
 

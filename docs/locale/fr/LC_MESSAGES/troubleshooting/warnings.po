@@ -171,6 +171,22 @@ msgstr "Droit pour une dépression fermée ; sinon tracer une ligne de sortie s
 msgid "A free outlet prescribes nothing. At a slower outlet the water fills up into a pond, or the finite-element kernel becomes unstable, and the finite-volume kernel lets water in wherever the velocity at the outflow line points into the domain. Use ``normal_depth`` unless the outlet is steep and smooth, and ``overfall`` at the lower edge of a field over which the terrain falls away (:ref:`hydrology-outlet`)."
 msgstr "Une prise libre ne prescrit rien. À une sortie plus lente, l'eau se remplit dans un étang, ou le noyau à éléments finis devient instable, et le noyau à volumes finis laisse l'eau entrer partout où la vitesse à la ligne de sortie pointe dans le domaine. Utilisez ``normal_depth`` sauf si la sortie est raide et lisse, et ``overfall`` au bord inférieur d'un champ sur lequel le terrain tombe (:ref:`hydrology-outlet`)."
 
+# machine translation: argos 747a14ba5c0a
+msgid "The case has a river that flows through the catchment: an inflow line carries a discharge into the model. A free outflow line or an overfall holds no level, so the river leaves the model as over a brink, and its water level drops toward the outflow line far more than in nature. Give the outflow line of the river its own outlet in the column ``Outlet`` of the liquid boundaries: ``normal_depth``, or ``elevation`` where the river flows into a lake or a larger river. The other outflow lines, for example the edges of a field, keep the outlet of the case (:ref:`hydrology-outlet`)."
+msgstr "Le cas a une rivière qui coule à travers le bassin versant : une ligne d'entrée transporte un débit dans le modèle. Une ligne d'écoulement libre ou une chute ne tient pas de niveau, de sorte que la rivière quitte le modèle comme au-dessus d'un bord, et son niveau d'eau descend vers la ligne d'écoulement bien plus que dans la nature. Donnez à la ligne de sortie de la rivière sa sortie dans la colonne ``Outlet`` des frontières liquides : ``normal_depth``, ou ``elevation`` où la rivière coule dans un lac ou une rivière plus grande. Les autres lignes de sortie, par exemple les bords d'un champ, gardent la sortie du cas (:ref:`hydrology-outlet`)."
+
+# machine translation: argos 9cac6a8e37cf
+msgid "The case in hydrology mode has no block ``morphodynamics``, so the hydrology run computes water only. The runoff of a catchment carries soil, and how much of it reaches the outlet or a river is often the question of the study, so aXqua strongly recommends sediment transport in the hydrology mode. Open the *Sediment transport wizard...* on the sub-tab *Simulations > Hydrology*, which recommends a setup for the soil and the slope of the catchment (:ref:`hydrology-sediment`). To keep the case hydraulic only, untick *Transport sediment* in the wizard and save: the case then says ``enabled: false`` and the checkup no longer asks."
+msgstr "Le cas en mode hydrologie n'a pas de bloc ``morphodynamics``, de sorte que l'hydrologie fonctionne calcule l'eau seulement. Le ruissellement d'un bassin versant porte le sol, et combien de celui-ci tronçons la sortie ou une rivière est souvent la question de l'étude, de sorte aXqua recommande fortement le transport des sédiments en mode hydrologie. Ouvrir le *Sediment transport wizard...* sur le sous-tab *Simulations > Hydrology*, qui recommande une configuration pour le sol et la pente du bassin versant (:ref:`hydrology-sediment`). Pour garder l'hydraulique cas seulement, détachez *Transport sediment* dans l'assistant et enregistrez : le cas dit alors ``enabled: false`` et le checkup ne demande plus."
+
+# machine translation: argos f3f75cc667f9
+msgid "``A class of ... mm is coarser than the 2 mm ...`` or ``... is finer than the gravel and coarse sand ...``"
+msgstr "``A class of ... mm is coarser than the 2 mm ...`` ou ``... is finer than the gravel and coarse sand ...``"
+
+# machine translation: argos 7e35e5affbca
+msgid "The bed-load formula does not fit the grain size of a sediment class: van Rijn (1984) derived his formula for sand of 0.2 to 2 mm, Meyer-Peter and Müller (1948) theirs for gravel and coarse sand. Choose the formula the message names, or let the *Sediment transport wizard...* recommend one (:ref:`hydrology-sediment`)."
+msgstr "La formule charriage ne correspond pas à la taille des grains d'une classe de sédiments : van Rijn (1984) a dérivé sa formule pour le sable de 0,2 à 2 mm, Meyer-Peter et Müller (1948) la leur pour le gravier et le sable grossier. Choisissez la formule les noms de message, ou laissez le *Sediment transport wizard...* recommander un (:ref:`hydrology-sediment`)."
+
 # machine translation: argos fe0cd156be34
 msgid "TELEMAC validates rainfall-runoff with its finite-volume kernel and the hydrostatic reconstruction of Chen and Noelle (``hydrology.kernel: finite-volumes``)."
 msgstr "TELEMAC valide le ruissellement des précipitations avec son noyau à volume fini et la reconstruction hydrostatique de Chen et Noelle (``hydrology.kernel: finite-volumes``)."
@@ -199,9 +215,9 @@ msgstr "L'analyse du terrain a échoué, généralement parce que le modèle de 
 msgid "Profile of this computer"
 msgstr "Profil de cet ordinateur"
 
-# machine translation: argos a1edaa5629c4
-msgid "The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) reports the following warnings. The plugin shows each of them as an orange triangle next to the entry concerned. A click on the triangle opens the message. A warning does not prevent saving the profile."
-msgstr "La vérification du profil (*Check* sur l'onglet *Configuration* ou ``axqua profile check``) indique les avertissements suivants. L'extension montre chacun d'eux comme un triangle orange à côté de l'entrée concernée. Un clic sur le triangle ouvre le message. Un avertissement n'empêche pas de sauvegarder le profil."
+# machine translation: argos 3c4f14a9f10c
+msgid "The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) and the check of an existing installation in the *Setup Wizard* (``axqua profile inspect``) report the following warnings. The plugin shows each of them as an orange triangle next to the entry concerned. A click on the triangle opens the message. A warning does not prevent saving the profile."
+msgstr "La vérification du profil (*Check* sur l'onglet *Configuration* ou ``axqua profile check``) et la vérification d'une installation existante dans le *Setup Wizard* (``axqua profile inspect``) indiquent les avertissements suivants. L'extension montre chacun d'eux comme un triangle orange à côté de l'entrée concernée. Un clic sur le triangle ouvre le message. Un avertissement n'empêche pas de sauvegarder le profil."
 
 # machine translation: argos b8ab7e5e983b
 msgid "The profile does not state where TELEMAC or OpenFOAM is installed. Select the installation folder or the environment script of the installation in the profile editor (:ref:`solver-bindings`). Leave both entries empty if the program is not used on this computer."
@@ -242,6 +258,14 @@ msgstr "Plus de processus que les cœurs du processeur ralentissent une simulati
 # machine translation: argos e919b13104d2
 msgid "The environment script belongs to another OpenFOAM version. aXqua writes its input files for the version v2406, and other versions may reject them. Enter the environment script of OpenFOAM v2406 in the profile."
 msgstr "Le script environnement appartient à une autre version OpenFOAM. aXqua écrit ses fichiers d'entrée pour la version v2406 et d'autres versions peuvent les rejeter. Entrez le script environnement d'OpenFOAM v2406 dans le profil."
+
+# machine translation: argos ad5fab03e5a4
+msgid "The installation works, but a part of it that one aXqua module needs is missing, for example GAIA or TELEMAC-3D in a TELEMAC build, or Olsen's sediDriftFoam2 or the stage-discharge outflow boundary of the BAW in an OpenFOAM installation. Every other module works. The message names the module that does not. If it is needed, build TELEMAC with the missing module, or install OpenFOAM with the *Setup Wizard* (*Install OpenFOAM*), which compiles the sediment solvers and the outflow boundary and enters its ``shell-rc.sh`` in the profile (:ref:`install-openfoam`)."
+msgstr "L'installation fonctionne, mais une partie de celle-ci que l'on a besoin d'un module aXqua est manquante, par exemple GAIA ou TELEMAC-3D dans une construction TELEMAC, ou la sediDriftFoam2 d'Olsen ou la mise à disposition d'étapes frontière de sortie de la BAW dans une installation OpenFOAM. Tous les autres modules fonctionnent. Le message nomme le module qui ne le fait pas. Si nécessaire, construire TELEMAC avec le module manquant, ou installer OpenFOAM avec le *Setup Wizard* (*Install OpenFOAM*), qui compile le sédiment solveurs et le frontière de sortie et entre son ``shell-rc.sh`` dans le profil (:ref:`install-openfoam`)."
+
+# machine translation: argos cd76d4974c69
+msgid "The selected file does not have the name of an environment script: ``pysource.<configuration>.sh`` in the folder ``configs`` of TELEMAC, ``etc/bashrc`` of OpenFOAM, or ``shell-rc.sh`` of the OpenFOAM installation of aXqua. aXqua still loads it and reports what it finds. Verify that the file is the script that sets up the installation and not, for example, a script of another program."
+msgstr "Le fichier sélectionné n'a pas le nom d'un script d'environnement : ``pysource.<configuration>.sh`` dans le dossier ``configs`` de TELEMAC, ``etc/bashrc`` d'OpenFOAM, ou ``shell-rc.sh`` de l'installation OpenFOAM d'aXqua. aXqua le charge toujours et rapporte ce qu'il trouve. Vérifiez que le fichier est le script qui définit l'installation et non, par exemple, un script d'un autre programme."
 
 # machine translation: argos ea0db95d380d
 msgid "Installation of the simulation software"

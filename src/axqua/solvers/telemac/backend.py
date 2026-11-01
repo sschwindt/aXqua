@@ -465,6 +465,11 @@ class TelemacBackend(BaseBackend):
             ctx.record("Outlet hydrograph (table)", folder / "hydrograph.csv",
                        kind="table")
             ctx.record("Water balance", folder / "water-balance.csv", kind="table")
+            ctx.record("Volume through each liquid boundary",
+                       folder / "boundary-volumes.csv", kind="table")
+            if (folder / "sediment-budget.csv").exists():
+                ctx.record("Sediment budget", folder / "sediment-budget.csv",
+                           kind="table")
             ctx.progress(flux_imbalance=result.relative_error)
         return result
 
@@ -578,6 +583,20 @@ class TelemacBackend(BaseBackend):
                        kind="mesh", style=STYLE_HIGH_WATER, variable="HIGH WATER MARK")
             ctx.record("TELEMAC result (hydrology) - highest velocity", hydrology,
                        kind="mesh", style=STYLE_VELOCITY, variable="HIGHEST VELOCITY")
+            # the suspended sediment of GAIA, which the hydrology run prints as tracers
+            m = getattr(cfg, "morphodynamics", None)
+            if m is not None:
+                for name in m.tracer_names:
+                    ctx.record(f"TELEMAC result (hydrology) - {name.lower()} [g/l]",
+                               hydrology, kind="mesh", variable=name)
+        # the bed of GAIA: how much it rose or fell, and the shear stress that moved it
+        m = getattr(cfg, "morphodynamics", None)
+        gaia = cfg.model_path(f"{m.gaia_results_base}.slf") if m is not None else None
+        if m is not None and m.enabled and gaia.exists():
+            ctx.record("GAIA result - bed change [m]", gaia, kind="mesh",
+                       variable="CUMUL BED EVOL")
+            ctx.record("GAIA result - bed shear stress [N/m2]", gaia, kind="mesh",
+                       variable="BED SHEAR STRESS")
         ctx.record("Mesh geometry", cfg.model_path(cfg.geometry_slf), kind="mesh")
         for name, kind in (("mesh-convergence.xlsx", "table"),
                            ("vertical-convergence.xlsx", "table")):

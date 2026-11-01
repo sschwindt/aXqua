@@ -384,4 +384,5 @@ def test_a_layer_without_internal_lines_says_nothing(tmp_path, caplog):
             assert boundary.exchange_regions(plain) == []
     finally:
         boundary.load_internal_source_regions = original
-    assert caplog.text == ""
+    # no warning; an INFO line of another module (solver discovery) may be captured too when an earlier test lowered the level of the logger
+    assert [r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING] == []

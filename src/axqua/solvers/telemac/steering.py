@@ -17,7 +17,8 @@ import math
 import re
 from pathlib import Path
 
-from axqua.config import Config, outlet_level
+from axqua.config import Config, class_fractions, outlet_level
+from axqua.core.boundaries import line_condition
 from axqua.core.geodata import dataset
 from axqua.solvers.telemac.boundary import LiquidBoundary
 
@@ -78,18 +79,14 @@ def _turbulence_length_scale(cfg: Config) -> float:
 
 
 def read_cas_values(path: str | Path, *keywords: str) -> dict[str, str | None]:
-    """Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``), ignoring comment lines - one file read/pass for all keywords."""
-    pats = {kw: re.compile(rf"^\s*{re.escape(kw)}\s*[:=]\s*(.+?)\s*$", re.IGNORECASE)
-            for kw in keywords}
+    """Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``, also continued over several lines), ignoring comment lines - one file read/pass for all keywords."""
+    wanted = {kw.strip().upper(): kw for kw in keywords}
     found: dict[str, str | None] = dict.fromkeys(keywords)
-    for line in Path(path).read_text(errors="replace").splitlines():
-        if line.lstrip().startswith(("/", "*")):
-            continue
-        for kw, pat in pats.items():
-            if found[kw] is None:
-                m = pat.match(line)
-                if m:
-                    found[kw] = m.group(1).strip()
+    lines = Path(path).read_text(errors="replace").splitlines()
+    for name, _, _, value in keyword_spans(lines):
+        kw = wanted.get(name)
+        if kw is not None and found[kw] is None and value:
+            found[kw] = value
     return found
 
 
@@ -708,6 +705,7 @@ def write_initial_conditions(cfg: Config, mesh) -> Path:
     selafin.write_initial_state(
         path, x=mesh.x, y=mesh.y, ikle=mesh.triangles + 1, ipobo=mesh.ipobo,
         depth=depth, title=f"{cfg.name} initial conditions",
+        bottom=_bed_for_gaia(cfg, mesh),
     )
     area = _nodal_areas(mesh)
     seeded = depth > 0.0
@@ -825,6 +823,7 @@ def write_dry_start_conditions(cfg: Config, mesh) -> Path | None:
     selafin.write_initial_state(
         path, x=mesh.x, y=mesh.y, ikle=mesh.triangles + 1, ipobo=mesh.ipobo,
         depth=depth, title=f"{cfg.name} dry start (inflow plug)",
+        bottom=_bed_for_gaia(cfg, mesh),
     )
     log.info("  dry start: seeded %d/%d inflow-plug nodes to %.2f m (within %.1f m of "
              "the inflow), dry elsewhere -> %s",
@@ -832,8 +831,17 @@ def write_dry_start_conditions(cfg: Config, mesh) -> Path | None:
     return path
 
 
+def _bed_for_gaia(cfg: Config, mesh):
+    """The bed for a previous-computation file when GAIA is coupled, else None: TELEMAC
+    with GAIA stops without it, and without GAIA the file stays as it was."""
+    if not cfg.morphodynamics.enabled:
+        return None
+    return getattr(mesh, "bottom", None)
+
+
 def _prescribed_arrays(cfg: Config, liquids: list[LiquidBoundary],
-                       inflow_q: float, outflow_wse: float | None) -> tuple[str, str, str]:
+                       inflow_q: float, outflow_wse: float | dict | None
+                       ) -> tuple[str, str, str]:
     """Build PRESCRIBED FLOWRATES / ELEVATIONS / VELOCITY PROFILES, ordered by
     liquid-boundary index. Unused slots get a harmless placeholder.
 
@@ -847,8 +855,11 @@ def _prescribed_arrays(cfg: Config, liquids: list[LiquidBoundary],
     proportion to their node count (a width/conveyance proxy) so the total prescribed
     inflow stays *inflow_q* - prescribing the full Q on each would multiply the
     supplied discharge and flood the domain.
+
+    *outflow_wse* is one level for every outflow line, or ``{index: level}`` where the
+    outflow lines of a hydrology case have conditions of their own; each line is free
+    or not by its own condition (:func:`axqua.core.boundaries.line_condition`).
     """
-    free_outflow = outlet_level(cfg.outflow_condition) is None
     inflows = [b for b in liquids if b.kind == "inflow"]
     per_line = bool(inflows) and all(b.discharge is not None for b in inflows)
     inflow_nodes = sum(b.n_nodes for b in inflows) or 1
@@ -861,7 +872,10 @@ def _prescribed_arrays(cfg: Config, liquids: list[LiquidBoundary],
             prof.append("4")                    # ~ proportional to sqrt(depth)
         else:
             flow.append("0.")                   # ignored for an outflow boundary
-            elev.append("0." if free_outflow else f"{outflow_wse:.4f}")
+            wse = (outflow_wse.get(lb.index) if isinstance(outflow_wse, dict)
+                   else outflow_wse)
+            free = outlet_level(line_condition(cfg, lb)) is None
+            elev.append("0." if free or wse is None else f"{wse:.4f}")
             prof.append("1")                    # constant normal profile
     return ";".join(flow), ";".join(elev), ";".join(prof)
 
@@ -875,14 +889,22 @@ def write_liquid_boundaries(cfg: Config, liquids: list[LiquidBoundary],
     node share, exactly as the steady prescribed flowrates) and ``SL(i)`` for
     prescribed-elevation outflows (``outflow_wse_fn(Q)`` - the rating-curve stage at
     that discharge). A free (Neumann) outflow prescribes nothing and gets no column.
-    The first column is the time ``T`` in seconds.
+    The first column is the time ``T`` in seconds. *outflow_wse_fn* may be ``{index:
+    callable}`` where the outflow lines of a hydrology case have conditions of their own.
     """
     import numpy as np
 
     # a level comes from the file only where the outflow prescribes one that the file
     # can give: not for a free outflow, and not for a hydrology outlet on TELEMAC's
     # stage-discharge curve, whose level TELEMAC takes from the curve itself
-    free_outflow = outlet_level(cfg.outflow_condition) in (None, "curve")
+    def has_level(lb) -> bool:
+        return outlet_level(line_condition(cfg, lb)) not in (None, "curve")
+
+    def level_of(lb, qt) -> float:
+        fn = (outflow_wse_fn.get(lb.index) if isinstance(outflow_wse_fn, dict)
+              else outflow_wse_fn)
+        return fn(qt) if fn else 0.0
+
     ordered = sorted(liquids, key=lambda b: b.index)
     inflows = [b for b in ordered if b.kind == "inflow"]
     per_line = bool(inflows) and all(b.discharge is not None for b in inflows)
@@ -895,7 +917,7 @@ def write_liquid_boundaries(cfg: Config, liquids: list[LiquidBoundary],
         q = np.array([q[-1], q[-1]])
 
     header = ["T"] + [f"Q({lb.index})" if lb.kind == "inflow" else f"SL({lb.index})"
-                      for lb in ordered if lb.kind == "inflow" or not free_outflow]
+                      for lb in ordered if lb.kind == "inflow" or has_level(lb)]
     units = ["s"] + ["m3/s" if c.startswith("Q") else "m" for c in header[1:]]
     lines = ["# liquid-boundaries hydrograph generated by axqua", " ".join(header),
              " ".join(units)]
@@ -909,8 +931,8 @@ def write_liquid_boundaries(cfg: Config, liquids: list[LiquidBoundary],
                     row.append(f"{qt * lb.discharge / disch_total:.4f}")
                 else:
                     row.append(f"{qt * lb.n_nodes / inflow_nodes:.4f}")
-            elif not free_outflow:
-                row.append(f"{(outflow_wse_fn(qt) if outflow_wse_fn else 0.0):.4f}")
+            elif has_level(lb):
+                row.append(f"{level_of(lb, qt):.4f}")
         lines.append(" ".join(row))
     path = cfg.model_path(cfg.liquid_boundaries_file)
     path.write_text("\n".join(lines) + "\n")
@@ -1081,10 +1103,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
         # M = scalar velocity (sqrt(u^2+v^2)); written so the results carry
         # SCALAR VELOCITY directly, which HydroBayesCal reads as a calibration QoI.
         # K,E (TKE + dissipation) are appended for the k-epsilon model (see above).
-        # A list too long for DAMOCLES' 72 columns goes on a line of its own.
-        *([f"VARIABLES FOR GRAPHIC PRINTOUTS : '{printvars}'"]
-          if len(printvars) <= 34 else
-          ["VARIABLES FOR GRAPHIC PRINTOUTS :", f"'{printvars}'"]),
+        f"VARIABLES FOR GRAPHIC PRINTOUTS : '{printvars}'",
         "PRINTING CUMULATED FLOWRATES : YES",
         "/",
         "/ TIME",
@@ -1312,8 +1331,11 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
         # its own tracers for suspended load, so no manual NUMBER OF TRACERS is needed.
         lines += ["/", "/ MORPHODYNAMICS (GAIA - bedload / suspended load)",
                   "COUPLING WITH : 'GAIA'",
-                  f"GAIA STEERING FILE : {gaia_cas}",
-                  f"COUPLING PERIOD FOR GAIA : {cfg.morphodynamics.coupling_period}"]
+                  f"GAIA STEERING FILE : {gaia_cas}"]
+        # GAIA runs at every hydraulic step: TELEMAC v9.1.1 has no COUPLING PERIOD FOR GAIA (only one for TOMAWAC), and its steering-file reader stops at an unknown keyword, which every coupled run did until 2026-10-31
+        if cfg.morphodynamics.coupling_period != 1:
+            log.warning("morphodynamics.coupling_period %s is ignored: TELEMAC couples "
+                        "GAIA at every time step", cfg.morphodynamics.coupling_period)
 
     if extra_block:
         lines += extra_block
@@ -1325,7 +1347,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
 
     lines.append("&ETA")
     path = cfg.model_path(out_name or cfg.cas_file)
-    path.write_text("\n".join(lines) + "\n")
+    path.write_text("\n".join(fit_columns(lines)) + "\n")
     return path
 
 
@@ -1388,7 +1410,7 @@ def write_hotstart_cas(cfg: Config, duration: float,
         out_lines.insert(len(out_lines) - 1, f"DURATION : {duration_s}")
 
     path = cfg.model_path(out_name)
-    path.write_text("\n".join(out_lines) + "\n")
+    path.write_text("\n".join(fit_columns(out_lines)) + "\n")
     log.info("hotstart steering file %s (DURATION : %s s, continues %s -> %s)",
              path.name, duration_s, cfg.results_slf, hot_results)
     return path
@@ -1398,6 +1420,133 @@ def write_hotstart_cas(cfg: Config, duration: float,
 # morphodynamic quantities - bed evolution (E), bed shear stress (TOB) and the mean
 # grain size (M) needed to interpret bed change and calibrate against a DoD.
 _GAIA_DEFAULT_PRINTOUTS = "'U,V,S,H,B,E,TOB,M'"
+
+
+def _fractions(classes) -> list[str]:
+    """CLASSES INITIAL FRACTION, one value per class, summing to 1 within GAIA's 1e-8 (``lecdon_gaia.f`` stops otherwise): normalized and rounded to 10 decimals, the largest class taking the rounded remainder, so that a class of fraction 0 stays 0. Fractions that are no composition raise (:func:`axqua.config.class_fractions`, which the case check asks too)."""
+    values = class_fractions(classes)
+    total = sum(values)
+    shares = [round(v / total, 10) for v in values]
+    largest = max(range(len(shares)), key=shares.__getitem__)
+    shares[largest] = round(1.0 - sum(v for k, v in enumerate(shares) if k != largest), 10)
+    return [f"{v:.10g}" for v in shares]
+
+
+#: The columns of a steering-file line that DAMOCLES reads (``damoc.f``: ``LONGLI = 72``).
+STEERING_COLUMNS = 72
+
+_KEY_LINE = re.compile(r"^(?P<key>[^:=/&*'\"][^:=]*?)\s*(?P<sep>[:=])\s*(?P<value>.*)$")
+_NOT_A_KEYWORD = ("/", "*", "&", "#")
+
+
+def _split_values(text: str) -> list[str]:
+    """The values of a list ``a;b;'c;d'``, split at the semicolons outside quotes."""
+    out, current, quote = [], "", None
+    for ch in text:
+        if quote:
+            current += ch
+            quote = None if ch == quote else quote
+        elif ch in "'\"":
+            current, quote = current + ch, ch
+        elif ch == ";":
+            out.append(current.strip())
+            current = ""
+        else:
+            current += ch
+    out.append(current.strip())
+    return out
+
+
+def _keyword(key: str, values: list[str], sep: str = ":") -> list[str]:
+    """``KEY : v1;v2;...`` on one line where it fits in :data:`STEERING_COLUMNS`, else the key on its own line and the values on as many lines as they take, each ending with ``;`` but the last: DAMOCLES reads the values of a keyword over several lines and drops whatever lies beyond column 72."""
+    line = f"{key} {sep} {';'.join(values)}"
+    if len(line) <= STEERING_COLUMNS:
+        return [line]
+    out, current = [f"{key} {sep}"], ""
+    for value in values:
+        # a line that another follows ends with ';', which has to fit as well
+        if current and len(current) + len(value) + 2 > STEERING_COLUMNS:
+            out.append(current + ";")
+            current = value
+        else:
+            current = f"{current};{value}" if current else value
+    out.append(current)
+    if any(len(text) > STEERING_COLUMNS for text in out):
+        log.warning("a value of %s is longer than the %d columns TELEMAC reads: %s",
+                    key, STEERING_COLUMNS, max(out, key=len))
+    return out
+
+
+def fit_line(line: str) -> list[str]:
+    """*line* on as many lines as DAMOCLES needs to read all of it (:func:`_keyword`); comments and lines that fit stay as they are."""
+    if len(line) <= STEERING_COLUMNS or line.lstrip().startswith(_NOT_A_KEYWORD):
+        return [line]
+    match = _KEY_LINE.match(line.strip())
+    if match is None:
+        log.warning("a steering-file line is longer than the %d columns TELEMAC reads: %s",
+                    STEERING_COLUMNS, line)
+        return [line]
+    return _keyword(match["key"].strip(), _split_values(match["value"]), match["sep"])
+
+
+def fit_columns(lines: list[str]) -> list[str]:
+    """Every line of a steering file through :func:`fit_line`."""
+    return [part for line in lines for part in fit_line(line)]
+
+
+def keyword_spans(lines: list[str]):
+    """``(KEY, first, stop, value)`` of each keyword of a steering file given as lines: KEY in upper case, ``lines[first:stop]`` the lines it is written on, *value* its values joined. A keyword continues on the next line while its value is empty or ends with ``;``, as DAMOCLES reads it."""
+    i = 0
+    while i < len(lines):
+        text = lines[i].strip()
+        match = None if text.startswith(_NOT_A_KEYWORD) else _KEY_LINE.match(text)
+        if match is None:
+            i += 1
+            continue
+        value, stop = match["value"].strip(), i + 1
+        while (not value or value.endswith(";")) and stop < len(lines):
+            more = lines[stop].strip()
+            if not more or more.startswith(_NOT_A_KEYWORD) or _KEY_LINE.match(more):
+                break
+            value += more
+            stop += 1
+        yield match["key"].strip().upper(), i, stop, value
+        i = stop
+
+
+def set_keyword(text: str, key: str, value: str, *, append: bool = False) -> str:
+    """*text* of a steering file with *key* set to *value*, on all the lines the old value took and within the columns TELEMAC reads. A missing keyword raises, or with *append* is added at the end."""
+    lines = text.splitlines()
+    for name, first, stop, _ in keyword_spans(lines):
+        if name == key.strip().upper():
+            lines[first:stop] = fit_line(f"{key} : {value}")
+            break
+    else:
+        if not append:
+            raise ValueError(f"keyword {key!r} not found in the base steering file")
+        lines += fit_line(f"{key} : {value}")
+        return "\n".join(lines) + "\n"
+    return "\n".join(lines) + ("\n" if text.endswith("\n") else "")
+
+
+def continued_keywords(path: str | Path) -> set[str]:
+    """The keywords (upper case) a steering file writes on more than one line."""
+    lines = Path(path).read_text(errors="replace").splitlines()
+    return {name for name, first, stop, _ in keyword_spans(lines) if stop - first > 1}
+
+
+def _without(lines: list[str], keys: set[str]) -> list[str]:
+    """*lines* without the keywords in *keys* (upper case) and their value lines: a keyword the case names in ``extra_keywords`` is written once, as the case gives it."""
+    out, skipping = [], False
+    for line in lines:
+        key = line.split(":", 1)[0].strip().upper() if ":" in line else None
+        if key is not None and not line.startswith("/"):
+            skipping = key in keys
+        elif not skipping or line.startswith("/"):
+            skipping = False
+        if not skipping:
+            out.append(line)
+    return out
 
 
 def write_gaia_cas(cfg: Config) -> Path | None:
@@ -1431,13 +1580,12 @@ def write_gaia_cas(cfg: Config) -> Path | None:
     if not (m.bedload or m.suspended_load):
         log.warning("morphodynamics.enabled but neither bedload nor suspended_load is "
                     "on; the GAIA run will transport no sediment")
-    classes = m.sediment_classes or [{"diameter": 0.001, "density": 2650}]
-    n_classes = len(classes)
-    diameters = ";".join(str(c.get("diameter", 0.001)) for c in classes)
-    densities = ";".join(str(c.get("density", 2650)) for c in classes)
-    shields = ";".join(str(c.get("shields", 0.047)) for c in classes)
-    # CLASSES TYPE OF SEDIMENT is per class: repeat the configured type for each.
-    types = ";".join([f"'{m.sediment_type}'"] * n_classes)
+    classes = m.classes
+    diameters = [str(c.get("diameter", 0.001)) for c in classes]
+    densities = [str(c.get("density", 2650)) for c in classes]
+    shields = [str(c.get("shields", 0.047)) for c in classes]
+    # CLASSES TYPE OF SEDIMENT is per class: a class's own type, else the configured one
+    types = [f"'{m.class_type(c)}'" for c in classes]
 
     lines = [
         "/ GAIA steering file generated by axqua",
@@ -1450,10 +1598,12 @@ def write_gaia_cas(cfg: Config) -> Path | None:
         f"MORPHOLOGICAL FACTOR : {m.morphological_factor:g}",
         "/",
         "/ SEDIMENT CLASSES",
-        f"CLASSES TYPE OF SEDIMENT : {types}",
-        f"CLASSES SEDIMENT DIAMETERS : {diameters}",
-        f"CLASSES SEDIMENT DENSITY : {densities}",
-        f"CLASSES SHIELDS PARAMETERS : {shields}",
+        *_keyword("CLASSES TYPE OF SEDIMENT", types),
+        *_keyword("CLASSES SEDIMENT DIAMETERS", diameters),
+        *_keyword("CLASSES SEDIMENT DENSITY", densities),
+        *_keyword("CLASSES SHIELDS PARAMETERS", shields),
+        *(_keyword("CLASSES INITIAL FRACTION", _fractions(classes))
+          if m.fractions() is not None else []),
         "/",
         "/ TRANSPORT MODES",
         f"BED LOAD FOR ALL SANDS : {'YES' if m.bedload else 'NO'}",
@@ -1462,6 +1612,10 @@ def write_gaia_cas(cfg: Config) -> Path | None:
         # suspended sediment is transported as TELEMAC tracers by GAIA (the coupling
         # declares them on the hydro side); needs no NUMBER OF TRACERS in the .cas.
         f"SUSPENSION FOR ALL SANDS : {'YES' if m.suspended_load else 'NO'}",
+        *([f"SUSPENSION TRANSPORT FORMULA FOR ALL SANDS : {m.suspension_formula}"]
+          if m.suspended_load and m.suspension_formula is not None else []),
+        *(["EQUILIBRIUM INFLOW CONCENTRATION : YES"]
+          if m.suspended_load and m.equilibrium_inflow else []),
         "/",
         "/ BED PROCESSES",
         f"SLOPE EFFECT : {'YES' if m.slope_effect else 'NO'}",
@@ -1472,6 +1626,19 @@ def write_gaia_cas(cfg: Config) -> Path | None:
         *([f"ACTIVE LAYER THICKNESS : {m.active_layer_thickness:g}"]
           if m.active_layer_thickness is not None else []),
     ]
+    # GAIA stops without sand unless the skin friction correction is 0 (lecdon_gaia.f)
+    if all(m.class_type(c) == "CO" for c in classes):
+        lines.append("SKIN FRICTION CORRECTION : 0")
+    # the soil that can erode (hydrology mode): one value per layer of the bed
+    per_layer = [("LAYERS INITIAL THICKNESS", m.layer_thickness),
+                 ("LAYERS CRITICAL EROSION SHEAR STRESS OF THE MUD", m.mud_erosion_shear),
+                 ("LAYERS PARTHENIADES CONSTANT", m.partheniades),
+                 ("LAYERS MUD CONCENTRATION", m.mud_concentration)]
+    if any(value is not None for _, value in per_layer):
+        lines += ["/", "/ THE SOIL THAT CAN ERODE (per layer of the bed)"]
+        for key, value in per_layer:
+            if value is not None:
+                lines += _keyword(key, [f"{float(value):g}"] * max(1, m.bed_layers))
     if m.secondary_currents:
         # spiral-flow deviation of bedload in bends (needs the driver's secondary
         # currents; the alpha coefficient scales the deviation intensity).
@@ -1480,12 +1647,14 @@ def write_gaia_cas(cfg: Config) -> Path | None:
                   f"SECONDARY CURRENTS ALPHA COEFFICIENT : {m.secondary_currents_alpha:g}"]
     if m.prescribed_solid_discharges is not None:
         # one value per liquid boundary, same FRONT2 order as PRESCRIBED FLOWRATES.
-        qs = ";".join(f"{q:g}" for q in m.prescribed_solid_discharges)
         lines += ["/", "/ SEDIMENT SUPPLY (per liquid boundary, FRONT2 order)",
-                  f"PRESCRIBED SOLID DISCHARGES : {qs}"]
+                  *_keyword("PRESCRIBED SOLID DISCHARGES",
+                            [f"{q:g}" for q in m.prescribed_solid_discharges])]
+    # a keyword the case names itself replaces the one written above, so it is written once
+    lines = _without(lines, {str(k).strip().upper() for k in m.extra_keywords})
     for key, value in m.extra_keywords.items():
         lines.append(f"{key} : {value}")
     lines.append("&ETA")
     path = cfg.model_path(cfg.gaia_cas)
-    path.write_text("\n".join(lines) + "\n")
+    path.write_text("\n".join(fit_columns(lines)) + "\n")
     return path

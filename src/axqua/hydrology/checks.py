@@ -32,6 +32,11 @@ CODES = {
     "axqua.hydrology.initial_moisture_default": WARNING,
     "axqua.hydrology.closed_catchment": WARNING,
     "axqua.hydrology.free_outlet": WARNING,
+    "axqua.hydrology.outlet_unknown": ERROR,
+    "axqua.hydrology.river_without_outlet": WARNING,
+    "axqua.hydrology.sediment_undecided": WARNING,
+    "axqua.hydrology.sediment_out_of_range": WARNING,
+    "axqua.hydrology.sediment_with_river": ERROR,
     "axqua.hydrology.finite_elements": WARNING,
     "axqua.hydrology.drain_short": WARNING,
     "axqua.hydrology.large_mesh": WARNING,
@@ -73,6 +78,7 @@ def run_checks(cfg, *, terrain: bool = False) -> list[Finding]:
     _check_weather(cfg, rain, found)
     _check_soil(cfg, found)
     _check_outlet_and_run(cfg, rain, found, terrain=terrain)
+    _check_sediment(cfg, found)
     if terrain:
         _check_terrain(cfg, found)
     return found
@@ -273,6 +279,93 @@ def _has_own_theta(cfg):
     return [False]
 
 
+def _check_sediment(cfg, found: list[Finding]) -> None:
+    """Sediment transport is strongly recommended in the mode: a case that has not decided is told so. A block ``morphodynamics`` with ``enabled: false`` is a decision and is left alone. What TELEMAC cannot run with a river inflow (:func:`axqua.hydrology.sediment.river_conflicts`) is an error. A grain size outside the range of the chosen formula is named."""
+    m = cfg.morphodynamics
+    if "morphodynamics" not in (cfg.declared_blocks or ()) and not m.enabled:
+        found.append(_finding(
+            "axqua.hydrology.sediment_undecided",
+            "The case does not transport sediment. The runoff of a catchment carries "
+            "soil, and how much of it reaches the outlet is often the question of the "
+            "study.",
+            "morphodynamics.enabled",
+            "Set up sediment transport with the Sediment transport wizard on the "
+            "sub-tab Simulations > Hydrology (axqua hydrology sediment), or switch it "
+            "off there to keep the case hydraulic only."))
+        return
+    if not m.enabled:
+        return
+    from axqua.hydrology.sediment import (GRAVEL_D50, MEYER_PETER_MUELLER, VAN_RIJN_BEDLOAD,
+                                          has_river, river_conflicts)
+
+    if has_river(cfg):
+        for message, remedy in river_conflicts(m):
+            found.append(_finding("axqua.hydrology.sediment_with_river", message,
+                                  "morphodynamics.sediment_classes", remedy))
+
+    for c in m.sediment_classes or []:
+        d = float(c.get("diameter", 0.0) or 0.0)
+        kind = c.get("type") or m.sediment_type
+        if kind != "NCO" or not m.bedload:
+            continue
+        if m.bedload_formula == VAN_RIJN_BEDLOAD and d > GRAVEL_D50:
+            found.append(_finding(
+                "axqua.hydrology.sediment_out_of_range",
+                f"A class of {1000 * d:g} mm is coarser than the 2 mm up to which van "
+                "Rijn derived his bed-load formula.",
+                "morphodynamics.bedload_formula",
+                "Use the formula of Meyer-Peter and Müller (1) for gravel."))
+        elif m.bedload_formula == MEYER_PETER_MUELLER and d < 0.0004:
+            found.append(_finding(
+                "axqua.hydrology.sediment_out_of_range",
+                f"A class of {1000 * d:g} mm is finer than the gravel and coarse sand for "
+                "which Meyer-Peter and Müller derived their formula.",
+                "morphodynamics.bedload_formula",
+                "Use van Rijn's formula (7) for the sand of a soil."))
+
+
+def _check_river(cfg, found: list[Finding]) -> None:
+    """The outlet column of the liquid boundaries, and a river that flows through the catchment: an inflow line carries a discharge into the domain, which needs an outflow line that holds a level for it."""
+    if cfg.boundaries.liquid_boundaries is None:
+        return
+    try:
+        from axqua.core.boundaries import (HYDROLOGY_OUTLETS, line_conditions,
+                                           liquid_line_details, liquid_lines,
+                                           outlet_level)
+
+        lines = line_conditions(cfg) or []
+        kinds = liquid_lines(cfg)
+        details = liquid_line_details(cfg) or []
+    except Exception:  # noqa: BLE001 - the case check names an unreadable layer
+        return
+    for line in lines:
+        if line["condition"] is not None and line["condition"] not in HYDROLOGY_OUTLETS:
+            found.append(_finding(
+                "axqua.hydrology.outlet_unknown",
+                f"An outflow line has the outlet {line['value']!r} in the column Outlet.",
+                "boundaries.liquid_boundaries",
+                f"Write one of {', '.join(HYDROLOGY_OUTLETS)}, or leave the cell empty "
+                f"for hydrology.outlet_condition."))
+    river = "inflow" in kinds and (
+        cfg.boundaries.prescribed_flowrate is not None or cfg.boundaries.inflow is not None
+        or any(d["kind"] == "inflow" and d["discharge"] for d in details))
+    if not river or "outflow" not in kinds:
+        return
+    conditions = [line["condition"] or cfg.outflow_condition for line in lines] \
+        if lines else [cfg.outflow_condition]
+    if all(outlet_level(c) in (None, "mesh") for c in conditions
+           if c in HYDROLOGY_OUTLETS):
+        found.append(_finding(
+            "axqua.hydrology.river_without_outlet",
+            "Water flows into the catchment through an inflow line, but every outflow "
+            "line is free or an overfall, so the river leaves the model as over a brink "
+            "and its level drops toward the outlet.",
+            "boundaries.liquid_boundaries",
+            "Give the outflow line of the river the outlet normal_depth (column Outlet "
+            "of the liquid boundaries), or elevation where it flows into a lake or a "
+            "larger river."))
+
+
 def _check_outlet_and_run(cfg, rain, found: list[Finding], *, terrain: bool) -> None:
     h = cfg.hydrology
     outflow = 0
@@ -289,6 +382,7 @@ def _check_outlet_and_run(cfg, rain, found: list[Finding], *, terrain: bool) -> 
             "The case has no outflow line: all rain stays in the catchment.",
             "boundaries.liquid_boundaries",
             "Draw an outflow line across the outlet of the catchment, on the outline."))
+    _check_river(cfg, found)
     if h.outlet_condition == "free":
         found.append(_finding(
             "axqua.hydrology.free_outlet",
