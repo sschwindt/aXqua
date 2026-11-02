@@ -82,7 +82,8 @@ EXAMPLES: dict[str, dict] = {
                    "rain of 42 mm in 7 hours. Hydrology mode of TELEMAC-2D with about "
                    "16,600 nodes: Green-Ampt infiltration after de Vos et al. (2024) "
                    "with two soils, sheet flow over the field, and the runoff that "
-                   "leaves it over three of its edges, in about 7 minutes.",
+                   "leaves it over three of its edges with the soil it carries, "
+                   "sediment transport by GAIA, in about 25 minutes on 4 cores.",
         "case": "example-agrohydrology.axq-case",
         "documents": ["README.md", "LICENSE.md", "LICENSE-CC-BY-4.0.txt"],
         # reconstructed from two TELEMAC models of the field (see the README)

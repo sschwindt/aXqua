@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.2.0
+version=1.2.1
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,16 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.2.0
+changelog=1.2.1
+    - Hydrology mode: the sediment budget of a run on several processor cores
+      is right. TELEMAC v9.1.1 writes into each processor's listing only the
+      suspended sediment that left through its own part of the mesh; aXqua now
+      adds the listings of all processors. Eroded and deposited mass come from
+      GAIA's erosion and deposition fluxes. aXqua 1.2.0 counted the sediment that
+      left through the other parts as deposited.
+    - The fix is in the aXqua program: upgrade it with
+      'pip install --upgrade axqua'.
+    1.2.0
     - Setup Wizard for TELEMAC and OpenFOAM on the Configuration tab: select an
       existing environment script, which aXqua checks module by module (a valid
       installation that lacks GAIA, TELEMAC-3D or sediDriftFoam2 is told apart
