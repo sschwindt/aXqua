@@ -5,6 +5,25 @@ Hydrology
 
 A hydrology simulation computes how rain on a catchment becomes runoff. Rain falls on every node of the mesh, part of it infiltrates into the soil, part of the surface water evaporates, and the rest flows over the terrain to the outlet. TELEMAC-2D solves the shallow water equations over the whole catchment, so that the hydrograph at the outlet, the water depths on the hillslopes and the flooded areas in the valley come from one model. This approach is called a hydrodynamic rainfall-runoff model, or rain on grid (Caviedes-Voullième et al. 2012, Fernández-Pato et al. 2016). It suits catchments up to some tens of square kilometers, flash floods, and fields and plots on which the path of the runoff matters, for example for soil erosion.
 
+.. admonition:: Watch the aXqua Hydrology tutorial on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://youtu.be/RfoUXIGyqjo"
+          title="TELEMAC 2D simulations with aXqua: dry start"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/RfoUXIGyqjo>`_.
+
+
 The hydrology mode is TELEMAC only. It is switched on in the case settings, with the check box *Hydrology mode* on the page *Mesh configuration* or on the page *Hydrology* (:ref:`case-hydrology`), and runs on the sub-tab *Simulations > Hydrology*.
 
 .. figure:: ../img/gui-case-editor-hydrology.png
