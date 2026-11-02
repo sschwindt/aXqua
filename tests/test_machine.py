@@ -180,10 +180,19 @@ def test_no_tracked_file_names_a_computer_of_the_developers():
     import subprocess
 
     root = Path(__file__).resolve().parent.parent
-    pattern = "lw" + "w-?13[0-9]"
-    out = subprocess.run(["git", "grep", "-n", "-i", "-I", "-E", pattern],
+    out = subprocess.run(["git", "grep", "-n", "-i", "-I", "-e", "lw" + "w"],
                          cwd=root, capture_output=True, text=True).stdout
     assert not out, "a private host name in a tracked file:\n" + out
+
+
+def test_no_tracked_file_names_the_institute_folders_of_the_developers():
+    """The folders of the institute's computers (``/home/<institute>/...``) are private as well (the user's order of 2026-11-02): a path to a program or a checkout is written relative, or with a neutral stand-in such as ``/opt/visit`` or ``$AXQUA_SOLVER_ROOT``. The pattern is put together here so that this file does not name it itself. Tracked files only: git grep."""
+    import subprocess
+
+    root = Path(__file__).resolve().parent.parent
+    out = subprocess.run(["git", "grep", "-n", "-I", "-e", "I" + "WS"],
+                         cwd=root, capture_output=True, text=True).stdout
+    assert not out, "a private folder name in a tracked file:\n" + out
 
 
 def test_a_synthesisable_outflow_rating_is_not_a_validation_error(tmp_path):
