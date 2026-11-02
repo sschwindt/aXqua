@@ -116,9 +116,9 @@ The sediment budget of the storm reads:
 
 | Quantity | Value |
 | --- | --- |
-| Soil eroded into suspension | 96 kg |
-| Deposited again on the field | 74 kg |
-| Carried off the field in suspension | 21 kg |
+| Soil eroded into suspension | 405 kg |
+| Deposited again on the field | 310 kg |
+| Carried off the field in suspension | 96 kg |
 | Bed load over the edges | 0 kg |
 
 These masses are small for 42 mm of rain on 5.6 ha of arable land, and they are not a prediction of its soil loss. GAIA detaches soil by the shear stress of the flow only, while on a bare field most soil is detached by the impact of raindrops and in rills, which the model does not represent; and the erosion parameters of the soil are GAIA's defaults, which need calibrating against measured sediment yields. The model shows where the flow picks up soil and where it deposits it.
@@ -156,10 +156,11 @@ The second model of the field has a more permeable soil with a larger pore volum
 | Infiltrated | 15.6 mm | 28.7 mm |
 | Runoff coefficient | 0.63 | 0.32 |
 | Peak discharge | 0.123 m³/s | 0.089 m³/s |
-| Soil eroded into suspension | 96 kg | 15 kg |
-| Carried off the field | 21 kg | 3 kg |
+| Soil eroded into suspension | 405 kg | 65 kg |
+| Deposited again on the field | 310 kg | 50 kg |
+| Carried off the field | 96 kg | 15 kg |
 
-On the more permeable soil, half as much of the rain leaves the field, and the peak discharge is 28 % lower. The sediment drops more than the water: the flow erodes a sixth of the soil and carries a seventh of it off the field. The results of the first soil are overwritten. To keep both, copy the folder `axqua-case/` before the second build, or copy the case file under another name and set another `sim_dir` in its block `project`.
+On the more permeable soil, half as much of the rain leaves the field, and the peak discharge is 28 % lower. The sediment drops more than the water: the flow erodes and carries off the field about a sixth of the soil of the first run. The results of the first soil are overwritten. To keep both, copy the folder `axqua-case/` before the second build, or copy the case file under another name and set another `sim_dir` in its block `project`.
 
 ## Optional steps
 

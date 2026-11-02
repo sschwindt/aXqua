@@ -234,74 +234,140 @@ def fortran_float(text: str) -> float:
         return float(f"{match.group(1)}E{match.group(2)}")
 
 
+_TRACER_OUT = "QUANTITY ENTERED THROUGH LIQ. BND."
+
+
+def _tracer_boundary_mass(text: str) -> dict[str, float]:
+    """The last cumulated tracer mass through the liquid boundaries per tracer of one listing; a tracer whose mass TELEMAC did not print (it prints none below 1e-8) is 0."""
+    out: dict[str, float] = {}
+    tracer = None
+    for line in text.splitlines():
+        line = line.strip()
+        if line.startswith("BALANCE OF TRACER"):
+            tracer = " ".join(line[len("BALANCE OF TRACER"):].split()[:-1]) or line
+            out.setdefault(tracer, 0.0)
+        elif line.startswith("FINAL BALANCE OF TRACER"):
+            tracer = None
+        elif tracer is not None and line.startswith(_TRACER_OUT):
+            out[tracer] = _number_after(line, ":")
+    return out
+
+
+def _processor_boundary_mass(listing: Path) -> dict[str, float]:
+    """The tracer mass through the liquid boundaries of a parallel finite-volume run, summed over its processors; empty where nothing is to be summed.
+
+    TELEMAC v9.1.1 sums the tracer fluxes through the liquid boundaries over the processors in the finite-element kernel only: in the finite-volume one, ``bilant1.f`` books ``DT * FLUTSOR`` and ``DT * FLUTENT`` of ``flux_trac.f``, which are sums over the boundary nodes of one subdomain, without ``P_SUM``. The main listing (processor 0) then names only what left through its own subdomain; on the agrohydrology example 0 kg of the 16-core run and part of the 4-core one, while the water balance and the eroded and suspended masses are summed. The per-processor listings of the same run (``<listing>_p0000N.sortie``) each hold their own share, and their sum with the main listing is the mass of the run. Where every processor prints the same value, TELEMAC has summed it already (the finite-element kernel, or a later release that fixes this) and nothing is added.
+    """
+    stem = listing.name[:-len(".sortie")] if listing.name.endswith(".sortie") else listing.name
+    copies = sorted(p for p in listing.parent.glob(f"{stem}_p*.sortie")
+                    if re.fullmatch(re.escape(stem) + r"_p\d+\.sortie", p.name))
+    if not copies:
+        return {}
+    text = listing.read_text(errors="replace")
+    if "SAINT-VENANT FV" not in text:
+        return {}
+    shares = [_tracer_boundary_mass(text)]
+    shares += [_tracer_boundary_mass(p.read_text(errors="replace")) for p in copies]
+    names = set().union(*shares)
+    summed: dict[str, float] = {}
+    for name in names:
+        values = [share.get(name, 0.0) for share in shares]
+        same = all(abs(v - values[0]) <= 1e-9 * max(1.0, abs(values[0])) for v in values)
+        summed[name] = values[0] if same and values[0] != 0.0 else float(sum(values))
+    return summed
+
+
 def read_sediment(path: str | Path) -> dict | None:
     """The sediment of a run with GAIA, from its listing, or None for a run without GAIA.
 
-    Two sources, because neither has everything. **The suspended load** is TELEMAC's tracers, whose balance blocks are cumulated over every time step: per class the mass eroded into suspension ("QUANTITY CREATED BY SOURCE TERM"), the mass that left through the liquid boundaries, and the mass in suspension at the end. TELEMAC's tracer balance has no deposition term, so the mass it reports as lost is the mass deposited; measured on a test catchment, it grew from 52 to 122 kg when infiltration was switched off, with the erosion. **The bed load** is GAIA's flux through each liquid boundary [kg/s, positive entering] in the block ``GAIA MASS-BALANCE OF SEDIMENTS OVER ALL CLASSES`` that precedes TELEMAC's water balance of each printout, or, for a single class, for which GAIA prints no such block (``mass_balance.f``: ``IF(NSICLA.GT.1)``), in the block of that class; it is integrated over the printouts. GAIA's own cumulated balance is printed only when the last time step is the step number ``NIT``, which a run with a variable time step does not reach, and its erosion and deposition fluxes are values of one step that the printouts sample too coarsely to integrate (twice the erosion of the tracer balance on the test catchment).
+    Two programs, because neither prints everything. **GAIA** prints at every listing printout, per class and (for more than one class, ``mass_balance.f``: ``IF(NSICLA.GT.1)``) over all classes, the bed load through each liquid boundary and the erosion and deposition flux of the suspended load [kg/s]; aXqua integrates them over the printouts. GAIA's own cumulated balance is printed only when the last time step is the step number ``NIT``, which a run with a variable time step does not reach. **TELEMAC** carries the suspended classes as tracers and cumulates their balance over every time step: the mass the bed exchanged with the water ("QUANTITY CREATED BY SOURCE TERM", which is erosion minus deposition: GAIA applies both through the source term of the tracer), the mass that left through the liquid boundaries, and the mass in suspension at the end. The difference of the integrated erosion and deposition fluxes is therefore the net exchange of TELEMAC, which tells whether the printouts were dense enough to integrate the fluxes (:func:`sediment_budget`); on the agrohydrology example, with a printout every 40 s, they agree to 1e-4 (405 kg eroded, 310 kg deposited, 95.6 kg net).
 
-    Returns ``time`` and ``bedload`` (printouts x boundaries) and ``suspended``: per tracer name ``{eroded, deposited, through_boundaries, final}`` in kg (concentration in g/l times m3), ``through_boundaries`` positive entering.
+    In a parallel finite-volume run the mass through the liquid boundaries is summed over the listings of the processors (:func:`_processor_boundary_mass`), because TELEMAC prints each subdomain's share only; so read the listing before its per-processor copies are deleted. Without that sum, the share that left through other subdomains looked like deposition, which is how aXqua 1.2.0 read this balance.
+
+    Returns ``time``, ``bedload`` (printouts x boundaries), ``erosion`` and ``deposition`` (printouts; NaN where GAIA printed no flux) and ``suspended``: per tracer name ``{net, through_boundaries, final}`` in kg (concentration in g/l times m3), ``net`` positive eroded, ``through_boundaries`` positive entering.
     """
     rows: list[dict] = []
-    block: dict | None = None
-    # the bed load of the printout being read: over all classes, and summed per class
-    total: dict[int, float] = {}
-    per_class: dict[int, float] = {}
+    block: str | None = None
+    # the printout being read: over all classes, and summed per class
+    total: dict = {"bedload": {}, "erosion": None, "deposition": None}
+    per_class: dict = {"bedload": {}, "erosion": None, "deposition": None}
     seen = False
     suspended: dict[str, dict] = {}
     tracer = None
+
+    def add(into: dict, key: str, value: float) -> None:
+        into[key] = value if into[key] is None else into[key] + value
+
     for line in Path(path).read_text(errors="replace").splitlines():
         text = line.strip()
         if _GAIA_TOTAL in text:
-            block, seen = total, True
+            block, seen = "total", True
             continue
         if _GAIA_CLASS in text:
-            block, seen = per_class, True
+            block, seen = "class", True
             continue
         if block is not None:
+            into = total if block == "total" else per_class
             if not text:
                 block = None
             elif text.startswith("BEDLOAD FLUX BOUNDARY"):
                 index = int(text.split("BOUNDARY", 1)[1].split()[0])
-                if block is total:
-                    total[index] = _number_after(text)
-                else:
-                    per_class[index] = per_class.get(index, 0.0) + _number_after(text)
+                into["bedload"][index] = into["bedload"].get(index, 0.0) + _number_after(text)
+            elif text.startswith("EROSION FLUX"):
+                add(into, "erosion", _number_after(text))
+            elif text.startswith("DEPOSITION FLUX"):
+                add(into, "deposition", _number_after(text))
             continue
         if text.startswith(_TIME.strip()) and seen:
+            use = total if (total["bedload"] or total["erosion"] is not None) else per_class
             rows.append({"time": float(text.split("=", 1)[1].split()[0]),
-                         "bedload": dict(total or per_class)})
-            total, per_class, seen = {}, {}, False
+                         "bedload": dict(use["bedload"]),
+                         "erosion": use["erosion"], "deposition": use["deposition"]})
+            total = {"bedload": {}, "erosion": None, "deposition": None}
+            per_class = {"bedload": {}, "erosion": None, "deposition": None}
+            seen = False
         elif text.startswith("BALANCE OF TRACER"):
             # "BALANCE OF TRACER COH SEDIMENT1   g/l": the name without the unit
             tracer = " ".join(text[len("BALANCE OF TRACER"):].split()[:-1]) or text
-            suspended.setdefault(tracer, {"eroded": 0.0, "deposited": 0.0,
-                                          "through_boundaries": 0.0, "final": 0.0})
+            suspended.setdefault(tracer, {"net": 0.0, "through_boundaries": 0.0,
+                                          "final": 0.0})
         elif tracer is None:
             continue
         elif text.startswith("QUANTITY OF TRACER:"):
             suspended[tracer]["final"] = _number_after(text, ":")
-        elif text.startswith("QUANTITY ENTERED THROUGH LIQ. BND."):
+        elif text.startswith(_TRACER_OUT):
             suspended[tracer]["through_boundaries"] = _number_after(text, ":")
         elif text.startswith("QUANTITY CREATED BY SOURCE TERM") and "   :" in line:
             # the cumulated line ("...SOURCE TERM   :"), not the one of the step
-            suspended[tracer]["eroded"] = _number_after(text, ":")
+            suspended[tracer]["net"] = _number_after(text, ":")
         elif text.startswith("FINAL BALANCE OF TRACER"):
             tracer = None
-    for item in suspended.values():
-        # no deposition term in TELEMAC's tracer balance: what it books as lost
-        item["deposited"] = (item["eroded"] + item["through_boundaries"]
-                             - item["final"])
+    for name, mass in _processor_boundary_mass(Path(path)).items():
+        if name in suspended:
+            suspended[name]["through_boundaries"] = mass
     if not rows and not suspended:
         return None
     n = max((max(r["bedload"]) for r in rows if r["bedload"]), default=0)
     bedload = np.array([[r["bedload"].get(j, 0.0) for j in range(1, n + 1)]
                         for r in rows], dtype=float).reshape(len(rows), n)
+
+    def series(key: str) -> np.ndarray:
+        return np.array([np.nan if r[key] is None else r[key] for r in rows], dtype=float)
+
     return {"time": np.array([r["time"] for r in rows]), "bedload": bedload,
+            "erosion": series("erosion"), "deposition": series("deposition"),
             "suspended": suspended}
 
 
+#: How far the integrated erosion minus deposition of GAIA may differ from TELEMAC's net exchange before the report warns that the listing printouts are too far apart.
+EXCHANGE_TOLERANCE = 0.05
+
+
 def sediment_budget(sediment: dict) -> dict:
-    """The sediment budget of the run [kg]: the bed load through each boundary (positive entering), and of the suspended load what was eroded into suspension, deposited again, carried out through the liquid boundaries and still in suspension at the end."""
+    """The sediment budget of the run [kg]: the bed load through each boundary (positive entering), and of the suspended load what was eroded into suspension and deposited again (GAIA's fluxes, integrated over the printouts), what the bed lost net (TELEMAC's tracer balance), what was carried out through the liquid boundaries and what was still in suspension at the end.
+
+    ``exchange_mismatch`` is the relative difference between the integrated erosion minus deposition and the net exchange; above :data:`EXCHANGE_TOLERANCE` the printouts sample the fluxes too coarsely and the erosion and deposition are approximate (the net, the outflow and the bed load stay exact). Without GAIA's fluxes in the listing, erosion and deposition are None.
+    """
     t = np.concatenate([[0.0], sediment["time"]])
     bedload = [_integrate(t, np.concatenate([[0.0], sediment["bedload"][:, j]]))
                for j in range(sediment["bedload"].shape[1])]
@@ -310,13 +376,26 @@ def sediment_budget(sediment: dict) -> dict:
     def total(key: str) -> float:
         return float(sum(item[key] for item in classes.values()))
 
+    def integral(key: str) -> float | None:
+        q = np.asarray(sediment.get(key, []), dtype=float)
+        if q.size == 0 or not np.isfinite(q).any():
+            return None
+        return _integrate(t, np.concatenate([[0.0], np.nan_to_num(q)]))
+
+    eroded, deposited = integral("erosion"), integral("deposition")
+    net = total("net")
+    mismatch = None
+    if eroded is not None and deposited is not None and classes:
+        mismatch = abs((eroded - deposited) - net) / max(abs(net), 1e-9 * max(eroded, 1.0))
     return {"bedload_kg": bedload,
             "bedload_out_kg": -sum(bedload),
-            "suspended_eroded_kg": total("eroded"),
-            "suspended_deposited_kg": total("deposited"),
+            "suspended_eroded_kg": eroded,
+            "suspended_deposited_kg": deposited,
+            "suspended_net_kg": net,
             "suspended_out_kg": -total("through_boundaries"),
             "suspended_end_kg": total("final"),
             "out_kg": -total("through_boundaries") - sum(bedload),
+            "exchange_mismatch": mismatch,
             "classes": {name: {k: float(v) for k, v in item.items()}
                         for name, item in classes.items()}}
 
@@ -386,11 +465,20 @@ def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
         pd.DataFrame([{k: v for k, v in budget_kg.items()
                        if not isinstance(v, (list, dict))}]).to_csv(
             out / "sediment-budget.csv", index=False)
-        log.info("  sediment: %.1f kg eroded into suspension, %.1f kg deposited again; "
-                 "out through the liquid boundaries %.1f kg in suspension and %.1f kg "
-                 "as bed load (net)", budget_kg["suspended_eroded_kg"],
-                 budget_kg["suspended_deposited_kg"], budget_kg["suspended_out_kg"],
+        if budget_kg["suspended_eroded_kg"] is not None:
+            log.info("  sediment: %.1f kg eroded into suspension, %.1f kg deposited again",
+                     budget_kg["suspended_eroded_kg"], budget_kg["suspended_deposited_kg"])
+        log.info("  sediment: the bed lost %.1f kg net to the suspension; out through the "
+                 "liquid boundaries %.1f kg in suspension and %.1f kg as bed load (net)",
+                 budget_kg["suspended_net_kg"], budget_kg["suspended_out_kg"],
                  budget_kg["bedload_out_kg"])
+        mismatch = budget_kg["exchange_mismatch"]
+        if mismatch is not None and mismatch > EXCHANGE_TOLERANCE:
+            log.warning("  sediment: erosion minus deposition differs by %.0f %% from the net "
+                        "exchange of the tracer balance; the listing printouts are too far "
+                        "apart to integrate GAIA's fluxes, so erosion and deposition are "
+                        "approximate (lower LISTING PRINTOUT PERIOD for exact values)",
+                        100 * mismatch)
     if lines:
         pd.DataFrame(lines).to_csv(out / "boundary-volumes.csv", index=False)
         for line in lines:

@@ -1373,7 +1373,8 @@ LISTING = """
      BOUNDARIES BEDLOAD FLUX                   =     0.000000      ( KG/S  >0 = ENTERING )
      BEDLOAD FLUX BOUNDARY    1                =   -0.010000      ( KG/S  >0 = ENTERING )
      BEDLOAD FLUX BOUNDARY    2                =    0.020000      ( KG/S  >0 = ENTERING )
-     EROSION FLUX                              =    0.7020082E-01  ( KG/S )
+     EROSION FLUX                              =     1.400000      ( KG/S )
+     DEPOSITION FLUX                           =    0.4000000      ( KG/S )
 
      RELATIVE ERROR IN VOLUME AT T =        100.0     S :    0.1705163E-15
 
@@ -1393,7 +1394,7 @@ LISTING = """
 
 
 def test_the_sediment_budget_is_read_from_the_listing(tmp_path):
-    """The suspended load from TELEMAC's cumulated tracer balance (whose "lost" mass is the deposited mass), the bed load per boundary from GAIA's printouts."""
+    """Erosion and deposition from GAIA's fluxes integrated over the printouts, the net exchange, the mass out and the mass left from TELEMAC's cumulated tracer balance (whose source term is erosion minus deposition), the bed load per boundary from GAIA's printouts."""
     from axqua.hydrology import report
 
     listing = tmp_path / "run.sortie"
@@ -1401,14 +1402,62 @@ def test_the_sediment_budget_is_read_from_the_listing(tmp_path):
     found = report.read_sediment(listing)
     budget = report.sediment_budget(found)
     item = budget["classes"]["COH SEDIMENT1"]
-    assert item["eroded"] == pytest.approx(50.0)
-    assert item["deposited"] == pytest.approx(45.0)        # 50 - 2 out - 3 left
+    assert item["net"] == pytest.approx(50.0)
+    assert budget["suspended_eroded_kg"] == pytest.approx(70.0)     # 0 at t = 0, trapezoid
+    assert budget["suspended_deposited_kg"] == pytest.approx(20.0)
+    assert budget["suspended_net_kg"] == pytest.approx(50.0)
+    assert budget["exchange_mismatch"] == pytest.approx(0.0)
     assert budget["suspended_out_kg"] == pytest.approx(2.0)
+    assert budget["suspended_end_kg"] == pytest.approx(3.0)
     assert budget["bedload_kg"] == pytest.approx([-0.5, 1.0])   # 0 at t = 0, trapezoid
     assert budget["out_kg"] == pytest.approx(2.0 - 0.5)
     plain = tmp_path / "plain.sortie"
     plain.write_text("     RELATIVE ERROR IN VOLUME AT T =  10.0 S :  0.0\n")
     assert report.read_sediment(plain) is None
+
+
+def _tracer_listing(out: float | None, kernel: str = "SAINT-VENANT FV") -> str:
+    line = (f"     QUANTITY ENTERED THROUGH LIQ. BND.:    {out}      ( IF <0 EXIT )\n"
+            if out is not None else "")
+    return f""" EQUATIONS
+ MOTCAR( 58)= {kernel}
+
+     RELATIVE ERROR IN VOLUME AT T =        100.0     S :    0.1E-15
+
+                     BALANCE OF TRACER COH SEDIMENT1   g/l
+
+     QUANTITY OF TRACER:   1.000000     TRACER UNIT M3
+
+     ABSOLUTE ERROR CUMULATED ON TRACER:     5.000000
+{line}     QUANTITY CREATED BY SOURCE TERM   :     10.00000
+--------------------------------------------------------------------------------
+                   FINAL BALANCE OF TRACER  1
+"""
+
+
+def test_the_sediment_out_of_a_parallel_finite_volume_run_is_summed_over_its_processors(tmp_path):
+    """TELEMAC v9.1.1 prints the tracer mass through the liquid boundaries of one subdomain in each listing of a finite-volume run (bilant1.f has no P_SUM there): the shares of the processors are added; in the finite-element kernel every listing prints the sum, which is not added again."""
+    from axqua.hydrology import report
+
+    run = "hydrology2d.cas_2026-11-02-09h24min54s"
+    main = tmp_path / f"{run}.sortie"
+    main.write_text(_tracer_listing(-1.0))
+    (tmp_path / f"{run}_p00001.sortie").write_text(_tracer_listing(-3.0))
+    (tmp_path / f"{run}_p00002.sortie").write_text(_tracer_listing(None))
+    # a copy of another run is not part of this one
+    (tmp_path / "hydrology2d.cas_2026-11-01-20h20min22s_p00001.sortie").write_text(_tracer_listing(-50.0))
+    budget = report.sediment_budget(report.read_sediment(main))
+    assert budget["suspended_out_kg"] == pytest.approx(4.0)
+    assert budget["suspended_eroded_kg"] is None          # no GAIA fluxes in this listing
+    # the finite-element kernel sums over the processors itself
+    for name in (f"{run}.sortie", f"{run}_p00001.sortie", f"{run}_p00002.sortie"):
+        (tmp_path / name).write_text(_tracer_listing(-2.0, kernel="SAINT-VENANT EF"))
+    assert report.sediment_budget(report.read_sediment(main))["suspended_out_kg"] == pytest.approx(2.0)
+    # a serial run has no copies
+    serial = tmp_path / "serial" / f"{run}.sortie"
+    serial.parent.mkdir()
+    serial.write_text(_tracer_listing(-1.0))
+    assert report.sediment_budget(report.read_sediment(serial))["suspended_out_kg"] == pytest.approx(1.0)
 
 
 def test_numbers_as_fortran_prints_them_are_read():
