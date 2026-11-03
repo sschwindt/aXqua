@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.2.1
+version=1.2.2
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,27 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.2.1
+changelog=1.2.2
+    - Mesh convergence study (TELEMAC): each mesh is read on its own
+      double-precision geometry. TELEMAC stores the coordinates of a result in
+      single precision, which at UTM coordinates resolves only 0.5 m; the report
+      gave wrong shortest edges and time steps for fine meshes and moved the
+      values at the points by up to 1.6 %.
+    - Vertical convergence study (TELEMAC-3D): no longer diverges at its first
+      time step. In 3D, aXqua uses k-epsilon in place of the automatically chosen
+      Spalart-Allmaras model, which fails on a bed that wets and dries unless
+      the case has its source-term patch in user_fortran/. This also applies to
+      the Steady 3D and Unsteady 3D runs.
+    - Vertical convergence study: compares the mean over the second half of each
+      run (20 result frames per run) instead of the last frame, and reports how
+      much the values at the points fluctuate in time. Near bars the 3D flow does
+      not become fully steady.
+    - Both studies draw a figure (value at each point per mesh, mean against
+      cell size, change per refinement against the tolerance) and add the sheet
+      'values at the points' to the workbook.
+    - The fixes are in the aXqua program: upgrade it with
+      'pip install --upgrade axqua'.
+    1.2.1
     - Hydrology mode: the sediment budget of a run on several processor cores
       is right. TELEMAC v9.1.1 writes into each processor's listing only the
       suspended sediment that left through its own part of the mesh; aXqua now
