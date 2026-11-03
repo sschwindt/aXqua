@@ -104,3 +104,56 @@ class _DummyCfg:
     name = "dummy"
     model_dir = "."
     results_slf = "r2d.slf"
+
+
+def _append_frame(path, time, arrays):
+    """Append one single-precision frame to a SERAFIN file (Fortran records)."""
+    import struct
+
+    with open(path, "ab") as f:
+        f.write(struct.pack(">i", 4) + struct.pack(">f", time) + struct.pack(">i", 4))
+        for values in arrays:
+            data = np.asarray(values, dtype=">f4").tobytes()
+            f.write(struct.pack(">i", len(data)) + data + struct.pack(">i", len(data)))
+
+
+def test_values_are_averaged_over_the_end_of_an_unsteady_run(tmp_path):
+    # the 3D runs of the vertical study fluctuate near bars: a single last frame
+    # mixes that into the comparison of the layer counts, the mean does not
+    from axqua.convergence import extract_mean_at_points
+    from axqua.core import selafin
+
+    x = np.array([0.0, 2.0, 0.0, 2.0])
+    y = np.array([0.0, 0.0, 2.0, 2.0])
+    ikle = np.array([[1, 2, 4], [1, 4, 3]])
+    res = selafin._write_selafin(
+        tmp_path / "r3d-2d.slf", x, y, ikle, np.zeros(4, dtype=int),
+        [("WATER DEPTH", "M", np.full(4, 1.0)), ("VELOCITY U", "M/S", np.zeros(4)),
+         ("VELOCITY V", "M/S", np.zeros(4))],
+        title="result", date=(2026, 11, 3, 0, 0, 0), double_precision=False)
+    for k, depth in ((1, 0.4), (2, 0.5), (3, 0.3)):          # t = 100, 200, 300 s
+        _append_frame(res, 100.0 * k, [np.full(4, depth), np.full(4, 1.0), np.zeros(4)])
+    avg = extract_mean_at_points(res, ["WATER DEPTH", "SCALAR VELOCITY"],
+                                 np.array([[1.0, 1.0]]), window=0.5)
+    assert avg.n_frames == 2 and avg.start == 200.0 and avg.end == 300.0
+    assert abs(avg.mean["WATER DEPTH"][0] - 0.4) < 1e-6
+    assert abs(avg.fluctuation["WATER DEPTH"] - 0.1 / 0.4) < 1e-6
+    assert avg.fluctuation["SCALAR VELOCITY"] == 0.0
+
+
+def test_a_change_within_the_fluctuation_is_reported(tmp_path):
+    a, b, c = _level(3, 0.30, 0.50), _level(5, 0.29, 0.45), _level(7, 0.288, 0.50)
+    for lv, spread in ((a, 0.04), (b, 0.03), (c, 0.02)):
+        lv.fluctuation = {"WATER DEPTH": spread / 10, "SCALAR VELOCITY": 0.12}
+        lv.n_frames = 10
+    rep = _build_report([a, b, c], ["WATER DEPTH", "SCALAR VELOCITY"], 0.05,
+                        np.zeros((6, 2)))
+    assert rep.unsteady_quantities() == ["SCALAR VELOCITY"]
+    text = rep.format()
+    assert "fluctuation in time" in text and "mean over the last 50%" in text
+    assert "SCALAR VELOCITY: the finest change is not larger" in text
+    rep.to_xlsx(tmp_path / "v.xlsx")
+    from openpyxl import load_workbook
+
+    labels = [r[0].value for r in load_workbook(tmp_path / "v.xlsx").active.iter_rows()]
+    assert labels.count("  fluctuation in time") == 2

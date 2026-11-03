@@ -106,3 +106,22 @@ def _cfg(tmp_path):
         morphodynamics=Morphodynamics(), ground_truth=GroundTruth(),
         calibration=Calibration(),
     )
+
+
+def test_an_unpatched_spalart_allmaras_is_not_taken_into_3d(tmp_path):
+    """Auto-selected S-A diverges in TELEMAC-3D on a wetting/drying bed without the
+    source-term patch (NaN at iteration 0 on isar-2025 and Inn KB15): k-epsilon."""
+    cfg = _cfg(tmp_path)
+    model = tmp_path / "model"
+    model.mkdir(exist_ok=True)
+    h, v, why = threed._without_unpatched_spalart(cfg, model, 5, 5, "coarse mesh")
+    assert (h, v) == (3, 3) and "Spalart-Allmaras" in why
+    # with the patch, or with a closure the case names itself, S-A stays
+    (model / "user_fortran").mkdir()
+    assert threed._without_unpatched_spalart(cfg, model, 5, 5, "x")[:2] == (5, 5)
+    (model / "user_fortran").rmdir()
+    cfg.hydrodynamics.turbulence_model = 6
+    assert threed._without_unpatched_spalart(cfg, model, 5, 5, "x")[:2] == (5, 5)
+    # other closures are untouched
+    cfg.hydrodynamics.turbulence_model = "auto"
+    assert threed._without_unpatched_spalart(cfg, model, 4, 2, "x")[:2] == (4, 2)

@@ -35,9 +35,14 @@ output ``r2d.slf``) into a ``<case-name>3d.cas`` for ``telemac3d.py``:
   :data:`TARGET_COURANT` (0.6) from the 2D velocity and the cell sizes.
 
 TELEMAC-3D cannot run with finite volumes, so the 3D case is always the
-finite-element kernel (the 2D ``finite_volumes`` flag is irrelevant here). Zonal
-friction is not carried over - TELEMAC-3D has no ``FRICTION DATA FILE`` - so a
-single representative bottom-friction law/coefficient is written instead.
+finite-element kernel (the 2D ``finite_volumes`` flag is irrelevant here). TELEMAC-3D
+has no ``FRICTION DATA FILE``, but it reads the per-node ``BOTTOM FRICTION`` variable of
+``geometry.slf`` (``FONSTR``, listing: "FRICTION COEFFICIENTS READ IN THE GEOMETRY FILE"),
+which the build writes from the roughness zones, so the 3D bed has the same ks per node
+as the 2D one. The ``FRICTION COEFFICIENT FOR THE BOTTOM`` written here is only the
+fallback for a geometry without that variable. What differs is how the ks acts: the 3D
+bed shear is a log law evaluated at the first plane above the bed (``tfond.f``), so it
+depends on the thickness of the lowest layer.
 """
 
 from __future__ import annotations
@@ -217,6 +222,30 @@ def select_3d_turbulence(cfg: Config, mesh) -> tuple[int, int, str]:
     return h3d, v3d, reason
 
 
+def _without_unpatched_spalart(cfg: Config, model: Path, h_turb: int, v_turb: int,
+                               reason: str) -> tuple[int, int, str]:
+    """k-epsilon in place of an auto-selected Spalart-Allmaras without its patch.
+
+    The 2D auto-selection picks Spalart-Allmaras on a coarse mesh, which is model 5
+    in TELEMAC-3D, and there it diverges in the first velocity-diffusion solve on a
+    wetting/drying bed (``GRACJG ... RELATIVE PRECISION NaN`` at iteration 0) unless
+    the source-term patch of a ``user_fortran/`` folder is linked in. Measured on
+    isar-2025 (two meshes) and on Inn KB15 (the vertical-convergence study of
+    2026-11-02, 3 planes): NaN with model 5, clean with k-epsilon. The 3D pre-run of
+    the OpenFOAM seed made the same swap; the 3D runs and the vertical-convergence
+    study had not, so every 3D run of such a case failed. A closure the case names
+    explicitly is kept.
+    """
+    chosen = str(getattr(cfg.hydrodynamics, "turbulence_model", "auto")).strip().lower()
+    if h_turb != 5 or chosen != "auto" or (Path(model) / "user_fortran").is_dir():
+        return h_turb, v_turb, reason
+    log.warning("3D: k-epsilon instead of the auto-selected Spalart-Allmaras, which "
+                "diverges in TELEMAC-3D on a wetting/drying bed without the "
+                "source-term patch of a user_fortran/ folder")
+    return 3, 3, (f"{TURB3D_NAMES[3]} in place of Spalart-Allmaras (diverges in 3D on "
+                  f"a wetting/drying bed without its user_fortran/ patch) - {reason}")
+
+
 def courant_time_step(dx: float, dz: float, u_char: float,
                       courant: float = TARGET_COURANT) -> float:
     """Fixed time step [s] giving an advective Courant ~ *courant* on the limiting
@@ -270,6 +299,7 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
                  n_time_steps: int | None = None,
                  listing_period: int | None = None,
                  graphic_period: int | None = None,
+                 graphic_frames: int | None = None,
                  min_depth: float | None = None,
                  data: dict | None = None) -> ThreeDSetup:
     """Write ``<case-name>3d.cas`` next to the 2D case and return the setup summary.
@@ -294,7 +324,9 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
     for a long boundary-flux convergence run). *n_time_steps* forces the step count
     (overriding the flow-through/duration sizing); *listing_period* /
     *graphic_period* override the printout spacing (e.g. a short listing period so
-    the flux-convergence analysis gets enough printouts). *data* is an optional
+    the flux-convergence analysis gets enough printouts); *graphic_frames* asks for that
+    many result frames over the run instead of the default 5 (the vertical convergence
+    study averages over the second half of each run). *data* is an optional
     pre-read 2D result (``selafin.read_slf``) so several variants can be built from
     one read of a large results file.
 
@@ -326,6 +358,8 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
     from types import SimpleNamespace
     mesh = SimpleNamespace(x=data["x"], y=data["y"], triangles=data["ikle"])
     h_turb, v_turb, turb_reason = select_3d_turbulence(cfg, mesh)
+    h_turb, v_turb, turb_reason = _without_unpatched_spalart(
+        cfg, model, h_turb, v_turb, turb_reason)
     u_char = characteristic_velocity(cfg, data)
     dt = courant_time_step(vd.dx, vd.dz, u_char)
 
@@ -342,7 +376,7 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
             total_time = total_time_factor * reach_len / max(u_char, 1e-6)
         n_steps = int(np.clip(round(total_time / dt), 200, 200_000))
     # 3D result writing is expensive; keep only a handful of frames over the spin-up
-    graphic = graphic_period or max(1, n_steps // 5)
+    graphic = graphic_period or max(1, n_steps // (graphic_frames or 5))
     listing = listing_period or max(1, n_steps // 10)
 
     law, coef = _global_friction(cfg)
@@ -480,9 +514,8 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
         f"VERTICAL TURBULENCE MODEL : {v_turb}",
         *(["MIXING LENGTH MODEL : 3"] if v_turb == 2 else []),
         "/",
-        "/ FRICTION (single representative Nikuradse law; TELEMAC-3D has no zonal",
-        "/ FRICTION DATA FILE, so the 2D per-zone roughness is collapsed to ONE ks -",
-        "/ NOT spatially equivalent to the 2D setup; refine here if zonation matters)",
+        "/ FRICTION (the per-node BOTTOM FRICTION of the geometry file holds the ks of",
+        "/ each roughness zone and takes precedence; this coefficient is the fallback)",
         f"LAW OF BOTTOM FRICTION : {law}",
         f"FRICTION COEFFICIENT FOR THE BOTTOM : {coef}",
     ]

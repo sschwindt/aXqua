@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 
 import numpy as np
+import pytest
 
 from axqua import convergence, percent_levels, ratio_levels, selafin
 from axqua.convergence import LevelResult, build_report, estimate_next_runtime
@@ -527,3 +528,67 @@ def test_probes_outside_the_model_are_left_out(tmp_path):
                                 geodata=types.SimpleNamespace(boundary=outline,
                                                               channel_centerline=None))
     assert default_probes(cfg).tolist() == [[5.0, 5.0], [2.0, 8.0]]
+
+
+def _utm_strip(tmp_path):
+    """A channel strip at UTM coordinates with 0.2 m short edges, written twice:
+    as a double-precision geometry and as a single-precision result, the way
+    TELEMAC writes one. The depth rises linearly across the strip."""
+    x0, y0 = 759_500.0, 5_348_500.0
+    xs = x0 + np.arange(0.0, 4.01, 1.0)
+    ys = y0 + np.array([0.0, 0.2, 0.4])
+    X, Y = np.meshgrid(xs, ys)
+    x, y = X.ravel(), Y.ravel()
+    nx = xs.size
+    ikle = []
+    for j in range(ys.size - 1):
+        for i in range(nx - 1):
+            a, b, c, d = j * nx + i, j * nx + i + 1, (j + 1) * nx + i + 1, (j + 1) * nx + i
+            ikle += [[a + 1, b + 1, c + 1], [a + 1, c + 1, d + 1]]
+    ikle = np.array(ikle)
+    ipobo = np.zeros(x.size, dtype=int)
+    depth = 1.0 + (y - y0)                                 # 1.0 .. 1.4 m
+    geo = selafin.write_geometry(tmp_path / "geometry.slf", x, y, ikle, ipobo,
+                                 bottom=np.zeros(x.size))
+    res = selafin._write_selafin(
+        tmp_path / "r2d.slf", x, y, ikle, ipobo,
+        [("WATER DEPTH", "M", depth), ("VELOCITY U", "M/S", np.ones(x.size)),
+         ("VELOCITY V", "M/S", np.zeros(x.size))],
+        title="result", date=(2026, 11, 2, 0, 0, 0), double_precision=False)
+    return geo, res, np.array([[x0 + 1.5, y0 + 0.13]])
+
+
+def test_a_level_is_read_on_its_double_precision_geometry(tmp_path):
+    # TELEMAC stores a result's coordinates in float32, which resolves 0.5 m at a
+    # UTM northing: the 0.2 m edges collapse and the shortest edge reads 0.5 m
+    geo, res, point = _utm_strip(tmp_path)
+    data = selafin.read_slf(res)
+    stored_edge, _, _ = convergence._geom_stats(data, point)
+    edge, depth, _ = convergence._geom_stats(data, point, geo)
+    assert stored_edge != pytest.approx(0.2, abs=0.01)
+    assert edge == pytest.approx(0.2, abs=1e-6)
+    assert depth == pytest.approx(1.13, abs=1e-6)
+    qoi = convergence.extract_at_points(res, ["WATER DEPTH"], point, geometry=geo)
+    assert qoi["WATER DEPTH"][0] == pytest.approx(1.13, abs=1e-6)
+
+
+def test_a_geometry_of_another_mesh_is_not_used(tmp_path):
+    geo, res, point = _utm_strip(tmp_path)
+    data = selafin.read_slf(res)
+    data = {**data, "x": np.append(data["x"], 0.0), "y": np.append(data["y"], 0.0)}
+    x, _, _ = convergence.mesh_coordinates(data, geo)
+    assert x is data["x"]
+
+
+def test_the_report_has_a_figure_and_the_values_at_the_points(tmp_path):
+    from openpyxl import load_workbook
+
+    levels = [_level("coarse", 2.0, 0.42, 0.38), _level("medium", 1.5, 0.40, 0.37),
+              _level("fine", 1.15, 0.41, 0.36)]
+    report = build_report(levels, ["WATER DEPTH", "SCALAR VELOCITY"], 0.05,
+                          np.zeros((6, 2)))
+    convergence.write_study_report(report, tmp_path, "mesh-convergence", None)
+    assert (tmp_path / "mesh-convergence.png").stat().st_size > 10_000
+    sheet = load_workbook(tmp_path / "mesh-convergence.xlsx")["values at the points"]
+    assert sheet.max_row == 1 + 6
+    assert sheet.cell(row=2, column=4).value == pytest.approx(0.42)

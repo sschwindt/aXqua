@@ -30,10 +30,14 @@ from axqua.core import selafin
 from axqua.config import Config
 from axqua.convergence import (
     DEFAULT_QUANTITIES, _gci_triplet, _rel_change, default_probes,
-    extract_at_points,
+    extract_mean_at_points,
 )
 
 log = logging.getLogger("axqua")
+
+#: result frames each run writes; the values are averaged over the second half
+FRAMES = 20
+WINDOW = 0.5
 
 
 # --------------------------------------------------------------------------- #
@@ -51,6 +55,9 @@ class VerticalLevel:
     time_step: float | None                # fixed dt sized for the target Courant [s]
     runtime_s: float | None
     qoi: dict[str, np.ndarray]             # {quantity: (n_probes,) values}
+    #: {quantity: spread over time / mean} at the points, over the averaged frames
+    fluctuation: dict[str, float] = field(default_factory=dict)
+    n_frames: int = 1                      # frames the values are averaged over
 
     @property
     def cell_size(self) -> float:
@@ -76,6 +83,9 @@ class VerticalConvergenceReport:
     gci_fine: dict[str, float | None] = field(default_factory=dict)
     converged: bool = False
     case: str = ""
+    #: what the grid size of this study is, for the axis of its figure
+    size_name = "layer thickness dz [m]"
+    level_name = "layer counts"
 
     def format(self) -> str:
         lv = self.levels
@@ -109,13 +119,37 @@ class VerticalConvergenceReport:
                 extra.append(f"GCI(fine)={g * 100:.2f}%")
             if extra:
                 lines.append(f"    {'':<20}" + "; ".join(extra))
+            if any(x.fluctuation.get(q) is not None for x in lv):
+                lines.append(f"    {'fluctuation in time':<20}" + "".join(
+                    (f"{x.fluctuation[q] * 100:>{w - 1}.2f}%" if q in x.fluctuation
+                     else f"{'-':>{w}}") for x in lv))
+        frames = sorted({x.n_frames for x in lv})
+        if frames != [1]:
+            lines.append(f"  values: mean over the last {WINDOW:.0%} of each run "
+                         f"({'/'.join(str(n) for n in frames)} frames)")
         verdict = "CONVERGED" if self.converged else "NOT converged"
         lines.append(f"  => {verdict} at {self.tolerance * 100:.1f}% "
                      "(finest relative change vs. tolerance)")
         if not self.converged:
             lines.append("     add layers (the finest still changes the QoI by more "
                          "than the tolerance).")
+        for q in self.unsteady_quantities():
+            lines.append(f"     {q}: the finest change is not larger than the runs' own "
+                         "fluctuation in time; more layers cannot settle it.")
         return "\n".join(lines)
+
+    def unsteady_quantities(self) -> list[str]:
+        """Quantities whose last change is within the fluctuation of the two runs."""
+        if len(self.levels) < 2:
+            return []
+        a, b = self.levels[-2], self.levels[-1]
+        out = []
+        for q in self.quantities:
+            rc = self.rel_change.get(q) or []
+            spread = max(a.fluctuation.get(q, 0.0), b.fluctuation.get(q, 0.0))
+            if rc and spread and rc[-1] <= spread:
+                out.append(q)
+        return out
 
     def save(self, path) -> Path:
         path = Path(path)
@@ -219,6 +253,10 @@ class VerticalConvergenceReport:
                 fmt="0.0000", align=center)
             rc = ["", ""] + [f"{e * 100:.2f}%" for e in self.rel_change.get(q, [])]
             row(["  rel. change vs. fewer", *rc[1:]], align=center)
+            if any(q in x.fluctuation for x in lv):
+                row(["  fluctuation in time",
+                     *[(f"{x.fluctuation[q] * 100:.2f}%" if q in x.fluctuation else "-")
+                       for x in lv]], align=center)
             p, g = self.observed_order.get(q), self.gci_fine.get(q)
             extra = []
             if p is not None:
@@ -244,6 +282,10 @@ class VerticalConvergenceReport:
         ws.column_dimensions["A"].width = 28
         for c in range(2, ncol + 1):
             ws.column_dimensions[chr(64 + c)].width = 13
+        from axqua.convergence import _points_sheet
+
+        _points_sheet(wb, self, head_fill=head_fill, head_font=head_font,
+                      border=border)
         wb.save(path)
         return path
 
@@ -280,6 +322,23 @@ def _build_report(levels, quantities, tolerance, probes, case="") \
     rep.converged = all(rep.rel_change[q] and rep.rel_change[q][-1] < tolerance
                         for q in quantities)
     return rep
+
+
+def level_from_results(d: Path, lc: Config, n_levels: int, dz: float,
+                       time_step: float | None, runtime_s: float | None, probes,
+                       quantities) -> VerticalLevel:
+    """Read one finished layer count in *d*: the mean over the last half of the run."""
+    res2d = Path(d) / lc.results2d_from_3d_slf
+    plan = selafin.SelafinFile(res2d)
+    avg = extract_mean_at_points(res2d, quantities, probes,
+                                 geometry=Path(d) / lc.geometry_slf, window=WINDOW)
+    log.info("  %d levels: values averaged over %d frames, %.0f to %.0f s",
+             n_levels, avg.n_frames, avg.start, avg.end)
+    return VerticalLevel(
+        n_levels=n_levels, dz=dz, n_nodes3d=plan.npoin * n_levels,
+        n_elem3d=plan.nelem * (n_levels - 1), time_step=time_step,
+        runtime_s=runtime_s, qoi=avg.mean, fluctuation=avg.fluctuation,
+        n_frames=avg.n_frames)
 
 
 def make_telemac3d_simulator(cfg: Config, *, results_2d: Path, base_dir: Path,
@@ -350,7 +409,7 @@ def make_telemac3d_simulator(cfg: Config, *, results_2d: Path, base_dir: Path,
                                         n_levels=n_levels,
                                         total_time_factor=total_time_factor,
                                         hotstart=hotstart, n_time_steps=n_time_steps,
-                                        min_depth=min_depth)
+                                        graphic_frames=FRAMES, min_depth=min_depth)
             steps = max(1, round(float(target_time) / probe.time_step))
             log.info("  L%d: dt~%.4f s -> %d steps to reach %.0f s simulated time",
                      n_levels, probe.time_step, steps, float(target_time))
@@ -358,7 +417,7 @@ def make_telemac3d_simulator(cfg: Config, *, results_2d: Path, base_dir: Path,
                                     n_levels=n_levels,
                                     total_time_factor=total_time_factor,
                                     hotstart=hotstart, n_time_steps=steps,
-                                    min_depth=min_depth)
+                                    graphic_frames=FRAMES, min_depth=min_depth)
         t0 = time.time()
         # stream the telemac3d listing live with the simulated-time progress bar
         # (same look as initial_run.py); 3D has no DURATION keyword, so the bar's
@@ -372,14 +431,8 @@ def make_telemac3d_simulator(cfg: Config, *, results_2d: Path, base_dir: Path,
             raise RuntimeError(
                 f"telemac3d failed for {n_levels} levels (rc={proc.returncode}); "
                 f"see the listing under {d}")
-        res2d = d / lc.results2d_from_3d_slf
-        data = selafin.read_slf(res2d, frame=-1)
-        return VerticalLevel(
-            n_levels=n_levels, dz=setup.dz,
-            n_nodes3d=data["x"].size * n_levels,
-            n_elem3d=data["ikle"].shape[0] * (n_levels - 1),
-            time_step=setup.time_step, runtime_s=runtime_s,
-            qoi=extract_at_points(res2d, quantities, probes))
+        return level_from_results(d, lc, n_levels, setup.dz, setup.time_step,
+                                  runtime_s, probes, quantities)
 
     return simulate
 

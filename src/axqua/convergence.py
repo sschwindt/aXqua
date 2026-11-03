@@ -81,7 +81,11 @@ def _resolve_field(values: dict[str, np.ndarray], qty: str) -> np.ndarray:
 
 
 def _interp_to_points(x, y, field, points):
-    """Linear interpolation of a node field onto *points*; nearest for outliers."""
+    """Linear interpolation of a node field onto *points*; nearest for outliers.
+
+    Triangulates the nodes anew (Delaunay), which is all that a file without its own
+    connectivity allows. A TELEMAC mesh is sampled with :func:`_interp_on_mesh`.
+    """
     from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
     nodes = np.column_stack([x, y])
@@ -92,12 +96,123 @@ def _interp_to_points(x, y, field, points):
     return out
 
 
-def extract_at_points(slf_path, quantities, points) -> dict[str, np.ndarray]:
-    """Read the last frame of *slf_path* and sample *quantities* at *points*."""
+def _interp_on_mesh(x, y, ikle, field, points):
+    """Linear interpolation in the mesh's own triangles; nearest node outside them.
+
+    A Delaunay triangulation of the nodes is not the mesh: it connects nodes across a
+    bank or a dry island that the mesh keeps apart. Where the coordinates cannot be
+    triangulated (the float32 coordinates of a result, see :func:`mesh_coordinates`),
+    this falls back to :func:`_interp_to_points`.
+    """
+    from matplotlib.tri import LinearTriInterpolator
+    from scipy.interpolate import NearestNDInterpolator
+
+    from axqua.model_column import safe_triangulation
+
+    points = np.asarray(points, dtype=float)
+    field = np.asarray(field, dtype=float)
+    try:
+        tri = safe_triangulation(x, y, ikle)
+    except ValueError:
+        return _interp_to_points(x, y, field, points)
+    out = np.asarray(LinearTriInterpolator(tri, field)(points[:, 0], points[:, 1])
+                     .filled(np.nan), dtype=float)
+    nan = np.isnan(out)
+    if nan.any():
+        out[nan] = NearestNDInterpolator(np.column_stack([x, y]), field)(points[nan])
+    return out
+
+
+def mesh_coordinates(data: dict, geometry=None):
+    """``(x, y, ikle)`` to sample *data* on: those of *geometry* where it matches.
+
+    TELEMAC writes a result in single precision, coordinates included, and a float32
+    northing near 5,300,000 m resolves only 0.5 m. On the Inn KB15 ladder this set the
+    shortest edge of both fine meshes to exactly 0.50 m (they have 0.77 and 0.58 m) and
+    moved the mean depth at the measurement points by up to 1.6 %, a fifth of the
+    change between two meshes. ``geometry.slf`` is written in double precision, so a
+    level is read on it. Without a geometry file, or with one of another node count (a
+    merged parallel result can repeat interface nodes), the result's own coordinates
+    are used as before.
+    """
+    if geometry is not None and Path(geometry).exists():
+        try:
+            geo = selafin.read_slf(geometry, frame=0)
+            if geo["x"].size == np.asarray(data["x"]).size:
+                return geo["x"], geo["y"], geo["ikle"]
+            log.debug("%s has %d nodes, the result %d: using the result's coordinates",
+                      Path(geometry).name, geo["x"].size, np.asarray(data["x"]).size)
+        except Exception as exc:                      # noqa: BLE001 - fall back
+            log.debug("cannot read %s: %s", geometry, exc)
+    return data["x"], data["y"], data["ikle"]
+
+
+def extract_at_points(slf_path, quantities, points, *,
+                      geometry=None) -> dict[str, np.ndarray]:
+    """Read the last frame of *slf_path* and sample *quantities* at *points*.
+
+    With *geometry* (the level's ``geometry.slf``) the field is interpolated in the
+    triangles of that double-precision mesh (:func:`mesh_coordinates`).
+    """
     data = selafin.read_slf(slf_path, frame=-1)
     points = np.asarray(points, dtype=float)
-    return {q: _interp_to_points(data["x"], data["y"], _resolve_field(data["values"], q),
-                                 points) for q in quantities}
+    if geometry is None:
+        return {q: _interp_to_points(data["x"], data["y"],
+                                     _resolve_field(data["values"], q), points)
+                for q in quantities}
+    x, y, ikle = mesh_coordinates(data, geometry)
+    return {q: _interp_on_mesh(x, y, ikle, _resolve_field(data["values"], q), points)
+            for q in quantities}
+
+
+@dataclass
+class TimeAverage:
+    """Values at the points averaged over the end of a run, and how much they move."""
+
+    mean: dict[str, np.ndarray]            # {quantity: (n_points,) time mean}
+    fluctuation: dict[str, float]          # {quantity: ||std over time|| / ||mean||}
+    n_frames: int                          # frames the mean is taken over
+    start: float                           # time of the first of them [s]
+    end: float                             # time of the last of them [s]
+
+
+def extract_mean_at_points(slf_path, quantities, points, *, geometry=None,
+                           window: float = 0.5) -> TimeAverage:
+    """Average *quantities* at *points* over the last *window* of the simulated time.
+
+    A snapshot is enough where the flow is steady. The 3D runs of the vertical study
+    are not, near bars and wet edges: on the Inn KB15 reach, 19 of 30 verticals moved
+    by 1 to 5 cm in depth and 0.1 to 0.3 m/s in velocity between two outputs 1,000 s
+    apart, as much as the change between two layer counts. The mean over the frames of
+    the window compares the layer counts, and ``fluctuation`` (the spread over time
+    in the norm the relative change uses) says how far a single frame can be off.
+    """
+    sf = selafin.SelafinFile(slf_path)
+    if sf.n_frames == 0:
+        raise ValueError(f"{Path(slf_path).name}: no time frames")
+    times = np.asarray(sf.times, dtype=float)
+    first = times[0] + (1.0 - float(window)) * (times[-1] - times[0])
+    chosen = [i for i, t in enumerate(times) if t >= first - 1e-9] or [sf.n_frames - 1]
+    points = np.asarray(points, dtype=float)
+    base = {"x": sf.x, "y": sf.y, "ikle": sf.ikle}
+    x, y, ikle = (mesh_coordinates(base, geometry) if geometry is not None
+                  else (sf.x, sf.y, sf.ikle))
+    series: dict[str, list[np.ndarray]] = {q: [] for q in quantities}
+    for i in chosen:
+        values = sf.frame(i)
+        for q in quantities:
+            field = np.asarray(_resolve_field(values, q), dtype=float)
+            series[q].append(_interp_on_mesh(x, y, ikle, field, points)
+                             if geometry is not None
+                             else _interp_to_points(x, y, field, points))
+    mean, spread = {}, {}
+    for q, rows in series.items():
+        stack = np.vstack(rows)
+        mean[q] = stack.mean(axis=0)
+        norm = np.linalg.norm(mean[q])
+        spread[q] = float(np.linalg.norm(stack.std(axis=0)) / norm) if norm else 0.0
+    return TimeAverage(mean=mean, fluctuation=spread, n_frames=len(chosen),
+                       start=float(times[chosen[0]]), end=float(times[chosen[-1]]))
 
 
 # --------------------------------------------------------------------------- #
@@ -395,8 +510,163 @@ class ConvergenceReport:
         ws.column_dimensions["A"].width = 28
         for c in range(2, ncol + 1):
             ws.column_dimensions[chr(64 + c)].width = 13
+        _points_sheet(wb, self, head_fill=head_fill, head_font=head_font,
+                      border=border)
         wb.save(path)
         return path
+
+
+def _points_sheet(wb, report, *, head_fill, head_font, border) -> None:
+    """A sheet with every quantity at every probe point on every mesh.
+
+    The verdict is drawn from the mean over the points, and a mean hides how much
+    single points move: on the Inn KB15 ladder the mean depth changed by 2 % between
+    two meshes while single points changed by more than 20 %.
+    """
+    from openpyxl.styles import Alignment
+
+    lv = report.levels
+    ws = wb.create_sheet("values at the points")
+    head = ["point", "x [m]", "y [m]"]
+    for q in report.quantities:
+        head += [f"{q} [{_unit(q)}] {x.label}" for x in lv]
+        if len(lv) > 1:
+            head.append(f"{q}: change of the finest [%]")
+    ws.append(head)
+    for c in range(1, len(head) + 1):
+        cell = ws.cell(row=1, column=c)
+        cell.fill, cell.font, cell.border = head_fill, head_font, border
+        cell.alignment = Alignment(wrap_text=True, horizontal="center")
+    probes = np.asarray(report.probes, dtype=float)
+    for i in range(len(probes)):
+        values = [i + 1, float(probes[i, 0]), float(probes[i, 1])]
+        for q in report.quantities:
+            column = [float(x.qoi[q][i]) for x in lv]
+            values += column
+            if len(lv) > 1:
+                prev, last = column[-2], column[-1]
+                values.append(100.0 * (last - prev) / last if last else float("nan"))
+        ws.append(values)
+        for c, value in enumerate(values, start=1):
+            cell = ws.cell(row=ws.max_row, column=c)
+            cell.border = border
+            if c in (2, 3):
+                cell.number_format = "0.00"
+            elif c > 3 and isinstance(value, float):
+                cell.number_format = "0.000"
+    ws.column_dimensions["A"].width = 7
+    ws.column_dimensions["B"].width = 12
+    ws.column_dimensions["C"].width = 13
+    ws.row_dimensions[1].height = 45
+    ws.freeze_panes = "D2"
+
+
+def _unit(quantity: str) -> str:
+    return {"WATER DEPTH": "m", "SCALAR VELOCITY": "m/s"}.get(quantity.upper(), "-")
+
+
+#: An ordinal blue ramp, light (coarse) to dark (fine), for the meshes of a study; a
+#: ladder longer than the ramp takes evenly spaced steps of it.
+_MESH_RAMP = ("#86b6ef", "#5598e7", "#2a78d6", "#1c5cab", "#104281", "#0d366b")
+_MESH_MARKERS = ("o", "s", "^", "D", "v", "P", "X")
+
+
+def plot_report(report, path, *, size_name: str = "cell size [m]") -> Path:
+    """Draw a study: values at the points, their mean, and the change per refinement.
+
+    One row per quantity. Left: the value at each probe point on each mesh (light =
+    coarse, dark = fine), which shows where the meshes disagree. Middle: the mean over
+    the points against the cell size, the number the verdict is drawn from. Right: the
+    relative change from one mesh to the next against the tolerance; a study that
+    converges shows these bars falling below the line.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg", force=False)
+    import matplotlib.pyplot as plt
+
+    path = Path(path)
+    lv = list(report.levels)
+    quantities = list(report.quantities)
+    n = len(lv)
+    idx = np.linspace(0, len(_MESH_RAMP) - 1, max(n, 2)).round().astype(int)
+    colors = [_MESH_RAMP[i] for i in idx][-n:] if n else []
+    ink, muted, grid = "#0b0b0b", "#52514e", "#e4e3df"
+    fig, axes = plt.subplots(len(quantities), 3, figsize=(15, 4.2 * len(quantities)),
+                             squeeze=False,
+                             gridspec_kw={"width_ratios": [2.4, 1.2, 1.2]})
+    fig.patch.set_facecolor("#fcfcfb")
+    points = np.arange(1, len(report.probes) + 1)
+    sizes = np.array([x.cell_size for x in lv], dtype=float)
+    for row, q in enumerate(quantities):
+        unit = _unit(q)
+        a, b, c = axes[row]
+        for ax in (a, b, c):
+            ax.set_facecolor("#fcfcfb")
+            ax.grid(True, color=grid, linewidth=0.8)
+            ax.set_axisbelow(True)
+            for side in ("top", "right"):
+                ax.spines[side].set_visible(False)
+            for side in ("left", "bottom"):
+                ax.spines[side].set_color(muted)
+            ax.tick_params(colors=muted, labelsize=9)
+        for k, x in enumerate(lv):
+            a.plot(points, x.qoi[q], linestyle="none",
+                   marker=_MESH_MARKERS[k % len(_MESH_MARKERS)], markersize=6,
+                   markerfacecolor=colors[k], markeredgecolor="#fcfcfb",
+                   markeredgewidth=0.8, label=x.label)
+        a.set_xlabel("measurement point", color=muted)
+        a.set_ylabel(f"{q.lower()} [{unit}]", color=muted)
+        a.set_xticks(points)
+        a.set_xlim(0.3, len(points) + 0.7)
+        a.set_title(f"{q.capitalize()} at each point", loc="left", color=ink,
+                    fontsize=11)
+        if row == 0:
+            a.legend(frameon=False, fontsize=9, ncol=min(n, 4), loc="upper left",
+                     bbox_to_anchor=(0.0, 1.02), handletextpad=0.3,
+                     labelcolor=muted)
+        means = np.array([x.repr_value(q) for x in lv])
+        b.plot(sizes, means, color="#2a78d6", linewidth=2, zorder=1)
+        for k in range(n):
+            b.plot(sizes[k], means[k], marker=_MESH_MARKERS[k % len(_MESH_MARKERS)],
+                   markersize=8, color=colors[k], markeredgecolor="#fcfcfb",
+                   markeredgewidth=1.5, zorder=2)
+        b.invert_xaxis()
+        b.set_xlabel(f"{size_name} (finer to the right)", color=muted)
+        b.set_ylabel(f"mean over the points [{unit}]", color=muted)
+        b.set_title("Mean over the points", loc="left", color=ink, fontsize=11)
+        span = means.max() - means.min()
+        pad = max(span * 0.6, abs(means.mean()) * 0.05)
+        b.set_ylim(means.min() - pad, means.max() + pad)
+        changes = np.array(report.rel_change.get(q, []), dtype=float) * 100.0
+        if changes.size:
+            labels = [f"to\n{lv[k + 1].label}" for k in range(changes.size)]
+            bars = c.bar(range(changes.size), changes, width=0.55,
+                         color=colors[1:changes.size + 1])
+            for bar, value in zip(bars, changes):
+                c.annotate(f"{value:.1f} %", (bar.get_x() + bar.get_width() / 2,
+                                              bar.get_height()),
+                           textcoords="offset points", xytext=(0, 3), ha="center",
+                           fontsize=9, color=ink)
+            tol = report.tolerance * 100.0
+            c.axhline(tol, color=ink, linewidth=1.2, linestyle=(0, (4, 3)))
+            c.text(0.98, 0.98, f"dashed line: tolerance {tol:.0f} %",
+                   transform=c.transAxes, ha="right", va="top", fontsize=9,
+                   color=ink)
+            c.set_xticks(range(changes.size), labels, fontsize=8)
+            c.set_ylim(0, max(changes.max(), tol) * 1.35)
+        c.set_ylabel("change at the points [%]", color=muted)
+        c.set_title("Change per refinement", loc="left", color=ink, fontsize=11)
+    verdict = "converged" if report.converged else "not converged"
+    case = f"{report.case}: " if getattr(report, "case", "") else ""
+    kind = getattr(report, "level_name", "meshes")
+    fig.suptitle(f"{case}{len(report.probes)} points, {n} {kind}, {verdict} at "
+                 f"{report.tolerance * 100:.0f} %", x=0.01, ha="left", color=ink,
+                 fontsize=13)
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(path, dpi=130, facecolor=fig.get_facecolor())
+    plt.close(fig)
+    return path
 
 
 # --------------------------------------------------------------------------- #
@@ -527,6 +797,11 @@ def write_readme(base_dir, *, report: ConvergenceReport | None = None,
     if report is not None or (base_dir / "mesh-convergence.txt").exists():
         lines += ["`mesh-convergence.txt` is a plain-text rendering of the same "
                   "summary.", ""]
+    lines += ["The sheet *values at the points* of the workbook lists both quantities "
+              "at every probe point on every mesh. `mesh-convergence.png` draws them: "
+              "the value at each point, the mean over the points against the cell "
+              "size, and the change from one mesh to the next against the "
+              "tolerance.", ""]
     lines += [
         "## Mathematical model and software",
         "",
@@ -904,9 +1179,10 @@ def make_telemac_simulator(cfg: Config, discharge: float, *, base_dir: Path,
         eff = mesh_mod.nominal_channel_size(lc)   # effective (gpkg-aware) size
         res = lc.model_path(lc.results_slf)
         data = selafin.read_slf(res, frame=-1)
-        min_edge, mean_depth, mean_vel = _geom_stats(data, probes)
+        geometry = lc.model_path(lc.geometry_slf)
+        min_edge, mean_depth, mean_vel = _geom_stats(data, probes, geometry)
         dt = _cfl_dt(min_edge, mean_depth, mean_vel)
-        qoi = extract_at_points(res, quantities, probes)
+        qoi = extract_at_points(res, quantities, probes, geometry=geometry)
         validity = mesh_validity.check_level(
             cfg, dx=eff, depth=mean_depth, velocity=mean_vel, ks=ks_channel,
             pinned_model=pinned_turbulence)
@@ -921,9 +1197,16 @@ def make_telemac_simulator(cfg: Config, discharge: float, *, base_dir: Path,
     return simulate
 
 
-def _geom_stats(data: dict, probes):
-    """(shortest edge, mean probe depth, mean probe velocity) from a result dict."""
-    x, y, ikle = data["x"], data["y"], data["ikle"]
+def _geom_stats(data: dict, probes, geometry=None):
+    """(shortest edge, mean probe depth, mean probe velocity) from a result dict.
+
+    With *geometry* the edges and the sampling use its double-precision coordinates
+    (:func:`mesh_coordinates`); the float32 coordinates of a result floor the
+    shortest edge at the coordinate resolution.
+    """
+    x, y, ikle = mesh_coordinates(data, geometry)
+    sample = _interp_on_mesh if geometry is not None else (
+        lambda x, y, _ikle, field, pts: _interp_to_points(x, y, field, pts))
     p = ikle
     e = np.concatenate([
         np.hypot(x[p[:, 0]] - x[p[:, 1]], y[p[:, 0]] - y[p[:, 1]]),
@@ -940,10 +1223,10 @@ def _geom_stats(data: dict, probes):
         e = e[nonzero]
     probes = np.asarray(probes, dtype=float)
     try:
-        depth = float(np.nanmean(_interp_to_points(
-            x, y, _resolve_field(data["values"], "WATER DEPTH"), probes)))
-        vel = float(np.nanmean(_interp_to_points(
-            x, y, _resolve_field(data["values"], "SCALAR VELOCITY"), probes)))
+        depth = float(np.nanmean(sample(
+            x, y, ikle, _resolve_field(data["values"], "WATER DEPTH"), probes)))
+        vel = float(np.nanmean(sample(
+            x, y, ikle, _resolve_field(data["values"], "SCALAR VELOCITY"), probes)))
     except KeyError:
         depth, vel = 1.0, 1.0
     min_edge = float(e.min()) if e.size else float("nan")
@@ -1024,9 +1307,10 @@ def _load_completed_level(cfg: Config, level_dir: Path, label: str, probes,
         meta = json.loads((Path(level_dir) / "level.json").read_text())
         res = Path(level_dir) / (result_name or getattr(cfg, "results_slf", "r2d.slf"))
         data = selafin.read_slf(res, frame=-1)
-        min_edge, mean_depth, mean_vel = _geom_stats(data, probes)
+        geometry = Path(level_dir) / getattr(cfg, "geometry_slf", "geometry.slf")
+        min_edge, mean_depth, mean_vel = _geom_stats(data, probes, geometry)
         dt = _cfl_dt(min_edge, mean_depth, mean_vel)
-        qoi = extract_at_points(res, quantities, probes)
+        qoi = extract_at_points(res, quantities, probes, geometry=geometry)
         cell_size = float(meta.get("cell_size") or meta["channel_size"])
         validity = None
         try:
@@ -1358,6 +1642,14 @@ def write_study_report(report, folder: Path, stem: str, ctx, *,
         workbook = report.to_xlsx(folder / f"{stem}.xlsx")
         summary = folder / f"{stem}.txt"
         report.save(summary)
+        figure = None
+        try:
+            figure = plot_report(report, folder / f"{stem}.png",
+                                 size_name=getattr(report, "size_name",
+                                                   "cell size [m]"))
+        except Exception as exc:                    # noqa: BLE001 - a figure is extra
+            log.warning("could not draw the %s figure: %s: %s", stem,
+                        type(exc).__name__, exc)
         if readme:
             write_readme(folder, report=report)
     except Exception as exc:                        # noqa: BLE001
@@ -1366,3 +1658,6 @@ def write_study_report(report, folder: Path, stem: str, ctx, *,
     log.info("%s report -> %s", stem, workbook)
     if ctx is not None:
         ctx.record(f"{stem.replace('-', ' ').capitalize()} summary", summary, kind="file")
+        if figure is not None:
+            ctx.record(f"{stem.replace('-', ' ').capitalize()} figure", figure,
+                       kind="file")

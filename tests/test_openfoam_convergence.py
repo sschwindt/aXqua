@@ -119,7 +119,8 @@ def test_the_backend_runs_the_study_and_writes_its_report(tmp_path, monkeypatch)
     assert report.converged
     folder = tmp_path / "post" / "openfoam-mesh-convergence"
     assert (folder / "openfoam-mesh-convergence.xlsx").is_file()
-    assert recorded == ["Openfoam mesh convergence summary"]
+    assert recorded == ["Openfoam mesh convergence summary",
+                        "Openfoam mesh convergence figure"]
 
 
 def test_the_study_is_a_job_kind_that_waits_for_the_case_and_gets_its_seed():
