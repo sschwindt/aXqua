@@ -592,3 +592,25 @@ def test_the_report_has_a_figure_and_the_values_at_the_points(tmp_path):
     sheet = load_workbook(tmp_path / "mesh-convergence.xlsx")["values at the points"]
     assert sheet.max_row == 1 + 6
     assert sheet.cell(row=2, column=4).value == pytest.approx(0.42)
+
+
+def test_centerline_probes_stay_off_the_liquid_boundaries(tmp_path):
+    # a probe on the inflow line reads one boundary node or another per mesh
+    import types
+
+    import geopandas as gpd
+    from shapely.geometry import LineString
+
+    from axqua.convergence import default_probes
+
+    line = tmp_path / "centerline.gpkg"
+    gpd.GeoDataFrame(geometry=[LineString([(0, 0), (100, 0)])],
+                     crs="EPSG:25832").to_file(line)
+    stale = tmp_path / "ground-truth.xlsx"
+    stale.write_text("left by an earlier build")
+    cfg = types.SimpleNamespace(
+        ground_truth=types.SimpleNamespace(measurements=None, sources=[]),
+        ground_truth_path=stale, crs_epsg=25832,
+        geodata=types.SimpleNamespace(boundary=None, channel_centerline=line))
+    probes = default_probes(cfg, n=4)
+    assert probes[:, 0].tolist() == [12.5, 37.5, 62.5, 87.5]

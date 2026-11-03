@@ -34,7 +34,7 @@ The study follows the procedure of Celik et al. (2008). It uses a sequence of fo
      - case values divided by 1.69
      - used for the convergence criterion
 
-Each mesh is run at the constant discharge of the case until the flow is steady. All runs start with a pre-wetted channel, to save the time for filling the reach (:ref:`case-initialization`). aXqua then reads the water depth and the flow velocity at the positions of the field measurements and compares them between the meshes.
+Each mesh is run at the constant discharge of the case until the flow is steady. All runs start with a pre-wetted channel, to save the time for filling the reach (:ref:`case-initialization`). aXqua then reads the water depth and the flow velocity at fixed points and compares them between the meshes. The study needs no measurements: without them, the points are 40 positions along the channel centerline, spaced so that none lies on the inflow or outflow line. When the case has measurement layers (:ref:`calibration-ground-truth`), their positions are used instead, because that is where the calibration will compare the model with the river; the measured values play no role in the study. The verdict depends on where the points are: points in shallow water near bars and wet edges change more under refinement than points in the main channel.
 
 The following options can be changed:
 

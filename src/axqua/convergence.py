@@ -1068,8 +1068,19 @@ def _slug(label: str) -> str:
 
 def default_probes(cfg: Config, n: int = 40) -> np.ndarray:
     """Probe points for the QoI: the ground-truth points if available, else samples
-    along the channel centerline (falling back to the ROI bbox diagonal)."""
-    gt = cfg.ground_truth_path
+    along the channel centerline (falling back to the ROI bbox diagonal).
+
+    Only the positions of measurements are used, never the measured values, and only
+    when the case names its ground truth: a table compiled by an earlier build stays
+    in the preprocessing folder after the case drops its sources. The centerline
+    points are spaced from half a step after the inflow to half a step before the
+    outflow. On the Inn KB15 ladder, a point on the inflow line read 0.09, 0.36, 0.12
+    and 0.40 m of depth on the four meshes, the depth of one boundary node or another.
+    """
+    named = getattr(cfg, "ground_truth", None)
+    configured = (named is None or getattr(named, "measurements", None) is not None
+                  or bool(getattr(named, "sources", None)))
+    gt = cfg.ground_truth_path if configured else None
     if gt is not None and Path(gt).exists():
         try:
             from axqua import ground_truth
@@ -1101,7 +1112,7 @@ def default_probes(cfg: Config, n: int = 40) -> np.ndarray:
         line = linemerge(merged) if merged.geom_type == "MultiLineString" else merged
         if line.geom_type == "MultiLineString":
             line = max(line.geoms, key=lambda g: g.length)
-        d = np.linspace(0, line.length, n)
+        d = (np.arange(n) + 0.5) / n * line.length
         return np.array([[line.interpolate(s).x, line.interpolate(s).y] for s in d])
     raise ValueError("no probe points: provide ground truth or a channel centerline, "
                      "or pass probes= explicitly to run_mesh_convergence")
