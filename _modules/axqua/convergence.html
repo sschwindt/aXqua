@@ -1540,19 +1540,98 @@
     <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"_"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"level"</span>
 
 
+<span class="c1">#: The points of a study keep this many flow adaptation lengths from the inflow and</span>
+<span class="c1">#: outflow lines. On the Inn KB15 reach (k-epsilon, six meshes), the difference</span>
+<span class="c1">#: between two meshes at the centerline reached 0.75 m/s 15 m below the inflow and</span>
+<span class="c1">#: the velocity swung by up to 0.2 m/s in time there; both fell to the level of the</span>
+<span class="c1">#: rest of the reach (below 0.02 m/s) within 150 to 200 m, about four adaptation</span>
+<span class="c1">#: lengths (48 m). The outflow showed no such effect; the rule keeps both ends clear.</span>
+<span class="n">BOUNDARY_ADAPTATION_LENGTHS</span> <span class="o">=</span> <span class="mf">4.0</span>
+
+
+<div class="viewcode-block" id="flow_adaptation_length">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.convergence.flow_adaptation_length">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">flow_adaptation_length</span><span class="p">(</span><span class="n">depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ks</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The length over which depth-averaged flow adapts to a disturbance [m].</span>
+
+<span class="sd">    lambda_w = h / (2 c_f) (Struiksma et al. 1985), with the friction coefficient of</span>
+<span class="sd">    the logarithmic law c_f = (kappa / ln(12 h / ks))^2, held between 0.002 and 0.05</span>
+<span class="sd">    so that a depth close to the roughness height gives a finite length.</span>
+<span class="sd">    """</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="mf">12.0</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">ks</span><span class="p">)</span>
+    <span class="n">cf</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.41</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ratio</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">ratio</span> <span class="o">&gt;</span> <span class="n">math</span><span class="o">.</span><span class="n">e</span> <span class="k">else</span> <span class="mf">0.05</span>
+    <span class="n">cf</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">cf</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">),</span> <span class="mf">0.05</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">cf</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="boundary_clearance">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.convergence.boundary_clearance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">boundary_clearance</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""How far the points of a study keep from the liquid boundaries [m], and why.</span>
+
+<span class="sd">    :data:`BOUNDARY_ADAPTATION_LENGTHS` flow adaptation lengths</span>
+<span class="sd">    (:func:`flow_adaptation_length`) of the flow depth of the case</span>
+<span class="sd">    (:func:`axqua.steering.flow_scale`) and the roughness of its channel bed. TELEMAC</span>
+<span class="sd">    spreads the inflow over the boundary nodes of each mesh, so the flow below the</span>
+<span class="sd">    inflow differs from mesh to mesh for reasons that have nothing to do with the</span>
+<span class="sd">    interior; a model is not evaluated close to its boundaries. ``(0.0, reason)``</span>
+<span class="sd">    when depth or roughness are unknown.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">mesh_validity</span><span class="p">,</span> <span class="n">steering</span>
+
+        <span class="n">depth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">steering</span><span class="o">.</span><span class="n">flow_scale</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span><span class="o">.</span><span class="n">depth</span><span class="p">)</span>
+        <span class="n">ks</span> <span class="o">=</span> <span class="n">mesh_validity</span><span class="o">.</span><span class="n">channel_ks</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                     <span class="c1"># noqa: BLE001 - bare test configs</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"no flow depth or roughness (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ks</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">depth</span> <span class="ow">or</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">ks</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"no flow depth or roughness"</span>
+    <span class="n">lam</span> <span class="o">=</span> <span class="n">flow_adaptation_length</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">ks</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">BOUNDARY_ADAPTATION_LENGTHS</span> <span class="o">*</span> <span class="n">lam</span>
+    <span class="k">return</span> <span class="n">dist</span><span class="p">,</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">BOUNDARY_ADAPTATION_LENGTHS</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> flow adaptation lengths h/(2 c_f) "</span>
+                  <span class="sa">f</span><span class="s2">"= </span><span class="si">{</span><span class="n">BOUNDARY_ADAPTATION_LENGTHS</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="n">lam</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> m for a depth of "</span>
+                  <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">depth</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m and ks </span><span class="si">{</span><span class="n">ks</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_liquid_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The inflow and outflow lines of the case as one geometry, or None."""</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"boundaries"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"liquid_boundaries"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+
 <div class="viewcode-block" id="default_probes">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.convergence.default_probes">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">default_probes</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_probes</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                   <span class="n">boundary_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Probe points for the QoI: the ground-truth points if available, else samples</span>
 <span class="sd">    along the channel centerline (falling back to the ROI bbox diagonal).</span>
 
 <span class="sd">    Only the positions of measurements are used, never the measured values, and only</span>
 <span class="sd">    when the case names its ground truth: a table compiled by an earlier build stays</span>
-<span class="sd">    in the preprocessing folder after the case drops its sources. The centerline</span>
-<span class="sd">    points are spaced from half a step after the inflow to half a step before the</span>
-<span class="sd">    outflow. On the Inn KB15 ladder, a point on the inflow line read 0.09, 0.36, 0.12</span>
-<span class="sd">    and 0.40 m of depth on the four meshes, the depth of one boundary node or another.</span>
+<span class="sd">    in the preprocessing folder after the case drops its sources.</span>
+
+<span class="sd">    No point lies within *boundary_distance* of the inflow and outflow lines (default:</span>
+<span class="sd">    :func:`boundary_clearance` of the case). The centerline points are spaced evenly</span>
+<span class="sd">    between that distance from both ends of the line, with half a step to spare; the</span>
+<span class="sd">    distance is cut to a quarter of the line where the reach is short. Measurement</span>
+<span class="sd">    points closer to a liquid boundary line are left out; if fewer than three remain,</span>
+<span class="sd">    the centerline points are used.</span>
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">boundary_distance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">boundary_distance</span><span class="p">,</span> <span class="n">why</span> <span class="o">=</span> <span class="n">boundary_clearance</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">why</span> <span class="o">=</span> <span class="s2">"given"</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">boundary_distance</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="n">named</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"ground_truth"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">configured</span> <span class="o">=</span> <span class="p">(</span><span class="n">named</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">named</span><span class="p">,</span> <span class="s2">"measurements"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                   <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">named</span><span class="p">,</span> <span class="s2">"sources"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)))</span>
@@ -1571,6 +1650,21 @@
             <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">_inside_the_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">t</span><span class="p">[[</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">]])</span>
                              <span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
                              <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="p">{</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">columns</span><span class="p">)])</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">_liquid_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">keep</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">lines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+
+                <span class="n">far</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lines</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">keep</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">])</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">far</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"mesh convergence: </span><span class="si">%d</span><span class="s2"> of </span><span class="si">%d</span><span class="s2"> measurement points lie within "</span>
+                             <span class="s2">"</span><span class="si">%.0f</span><span class="s2"> m of an inflow or outflow line and are left out (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
+                             <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">far</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">),</span> <span class="n">keep</span><span class="p">,</span> <span class="n">why</span><span class="p">)</span>
+                <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[</span><span class="n">far</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"mesh convergence: fewer than three measurement points "</span>
+                                <span class="s2">"lie </span><span class="si">%.0f</span><span class="s2"> m or more from the inflow and outflow lines; "</span>
+                                <span class="s2">"the study uses points along the centerline"</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
+                    <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[:</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">pts</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - fallback only</span>
@@ -1588,7 +1682,12 @@
         <span class="n">line</span> <span class="o">=</span> <span class="n">linemerge</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span> <span class="k">if</span> <span class="n">merged</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"MultiLineString"</span> <span class="k">else</span> <span class="n">merged</span>
         <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"MultiLineString"</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span> <span class="o">*</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">keep</span><span class="p">,</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keep</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"mesh convergence: the points keep </span><span class="si">%.0f</span><span class="s2"> m from both ends of the "</span>
+                     <span class="s2">"centerline (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">why</span> <span class="k">if</span> <span class="n">end</span> <span class="o">==</span> <span class="n">keep</span> <span class="k">else</span>
+                     <span class="sa">f</span><span class="s2">"cut to a quarter of the </span><span class="si">{</span><span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> m line"</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">end</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">end</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">d</span><span class="p">])</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"no probe points: provide ground truth or a channel centerline, "</span>
                      <span class="s2">"or pass probes= explicitly to run_mesh_convergence"</span><span class="p">)</span></div>
