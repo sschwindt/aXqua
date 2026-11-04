@@ -99,10 +99,13 @@ hydrodynamics:
   graphic_printout_period: 500
   listing_printout_period: 500
   finite_volumes: false        # true -> HLLC finite-volume kernel (const viscosity only)
-  # Turbulence: "auto" picks k-epsilon (3) / Spalart-Allmaras (6) / Smagorinski (4)
-  # from the mesh resolution vs the flow depth and the velocity guess.
-  turbulence_model: auto       # auto | 1 const | 3 k-epsilon | 4 Smagorinski | 6 Spalart-Allmaras
-  initial_velocity_guess: 1.0  # assumed mean flow [m/s]; sizes eddy viscosity + model choice
+  # Turbulence: "auto" picks k-epsilon (3) where the channel cells are larger than the
+  # flow depth, and Smagorinski LES (4) with the turbulence generated at the bed (a
+  # generated user_fortran/smagor.f) where they are finer. A literal int/name
+  # overrides; Spalart-Allmaras (6) suits a flume, not a river (no bed turbulence).
+  # (Finite volumes force model 1 regardless.)
+  turbulence_model: auto       # auto | 1 const | 3 k-epsilon | 4 Smagorinski | 5 mixing length | 6 Spalart-Allmaras
+  initial_velocity_guess: 1.0  # assumed mean flow [m/s]; sizes the eddy viscosity of model 1
   # desired_courant: 0.30      # target Courant for the CFL-adaptive march (default 0.30)
 
 # morphodynamics:              # optional GAIA extension (v1 focuses on 2D hydraulics)

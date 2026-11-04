@@ -20,7 +20,8 @@ def _hydro_cfg():
     """Just enough config for the turbulence auto-pick (L = 1 m, U = 1 m/s)."""
     return SimpleNamespace(
         hydrodynamics=SimpleNamespace(initial_velocity_guess=1.0,
-                                      turbulence_length_scale=1.0),
+                                      turbulence_length_scale=1.0,
+                                      les_depth_ratio=1.0),
         initialization=SimpleNamespace(prewet_depth=None),
     )
 
@@ -56,16 +57,19 @@ def test_check_level_flags_dx_below_ks():
 def test_turbulence_pick_and_regime_change():
     from axqua.steering import turbulence_pick_for_dx
 
-    cfg = _hydro_cfg()                       # L = 1 m
-    assert turbulence_pick_for_dx(cfg, 0.05)[0] == 4    # dx/L <= 0.0894 -> LES
-    assert turbulence_pick_for_dx(cfg, 0.20)[0] == 3    # >= 4 cells/L -> k-epsilon
-    assert turbulence_pick_for_dx(cfg, 0.50)[0] == 6    # coarse -> Spalart-Allmaras
+    cfg = _hydro_cfg()                       # depth 1 m
+    assert turbulence_pick_for_dx(cfg, 0.50)[0] == 4    # filter <= depth -> LES
+    assert turbulence_pick_for_dx(cfg, 1.50)[0] == 3    # coarser -> k-epsilon
+    assert turbulence_pick_for_dx(cfg, 30.0)[0] == 3    # never Spalart-Allmaras
 
-    v = check_level(cfg, dx=0.20, depth=1.5, velocity=1.0, ks=0.05, pinned_model=6)
-    assert v.turbulence_pick == 3 and v.regime_change
+    v = check_level(cfg, dx=1.5, depth=1.5, velocity=1.0, ks=0.05, pinned_model=3)
+    assert v.turbulence_pick == 3 and not v.regime_change
+    # the measured filter width decides, not the nominal cell size
+    v = check_level(cfg, dx=1.5, depth=1.5, velocity=1.0, ks=0.05, pinned_model=3,
+                    filter_width=0.8)
+    assert v.turbulence_pick == 4 and v.regime_change and v.filter_width == 0.8
     assert any("regime change" in w for w in v.warnings)
-    same = check_level(cfg, dx=0.20, depth=1.5, velocity=1.0, ks=0.05, pinned_model=3)
-    assert not same.regime_change
+    assert "filter=0.80 m" in v.lines()[0]
 
 
 def test_channel_ks_from_friction_zones():

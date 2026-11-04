@@ -347,24 +347,145 @@ def test_steering_finite_element_default_vs_finite_volume(tmp_path):
 
 
 def test_turbulence_model_auto_selection(tmp_path):
-    """'auto' picks Smagorinski LES / k-epsilon / Spalart-Allmaras from the channel
-    cell size relative to the turbulence length scale; an explicit setting overrides."""
+    """'auto' picks Smagorinski LES once the filter width is at most one flow depth and
+    k-epsilon on every coarser mesh, never Spalart-Allmaras; an explicit setting
+    overrides."""
     from axqua.steering import select_turbulence_model
 
     cfg = _minimal_cfg(tmp_path)
-    cfg.hydrodynamics.turbulence_length_scale = 1.0     # L = 1 m
+    cfg.hydrodynamics.turbulence_length_scale = 1.0     # depth 1 m
 
-    cfg.mesh.channel_size = 0.05                         # dx/L <= 0.2**1.5 -> >=80% TKE
-    assert select_turbulence_model(cfg, None)[0] == 4   # Smagorinski LES
-    cfg.mesh.channel_size = 0.2                          # ~5 cells/L
+    cfg.mesh.channel_size = 0.9                          # finer than the depth -> LES
+    assert select_turbulence_model(cfg, None)[0] == 4
+    cfg.mesh.channel_size = 1.1                          # coarser than the depth
     assert select_turbulence_model(cfg, None)[0] == 3   # k-epsilon
-    cfg.mesh.channel_size = 0.5                          # ~2 cells/L (coarse)
-    assert select_turbulence_model(cfg, None)[0] == 6   # Spalart-Allmaras
+    cfg.mesh.channel_size = 20.0                         # very coarse: still k-epsilon
+    assert select_turbulence_model(cfg, None)[0] == 3
+    cfg.mesh.channel_size = 0.9
+    cfg.hydrodynamics.les_depth_ratio = 0.5              # a stricter LES gate
+    assert select_turbulence_model(cfg, None)[0] == 3
 
     cfg.hydrodynamics.turbulence_model = "k-epsilon"    # explicit name overrides
     assert select_turbulence_model(cfg, None)[0] == 3
+    cfg.hydrodynamics.turbulence_model = "mixing-length"
+    assert select_turbulence_model(cfg, None)[0] == 5
     cfg.hydrodynamics.turbulence_model = 6              # explicit int overrides
-    assert select_turbulence_model(cfg, None)[0] == 6
+    model, why = select_turbulence_model(cfg, None)
+    assert model == 6 and "not a river" in why          # width unknown: warned
+
+
+def test_spalart_allmaras_fits_a_flume_and_not_a_river():
+    from axqua.steering import FlowScale, spalart_allmaras_note
+
+    assert spalart_allmaras_note(None, FlowScale(1.0, "x", width=8.0)) == ""
+    note = spalart_allmaras_note(None, FlowScale(0.9, "x", width=90.0))
+    assert "100 depths wide" in note and "not a river" in note
+
+
+def test_filter_width_is_that_of_telemac_smagorinski():
+    """sqrt(2 A): 0.93 times the edge of an equilateral triangle, the edge of a
+    right-isosceles one; restricted to the triangles with two masked nodes."""
+    import numpy as np
+
+    from axqua.steering import filter_width
+
+    a = 2.0
+    x = np.array([0.0, a, a / 2, 10.0, 10.0 + a, 10.0])
+    y = np.array([0.0, 0.0, a * np.sqrt(3) / 2, 0.0, 0.0, a])
+    tri = np.array([[0, 1, 2], [3, 4, 5]])
+    assert abs(filter_width(x, y, tri[:1]) - a * np.sqrt(np.sqrt(3) / 2)) < 1e-12
+    assert abs(filter_width(x, y, tri[1:]) - a) < 1e-12
+    mask = np.array([False, False, False, True, True, True])
+    assert abs(filter_width(x, y, tri, mask) - a) < 1e-12
+
+
+def test_flow_scale_reads_the_steady_result(tmp_path, caplog):
+    """The depth is the median wetted depth of the steady result; without one, the
+    pre-wetting depth, and without that 1 m with a warning."""
+    import logging
+
+    import numpy as np
+
+    from axqua.core import selafin
+    from axqua.steering import flow_scale
+
+    cfg = _minimal_cfg(tmp_path)
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        scale = flow_scale(cfg)
+    assert scale.depth == 1.0 and "assumed" in scale.source
+    assert any("no flow depth known" in r.message for r in caplog.records)
+
+    cfg.initialization.prewet_depth = 0.4
+    assert flow_scale(cfg).depth == 0.4
+
+    x = np.array([0.0, 1.0, 0.0, 1.0, 2.0])
+    y = np.array([0.0, 0.0, 1.0, 1.0, 0.0])
+    selafin.write_initial_state(
+        cfg.model_path(cfg.results_slf), x=x, y=y,
+        ikle=np.array([[1, 2, 3], [2, 4, 3], [2, 5, 4]]), ipobo=np.array([1, 5, 4, 3, 0]),
+        depth=np.array([0.5, 0.7, 0.9, 1.1, 0.0]),
+        velocity_u=np.array([0.3, 0.4, 0.5, 0.6, 0.0]), velocity_v=np.zeros(5))
+    scale = flow_scale(cfg)
+    assert abs(scale.depth - 0.8) < 1e-6            # the dry node does not count
+    assert abs(scale.velocity - 0.45) < 1e-6
+    assert "steady result" in scale.source
+    cfg.hydrodynamics.turbulence_length_scale = 2.5  # an explicit depth wins
+    assert flow_scale(cfg).depth == 2.5
+
+
+def test_turbulence_routines_follow_the_model(tmp_path):
+    """LES writes user_fortran/smagor.f with the bed term, k-epsilon corvis.f with the
+    shallow-node reset; each names the folder once, a change of model removes the
+    generated routine of the other, and a routine of the user is never touched."""
+    from axqua import steering
+    from axqua.boundary import LiquidBoundary
+    from axqua.solvers.telemac import turbulence_fortran as tf
+
+    cfg = _minimal_cfg(tmp_path)
+    liquids = [LiquidBoundary(index=1, kind="inflow", n_nodes=10),
+               LiquidBoundary(index=2, kind="outflow", n_nodes=10)]
+    folder = cfg.model_path(cfg.user_fortran_dir)
+    smagor, corvis = folder / tf.SMAGOR, folder / tf.CORVIS
+
+    def cas(model):
+        return steering.write_cas(cfg, liquids, inflow_q=40.0, outflow_wse=373.4,
+                                  turbulence_model=model).read_text()
+
+    text = cas(4)
+    assert "TURBULENCE MODEL : 4" in text and ",D'" in text
+    assert text.count("FORTRAN FILE : 'user_fortran'") == 1
+    src = smagor.read_text()
+    assert src.startswith(tf.MARKER) and "SUBROUTINE SMAGOR" in src
+    assert "ALPHAB = 6.670000D-02" in src and "ALPHAB*USBEDL*HBEDLE" in src
+    assert max(len(line) for line in src.splitlines()) <= 72         # fixed form
+    assert not corvis.exists() and not tf.three_d_routines(folder)  # 2D only
+
+    text = cas(3)
+    assert text.count("FORTRAN FILE : 'user_fortran'") == 1 and ",K,E'" in text
+    src = corvis.read_text()
+    assert "SUBROUTINE CORVIS" in src and "HSHALW = 2.000000D-02" in src
+    assert "RLMAXK = 1.000000D+00" in src and "CMU34*MAX(AK%R(N),0.D0)**1.5D0" in src
+    assert max(len(line) for line in src.splitlines()) <= 72
+    assert not smagor.exists() and not tf.three_d_routines(folder)
+
+    text = cas(1)                                       # no routine, no folder
+    assert "FORTRAN FILE" not in text and not folder.exists()
+
+    cfg.hydrodynamics.les_bed_coefficient = 0.0          # TELEMAC's own Smagorinski
+    assert "FORTRAN FILE" not in cas(4) and not folder.exists()
+    cfg.hydrodynamics.keps_shallow_depth = 0.0           # the limiter alone
+    assert "FORTRAN FILE" in cas(3)
+    cfg.hydrodynamics.keps_length_limit = 0.0            # TELEMAC's own k-epsilon
+    assert "FORTRAN FILE" not in cas(3)
+
+    folder.mkdir(parents=True)
+    smagor.write_text("      SUBROUTINE SMAGOR\n")       # the user's own routine
+    cfg.hydrodynamics.les_bed_coefficient = 0.0667
+    cas(4)
+    assert smagor.read_text() == "      SUBROUTINE SMAGOR\n"
+    assert tf.three_d_routines(folder)
+    cas(3)
+    assert smagor.exists()
 
 
 def test_unsteady_cas_and_liquid_boundaries(tmp_path):
@@ -497,9 +618,11 @@ def test_turbulence_solver_accuracy(tmp_path):
 
     keps = steering.write_cas(cfg, liquids, 47.0, 379.5, turbulence_model=3).read_text()
     assert "ACCURACY OF K : 1e-06" in keps and "ACCURACY OF EPSILON : 1e-06" in keps
+    assert "SOLVER FOR K-EPSILON MODEL : 7" in keps      # GMRES, not symmetric
 
     sa = steering.write_cas(cfg, liquids, 47.0, 379.5, turbulence_model=6).read_text()
     assert "ACCURACY OF SPALART-ALLMARAS : 1e-06" in sa and "ACCURACY OF K" not in sa
+    assert "SOLVER FOR K-EPSILON MODEL" not in sa
 
     const = steering.write_cas(cfg, liquids, 47.0, 379.5, turbulence_model=1).read_text()
     assert "ACCURACY OF" not in const

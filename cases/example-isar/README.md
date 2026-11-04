@@ -1,8 +1,8 @@
 # Example: Isar River in QGIS, from preprocessing to Bayesian calibration and validation
 
-This example runs the complete TELEMAC workflow of aXqua from the QGIS plugin: build a two-dimensional (2D) model from geodata, run it to a steady state, load the result into QGIS, calibrate two roughness values against measured flow velocities with HydroBayesCal, and validate the calibrated model against measurements of another discharge. Every step is a button in the plugin. The same steps are listed as terminal commands at the end.
+This example runs the complete TELEMAC workflow of aXqua from the QGIS plugin: build a two-dimensional (2D) model from geodata, run it to a steady state, load the result into QGIS, calibrate two roughness values against measured flow velocities and water depths with HydroBayesCal, and validate the calibrated model against measurements of another discharge. Every step is a button in the plugin. The same steps are listed as terminal commands at the end.
 
-The example is a fast version of a research case. It uses the same input data and a mesh that is three times coarser, so that the whole workflow takes about half an hour instead of more than a day.
+The example is a fast version of a research case. It uses the same input data and a mesh that is three times coarser, so that the whole workflow takes about 40 minutes instead of more than a day.
 
 ## What the example computes
 
@@ -13,9 +13,9 @@ The model covers a braided reach of the Isar River of about 6.6 ha. The terrain 
 | Case file | `example-isar.axq-case` |
 | Mesh | about 26,500 nodes and 52,600 triangles, edge length about 0.9 m across the channel |
 | Bed roughness | equivalent sand roughness k_s in six zones, from 0.004 m (sand) to 0.5 m (vegetation) |
-| Turbulence model | Spalart-Allmaras, selected by aXqua for this cell size |
-| Simulated time | 3000 s; inflow and outflow balance to within 0.1 % after about 2200 s |
-| Calibration data | 33 verticals of a SonTek FlowTracker2, measured on November 24 and 25, 2025 at 2.6 m³/s; the readings of each vertical are combined into its depth-averaged velocity |
+| Turbulence model | k-epsilon, selected by aXqua because the cells are wider than the flow is deep |
+| Simulated time | 6000 s; inflow and outflow balance to within 0.1 % after about 3400 s |
+| Calibration data | 33 verticals of a SonTek FlowTracker2, measured on November 24 and 25, 2025 at 2.6 m³/s; the readings of each vertical are combined into its depth-averaged velocity; the calibration uses this velocity and the water depth of each vertical |
 | Calibration parameters | k_s of roughness zone 4 (coarse gravel, 17 verticals) and of zone 5 (coarse gravel with cobbles, 11 verticals) |
 | Calibration runs | 8 initial simulations and 4 simulations selected by Bayesian active learning |
 | Validation data | 83 verticals, measured on September 30, 2025 at 5.3 m³/s |
@@ -29,20 +29,20 @@ Measured run times with 8 processor cores on a workstation with 16 cores:
 | Step | Button in the plugin | Run time |
 | --- | --- | --- |
 | Build the model | *Preprocessing* > *Build* | 1 min |
-| Steady simulation | *Simulations* > *Baseline (Telemac)* > *Steady 2D* > *Submit* | 1.5 min |
-| Bayesian calibration | *Calibration & validation* > *Submit* | 16 min |
-| Validation | *Calibration & validation* > *Validate* | 1.5 min |
-| Mesh convergence study (optional) | *Mesh convergence* > *Submit* | 15 min |
+| Steady simulation | *Simulations* > *Baseline (Telemac)* > *Steady 2D* > *Submit* | 2.5 min |
+| Bayesian calibration | *Calibration & validation* > *Submit* | 30 min |
+| Validation | *Calibration & validation* > *Validate* | 2.5 min |
+| Mesh convergence study (optional) | *Mesh convergence* > *Submit* | 30 min |
 | Three-dimensional model (optional) | *Simulations* > *Baseline (Telemac)* > *Steady 3D* > *Build*, then *Submit* | 19 min |
 
 ## Requirements
 
 1. **The folder of the example.** It contains the case file, this guide, and the input data in `user-sources/` (about 6 MB): the terrain model, cut to the outline of the model, the layers and tables that describe the reach, and the velocity measurements. To get the folder, click *Example case...* on the *Case Setup* tab of the plugin, or run `axqua example get example-isar --folder <folder>` in a terminal. Everything the example produces is written to `axqua-case/` in the same folder.
 2. **aXqua with a TELEMAC installation.** aXqua has to know where TELEMAC is installed. Step 1 below sets this up in the plugin. In a terminal, `axqua profile init` writes the profile of this computer with the TELEMAC installation it finds, and `axqua profile check` starts TELEMAC once and reports every problem with its remedy.
-3. **HydroBayesCal 1.8.1 or newer** in the Python environment of aXqua. The Python Package Index currently provides version 1.7.0 only, so install it from the tagged source:
+3. **HydroBayesCal 1.11.0 or newer** in the Python environment of aXqua. Older versions stop the calibration of this example after its first eight simulations, because some verticals are dry in all of them:
 
    ```bash
-   pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git@v1.9.0"
+   pip install "hydrobayescal>=1.11.0"
    ```
 
 4. **QGIS 3.44 or newer with the aXqua plugin** (documentation, section *QGIS plugin*).
@@ -76,7 +76,7 @@ Jobs of one case run one after the other. A job that is submitted while another 
 ## Step 3: Run the steady simulation and load the result
 
 1. Go to the tab *Simulations*, sub-tab *Baseline (Telemac)*. In the box *Steady 2D*, click *Submit*.
-2. In the list of jobs, the column *Progress* shows the simulated share of the 3000 s and the number of time steps. The run is complete after about 1.5 min.
+2. In the list of jobs, the column *Progress* shows the simulated share of the 6000 s and the number of time steps. The run is complete after about 2.5 min.
 3. Select the completed job in the list and click *Load results* below the list.
 
 QGIS adds three layers in the group `axqua` of the layer panel:
@@ -89,7 +89,7 @@ QGIS adds three layers in the group `axqua` of the layer panel:
 
 The layers carry the coordinate reference system of the case (EPSG:25832), so they align with a base map or an orthophoto. The water depth lies on top. Switch it off in the layer panel to see the flow velocity, and switch both result layers off to see the bed elevation.
 
-To compare the result with the measurements, add the layer `user-sources/ground-truth/flowtracker-2025-09.gpkg` to the map.
+To compare the result with the measurements at the discharge of the model, add the layer `user-sources/ground-truth/flowtracker-2025-11.gpkg` to the map.
 
 ## Step 4: Check that the simulation reached a steady state
 
@@ -102,12 +102,12 @@ A steady simulation is only useful when the discharge that leaves the model equa
 | `wetting-report.csv` | wetted area split into flowing water, stagnant film, and isolated puddles |
 | `outlet-profile.csv` | water surface, depth, and Froude number in bands upstream of the outflow line |
 
-In this example, the difference between inflow and outflow falls below 0.1 % after about 2200 s of simulated time. The button *View logs* below the list of jobs shows the same numbers in the log of the selected job.
+In this example, the difference between inflow and outflow falls below 0.1 % after about 3400 s of simulated time and stays there; a repeated build may need a few hundred seconds more, which the 6000 s of the run leave room for. The button *View logs* below the list of jobs shows the same numbers in the log of the selected job.
 
 ## Step 5: Calibrate the roughness
 
 1. Go to the tab *Calibration & validation* and click *Submit*. Leave the option *Prepare only* as it is.
-2. The list of jobs shows the number of the current simulation in the column *Progress*, for example `iter 5/12`. The calibration takes about 16 min.
+2. The list of jobs shows the number of the current simulation in the column *Progress*, for example `iter 5/12`. The calibration takes about 30 min.
 
 The calibration first writes the measurements into the table `axqua-case/calibration-validation/measurements-calibration.csv`, with one row per vertical inside the model. HydroBayesCal then proceeds in two stages. It runs the model for eight combinations of the two roughness values that cover the ranges given in the case file (0.02 to 0.30 m for zone 4 and 0.05 to 0.60 m for zone 5), and trains a surrogate model on the results. A surrogate model is a fast statistical approximation of the simulation, here a Gaussian process. In the second stage, Bayesian active learning selects four additional combinations, one after the other, at which a simulation improves the estimate of the roughness values the most.
 
@@ -121,27 +121,27 @@ HydroBayesCal writes its results into `axqua-case/calibration-validation/auto-sa
 
 | File | Content |
 | --- | --- |
-| `plots/SCALAR VELOCITY/calibration-target-agreement.png` | modeled against measured flow velocity at the 33 verticals, before and after the calibration |
-| `calibration-data/SCALAR VELOCITY/collocation-points-SCALAR VELOCITY.csv` | the 12 tested combinations of the two roughness values |
-| `calibration-data/SCALAR VELOCITY/model-results-calibration-SCALAR VELOCITY.csv` | the modeled velocity at each vertical, one row per simulation |
-| `calibration-data/SCALAR VELOCITY/model-results-extraction.csv` | the same with the water depth in addition |
+| `plots/WATER DEPTH_SCALAR VELOCITY/calibration-target-agreement.png` | modeled against measured flow velocity and water depth at the 33 verticals, before and after the calibration |
+| `calibration-data/WATER DEPTH_SCALAR VELOCITY/collocation-points-WATER DEPTH_SCALAR VELOCITY.csv` | the 12 tested combinations of the two roughness values |
+| `calibration-data/WATER DEPTH_SCALAR VELOCITY/model-results-calibration-WATER DEPTH_SCALAR VELOCITY.csv` | the modeled water depth and velocity at each vertical, one row per simulation |
+| `calibration-data/WATER DEPTH_SCALAR VELOCITY/model-results-extraction.csv` | the same values, labeled by vertical |
 | `surrogate-gpe/` | the trained surrogate models |
 
 The file `logfile.log` in `axqua-case/calibration-validation/` reports the most probable roughness values after every iteration and ends with an assessment of the agreement between the model and the measurements. The results of the 12 simulations remain in `axqua-case/simulation/` as `r2d_1.slf` to `r2d_12.slf` and can be added to the map as mesh layers.
 
 Read the result in the order of the section *Quality analysis* of the documentation. In this example, it reads as follows:
 
-1. **The calibrated model remains too slow, whatever the roughness.** In all 12 simulations, the modeled velocities are lower than the measured ones at 76 to 79 % of the verticals, and the mean velocity at the verticals is 33 to 40 % lower than the measured 0.55 m/s. The modeled water depths are 0.29 to 0.33 m on average, against 0.28 m measured. HydroBayesCal reports a mean difference of 36 % before the calibration and 37 % after it, and a root mean square error that decreases only from 0.34 to 0.33 m/s.
-2. **The posterior is degenerate.** Of 5000 roughness combinations that HydroBayesCal draws from the prior ranges, only one to three remain plausible, because no combination comes close to the measurements. The log file therefore states no joint posterior maximum, and aXqua takes the mean of the remaining sample: about 0.30 m in zone 4, which is the upper limit of its range, and about 0.30 m in zone 5.
+1. **The model remains too slow and too shallow, whatever the roughness.** In all 12 simulations, the modeled velocities are lower than the measured ones at 67 to 73 % of the verticals. The mean velocity at the verticals lies 7 to 26 % below the measured 0.55 m/s, except in the simulation with the lowest roughness in both zones, where it lies 10 % above it. The mean water depth is 0.17 to 0.24 m, against 0.28 m measured. Seven to nine verticals of one cross section are dry in every simulation, although 0.19 to 0.36 m of water were measured there. HydroBayesCal reports for the velocity a mean difference of -18 % before the calibration and -27 % after it, and a root mean square error over both quantities that decreases only from 0.31 to 0.29.
+2. **The roughness cannot correct both quantities.** A rougher bed raises the water and slows the flow, so it brings the modeled depth closer to the measurements and the modeled velocity farther away. HydroBayesCal states this in its log: the depth and velocity residuals are correlated, and the optimum of the roughness will lie at a limit of its range. Of 5000 roughness combinations that HydroBayesCal draws from the prior ranges, only one remains plausible. aXqua takes it as the calibrated values: 0.30 m in zone 4 and 0.60 m in zone 5, the upper limits of both ranges.
 
-A systematic difference that no tested combination removes, together with a parameter value at a limit, indicates a deviation that the roughness cannot compensate. The discharge is not the cause here, because the calibration data were measured at the discharge of the model, and the water depths are close. The correction of the DGPS positions in October 2026 did not change the positions of these two campaigns. Candidates to examine in the research case are the terrain model, which stems from a survey earlier in 2025 and may not represent the channels of November in this braided reach and the distribution of the discharge among the channels. Wider roughness ranges would not solve this. The example therefore demonstrates the workflow and its diagnostics, and it does not yield roughness values for the reach.
+A systematic difference that no tested combination removes, together with parameter values at a limit, indicates a deviation that the roughness cannot compensate. The discharge is not the cause here, because the calibration data were measured at the discharge of the model. The correction of the DGPS positions in October 2026 did not change the positions of these two campaigns. The dry cross section points to the terrain model, which stems from a survey earlier in 2025 and may not represent the channels of November in this braided reach, and with it to the distribution of the discharge among the channels. Wider roughness ranges would not solve this. The example therefore demonstrates the workflow and its diagnostics, and it does not yield roughness values for the reach.
 
 ## Step 7: Validate the calibrated model
 
 A validation examines whether the calibrated roughness values also hold in another flow situation. The case file names the measurements of September 30, 2025 as validation data, with the discharges of that day: 5.1 m³/s in the main channel and 0.2 m³/s in the side channel (block `calibration.validation`).
 
 1. On the tab *Calibration & validation*, the box *Validation with data of another flow situation* shows the validation layer and the two inflows of the model, each with the discharge that it carries in the calibrated case (0.8 and 1.6 m³/s) and the discharge of the validation situation (0.2 and 5.1 m³/s).
-2. Click *Validate*. The job takes about 1.5 min.
+2. Click *Validate*. The job takes about 2.5 min.
 3. When the job has ended, the box summarizes the result. *Open the figure* shows the modeled against the measured values.
 
 The validation runs the calibrated model with the discharges of the validation situation. aXqua derives the water level at the outflow for 5.3 m³/s in the same way as for the discharge of the case. The steering file `validation-september-2025.cas` in `axqua-case/simulation/` differs from that of the built case only in the discharges, the water level at the outflow, the names of its own result and friction files, and the two calibrated roughness values. The results are written to `axqua-case/calibration-validation/validation/`:
@@ -152,15 +152,15 @@ The validation runs the calibrated model with the discharges of the validation s
 | `validation-september-2025.json` | the statistics, and the boundary values and roughness values of the run |
 | `validation-september-2025.png` | modeled against measured values with the errors of the measurements |
 
-In this example, the calibrated model underestimates the flow velocity of the validation situation by 0.18 m/s on average (21 %) and overestimates the water depth by 0.09 m (22 %). The root mean square errors are 0.42 m/s and 0.24 m. Three verticals are dry in the model although water was measured there. Inflow and outflow differ by 0.07 % at the end of the run.
+In this example, the calibrated model underestimates the flow velocity of the validation situation by 0.09 m/s on average (11 %) and the water depth by 0.01 m (3 %). The root mean square errors are 0.32 m/s and 0.20 m. Five verticals are dry in the model although water was measured there. Inflow and outflow differ by 0.02 % at the end of the run.
 
-The validation confirms what the calibration result indicated: the model is too slow and too deep in this flow situation as well, by about the same share as in the calibration situation. The calibration has adjusted the roughness to a deviation of another origin, and it cannot carry the model closer to another discharge. Showing this is the purpose of a validation with independent data. A validation with a part of the calibration data would not have shown it.
+The mean deviations are smaller than in the calibration situation, but the scatter is not: 24 % of the velocities and 16 % of the depths lie within one measurement error of the measured value, and modeled and measured depths correlate at only 0.45. With both roughness values at the limits of their ranges, a small mean deviation is no evidence that the roughness is right: the calibration has adjusted the roughness to a deviation of another origin. Showing this is the purpose of a validation with independent data. A validation with a part of the calibration data would not have shown it.
 
 The numbers of a repeated run differ slightly from those above, because the mesh generator does not reproduce a mesh node by node.
 
 ## Optional steps
 
-**Mesh convergence.** On the tab *Simulations*, sub-tab *Mesh convergence*, with the simulation program *TELEMAC*, the box *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 33 calibration verticals inside the model. The study takes about 15 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 5.1 % and the flow velocity by 6.6 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the list of jobs shows the number of completed meshes, for example `level 2/4`.
+**Mesh convergence.** On the tab *Simulations*, sub-tab *Mesh convergence*, with the simulation program *TELEMAC*, the box *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 33 calibration verticals inside the model. The study takes about 30 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 5.0 % and the flow velocity by 9.1 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the list of jobs shows the number of completed meshes, for example `level 2/4`.
 
 **Three-dimensional model.** On the tab *Simulations*, sub-tab *Baseline (Telemac)*, the box *Steady 3D* becomes active as soon as a 2D result exists, because the 3D simulation starts from it. *Build* writes the TELEMAC-3D steering files within seconds. *Submit* runs the variant that is selected under *Variant*: the hydrostatic simulation, which verifies the discharge balance in 3D and takes about 19 min, or the non-hydrostatic simulation, which takes about 10 min. *Load results* then adds the depth-averaged result to the map. For the coarse mesh of this example, aXqua selects only two vertical levels, so that the 3D result adds little to the 2D result. The step demonstrates the workflow. The box *Vertical convergence* on the sub-tab *Mesh convergence* repeats the 3D simulation with different numbers of vertical levels. It was not run for this guide.
 

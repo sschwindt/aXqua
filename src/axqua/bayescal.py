@@ -318,7 +318,8 @@ def restore_as_built(cfg: Config) -> bool:
     or a power cut, before it could restore the case itself. The copy is then the case
     as built, and what is in the model folder is the last parameter set the driver had
     reached. Every TELEMAC run of the case calls this first, so a cancelled calibration
-    cannot leak into the next simulation.
+    cannot leak into the next simulation, and every build discards the copy
+    (:func:`discard_as_built`), so it cannot replace a newer build either.
     """
     keep = cfg.calibration_path(AS_BUILT)
     if not keep.is_dir():
@@ -328,6 +329,22 @@ def restore_as_built(cfg: Config) -> bool:
         target = model / source.relative_to(keep)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+    shutil.rmtree(keep, ignore_errors=True)
+    return True
+
+
+def discard_as_built(cfg: Config) -> bool:
+    """Drop the copy a killed calibration set aside, because the case is built anew.
+
+    The copy holds the files of the build the calibration started from. Once the case
+    is rebuilt, restoring it would put the old build back over the new one: on the Isar
+    example a calibration cancelled during its first run, then a build with a longer
+    ``DURATION``, then a steady run gave the old steering file and the old duration.
+    Returns whether there was a copy.
+    """
+    keep = cfg.calibration_path(AS_BUILT)
+    if not keep.is_dir():
+        return False
     shutil.rmtree(keep, ignore_errors=True)
     return True
 

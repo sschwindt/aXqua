@@ -59,6 +59,13 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
     # before anything else so that stage 0 and a validation failure are recorded too.
     if log_to_file:
         setup_logging(cfg.model_path(cfg.log_file))
+    # a calibration that was killed left the files of the previous build aside; the
+    # next run would restore them over this build (bayescal.restore_as_built)
+    from axqua import bayescal
+
+    if bayescal.discard_as_built(cfg):
+        log.warning("discarded the copy of the previous build that an interrupted "
+                    "calibration had set aside; this build replaces it")
     art = Artifacts()
     # 0) CAD surfaces -> the geodata a surveyed case would have been given. Ahead of
     # everything else, including the rating synthesis below, which reads the DEM and

@@ -156,6 +156,13 @@ def test_cas_fortran_mode(tmp_path):
     assert "SOURCE REGIONS DATA FILE" not in txt
     assert "WATER DISCHARGE OF SOURCES" not in txt
 
+    # with k-epsilon the turbulence routine shares the folder: named once (the
+    # Isar example had the keyword twice)
+    txt = steering.write_cas(cfg, _liquids(), inflow_q=2.4, outflow_wse=815.1,
+                             turbulence_model=3, source_regions=_regions()).read_text()
+    assert txt.count("FORTRAN FILE") == 1
+    assert (cfg.model_dir / cfg.user_fortran_dir / "corvis.f").exists()
+
 
 def test_fortran_template(tmp_path):
     from axqua import fortran

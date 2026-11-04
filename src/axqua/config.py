@@ -1208,20 +1208,46 @@ class Hydrodynamics:
     # EPSILON). TELEMAC's default 50 is too few while the dry-start domain is still
     # ill-conditioned; 120 lets the turbulence solve converge without relaxing accuracy.
     max_keps_iterations: int = 120
-    # turbulence closure. "auto" (the default) picks among k-epsilon (3),
-    # Spalart-Allmaras (6) and Smagorinski LES (4) from the channel mesh resolution
-    # relative to the turbulence length scale (the flow depth) and the velocity guess
-    # below, applying the 80%-TKE LES criterion - see steering.select_turbulence_model.
-    # A literal int or name (1 const-visc, 3 k-epsilon, 4 Smagorinski, 6
-    # Spalart-Allmaras) overrides the auto choice. NOTE: finite volumes accept ONLY
-    # model 1; "auto"/3/4/6 require finite_volumes=False (the default kernel).
+    # solver of the k-epsilon system (SOLVER FOR K-EPSILON MODEL). TELEMAC's default 1,
+    # the conjugate gradient, needs a symmetric matrix, which the k-epsilon system with
+    # its sources is not: on the pre-wetted Inn KB15 mesh it failed about three times
+    # per time step, some with a NaN precision (785 failures in 300 s); GMRES (7) failed
+    # 59 times, at a median precision of 4e-4, and never with a NaN.
+    keps_solver: int = 7
+    # depth [m] below which a generated user_fortran/corvis.f resets k and epsilon to
+    # their floors and the viscosity to the molecular one (TELEMAC's own threshold for
+    # the shear production of k). Without it, k grew without bound at dry nodes of the
+    # pre-wetted Inn KB15 mesh and the run diverged after 26 s; 0 leaves it out.
+    keps_shallow_depth: float = 0.02
+    # the same routine keeps the turbulent length scale C_mu^0.75 k^1.5 / epsilon at most
+    # this many flow depths by raising epsilon. The run starts with k = 0 and epsilon at
+    # its floor, and in the start-up transient k grew far faster than epsilon (KB15,
+    # mesh finer by 1.3: k 0.18 -> 482 m2/s2 in a second, viscosity 1e5 m2/s, diverged
+    # after 10 s). In the steady flow the length is ~3 cm in 0.9 m: inactive. 0: off.
+    keps_length_limit: float = 1.0
+    # turbulence closure. "auto" (the default) picks k-epsilon (3) where the channel
+    # cells are larger than the flow depth, and Smagorinski LES (4) with the turbulence
+    # generated at the bed (a generated smagor.f in user_fortran/) where their filter
+    # width is at most les_depth_ratio depths - see steering.select_turbulence_model.
+    # A literal int or name (1 const-visc, 3 k-epsilon, 4 Smagorinski, 5 mixing length,
+    # 6 Spalart-Allmaras) overrides the auto choice. Spalart-Allmaras is never chosen
+    # automatically: in TELEMAC-2D it has no turbulence from the bed and suits a flume
+    # no wider than ten depths, not a river. NOTE: finite volumes accept ONLY model 1.
     turbulence_model: int | str = "auto"
-    # mean-flow velocity guess [m/s] - the assumed initial average flow used to size
-    # the turbulent eddy viscosity and feed the turbulence-model selection criteria.
+    # mean-flow velocity guess [m/s], used for the constant eddy viscosity of model 1.
     initial_velocity_guess: float = 1.0
-    # turbulence integral length scale [m] for the resolution criterion; defaults to
-    # the flow depth scale (prewet_depth, else 1.0 m) when left None.
+    # representative flow depth [m] for the choice of the turbulence model; when None it
+    # is the median wetted depth of the steady result, else the normal-flow depth of the
+    # channel cross-sections at the case discharge (steering.flow_scale).
     turbulence_length_scale: float | None = None
+    # Smagorinski LES is chosen once the filter width of the channel cells is at most
+    # this many flow depths (eddies smaller than the depth are never resolved in 2D).
+    les_depth_ratio: float = 1.0
+    # coefficient alpha of the eddy viscosity alpha * u* * h that the turbulence
+    # generated at the bed adds to the Smagorinski viscosity (kappa/6, the depth average
+    # of the parabolic profile, as in TELEMAC's mixing-length model); 0 leaves out the
+    # generated routine and runs TELEMAC's own Smagorinski model.
+    les_bed_coefficient: float = 0.0667
     velocity_diffusivity: float | None = None   # eddy viscosity [m2/s]; auto from U for model 1
     extra_keywords: dict[str, Any] = field(default_factory=dict)  # raw .cas overrides
 

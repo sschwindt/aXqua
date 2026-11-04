@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 import math
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 from axqua.config import Config, class_fractions, outlet_level
@@ -29,24 +30,22 @@ LAW_NAMES = {0: "NOFR", 1: "HAAL", 2: "CHEZ", 3: "STRI", 4: "MANN", 5: "NIKU", 7
 
 # TELEMAC-2D TURBULENCE MODEL number -> name
 TURB_NAMES = {1: "constant viscosity", 2: "Elder", 3: "k-epsilon",
-              4: "Smagorinski", 6: "Spalart-Allmaras"}
+              4: "Smagorinski", 5: "mixing length", 6: "Spalart-Allmaras"}
 # accepted names for an explicit hydrodynamics.turbulence_model
 TURB_ALIASES = {
     "constant": 1, "constant-viscosity": 1, "const": 1, "elder": 2,
     "k-epsilon": 3, "k_epsilon": 3, "kepsilon": 3, "k-e": 3, "ke": 3,
     "smagorinski": 4, "smagorinsky": 4, "les": 4,
+    "mixing-length": 5, "mixing_length": 5, "mixlength": 5,
     "spalart-allmaras": 6, "spalart_allmaras": 6, "spalart": 6, "sa": 6,
 }
 
-# 80% of the TKE is resolved (so LES / Smagorinski is justified) once the cell /
-# filter width dx is small enough that the unresolved energy above the spectral
-# cutoff - which in the inertial subrange (E(k) ~ k^-5/3) scales as (dx/L)^(2/3) -
-# drops below 20%:  (dx/L)^(2/3) <= 0.2  <=>  dx/L <= 0.2**1.5 (~0.089, i.e. >= ~11
-# cells per integral length scale L). Then the sub-grid model handles <20% of the
-# dissipation, the LES validity requirement.
-LES_TKE_FRACTION = 0.80
-_LES_RATIO = (1.0 - LES_TKE_FRACTION) ** 1.5     # dx/L threshold for the LES gate
-_KEPS_MIN_CELLS = 4.0                            # cells per L for the k-epsilon range
+# Spalart-Allmaras in TELEMAC-2D (spalart_allmaras.F) takes its length scale from the
+# distance to the solid boundaries of the plan and has no source of turbulence at the
+# bed. That describes a flow whose turbulence comes from its walls: a channel no wider
+# than a few depths, such as a laboratory flume. In a river, wider than ten depths, the
+# bed generates the turbulence, and the model would miss it.
+SA_MAX_WIDTH_DEPTH = 10.0
 
 
 def _coerce_turbulence_model(value) -> int | None:
@@ -64,18 +63,139 @@ def _coerce_turbulence_model(value) -> int | None:
     return int(value)
 
 
-def _turbulence_length_scale(cfg: Config) -> float:
-    """Turbulence integral length scale [m] - the flow depth proxy: the explicit
-    override, else the pre-wet depth, else 0.1 m for the overland flow of a hydrology
-    case, else 1 m."""
+@dataclass
+class FlowScale:
+    """Representative depth [m] of the flowing water, with the velocity [m/s] and the wetted width [m] where known, and where the numbers come from."""
+
+    depth: float
+    source: str
+    velocity: float | None = None
+    width: float | None = None
+
+
+def flow_scale(cfg: Config, mesh=None) -> FlowScale:
+    """The depth the turbulence closure is chosen for, best source first.
+
+    1. ``hydrodynamics.turbulence_length_scale``, when the case sets it;
+    2. 0.1 m for the overland flow of a hydrology case;
+    3. the steady result of the case (``r2d.slf`` in the model folder): the median depth of the wetted nodes, and their median velocity;
+    4. normal flow at the case discharge through the channel cross-sections (:func:`_normal_flow_sections`, needs *mesh*, a centerline and a discharge): the median hydraulic depth A/B, velocity Q/A and wetted width B. Normal flow ignores the backwater of the outflow level, so it can be off by a factor of 1.5 (Inn KB15: 0.57 m against 0.89 m of the steady result); it serves the first build, before any result exists;
+    5. ``initialization.prewet_depth``;
+    6. 1 m, with a warning.
+    """
     h = cfg.hydrodynamics
     if h.turbulence_length_scale is not None:
-        return float(h.turbulence_length_scale)
-    if cfg.initialization.prewet_depth is not None:
-        return float(cfg.initialization.prewet_depth)
+        return FlowScale(float(h.turbulence_length_scale),
+                         "hydrodynamics.turbulence_length_scale")
     if _hydrology(cfg):
-        return 0.1
-    return 1.0
+        return FlowScale(0.1, "overland flow of the hydrology mode")
+    found = _scale_from_result(cfg)
+    if found is not None:
+        return found
+    if mesh is not None:
+        try:
+            found = _scale_from_normal_flow(cfg, mesh)
+        except Exception as exc:                 # noqa: BLE001 - an estimate, not a need
+            log.debug("no normal-flow depth for the turbulence choice: %s", exc)
+        if found is not None:
+            return found
+    if cfg.initialization.prewet_depth is not None:
+        return FlowScale(float(cfg.initialization.prewet_depth),
+                         "initialization.prewet_depth")
+    log.warning("no flow depth known for the choice of the turbulence model (no steady "
+                "result, no normal flow); assuming 1 m. Set "
+                "hydrodynamics.turbulence_length_scale to the typical depth.")
+    return FlowScale(1.0, "assumed, no depth known")
+
+
+def _scale_from_result(cfg: Config) -> FlowScale | None:
+    """Median depth and velocity of the wetted nodes of the case's steady result."""
+    import numpy as np
+
+    from axqua.core.selafin import SelafinFile
+
+    try:
+        path = cfg.model_path(cfg.results_slf)
+    except Exception:                            # noqa: BLE001 - bare test configs
+        return None
+    if not Path(path).is_file():
+        return None
+    try:
+        frame = SelafinFile(path).frame(-1)
+        depth = np.asarray(frame["WATER DEPTH"], float)
+        if "SCALAR VELOCITY" in frame:
+            vel = np.asarray(frame["SCALAR VELOCITY"], float)
+        else:
+            vel = np.hypot(np.asarray(frame["VELOCITY U"], float),
+                           np.asarray(frame["VELOCITY V"], float))
+    except Exception as exc:                     # noqa: BLE001 - unreadable or partial
+        log.debug("steady result %s not usable for the flow scale: %s", path, exc)
+        return None
+    wet = depth > (cfg.wet_depth or 0.01)
+    if not wet.any():
+        return None
+    return FlowScale(float(np.median(depth[wet])),
+                     f"median wetted depth of the steady result {Path(path).name}",
+                     velocity=float(np.median(vel[wet])),
+                     width=_wetted_width(cfg, path, wet))
+
+
+def _wetted_width(cfg: Config, path, wet) -> float | None:
+    """Mean wetted width [m]: the wetted area of a result over the length of the channel centerline."""
+    import numpy as np
+
+    from axqua.core.selafin import SelafinFile
+
+    if not getattr(cfg.geodata, "channel_centerline", None):
+        return None
+    try:
+        res = SelafinFile(path)
+        tri = np.asarray(res.ikle).reshape(-1, 3)      # 0-based already
+        x, y = res.x, res.y
+        geometry = Path(cfg.model_path(cfg.geometry_slf))
+        if geometry.is_file():                   # double-precision coordinates
+            geo = SelafinFile(geometry)
+            if geo.npoin == res.npoin:
+                x, y = geo.x, geo.y
+        tri = tri[np.asarray(wet)[tri].all(axis=1)]
+        area = 0.5 * np.abs((x[tri[:, 1]] - x[tri[:, 0]]) * (y[tri[:, 2]] - y[tri[:, 0]])
+                            - (x[tri[:, 2]] - x[tri[:, 0]]) * (y[tri[:, 1]] - y[tri[:, 0]]))
+        length = _channel_centerline(cfg).length
+    except Exception as exc:                     # noqa: BLE001 - a note, not a need
+        log.debug("no wetted width from %s: %s", path, exc)
+        return None
+    return float(area.sum() / length) if length > 0 else None
+
+
+def _scale_from_normal_flow(cfg: Config, mesh) -> FlowScale | None:
+    """Median hydraulic depth, velocity and width of normal flow at the case discharge."""
+    import numpy as np
+
+    if not cfg.geodata.channel_centerline:
+        return None
+    q = _prewet_discharge(cfg)
+    if not q:
+        return None
+    _, _, stage, _, rated, sections = _normal_flow_sections(cfg, mesh, q)
+    depth, vel, width = [], [], []
+    for j, sec in enumerate(sections):
+        if sec is None or not rated[j]:
+            continue
+        station, bed, _ = sec
+        d = np.maximum(stage[j] - bed, 0.0)
+        wet = d > 0.0
+        if not wet.any():
+            continue
+        step = float(np.median(np.diff(station))) if station.size > 1 else 0.5
+        area, b = float(d.sum() * step), float(wet.sum() * step)
+        depth.append(area / b)
+        vel.append(q / area)
+        width.append(b)
+    if not depth:
+        return None
+    return FlowScale(float(np.median(depth)),
+                     f"normal flow at Q={q:g} m3/s through {len(depth)} cross-sections",
+                     velocity=float(np.median(vel)), width=float(np.median(width)))
 
 
 def read_cas_values(path: str | Path, *keywords: str) -> dict[str, str | None]:
@@ -111,96 +231,148 @@ def eddy_viscosity_estimate(cfg: Config) -> float:
 
     Elder-type closure ``nu_t = alpha * u_star * h`` with the shear velocity
     ``u_star ~ 0.1 * U`` (a skin-friction proxy C_f ~ 0.01) and the transverse-mixing
-    coefficient ``alpha = 0.6``; ``h`` is the turbulence length scale (flow depth).
-    Used as the constant VELOCITY DIFFUSIVITY (model 1) and reported for context."""
+    coefficient ``alpha = 0.6``; ``h`` is the depth of :func:`flow_scale`.
+    Used as the constant VELOCITY DIFFUSIVITY (model 1)."""
     u = abs(float(cfg.hydrodynamics.initial_velocity_guess))
-    h = _turbulence_length_scale(cfg)
+    h = flow_scale(cfg).depth
     return max(0.6 * (0.1 * u) * h, 1e-6)
 
 
-def _channel_cell_size(cfg: Config, mesh) -> float:
-    """Representative channel cell edge length [m] (median edge of channel-side
-    cells). Without a mesh, falls back to the effective configured size
-    (:func:`axqua.mesh.nominal_channel_size` - gpkg per-zone sizes and
-    ``mesh.size_scale`` included, so a scaled convergence level is seen)."""
+def filter_width(x, y, triangles, mask=None) -> float:
+    """Median Smagorinski filter width [m] of the triangles (of the channel, with *mask*).
+
+    TELEMAC-2D's ``smagor.f`` multiplies the strain rate by the integral of the test function of each node, which it takes as the square of the mesh size: a third of the area of the triangles around the node, or twice the area of one triangle on a regular mesh. The width is therefore ``sqrt(2 A)``, which is about 1.5 times the nominal channel size of the anisotropic channel mesh of Inn KB15 and 0.93 times the edge of an equilateral triangle.
+    """
     import numpy as np
 
+    tri = np.asarray(triangles)
+    if mask is not None:
+        sel = np.asarray(mask)[tri].sum(axis=1) >= 2
+        if sel.any():
+            tri = tri[sel]
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    area = 0.5 * np.abs((x[tri[:, 1]] - x[tri[:, 0]]) * (y[tri[:, 2]] - y[tri[:, 0]])
+                        - (x[tri[:, 2]] - x[tri[:, 0]]) * (y[tri[:, 1]] - y[tri[:, 0]]))
+    return float(np.median(np.sqrt(2.0 * area))) if area.size else float("nan")
+
+
+def _channel_cell_size(cfg: Config, mesh) -> float:
+    """Smagorinski filter width [m] of the channel cells (:func:`filter_width`).
+
+    Without a mesh, the effective configured size (:func:`axqua.mesh.nominal_channel_size`, gpkg per-zone sizes and ``mesh.size_scale`` included) stands in for it.
+    """
     from axqua.solvers.telemac import mesh as mesh_mod
 
     if mesh is None:
         return mesh_mod.nominal_channel_size(cfg)
-
-    tri = mesh.triangles
     try:                                         # restrict to channel cells if zoned
-        in_channel = mesh_mod.channel_node_mask(cfg, mesh)
-        sel = in_channel[tri].sum(axis=1) >= 2
-        if sel.any():
-            tri = tri[sel]
-    except Exception:                            # no channel zones -> whole mesh
-        pass
-    p = np.column_stack([mesh.x, mesh.y])
-    edges = np.concatenate([
-        np.linalg.norm(p[tri[:, 0]] - p[tri[:, 1]], axis=1),
-        np.linalg.norm(p[tri[:, 1]] - p[tri[:, 2]], axis=1),
-        np.linalg.norm(p[tri[:, 2]] - p[tri[:, 0]], axis=1),
-    ])
-    return float(np.median(edges)) if edges.size else mesh_mod.nominal_channel_size(cfg)
+        mask = mesh_mod.channel_node_mask(cfg, mesh)
+    except Exception:                            # noqa: BLE001 - no channel zones
+        mask = None
+    width = filter_width(mesh.x, mesh.y, mesh.triangles, mask)
+    return width if width == width else mesh_mod.nominal_channel_size(cfg)
 
 
-def select_turbulence_model(cfg: Config, mesh=None) -> tuple[int, str]:
-    """Pick the TELEMAC turbulence model from the mesh resolution and velocity guess.
+def mesh_from_geometry(geometry):
+    """The nodes, triangles, bed and roughness of a geometry SELAFIN as a light mesh, or None.
 
-    An explicit ``hydrodynamics.turbulence_model`` (int or name) is honored as-is.
-    With ``"auto"`` the choice follows the channel cell size ``dx`` relative to the
-    turbulence length scale ``L`` (the flow depth) - a mesh-size/velocity criterion:
+    Enough for :func:`flow_scale` and :func:`_channel_cell_size` where no :class:`axqua.mesh.Mesh` is at hand (the mesh-convergence study).
+    """
+    import types
 
-    * **Smagorinski LES (4)** when the mesh resolves >=80% of the TKE
-      (``dx/L <= 0.2**1.5``, ~11+ cells per ``L``): the sub-grid model then handles
-      <20% of the dissipation, the LES validity requirement.
-    * **k-epsilon (3)** at moderate resolution (>= ~4 cells per ``L`` but below the
-      LES gate): a full two-equation RANS closure resolving the mean shear.
-    * **Spalart-Allmaras (6)** on coarse meshes (< ~4 cells per ``L``): a robust,
-      economical one-equation RANS model, tolerant of the stretched channel cells.
+    import numpy as np
 
-    The velocity guess sets the eddy-viscosity scale (and the steady initial flow
-    field); for a fixed ``L`` it cancels from the resolution ratio, so the cell size
-    drives the choice. Returns ``(model_number, rationale)``.
+    from axqua.core.selafin import SelafinFile
+
+    try:
+        geo = SelafinFile(geometry)
+        frame = geo.frame(0)
+    except Exception as exc:                     # noqa: BLE001 - missing or unreadable
+        log.debug("no mesh from %s: %s", geometry, exc)
+        return None
+    tri = np.asarray(geo.ikle).reshape(-1, 3)          # 0-based already
+    rough = frame.get("BOTTOM FRICTION")
+    return types.SimpleNamespace(
+        x=np.asarray(geo.x, float), y=np.asarray(geo.y, float), triangles=tri,
+        bottom=np.asarray(frame["BOTTOM"], float) if "BOTTOM" in frame else None,
+        roughness=np.asarray(rough, float) if rough is not None else None)
+
+
+def geometry_filter_width(cfg: Config, geometry) -> float | None:
+    """:func:`filter_width` of the channel cells of a geometry SELAFIN, or None."""
+    mesh = mesh_from_geometry(geometry)
+    if mesh is None:
+        return None
+    width = _channel_cell_size(cfg, mesh)
+    return width if width == width and width > 0 else None
+
+
+def select_turbulence_model(cfg: Config, mesh=None, *,
+                            scale: FlowScale | None = None) -> tuple[int, str]:
+    """Pick the TELEMAC-2D turbulence model from the cell size and the flow depth.
+
+    An explicit ``hydrodynamics.turbulence_model`` (int or name) is honored; Spalart-Allmaras is checked by :func:`spalart_allmaras_note`. A hydrology case uses a constant viscosity. Otherwise :func:`turbulence_pick_for_dx` decides from the Smagorinski filter width of the channel cells (:func:`_channel_cell_size`) and the depth of :func:`flow_scale`. Returns ``(model_number, rationale)``.
     """
     explicit = _coerce_turbulence_model(cfg.hydrodynamics.turbulence_model)
     if explicit is not None:
-        return explicit, f"configured explicitly: {TURB_NAMES.get(explicit, explicit)}"
+        why = f"configured explicitly: {TURB_NAMES.get(explicit, explicit)}"
+        if explicit == 6:
+            note = spalart_allmaras_note(cfg, scale or flow_scale(cfg, mesh))
+            if note:
+                why += f"; {note}"
+        return explicit, why
     if _hydrology(cfg):
         # overland flow a few centimeters deep on cells of meters resolves no
         # turbulence length scale; a transport model would only add a stiff solve
         return 1, ("hydrology mode: constant eddy viscosity for overland flow, whose "
                    "depth is far below the cell size")
-    return turbulence_pick_for_dx(cfg, _channel_cell_size(cfg, mesh))
+    return turbulence_pick_for_dx(cfg, _channel_cell_size(cfg, mesh),
+                                  scale=scale or flow_scale(cfg, mesh))
 
 
-def turbulence_pick_for_dx(cfg: Config, dx: float) -> tuple[int, str]:
-    """The mesh-resolution auto-selection of :func:`select_turbulence_model` for an
-    arbitrary channel cell size *dx* [m], ignoring any explicit
-    ``hydrodynamics.turbulence_model`` override.
+def turbulence_pick_for_dx(cfg: Config, dx: float, *,
+                           scale: FlowScale | None = None) -> tuple[int, str]:
+    """The automatic choice for a Smagorinski filter width *dx* [m], ignoring an explicit ``hydrodynamics.turbulence_model``.
 
-    Used by the mesh-convergence validity check to ask "what *would* auto-selection
-    pick at this refinement?" while the study runs with the closure pinned to the
-    baseline choice. Returns ``(model_number, rationale)``.
+    A depth-averaged model never resolves eddies smaller than the depth: they are three-dimensional, and the turbulence the bed generates is always modeled. What a fine mesh can resolve are the horizontal eddies from the depth scale up, such as the shear layer at a bar edge.
+
+    * **Smagorinski LES (4)** once the filter width is no more than ``hydrodynamics.les_depth_ratio`` (1) depths: the mesh resolves the horizontal eddies, and a RANS closure would damp the eddies it resolves. The Smagorinski viscosity scales with the cell size, so its results change with the mesh by design. :mod:`axqua.solvers.telemac.turbulence_fortran` adds the turbulence generated at the bed, which TELEMAC's ``smagor.f`` lacks (depth-averaged LES, Hinterberger et al. 2007).
+    * **k-epsilon (3)** on coarser meshes: no eddy is resolved, and the depth-averaged k-epsilon model of TELEMAC (Rastogi and Rodi production at the bed, ``kepsil.f``) models all of the turbulence. Its viscosity does not depend on the cell size, so a mesh convergence study measures the mesh alone. It is solved with GMRES (``keps_solver``), reset on nodes shallower than ``keps_shallow_depth`` and its length scale kept at most ``keps_length_limit`` depths (a generated ``corvis.f``); without these it diverged on the wetting and drying Inn KB15 meshes.
+
+    Spalart-Allmaras is never chosen automatically (see :data:`SA_MAX_WIDTH_DEPTH`). Used by the mesh-convergence validity check to ask what the choice *would* be at a refinement while the study keeps the model of the baseline. Returns ``(model_number, rationale)``.
     """
-    import numpy as np
+    scale = scale or flow_scale(cfg)
+    depth = scale.depth
+    ratio = float(getattr(cfg.hydrodynamics, "les_depth_ratio", 1.0))
+    depths = dx / depth if depth > 0 else float("inf")
+    tail = (f"filter width {dx:.2f} m = {depths:.2f} x the depth {depth:.2f} m "
+            f"({scale.source})")
+    if depths <= ratio:
+        return 4, ("Smagorinski LES with turbulence from the bed: the cells resolve "
+                   f"horizontal eddies from the depth scale up; {tail}")
+    return 3, ("k-epsilon: the cells are larger than the depth, so the depth-averaged "
+               f"RANS closure models all of the turbulence; {tail}")
 
-    u = float(cfg.hydrodynamics.initial_velocity_guess)
-    length = _turbulence_length_scale(cfg)
-    ratio = dx / length if length > 0 else np.inf
-    cells = length / dx if dx > 0 else np.inf
-    resolved = float(np.clip(1.0 - ratio ** (2.0 / 3.0), 0.0, 1.0)) if np.isfinite(ratio) else 0.0
-    nu_t = eddy_viscosity_estimate(cfg)
-    tail = (f"channel cell {dx:.2f} m, L~{length:.2f} m ({cells:.1f} cells/L, "
-            f"~{resolved * 100:.0f}% TKE resolved), U~{u:.1f} m/s, nu_t~{nu_t:.3f} m2/s")
-    if ratio <= _LES_RATIO:
-        return 4, f"Smagorinski LES: >=80% TKE resolved, sub-grid <20% dissipation; {tail}"
-    if cells >= _KEPS_MIN_CELLS:
-        return 3, f"k-epsilon: moderate resolution, two-equation RANS; {tail}"
-    return 6, f"Spalart-Allmaras: coarse mesh, robust one-equation RANS; {tail}"
+
+def spalart_allmaras_note(cfg: Config, scale: FlowScale) -> str:
+    """Warning text for Spalart-Allmaras in 2D where it misses the bed turbulence ('' where it fits).
+
+    TELEMAC-2D's Spalart-Allmaras takes its length scale from the distance to the solid boundaries and has no production at the bed. It fits a flow bounded by walls, a channel no wider than :data:`SA_MAX_WIDTH_DEPTH` depths; a wider reach is a river, where the bed generates the turbulence.
+    """
+    if scale.width is not None and scale.depth > 0:
+        aspect = scale.width / scale.depth
+        if aspect <= SA_MAX_WIDTH_DEPTH:
+            return ""
+        text = (f"the reach is {aspect:.0f} depths wide (width {scale.width:.1f} m, "
+                f"depth {scale.depth:.2f} m), a river")
+    else:
+        text = "the width of the reach is not known"
+    note = (f"Spalart-Allmaras in TELEMAC-2D has no turbulence from the bed and takes "
+            f"its length scale from the distance to the walls; {text}. It suits a flume "
+            f"no wider than {SA_MAX_WIDTH_DEPTH:.0f} depths, not a river: use 'auto' "
+            "(k-epsilon, or Smagorinski LES on fine meshes)")
+    log.warning(note)
+    return note
 
 
 def _friction_rows(cfg: Config) -> list[tuple[int, int, float, str]]:
@@ -409,31 +581,20 @@ def _prewet_discharge(cfg: Config) -> float | None:
         return None
 
 
-def _normal_depth_prewet_depth(cfg: Config, mesh, mask, discharge):
-    """Pre-wet water depth from the **normal-flow stage of the real cross-sections**.
+def _normal_flow_sections(cfg: Config, mesh, discharge):
+    """Normal-flow stage of the channel cross-sections along the centerline.
 
     Every ``initialization.prewet_bin_spacing`` meters along the channel centerline a
     perpendicular transect of ``prewet_transect_half_width`` half-width is cut,
     sampled at 0.5 m, clipped to the ``*channel*`` mesh zones and given the bed and
-    Nikuradse ``ks`` of the nearest mesh node. The transect's **normal stage** at the
-    case *discharge* follows from :func:`axqua.rating.stage_for_discharge` (the
-    same Keulegan conveyance inversion that builds the outflow rating), with the local
-    bed slope taken from the gradient of the transect thalwegs - not one slope for the
-    whole reach, which is wrong where the local gradient varies by a factor of four.
+    Nikuradse ``ks`` of the nearest mesh node. Its normal stage at *discharge* comes
+    from :func:`axqua.rating.stage_for_discharge`, with the local bed slope from the
+    gradient of the smoothed transect thalwegs.
 
-    The seeded surface is then
-
-    .. math:: wl(s) = z_{thalweg}(s) + f \\cdot (z_{normal}(s) - z_{thalweg}(s))
-
-    with the fill factor ``initialization.prewet_fill`` (< 1 by design), and the depth
-    is ``max(wl - bed, 0)`` on the channel nodes.
-
-    Why a *conveyance* stage rather than the older "low bed percentile + a fixed
-    depth": on a braided reach that percentile sits well above the thalweg, so the
-    seeded surface lands above the surface the run converges to and floods bar tops
-    and bank shelves. That water then has nowhere to go - a 2D model has neither
-    infiltration nor evaporation - and it survives as immobile film for the whole run.
-    Referencing the stage that actually carries the discharge removes the cause.
+    Returns ``(centers, thalweg, stage, slope, rated, sections)``: arc lengths of the
+    transects, smoothed thalweg, normal stage (interpolated over transects that could
+    not be rated and kept above the thalweg), local slope, the mask of rated
+    transects and per transect ``(station, bed, ks)`` or None.
     """
     import numpy as np
     import shapely
@@ -498,8 +659,43 @@ def _normal_depth_prewet_depth(cfg: Config, mesh, mask, discharge):
     if not ok.any():
         raise ValueError("no cross-section along the centerline could be rated for "
                          f"Q={discharge:g} m3/s")
+    rated = ok.copy()
     stage = np.interp(centers, centers[ok], stage[ok])
     stage = np.maximum(stage, thalweg)
+    return centers, thalweg, stage, slope, rated, sections
+
+
+def _normal_depth_prewet_depth(cfg: Config, mesh, mask, discharge):
+    """Pre-wet water depth from the **normal-flow stage of the real cross-sections**.
+
+    Every ``initialization.prewet_bin_spacing`` meters along the channel centerline a
+    perpendicular transect of ``prewet_transect_half_width`` half-width is cut,
+    sampled at 0.5 m, clipped to the ``*channel*`` mesh zones and given the bed and
+    Nikuradse ``ks`` of the nearest mesh node. The transect's **normal stage** at the
+    case *discharge* follows from :func:`axqua.rating.stage_for_discharge` (the
+    same Keulegan conveyance inversion that builds the outflow rating), with the local
+    bed slope taken from the gradient of the transect thalwegs - not one slope for the
+    whole reach, which is wrong where the local gradient varies by a factor of four.
+
+    The seeded surface is then
+
+    .. math:: wl(s) = z_{thalweg}(s) + f \\cdot (z_{normal}(s) - z_{thalweg}(s))
+
+    with the fill factor ``initialization.prewet_fill`` (< 1 by design), and the depth
+    is ``max(wl - bed, 0)`` on the channel nodes.
+
+    Why a *conveyance* stage rather than the older "low bed percentile + a fixed
+    depth": on a braided reach that percentile sits well above the thalweg, so the
+    seeded surface lands above the surface the run converges to and floods bar tops
+    and bank shelves. That water then has nowhere to go - a 2D model has neither
+    infiltration nor evaporation - and it survives as immobile film for the whole run.
+    Referencing the stage that actually carries the discharge removes the cause.
+    """
+    import numpy as np
+
+    init = cfg.initialization
+    centers, thalweg, stage, slope, ok, _ = _normal_flow_sections(cfg, mesh, discharge)
+    bottom = np.asarray(mesh.bottom, dtype=float)
 
     fill = float(init.prewet_fill)
     wl_bin = thalweg + fill * (stage - thalweg)
@@ -1050,7 +1246,9 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
         turb_model = 1
     # K (TKE) and E (its dissipation) only exist for the k-epsilon model (3); request
     # them as graphic outputs there so the results carry the turbulence fields too.
-    printvars = (printouts or "U,V,S,B,H,M,Q,F") + (",K,E" if turb_model == 3 else "")
+    # K,E for k-epsilon; the eddy viscosity D for LES, whose viscosity depends on
+    # the mesh and the bed term (axqua.solvers.telemac.turbulence_fortran)
+    printvars = (printouts or "U,V,S,B,H,M,Q,F") + {3: ",K,E", 4: ",D"}.get(turb_model, "")
     graphic_period, listing_period = printout_periods or (h.graphic_printout_period,
                                                           h.listing_printout_period)
 
@@ -1174,6 +1372,13 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
     diffusivity = (h.velocity_diffusivity if h.velocity_diffusivity is not None
                    else eddy_viscosity_estimate(cfg) if turb_model == 1 else None)
 
+    # generated turbulence routines (axqua.solvers.telemac.turbulence_fortran): the
+    # bed turbulence of depth-averaged LES (smagor.f), the k-epsilon reset on shallow
+    # and dry nodes (corvis.f); routines of another model are removed
+    from axqua.solvers.telemac import turbulence_fortran
+
+    turb_fortran = turbulence_fortran.write_routines(cfg, turb_model)
+
     lines += [
         "/",
         "/ STABILITY CONTROLS",
@@ -1282,6 +1487,8 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
                 "OPTION'). Set hydrodynamics.finite_volumes: false, or the run will "
                 "abort at the first time step.")
 
+    # the gain-lose routine above may have named the folder already
+    fortran_named = any(ln.startswith("FORTRAN FILE") for ln in lines)
     lines += [
         "/",
         "/ FRICTION (zonal; coefficients calibrated by HydroBayesCal)",
@@ -1314,7 +1521,9 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
            f"ACCURACY OF EPSILON : {h.turbulence_solver_accuracy}",
            # raise the k-epsilon solve budget (default 50 is too few on the
            # ill-conditioned dry-start domain) without relaxing the accuracy above.
-           f"MAXIMUM NUMBER OF ITERATIONS FOR K AND EPSILON : {h.max_keps_iterations}"]
+           f"MAXIMUM NUMBER OF ITERATIONS FOR K AND EPSILON : {h.max_keps_iterations}",
+           # GMRES: the k-epsilon system is not symmetric (config.keps_solver)
+           f"SOLVER FOR K-EPSILON MODEL : {h.keps_solver}"]
           if turb_model == 3 else []),
         *([f"ACCURACY OF SPALART-ALLMARAS : {h.turbulence_solver_accuracy}",
            # the Spalart-Allmaras transport solve shares the k-epsilon iteration
@@ -1324,6 +1533,17 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
            f"MAXIMUM NUMBER OF ITERATIONS FOR K AND EPSILON : {h.max_keps_iterations}"]
           if turb_model == 6 else []),
         *([f"VELOCITY DIFFUSIVITY : {diffusivity:g}"] if diffusivity is not None else []),
+        # depth-averaged LES: alpha u* h of the bed turbulence on top of the
+        # Smagorinski viscosity; k-epsilon: reset on nodes shallower than the floor
+        *(["/ depth-averaged LES: user_fortran smagor.f adds the bed turbulence "
+           f"alpha u* h, alpha = {float(h.les_bed_coefficient):g}"]
+          if turb_fortran and turb_model == 4 else []),
+        *(["/ k-epsilon: user_fortran corvis.f resets k, epsilon and the viscosity "
+           f"on nodes shallower than {float(h.keps_shallow_depth):g} m and keeps the "
+           f"turbulent length at most {float(h.keps_length_limit):g} depths"]
+          if turb_fortran and turb_model == 3 else []),
+        *([f"FORTRAN FILE : '{cfg.user_fortran_dir}'"]
+          if turb_fortran and not fortran_named else []),
     ]
 
     if cfg.morphodynamics.enabled and gaia_cas:

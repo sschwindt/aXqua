@@ -56,6 +56,7 @@ import numpy as np
 
 from axqua.core import selafin
 from axqua.config import Config
+from axqua.solvers.telemac.turbulence_fortran import three_d_routines
 from axqua.solvers.telemac.steering import TURB_NAMES, _global_friction, select_turbulence_model
 from axqua.solvers.telemac.steering import fit_columns as _fit_columns
 from axqua.solvers.telemac.steering import read_cas_values as _read_cas_values
@@ -64,8 +65,9 @@ log = logging.getLogger("axqua")
 
 # 2D turbulence-model number -> TELEMAC-3D HORIZONTAL TURBULENCE MODEL number.
 # Note: Spalart-Allmaras is 5 in 3D (it is 6 in 2D); constant/Elder fall back to
-# k-epsilon so the 3D run always carries a real turbulence closure.
-_TURB_2D_TO_3D = {1: 3, 2: 3, 3: 3, 4: 4, 6: 5}
+# k-epsilon so the 3D run always carries a real turbulence closure; so does the 2D
+# mixing-length model (5), whose 3D counterpart is a vertical model only.
+_TURB_2D_TO_3D = {1: 3, 2: 3, 3: 3, 4: 4, 5: 3, 6: 5}
 TURB3D_NAMES = {1: "constant viscosity", 2: "mixing length", 3: "k-epsilon",
                 4: "Smagorinski", 5: "Spalart-Allmaras", 7: "k-omega"}
 
@@ -226,7 +228,7 @@ def _without_unpatched_spalart(cfg: Config, model: Path, h_turb: int, v_turb: in
                                reason: str) -> tuple[int, int, str]:
     """k-epsilon in place of an auto-selected Spalart-Allmaras without its patch.
 
-    The 2D auto-selection picks Spalart-Allmaras on a coarse mesh, which is model 5
+    A safety net: since 2026-11-03 the 2D auto-selection never picks Spalart-Allmaras. Before, it did on a coarse mesh, which is model 5
     in TELEMAC-3D, and there it diverges in the first velocity-diffusion solve on a
     wetting/drying bed (``GRACJG ... RELATIVE PRECISION NaN`` at iteration 0) unless
     the source-term patch of a ``user_fortran/`` folder is linked in. Measured on
@@ -237,7 +239,7 @@ def _without_unpatched_spalart(cfg: Config, model: Path, h_turb: int, v_turb: in
     explicitly is kept.
     """
     chosen = str(getattr(cfg.hydrodynamics, "turbulence_model", "auto")).strip().lower()
-    if h_turb != 5 or chosen != "auto" or (Path(model) / "user_fortran").is_dir():
+    if h_turb != 5 or chosen != "auto" or three_d_routines(Path(model) / "user_fortran"):
         return h_turb, v_turb, reason
     log.warning("3D: k-epsilon instead of the auto-selected Spalart-Allmaras, which "
                 "diverges in TELEMAC-3D on a wetting/drying bed without the "
@@ -436,8 +438,10 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
         # directory is present in the model dir - e.g. the KB15 Spalart-Allmaras
         # source-term fix (sousa.f wall distance + dry-cell source clip) so 3D
         # turbulence produces physical eddy viscosity. See user_fortran/README.
+        # (the generated 2D LES routine smagor.f alone is no reason: TELEMAC-3D
+        # resolves the bed turbulence with its vertical model)
         *([f"FORTRAN FILE : {(model / 'user_fortran').name}"]
-          if (model / "user_fortran").is_dir() else []),
+          if three_d_routines(model / "user_fortran") else []),
         # hydrograph forcing (Q(t)/SL(t)) for the unsteady run
         *([f"LIQUID BOUNDARIES FILE : {liquid_boundaries_file}"]
           if (unsteady and liquid_boundaries_file) else []),

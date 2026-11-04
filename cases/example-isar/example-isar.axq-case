@@ -65,9 +65,9 @@ friction:
   boundary_coefficient: 30
 
 hydrodynamics:
-  duration: 3000.0             # [s] simulated time; the discharge balances after about 2200 s
+  duration: 6000.0             # [s] simulated time; inflow and outflow balance to 0.1 % after 3400 s or later (the mesh differs slightly from build to build)
   desired_courant: 0.6
-  turbulence_model: auto       # chosen from the cell size; Spalart-Allmaras on this mesh
+  turbulence_model: auto       # k-epsilon here: the cells are wider than the flow is deep
   graphic_printout_period: 500 # time steps between two saved results
   listing_printout_period: 500
 

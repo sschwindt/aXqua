@@ -242,6 +242,45 @@ def test_a_calibration_that_was_killed_is_undone_by_the_next_one(tmp_path):
     assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"
 
 
+def test_a_build_after_a_killed_calibration_is_not_undone(tmp_path):
+    """Cancelled calibration, then a build, then a steady run: the run restored the
+    copy of the old build over the new one (Isar example, 2026-11-04: the old
+    steering file with the old DURATION). The build discards the copy."""
+    import pytest
+
+    from axqua import bayescal
+    from axqua.bayescal import AS_BUILT, restore_as_built
+    from axqua.solvers.telemac import pipeline
+
+    cfg, model, calibration = _built_case(tmp_path)
+    keep = calibration / AS_BUILT
+    keep.mkdir()
+    (keep / "steady2d.cas").write_text("DURATION : 4000.0\n")    # the old build
+
+    class Stop(Exception):
+        pass
+
+    class Building:
+        """Enough of a Config for pipeline.run to reach its first stage."""
+        def __init__(self, inner):
+            self.__dict__["_inner"] = inner
+
+        def ensure_dirs(self):
+            pass
+
+        def __getattr__(self, name):
+            if name == "surfaces":
+                raise Stop                         # stage 0: far enough
+            return getattr(self._inner, name)
+
+    with pytest.raises(Stop):
+        pipeline.run(Building(cfg), validate_env=False, log_to_file=False)
+    (model / "steady2d.cas").write_text("DURATION : 6000.0\n")     # the new build
+    assert not keep.exists() and restore_as_built(cfg) is False
+    assert (model / "steady2d.cas").read_text() == "DURATION : 6000.0\n"
+    assert bayescal.discard_as_built(cfg) is False
+
+
 def test_the_case_file_decides_the_calibration_targets(monkeypatch):
     """A job names no targets; the case file's must then be used. Until 2026-10-17 a
     built-in ("SCALAR VELOCITY",) replaced them, so a case asking for depth and

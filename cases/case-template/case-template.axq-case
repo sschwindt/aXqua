@@ -234,13 +234,17 @@ hydrodynamics:
   finite_volumes: false
   # finite_volume_scheme: 5    # 5 = HLLC (default); 0 Roe, 1 kinetic, 6 WAF
   # fv_space_order: 2          # 2 = MUSCL (2nd order); 1 = 1st order
-  # Turbulence: "auto" picks k-epsilon (3) / Spalart-Allmaras (6) / Smagorinski LES
-  # (4) from the channel mesh resolution vs the turbulence length scale (the flow
-  # depth) and the velocity guess, applying the 80%-TKE LES criterion. A literal
-  # int/name overrides. (Finite volumes force model 1 regardless.)
-  turbulence_model: auto       # auto | 1 const | 3 k-epsilon | 4 Smagorinski | 6 Spalart-Allmaras
-  initial_velocity_guess: 1.0  # assumed mean flow [m/s]; sizes eddy viscosity + model choice
-  # turbulence_length_scale: 1.0  # integral length scale [m]; defaults to prewet_depth
+  # Turbulence: "auto" picks k-epsilon (3) where the channel cells are larger than the
+  # flow depth, and Smagorinski LES (4) with the turbulence generated at the bed (a
+  # generated user_fortran/smagor.f) where they are finer. A literal int/name
+  # overrides; Spalart-Allmaras (6) suits a flume, not a river (no bed turbulence).
+  # (Finite volumes force model 1 regardless.)
+  turbulence_model: auto       # auto | 1 const | 3 k-epsilon | 4 Smagorinski | 5 mixing length | 6 Spalart-Allmaras
+  initial_velocity_guess: 1.0  # assumed mean flow [m/s]; sizes the eddy viscosity of model 1
+  # turbulence_length_scale: 0.9  # flow depth [m] for the model choice; default: the
+  #                               # steady result, else normal flow at the case discharge
+  # les_depth_ratio: 1.0          # LES once the filter width is <= this many depths
+  # les_bed_coefficient: 0.0667   # alpha of the bed term alpha u* h in LES (0: none)
   # velocity_diffusivity: 1.0e-6  # constant eddy viscosity [m2/s]; auto from U for model 1
   # CFL-adaptive marching to steady state (variable_timestep true by default): the
   # desired_courant sets the target Courant number. 0.30 (the default) is the

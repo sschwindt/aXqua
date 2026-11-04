@@ -614,3 +614,72 @@ def test_centerline_probes_stay_off_the_liquid_boundaries(tmp_path):
         geodata=types.SimpleNamespace(boundary=None, channel_centerline=line))
     probes = default_probes(cfg, n=4)
     assert probes[:, 0].tolist() == [12.5, 37.5, 62.5, 87.5]
+
+
+def test_resume_reruns_a_level_of_another_turbulence_model(tmp_path):
+    """A level folder of an older study that ran another closure is not reused."""
+    import json
+    from types import SimpleNamespace
+
+    from axqua.convergence import _scan_completed, _slug
+
+    cfg = SimpleNamespace(results_slf="r2d.slf", cas_file="steady2d.cas")
+    d = tmp_path / _slug("baseline")
+    d.mkdir()
+    (d / "level.json").write_text(json.dumps({"channel_size": 1.5,
+                                              "floodplain_size": 4.0}))
+    (d / "r2d.slf").write_bytes(b"")
+    (d / "steady2d.cas").write_text("/ TURBULENCE\nTURBULENCE MODEL : 6\n")
+    levels = [("baseline", 1.5, 4.0)]
+    assert _scan_completed(cfg, tmp_path, levels, turbulence_model=3) == {}
+    assert _scan_completed(cfg, tmp_path, levels, turbulence_model=6) == {"baseline": d}
+    assert _scan_completed(cfg, tmp_path, levels) == {"baseline": d}   # no model: sizes
+
+
+def test_a_reused_level_is_averaged_over_the_end_of_its_run(tmp_path):
+    """With k-epsilon the 2D flow oscillates at the inflow: a level is compared by its
+    mean over the second half of the run, and the report shows the fluctuation."""
+    import json
+    import struct
+    from types import SimpleNamespace
+
+    from axqua.convergence import (LevelResult, _load_completed_level, build_report)
+    from axqua.core import selafin
+
+    def append(path, time, arrays):
+        with open(path, "ab") as f:
+            f.write(struct.pack(">i", 4) + struct.pack(">f", time) + struct.pack(">i", 4))
+            for values in arrays:
+                data = np.asarray(values, dtype=">f4").tobytes()
+                f.write(struct.pack(">i", len(data)) + data + struct.pack(">i", len(data)))
+
+    d = tmp_path / "baseline"
+    d.mkdir()
+    x = np.array([0.0, 2.0, 0.0, 2.0])
+    y = np.array([0.0, 0.0, 2.0, 2.0])
+    ikle = np.array([[1, 2, 4], [1, 4, 3]])
+    res = selafin._write_selafin(
+        d / "r2d.slf", x, y, ikle, np.zeros(4, dtype=int),
+        [("WATER DEPTH", "M", np.full(4, 1.0)), ("VELOCITY U", "M/S", np.zeros(4)),
+         ("VELOCITY V", "M/S", np.zeros(4))],
+        title="result", date=(2026, 11, 3, 0, 0, 0), double_precision=False)
+    for k, u in ((1, 0.2), (2, 1.0), (3, 1.4), (4, 0.6)):   # t = 100 .. 400 s
+        append(res, 100.0 * k, [np.full(4, 1.0), np.full(4, u), np.zeros(4)])
+    (d / "level.json").write_text(json.dumps(
+        {"channel_size": 1.5, "floodplain_size": 4.0, "cell_size": 1.5,
+         "runtime_s": 60.0}))
+    cfg = SimpleNamespace(results_slf="r2d.slf", geometry_slf="geometry.slf")
+    lv = _load_completed_level(cfg, d, "baseline", np.array([[1.0, 1.0]]),
+                               ["WATER DEPTH", "SCALAR VELOCITY"], check_validity=False)
+    assert lv.n_frames == 3                                  # t = 200, 300, 400 s
+    assert abs(lv.qoi["SCALAR VELOCITY"][0] - 1.0) < 1e-6    # not the last 0.6
+    assert abs(lv.fluctuation["SCALAR VELOCITY"] - np.sqrt(0.32 / 3)) < 1e-6
+    coarse = LevelResult(label="coarse", cell_size=2.0, n_elem=2, n_nodes=4,
+                         min_edge=2.0, dt=None, runtime_s=30.0,
+                         qoi={"WATER DEPTH": np.array([1.0]),
+                              "SCALAR VELOCITY": np.array([1.2])})
+    rep = build_report([coarse, lv], ["WATER DEPTH", "SCALAR VELOCITY"], 0.05,
+                       np.array([[1.0, 1.0]]))
+    text = rep.format()
+    assert "fluctuation in time" in text and "mean over the last 50%" in text
+    assert rep.unsteady_quantities() == ["SCALAR VELOCITY"]    # 20 % change < 33 %

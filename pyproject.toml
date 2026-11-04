@@ -86,12 +86,16 @@ gui = ["streamlit>=1.30"]
 #   1.4.4  makes the MULTI-FLOW driver honor the config's `extraction` block;
 #          before it, multi-flow silently averaged the last frames while single-flow
 #          on the same config did not, so the two were fitted to different data.
+#   1.11.0 trains the emulators on outputs that are the same in every run. Before it,
+#          a vertical that is dry in every run of the initial design divided by a
+#          zero spread, and the calibration stopped with NaN after its initial runs
+#          (Isar example with k-epsilon, 2026-11-04: 7 of 33 verticals dry).
 #
 # Beyond the floor, axqua does NOT check versions: `hbc.require_hbc` tests for the
 # capability it needs (hasattr(hydroBayesCal, "copy_driver")). On an additive-only
 # upstream that is the right test - a version comparison would need editing on every
 # release, and would reject a valid newer one the moment the scheme changed.
-calibration = ["hydrobayescal>=1.8.1"]
+calibration = ["hydrobayescal>=1.11.0"]
 
 [project.scripts]
 axqua = "axqua.cli:main"

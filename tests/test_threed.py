@@ -49,12 +49,14 @@ def test_turbulence_mapping_2d_to_3d(tmp_path):
     cfg = _cfg(tmp_path)
     cfg.hydrodynamics.turbulence_length_scale = 1.0
 
-    cfg.mesh.channel_size = 0.05                  # fine -> Smagorinski (4) both dims H
+    cfg.mesh.channel_size = 0.5                   # fine -> Smagorinski H, mixing length V
     assert threed.select_3d_turbulence(cfg, None)[:2] == (4, 2)
-    cfg.mesh.channel_size = 0.2                    # moderate -> k-epsilon (3 H, 3 V)
+    cfg.mesh.channel_size = 2.0                    # coarse -> k-epsilon (3 H, 3 V)
     assert threed.select_3d_turbulence(cfg, None)[:2] == (3, 3)
-    cfg.mesh.channel_size = 0.5                    # coarse -> Spalart-Allmaras (5 H+V)
+    cfg.hydrodynamics.turbulence_model = "spalart-allmaras"   # only when named
     assert threed.select_3d_turbulence(cfg, None)[:2] == (5, 5)  # S-A: both directions
+    cfg.hydrodynamics.turbulence_model = "mixing-length"      # 2D only -> k-epsilon
+    assert threed.select_3d_turbulence(cfg, None)[:2] == (3, 3)
 
 
 def test_build_3d_cas_from_2d_result(tmp_path):
@@ -118,7 +120,12 @@ def test_an_unpatched_spalart_allmaras_is_not_taken_into_3d(tmp_path):
     assert (h, v) == (3, 3) and "Spalart-Allmaras" in why
     # with the patch, or with a closure the case names itself, S-A stays
     (model / "user_fortran").mkdir()
+    # an empty folder, or one with only the generated 2D LES routine, is no patch
+    assert threed._without_unpatched_spalart(cfg, model, 5, 5, "x")[:2] == (3, 3)
+    patch = model / "user_fortran" / "sousa.f"
+    patch.write_text("      SUBROUTINE SOURCE_TRAC\n")
     assert threed._without_unpatched_spalart(cfg, model, 5, 5, "x")[:2] == (5, 5)
+    patch.unlink()
     (model / "user_fortran").rmdir()
     cfg.hydrodynamics.turbulence_model = 6
     assert threed._without_unpatched_spalart(cfg, model, 5, 5, "x")[:2] == (5, 5)

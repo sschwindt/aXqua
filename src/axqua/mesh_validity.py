@@ -148,6 +148,8 @@ class MeshValidity:
     y_plus_ok: bool = True          # y+ >= 30 -> log-layer wall functions valid
     ks_regime: str = "unknown"      # fully rough / transitional / smooth / unknown
     dx_below_ks: bool = False       # dx < ks -> roughness double-counting risk
+    filter_width: float = float("nan")       # Smagorinski filter width of the channel cells [m]
+    turbulence_depth: float = float("nan")   # depth the turbulence choice is made for [m]
     turbulence_pick: int | None = None       # auto-selection at this dx
     turbulence_pick_name: str = ""
     pinned_model: int | None = None          # the model the study runs with
@@ -166,6 +168,8 @@ class MeshValidity:
                  f"y+={num(self.y_plus, '{:.0f}')}",
                  f"ks+={num(self.ks_plus, '{:.0f}')} ({self.ks_regime})",
                  f"dx/ks={num(self.dx_over_ks, '{:.2f}')}"]
+        if math.isfinite(self.filter_width):
+            parts.append(f"filter={num(self.filter_width, '{:.2f}')} m")
         if self.turbulence_pick is not None:
             pin = (f" [pinned: {_turb_name(self.pinned_model)}]"
                    if self.pinned_model is not None else "")
@@ -185,13 +189,16 @@ def _turb_name(model: int | None) -> str:
 
 def check_level(cfg: Config, *, dx: float, depth: float, velocity: float,
                 ks: float | None = None, pinned_model: int | None = None,
-                estimated: bool = False) -> MeshValidity:
+                estimated: bool = False,
+                filter_width: float | None = None) -> MeshValidity:
     """Run the validity checks for one cell size *dx* (see the module docstring).
 
     *depth*/*velocity* are the level's mean probe values (or the finest completed
     level's, for a candidate refinement; then set ``estimated=True`` when they are
     placeholders). *ks* defaults to :func:`channel_ks`; *pinned_model* is the
     turbulence model the study is pinned to (None skips the consistency check).
+    *filter_width* is the Smagorinski filter width measured on the level's mesh
+    (:func:`axqua.steering.filter_width`); the turbulence choice uses it, else *dx*.
     The turbulence auto-pick deliberately ignores any explicit
     ``hydrodynamics.turbulence_model`` (the study pins that on each level copy).
     """
@@ -240,12 +247,18 @@ def check_level(cfg: Config, *, dx: float, depth: float, velocity: float,
     try:
         from axqua import steering
 
-        v.turbulence_pick, _ = steering.turbulence_pick_for_dx(cfg, dx)
+        width = filter_width if filter_width and filter_width > 0 else dx
+        scale = steering.flow_scale(cfg)
+        if filter_width and filter_width > 0:
+            v.filter_width = float(filter_width)
+        v.turbulence_depth = float(scale.depth)
+        v.turbulence_pick, _ = steering.turbulence_pick_for_dx(cfg, width, scale=scale)
         v.turbulence_pick_name = _turb_name(v.turbulence_pick)
         if pinned_model is not None and v.turbulence_pick != pinned_model:
             v.regime_change = True
             v.warnings.append(
-                f"turbulence-model regime change: auto-selection at dx={dx:.3f} m "
+                f"turbulence-model regime change: auto-selection at a filter width of "
+                f"{width:.3f} m (depth {scale.depth:.2f} m) "
                 f"would pick {v.turbulence_pick_name}, but the study is pinned to "
                 f"{_turb_name(pinned_model)} - the pinned closure's validity "
                 "assumptions no longer match this resolution")

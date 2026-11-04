@@ -96,6 +96,47 @@ def _interp_to_points(x, y, field, points):
     return out
 
 
+def _mesh_sampler(x, y, ikle, points):
+    """A function ``field -> values at points``, linear in the mesh's own triangles and nearest node outside them; None where the coordinates cannot be triangulated.
+
+    The points are located once (triangle and barycentric weights, or the nearest node), so sampling many frames of one mesh costs a weighted sum per frame instead of a new point location: averaging the ~50-100 frames of a 2D run took minutes per mesh before.
+    """
+    from scipy.spatial import cKDTree
+
+    from axqua.model_column import safe_triangulation
+
+    points = np.asarray(points, dtype=float)
+    try:
+        tri = safe_triangulation(x, y, ikle)
+    except ValueError:
+        return None
+    px, py = points[:, 0], points[:, 1]
+    found = np.asarray(tri.get_trifinder()(px, py), dtype=int)
+    inside = found >= 0
+    nodes = np.zeros((points.shape[0], 3), dtype=int)
+    weights = np.zeros((points.shape[0], 3), dtype=float)
+    if inside.any():
+        t = tri.triangles[found[inside]]
+        xa, ya = tri.x[t[:, 0]], tri.y[t[:, 0]]
+        xb, yb = tri.x[t[:, 1]], tri.y[t[:, 1]]
+        xc, yc = tri.x[t[:, 2]], tri.y[t[:, 2]]
+        det = (yb - yc) * (xa - xc) + (xc - xb) * (ya - yc)
+        wa = ((yb - yc) * (px[inside] - xc) + (xc - xb) * (py[inside] - yc)) / det
+        wb = ((yc - ya) * (px[inside] - xc) + (xa - xc) * (py[inside] - yc)) / det
+        nodes[inside] = t
+        weights[inside] = np.column_stack([wa, wb, 1.0 - wa - wb])
+    if (~inside).any():
+        _, near = cKDTree(np.column_stack([x, y])).query(points[~inside])
+        nodes[~inside, 0] = near
+        weights[~inside, 0] = 1.0
+
+    def sample(field):
+        field = np.asarray(field, dtype=float)
+        return (field[nodes] * weights).sum(axis=1)
+
+    return sample
+
+
 def _interp_on_mesh(x, y, ikle, field, points):
     """Linear interpolation in the mesh's own triangles; nearest node outside them.
 
@@ -104,23 +145,11 @@ def _interp_on_mesh(x, y, ikle, field, points):
     triangulated (the float32 coordinates of a result, see :func:`mesh_coordinates`),
     this falls back to :func:`_interp_to_points`.
     """
-    from matplotlib.tri import LinearTriInterpolator
-    from scipy.interpolate import NearestNDInterpolator
-
-    from axqua.model_column import safe_triangulation
-
-    points = np.asarray(points, dtype=float)
-    field = np.asarray(field, dtype=float)
-    try:
-        tri = safe_triangulation(x, y, ikle)
-    except ValueError:
-        return _interp_to_points(x, y, field, points)
-    out = np.asarray(LinearTriInterpolator(tri, field)(points[:, 0], points[:, 1])
-                     .filled(np.nan), dtype=float)
-    nan = np.isnan(out)
-    if nan.any():
-        out[nan] = NearestNDInterpolator(np.column_stack([x, y]), field)(points[nan])
-    return out
+    sample = _mesh_sampler(x, y, ikle, points)
+    if sample is None:
+        return _interp_to_points(x, y, np.asarray(field, dtype=float),
+                                 np.asarray(points, dtype=float))
+    return sample(field)
 
 
 def mesh_coordinates(data: dict, geometry=None):
@@ -165,6 +194,13 @@ def extract_at_points(slf_path, quantities, points, *,
             for q in quantities}
 
 
+#: share of the simulated time at the end of each run that a level's values are
+#: averaged over. With k-epsilon the 2D flow of Inn KB15 oscillates at the inflow
+#: (point 1: 0.97 to 1.36 m/s, period ~1,100 s, on the baseline mesh), so a snapshot
+#: would mix the phase of the oscillation into the change between meshes.
+TIME_WINDOW = 0.5
+
+
 @dataclass
 class TimeAverage:
     """Values at the points averaged over the end of a run, and how much they move."""
@@ -197,13 +233,13 @@ def extract_mean_at_points(slf_path, quantities, points, *, geometry=None,
     base = {"x": sf.x, "y": sf.y, "ikle": sf.ikle}
     x, y, ikle = (mesh_coordinates(base, geometry) if geometry is not None
                   else (sf.x, sf.y, sf.ikle))
+    sample = _mesh_sampler(x, y, ikle, points) if geometry is not None else None
     series: dict[str, list[np.ndarray]] = {q: [] for q in quantities}
     for i in chosen:
         values = sf.frame(i)
         for q in quantities:
             field = np.asarray(_resolve_field(values, q), dtype=float)
-            series[q].append(_interp_on_mesh(x, y, ikle, field, points)
-                             if geometry is not None
+            series[q].append(sample(field) if sample is not None
                              else _interp_to_points(x, y, field, points))
     mean, spread = {}, {}
     for q, rows in series.items():
@@ -236,6 +272,9 @@ class LevelResult:
     mean_depth: float | None = None        # mean probe water depth [m]
     mean_velocity: float | None = None     # mean probe scalar velocity [m/s]
     validity: object | None = None         # mesh_validity.MeshValidity (or None)
+    #: {quantity: spread over time / mean} at the points, over the averaged frames
+    fluctuation: dict = field(default_factory=dict)
+    n_frames: int = 1                      # frames the values are averaged over
 
     def repr_value(self, qty: str) -> float:
         """Representative scalar: mean magnitude over the probes."""
@@ -299,6 +338,14 @@ class ConvergenceReport:
                 extra.append(f"asymptotic ratio={self.asymptotic_ratio[q]:.2f}")
             if extra:
                 lines.append(f"    {'':<20}" + "; ".join(extra))
+            if any(q in getattr(x, "fluctuation", {}) for x in lv):
+                lines.append(f"    {'fluctuation in time':<20}" + "".join(
+                    (f"{x.fluctuation[q] * 100:>{w - 1}.2f}%" if q in x.fluctuation
+                     else f"{'-':>{w}}") for x in lv))
+        frames = sorted({getattr(x, "n_frames", 1) for x in lv})
+        if frames != [1]:
+            lines.append(f"  values: mean over the last {TIME_WINDOW:.0%} of each run "
+                         f"({'/'.join(str(n) for n in frames)} frames)")
         verdict = "CONVERGED" if self.converged else "NOT converged"
         basis = ("GCI of the finest grid triplet" if self.verdict_basis == "gci"
                  else "finest relative change; GCI not trustworthy - asymptotic "
@@ -308,6 +355,9 @@ class ConvergenceReport:
         if not self.converged:
             lines.append("     refine further (the finest mesh still changes the QoI "
                          "by more than the tolerance).")
+        for q in self.unsteady_quantities():
+            lines.append(f"     {q}: the finest change is not larger than the runs' own "
+                         "fluctuation in time; a finer mesh cannot settle it.")
         validity = [x for x in lv if x.validity is not None]
         if validity:
             lines.append("  mesh validity (y+ / roughness / turbulence closure):")
@@ -316,6 +366,20 @@ class ConvergenceReport:
                 lines.append(f"    {x.label}: {vlines[0]}")
                 lines.extend(f"      {extra_line}" for extra_line in vlines[1:])
         return "\n".join(lines)
+
+    def unsteady_quantities(self) -> list[str]:
+        """Quantities whose last change is within the fluctuation in time of the two finest runs."""
+        if len(self.levels) < 2:
+            return []
+        a, b = self.levels[-2], self.levels[-1]
+        out = []
+        for q in self.quantities:
+            rc = self.rel_change.get(q) or []
+            spread = max(getattr(a, "fluctuation", {}).get(q, 0.0),
+                         getattr(b, "fluctuation", {}).get(q, 0.0))
+            if rc and spread and rc[-1] <= spread:
+                out.append(q)
+        return out
 
     def save(self, path) -> Path:
         path = Path(path)
@@ -480,6 +544,10 @@ class ConvergenceReport:
                 fmt="0.0000", align=center)
             rc = ["", ""] + [f"{e * 100:.2f}%" for e in self.rel_change.get(q, [])]
             row(["  rel. change vs. coarser", *rc[1:]], align=center)
+            if any(q in getattr(x, "fluctuation", {}) for x in lv):
+                row(["  fluctuation in time",
+                     *[(f"{x.fluctuation[q] * 100:.2f}%" if q in x.fluctuation else "-")
+                       for x in lv]], align=center)
             p, pu = self.observed_order.get(q), self.order_used.get(q)
             extra = []
             if p is not None:
@@ -1119,7 +1187,8 @@ def default_probes(cfg: Config, n: int = 40) -> np.ndarray:
 
 
 def make_telemac_simulator(cfg: Config, discharge: float, *, base_dir: Path,
-                           runtime=None, n_processors: int | None = None):
+                           runtime=None, n_processors: int | None = None,
+                           pinned_turbulence: int | None = None):
     """Build a ``simulate(label, ch, fp, probes, quantities) -> LevelResult`` that
     builds the case at the given resolution, runs TELEMAC once at constant
     *discharge* (variable time step for per-mesh CFL), and samples the QoI.
@@ -1130,6 +1199,8 @@ def make_telemac_simulator(cfg: Config, discharge: float, *, base_dir: Path,
     per-zone ``Max Edge Length (m)`` values from the mesh-zones gpkg, which would
     otherwise silently override the per-level sizes and leave every "level" with
     the same mesh (the bug behind the invalid first ering study).
+
+    *pinned_turbulence* is the turbulence model of every level (default: the choice for *cfg* without a mesh); :func:`run_mesh_convergence` passes the choice for the case's own mesh.
     """
     import copy
     import shutil
@@ -1143,7 +1214,8 @@ def make_telemac_simulator(cfg: Config, discharge: float, *, base_dir: Path,
     # pin the turbulence closure to the baseline choice across all grid levels, so
     # the study isolates the discretization error (per-level auto-selection would
     # otherwise switch closures as the cell size changes and confound the comparison)
-    pinned_turbulence = steering.select_turbulence_model(cfg)[0]
+    if pinned_turbulence is None:
+        pinned_turbulence = steering.select_turbulence_model(cfg)[0]
     base_channel = float(cfg.mesh.channel_size)
     try:
         ks_channel = mesh_validity.channel_ks(cfg)
@@ -1193,15 +1265,19 @@ def make_telemac_simulator(cfg: Config, discharge: float, *, base_dir: Path,
         geometry = lc.model_path(lc.geometry_slf)
         min_edge, mean_depth, mean_vel = _geom_stats(data, probes, geometry)
         dt = _cfl_dt(min_edge, mean_depth, mean_vel)
-        qoi = extract_at_points(res, quantities, probes, geometry=geometry)
+        avg = extract_mean_at_points(res, quantities, probes, geometry=geometry,
+                                     window=TIME_WINDOW)
+        qoi = avg.mean
         validity = mesh_validity.check_level(
             cfg, dx=eff, depth=mean_depth, velocity=mean_vel, ks=ks_channel,
-            pinned_model=pinned_turbulence)
+            pinned_model=pinned_turbulence,
+            filter_width=steering.geometry_filter_width(cfg, geometry))
         result = LevelResult(label=label, cell_size=eff, n_elem=data["ikle"].shape[0],
                              n_nodes=data["x"].size, min_edge=min_edge, dt=dt,
                              runtime_s=runtime_s, qoi=qoi, scale=lc.mesh.size_scale,
                              mean_depth=mean_depth, mean_velocity=mean_vel,
-                             validity=validity)
+                             validity=validity, fluctuation=avg.fluctuation,
+                             n_frames=avg.n_frames)
         _write_level_json(d, result, ch, fp)
         return result
 
@@ -1278,12 +1354,15 @@ def _write_level_json(level_dir: Path, level: LevelResult, ch: float,
 
 
 def _scan_completed(cfg: Config, base_dir: Path, levels, *,
-                    result_name: str | None = None) -> dict[str, Path]:
+                    result_name: str | None = None,
+                    turbulence_model: int | None = None) -> dict[str, Path]:
     """Map ``{label: level_dir}`` of planned levels with a reusable result.
 
     A level is reusable when its folder holds both the result SELAFIN and a
     ``level.json`` whose channel/floodplain sizes match the planned tuple (so a
-    changed ladder never silently reuses a mesh built at different sizes).
+    changed ladder never silently reuses a mesh built at different sizes), and,
+    with *turbulence_model*, when its steering file ran that TELEMAC model (a level
+    of an older study with another closure is run again).
     *result_name* is the result file of a level (TELEMAC's ``r2d.slf`` by default)."""
     results_slf = result_name or getattr(cfg, "results_slf", "r2d.slf")
     done: dict[str, Path] = {}
@@ -1294,7 +1373,11 @@ def _scan_completed(cfg: Config, base_dir: Path, levels, *,
             continue
         try:
             meta = json.loads(jf.read_text())
-            if (math.isclose(float(meta["channel_size"]), ch, rel_tol=1e-6)
+            ran = _level_turbulence(cfg, d) if turbulence_model is not None else None
+            if ran is not None and ran != turbulence_model:
+                log.info("existing level '%s' ran turbulence model %d, the study "
+                         "uses %d; it will be re-run", label, ran, turbulence_model)
+            elif (math.isclose(float(meta["channel_size"]), ch, rel_tol=1e-6)
                     and math.isclose(float(meta["floodplain_size"]), fp, rel_tol=1e-6)):
                 done[label] = d
             else:
@@ -1304,6 +1387,18 @@ def _scan_completed(cfg: Config, base_dir: Path, levels, *,
         except (KeyError, ValueError, TypeError, OSError) as exc:
             log.debug("unreadable level.json in %s: %s", d, exc)
     return done
+
+
+def _level_turbulence(cfg: Config, level_dir: Path) -> int | None:
+    """The TURBULENCE MODEL of a level's steering file, or None."""
+    from axqua.solvers.telemac.steering import read_cas_values
+
+    cas = Path(level_dir) / getattr(cfg, "cas_file", "steady2d.cas")
+    try:
+        value = read_cas_values(cas, "TURBULENCE MODEL")["TURBULENCE MODEL"]
+        return int(str(value).strip()) if value else None
+    except (OSError, ValueError):
+        return None
 
 
 def _load_completed_level(cfg: Config, level_dir: Path, label: str, probes,
@@ -1321,16 +1416,25 @@ def _load_completed_level(cfg: Config, level_dir: Path, label: str, probes,
         geometry = Path(level_dir) / getattr(cfg, "geometry_slf", "geometry.slf")
         min_edge, mean_depth, mean_vel = _geom_stats(data, probes, geometry)
         dt = _cfl_dt(min_edge, mean_depth, mean_vel)
-        qoi = extract_at_points(res, quantities, probes, geometry=geometry)
+        # a TELEMAC level is averaged over the end of its run, as when it was run;
+        # a result of another code (result_name) is read at its last frame
+        fluct, n_frames = {}, 1
+        if result_name is None:
+            avg = extract_mean_at_points(res, quantities, probes, geometry=geometry,
+                                         window=TIME_WINDOW)
+            qoi, fluct, n_frames = avg.mean, avg.fluctuation, avg.n_frames
+        else:
+            qoi = extract_at_points(res, quantities, probes, geometry=geometry)
         cell_size = float(meta.get("cell_size") or meta["channel_size"])
         validity = None
         try:
             if check_validity:
-                from axqua import mesh_validity
+                from axqua import mesh_validity, steering
 
                 validity = mesh_validity.check_level(
                     cfg, dx=cell_size, depth=mean_depth, velocity=mean_vel, ks=ks,
-                    pinned_model=pinned_model)
+                    pinned_model=pinned_model,
+                    filter_width=steering.geometry_filter_width(cfg, geometry))
         except Exception as exc:                 # dummy test configs
             log.debug("validity check skipped for reused '%s': %s", label, exc)
         return LevelResult(label=label, cell_size=cell_size,
@@ -1340,7 +1444,7 @@ def _load_completed_level(cfg: Config, level_dir: Path, label: str, probes,
                            runtime_s=meta.get("runtime_s"), qoi=qoi,
                            scale=float(meta.get("scale") or 1.0),
                            mean_depth=mean_depth, mean_velocity=mean_vel,
-                           validity=validity)
+                           validity=validity, fluctuation=fluct, n_frames=n_frames)
     except Exception as exc:
         log.warning("could not reuse completed level '%s' (%s); re-running it",
                     label, exc)
@@ -1412,6 +1516,30 @@ def _default_ask(prompt: str, *, default: bool = False,
     return default if not reply else reply in ("y", "yes")
 
 
+def _with_turbulence_depth(cfg: Config):
+    """``(cfg, case_mesh)``: a copy of *cfg* whose turbulence depth is fixed for every mesh of the study, and the light mesh of the case's own geometry (None without one).
+
+    The choice of the turbulence model compares the filter width of the cells with the flow depth (:func:`axqua.steering.select_turbulence_model`). Each level of the study has its own model folder, without a steady result, so each would estimate the depth anew; the depth of the case (its steady result, else normal flow on its mesh) is set once as ``hydrodynamics.turbulence_length_scale`` on the copy instead. A case that sets it keeps its value.
+    """
+    import copy
+
+    try:
+        from axqua import steering
+
+        case_mesh = steering.mesh_from_geometry(cfg.model_path(cfg.geometry_slf))
+        if cfg.hydrodynamics.turbulence_length_scale is not None:
+            return cfg, case_mesh
+        scale = steering.flow_scale(cfg, case_mesh)
+    except Exception as exc:                     # noqa: BLE001 - bare test configs
+        log.debug("no turbulence depth for the study: %s", exc)
+        return cfg, None
+    out = copy.deepcopy(cfg)
+    out.hydrodynamics.turbulence_length_scale = float(scale.depth)
+    log.info("mesh convergence: flow depth %.2f m for the turbulence choice of every "
+             "mesh (%s)", scale.depth, scale.source)
+    return out, case_mesh
+
+
 def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
                          quantities=DEFAULT_QUANTITIES, probes=None,
                          tolerance: float = DEFAULT_TOLERANCE, simulate=None,
@@ -1474,16 +1602,17 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
         # level fails. An explicit *ask* (e.g. a test stub) still takes precedence.
         ask = ask or (lambda *a, **k: True)
     ask = ask or _default_ask
-    simulate = simulate or make_telemac_simulator(
-        cfg, discharge, base_dir=base_dir, runtime=runtime, n_processors=n_processors)
 
     # study context for the validity checks (graceful for bare test configs)
     pinned = ks_channel = None
     if check_validity:
+        cfg, case_mesh = _with_turbulence_depth(cfg)
         try:
             from axqua import steering
 
-            pinned = steering.select_turbulence_model(cfg)[0]
+            pinned, why = steering.select_turbulence_model(cfg, case_mesh)
+            log.info("mesh convergence: turbulence model of every mesh: %s (%s)",
+                     steering.TURB_NAMES.get(pinned, pinned), why)
         except Exception:
             pinned = None
         try:
@@ -1492,10 +1621,15 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
             ks_channel = mesh_validity.channel_ks(cfg)
         except Exception:
             ks_channel = None
+    if simulate is None:
+        simulate = make_telemac_simulator(
+            cfg, discharge, base_dir=base_dir, runtime=runtime,
+            n_processors=n_processors, pinned_turbulence=pinned)
 
     reuse: dict[str, Path] = {}
     if base_dir.exists():
-        done = _scan_completed(cfg, base_dir, levels, result_name=result_name)
+        done = _scan_completed(cfg, base_dir, levels, result_name=result_name,
+                               turbulence_model=pinned)
         if done:
             summary = ", ".join(f"'{lbl}'" for lbl in done)
             if ask(f"mesh convergence: found {len(done)} completed level(s) in "
@@ -1551,12 +1685,14 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
                 raise LookupError("no closure checks for this code")
             from axqua import mesh_validity
 
+            fw = getattr(finest.validity, "filter_width", float("nan"))
             cand = mesh_validity.check_level(
                 cfg, dx=cand_dx,
                 depth=finest.mean_depth if finest.mean_depth else 1.0,
                 velocity=finest.mean_velocity if finest.mean_velocity else 1.0,
                 ks=ks_channel, pinned_model=pinned,
-                estimated=finest.mean_depth is None or finest.mean_velocity is None)
+                estimated=finest.mean_depth is None or finest.mean_velocity is None,
+                filter_width=(fw / extend_ratio if fw == fw and fw > 0 else None))
             validity_txt = "\n".join("  " + ln for ln in cand.lines())
             if cand.dx_below_ks or cand.regime_change:
                 reasons = []
@@ -1576,7 +1712,7 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
                 log.warning(
                     "mesh convergence: refinement '%s' (channel %.3f m) may not match "
                     "the turbulence/roughness model compatibility at this resolution "
-                    "(%s); running it anyway.", label, ch, why)
+                    "(%s); running it anyway.", label, cand_dx, why)
         except Exception as exc:
             log.debug("candidate validity check skipped: %s", exc)
         worst = max((report.gci_fine.get(q) if report.verdict_basis == "gci"
@@ -1586,7 +1722,7 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
         prompt = (f"mesh convergence: NOT converged after {len(results)} meshes "
                   f"(worst {'GCI' if report.verdict_basis == 'gci' else 'rel. change'}"
                   f" {worst * 100:.1f}% vs. {tolerance * 100:.0f}% goal).\n"
-                  f"Run one more refinement '{label}' (channel {ch:.3f} m)?\n"
+                  f"Run one more refinement '{label}' (channel {cand_dx:.3f} m)?\n"
                   f"  estimated runtime: {est_txt}\n"
                   f"  validity at the candidate size:\n{validity_txt}\n"
                   "Continue with this refinement ('n' stops and writes the report)?")

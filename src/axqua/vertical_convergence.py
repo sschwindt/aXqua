@@ -385,7 +385,9 @@ def make_telemac3d_simulator(cfg: Config, *, results_2d: Path, base_dir: Path,
         # a user_fortran/ dir (e.g. the KB15 Spalart-Allmaras source-term fix) is
         # symlinked in too so FORTRAN FILE resolves and the patch compiles per run
         links = [cfg.geometry_slf, cfg.boundary_cli]
-        if (model / "user_fortran").is_dir():
+        from axqua.solvers.telemac.turbulence_fortran import three_d_routines
+
+        if three_d_routines(model / "user_fortran"):
             links.append("user_fortran")
         # the continuation hotstart reads FILE FOR 2D CONTINUATION (r2d.slf) from
         # the run dir, so it must be linked in too
