@@ -683,3 +683,67 @@ def test_a_reused_level_is_averaged_over_the_end_of_its_run(tmp_path):
     text = rep.format()
     assert "fluctuation in time" in text and "mean over the last 50%" in text
     assert rep.unsteady_quantities() == ["SCALAR VELOCITY"]    # 20 % change < 33 %
+
+
+def test_the_flow_adaptation_length_of_the_inn_reach():
+    # h / (2 c_f) with c_f = (0.41 / ln(12 h / ks))^2: 0.9 m deep over ks 0.155 m
+    from axqua.convergence import flow_adaptation_length
+
+    assert flow_adaptation_length(0.9, 0.155) == pytest.approx(48.2, abs=0.2)
+    assert flow_adaptation_length(0.1, 0.5) == pytest.approx(0.1 / (2 * 0.05))
+
+
+def _centerline_case(tmp_path, *, liquid=None, table=None):
+    import types
+
+    import geopandas as gpd
+    from shapely.geometry import LineString
+
+    line = tmp_path / "centerline.gpkg"
+    gpd.GeoDataFrame(geometry=[LineString([(0, 0), (100, 0)])],
+                     crs="EPSG:25832").to_file(line)
+    return types.SimpleNamespace(
+        ground_truth=(None if table else
+                      types.SimpleNamespace(measurements=None, sources=[])),
+        ground_truth_path=table, crs_epsg=25832,
+        boundaries=types.SimpleNamespace(liquid_boundaries=liquid),
+        geodata=types.SimpleNamespace(boundary=None, channel_centerline=line))
+
+
+def test_centerline_probes_keep_their_distance_from_the_liquid_boundaries(tmp_path):
+    """On the Inn KB15 reach a point 20 m below the inflow made three quarters of the
+    velocity change between two meshes; the points now keep clear of both ends."""
+    from axqua.convergence import default_probes
+
+    cfg = _centerline_case(tmp_path)
+    probes = default_probes(cfg, n=4, boundary_distance=20.0)
+    assert probes[:, 0] == pytest.approx([27.5, 42.5, 57.5, 72.5])
+    # a short reach keeps at least half of its line
+    probes = default_probes(cfg, n=4, boundary_distance=40.0)
+    assert probes[:, 0] == pytest.approx([31.25, 43.75, 56.25, 68.75])
+
+
+def test_measurement_points_near_a_liquid_boundary_are_left_out(tmp_path):
+    import geopandas as gpd
+    import pandas as pd
+    from shapely.geometry import LineString
+
+    from axqua import ground_truth
+    from axqua.convergence import default_probes
+
+    liquid = tmp_path / "liquid.gpkg"
+    gpd.GeoDataFrame({"Type (inflow/outflow)": ["inflow", "outflow"]},
+                     geometry=[LineString([(0, -5), (0, 5)]),
+                               LineString([(100, -5), (100, 5)])],
+                     crs="EPSG:25832").to_file(liquid)
+    table = tmp_path / "ground-truth.xlsx"
+    xs = [2.0, 30.0, 50.0, 70.0, 99.0]
+    ground_truth.write_tidy({"hydraulics": pd.DataFrame(
+        {"x": xs, "y": 0.0, "z": 0.0, "u": 1.0})}, table)
+    cfg = _centerline_case(tmp_path, liquid=liquid, table=table)
+    cfg.geodata.boundary = None
+    probes = default_probes(cfg, n=4, boundary_distance=10.0)
+    assert probes[:, 0].tolist() == [30.0, 50.0, 70.0]
+    # too few left: the centerline takes over
+    probes = default_probes(cfg, n=4, boundary_distance=35.0)
+    assert len(probes) == 4 and probes[:, 1].tolist() == [0.0] * 4

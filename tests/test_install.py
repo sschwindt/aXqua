@@ -326,6 +326,14 @@ def _no_local_compilers(monkeypatch):
     monkeypatch.setattr(recipes, "shadowed_tools", lambda: [])
 
 
+@pytest.fixture(autouse=True)
+def _plenty_of_space(monkeypatch):
+    """A plan must not depend on the free space of the test computer either: a GitHub
+    runner with 8 GiB free in /tmp added the warning little_space to every plan
+    (2026-11-04) and failed the tests that expect a plan without findings."""
+    monkeypatch.setattr(recipes, "_free_gb", lambda folder: 1000.0)
+
+
 def _plan(target, installers, host, tmp_path, **options):
     options.setdefault("folder", tmp_path / "target")
     # Most tests here are not about the example cases of TELEMAC; the step that
@@ -345,6 +353,13 @@ def test_a_telemac_plan_never_asks_for_a_password(installers, debian, tmp_path):
     assert not any("sudo" in word for step in plan.steps for word in step.argv)
     assert plan.outputs == {"solvers.telemac.setup_script": str(
         tmp_path / "target" / "telemac-mascaret" / "configs" / "pysource.debian12.sh")}
+
+
+def test_a_plan_warns_when_the_drive_is_too_small(installers, debian, tmp_path, monkeypatch):
+    monkeypatch.setattr(recipes, "_free_gb", lambda folder: 2.0)
+    plan = _plan("telemac", installers, debian, tmp_path)
+    assert _codes(plan.findings) == {"axqua.install.little_space"}
+    assert plan.ready and plan.steps    # a warning, not a reason to refuse
 
 
 def test_of_the_examples_of_telemac_only_what_a_run_reads_is_downloaded(

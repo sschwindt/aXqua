@@ -43,9 +43,11 @@ changelog=1.3.0
     - Mesh convergence study: compares the mean over the second half of each
       run instead of the last frame, reports how much the values fluctuate in
       time, and says when the last change is smaller than that fluctuation.
-      The points along the centerline keep half a step away from the inflow
-      and outflow lines, and a ground-truth table of an earlier build is no
-      longer used once the case names no ground truth.
+      No point lies close to the inflow or outflow line: the points keep four
+      flow adaptation lengths (Struiksma et al. 1985) from both, 190 m on the
+      Inn KB15 case, where the inflow had decided the verdict. Measurement
+      positions closer to the lines are left out. A ground-truth table of an
+      earlier build is no longer used once the case names no ground truth.
     - Calibration requires HydroBayesCal 1.11.0 or newer: older versions stop
       when a measurement point is dry in every run. A build made after a
       cancelled calibration is no longer replaced by the previous build.

@@ -1134,17 +1134,90 @@ def _slug(label: str) -> str:
     return "".join(c if c.isalnum() else "_" for c in label).strip("_") or "level"
 
 
-def default_probes(cfg: Config, n: int = 40) -> np.ndarray:
+#: The points of a study keep this many flow adaptation lengths from the inflow and
+#: outflow lines. On the Inn KB15 reach (k-epsilon, six meshes), the difference
+#: between two meshes at the centerline reached 0.75 m/s 15 m below the inflow and
+#: the velocity swung by up to 0.2 m/s in time there; both fell to the level of the
+#: rest of the reach (below 0.02 m/s) within 150 to 200 m, about four adaptation
+#: lengths (48 m). The outflow showed no such effect; the rule keeps both ends clear.
+BOUNDARY_ADAPTATION_LENGTHS = 4.0
+
+
+def flow_adaptation_length(depth: float, ks: float) -> float:
+    """The length over which depth-averaged flow adapts to a disturbance [m].
+
+    lambda_w = h / (2 c_f) (Struiksma et al. 1985), with the friction coefficient of
+    the logarithmic law c_f = (kappa / ln(12 h / ks))^2, held between 0.002 and 0.05
+    so that a depth close to the roughness height gives a finite length.
+    """
+    ratio = 12.0 * float(depth) / float(ks)
+    cf = (0.41 / math.log(ratio)) ** 2 if ratio > math.e else 0.05
+    cf = min(max(cf, 0.002), 0.05)
+    return float(depth) / (2.0 * cf)
+
+
+def boundary_clearance(cfg: Config) -> tuple[float, str]:
+    """How far the points of a study keep from the liquid boundaries [m], and why.
+
+    :data:`BOUNDARY_ADAPTATION_LENGTHS` flow adaptation lengths
+    (:func:`flow_adaptation_length`) of the flow depth of the case
+    (:func:`axqua.steering.flow_scale`) and the roughness of its channel bed. TELEMAC
+    spreads the inflow over the boundary nodes of each mesh, so the flow below the
+    inflow differs from mesh to mesh for reasons that have nothing to do with the
+    interior; a model is not evaluated close to its boundaries. ``(0.0, reason)``
+    when depth or roughness are unknown.
+    """
+    try:
+        from axqua import mesh_validity, steering
+
+        depth = float(steering.flow_scale(cfg).depth)
+        ks = mesh_validity.channel_ks(cfg)
+    except Exception as exc:                     # noqa: BLE001 - bare test configs
+        return 0.0, f"no flow depth or roughness ({exc})"
+    if not ks or not depth or depth <= 0 or ks <= 0:
+        return 0.0, "no flow depth or roughness"
+    lam = flow_adaptation_length(depth, ks)
+    dist = BOUNDARY_ADAPTATION_LENGTHS * lam
+    return dist, (f"{BOUNDARY_ADAPTATION_LENGTHS:g} flow adaptation lengths h/(2 c_f) "
+                  f"= {BOUNDARY_ADAPTATION_LENGTHS:g} x {lam:.0f} m for a depth of "
+                  f"{depth:.2f} m and ks {ks:.3f} m")
+
+
+def _liquid_lines(cfg: Config):
+    """The inflow and outflow lines of the case as one geometry, or None."""
+    path = getattr(getattr(cfg, "boundaries", None), "liquid_boundaries", None)
+    if path is None or not Path(path).exists():
+        return None
+    import geopandas as gpd
+    from shapely.ops import unary_union
+
+    gdf = gpd.read_file(path)
+    if gdf.crs and gdf.crs.to_epsg() != cfg.crs_epsg:
+        gdf = gdf.to_crs(epsg=cfg.crs_epsg)
+    return unary_union(gdf.geometry.values) if len(gdf) else None
+
+
+def default_probes(cfg: Config, n: int = 40, *,
+                   boundary_distance: float | None = None) -> np.ndarray:
     """Probe points for the QoI: the ground-truth points if available, else samples
     along the channel centerline (falling back to the ROI bbox diagonal).
 
     Only the positions of measurements are used, never the measured values, and only
     when the case names its ground truth: a table compiled by an earlier build stays
-    in the preprocessing folder after the case drops its sources. The centerline
-    points are spaced from half a step after the inflow to half a step before the
-    outflow. On the Inn KB15 ladder, a point on the inflow line read 0.09, 0.36, 0.12
-    and 0.40 m of depth on the four meshes, the depth of one boundary node or another.
+    in the preprocessing folder after the case drops its sources.
+
+    No point lies within *boundary_distance* of the inflow and outflow lines (default:
+    :func:`boundary_clearance` of the case). The centerline points are spaced evenly
+    between that distance from both ends of the line, with half a step to spare; the
+    distance is cut to a quarter of the line where the reach is short. Measurement
+    points closer to a liquid boundary line are left out; if fewer than three remain,
+    the centerline points are used.
     """
+    if boundary_distance is None:
+        boundary_distance, why = boundary_clearance(cfg)
+    else:
+        why = "given"
+    keep = max(float(boundary_distance), 0.0)
     named = getattr(cfg, "ground_truth", None)
     configured = (named is None or getattr(named, "measurements", None) is not None
                   or bool(getattr(named, "sources", None)))
@@ -1163,6 +1236,21 @@ def default_probes(cfg: Config, n: int = 40) -> np.ndarray:
             pts = np.vstack([_inside_the_model(cfg, t[["x", "y"]])
                              .to_numpy(dtype=float)
                              for t in tables.values() if {"x", "y"} <= set(t.columns)])
+            lines = _liquid_lines(cfg) if keep > 0 and len(pts) else None
+            if lines is not None:
+                from shapely.geometry import Point
+
+                far = np.array([lines.distance(Point(x, y)) >= keep for x, y in pts])
+                if (~far).any():
+                    log.info("mesh convergence: %d of %d measurement points lie within "
+                             "%.0f m of an inflow or outflow line and are left out (%s)",
+                             int((~far).sum()), len(pts), keep, why)
+                pts = pts[far]
+                if len(pts) < 3:
+                    log.warning("mesh convergence: fewer than three measurement points "
+                                "lie %.0f m or more from the inflow and outflow lines; "
+                                "the study uses points along the centerline", keep)
+                    pts = pts[:0]
             if len(pts):
                 return pts
         except Exception as exc:  # pragma: no cover - fallback only
@@ -1180,7 +1268,12 @@ def default_probes(cfg: Config, n: int = 40) -> np.ndarray:
         line = linemerge(merged) if merged.geom_type == "MultiLineString" else merged
         if line.geom_type == "MultiLineString":
             line = max(line.geoms, key=lambda g: g.length)
-        d = (np.arange(n) + 0.5) / n * line.length
+        end = min(keep, 0.25 * line.length)
+        if keep > 0:
+            log.info("mesh convergence: the points keep %.0f m from both ends of the "
+                     "centerline (%s)", end, why if end == keep else
+                     f"cut to a quarter of the {line.length:.0f} m line")
+        d = end + (np.arange(n) + 0.5) / n * (line.length - 2.0 * end)
         return np.array([[line.interpolate(s).x, line.interpolate(s).y] for s in d])
     raise ValueError("no probe points: provide ground truth or a channel centerline, "
                      "or pass probes= explicitly to run_mesh_convergence")
