@@ -471,7 +471,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_build_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">hydrostatic_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="n">n_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">_ignored</span><span class="p">):</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.threed</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_3d_cases</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.threed</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_3d_cases</span><span class="p">,</span> <span class="n">three_d_case</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">hydrostatic_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">"hydrostatic_steps"</span><span class="p">]</span> <span class="o">=</span> <span class="n">hydrostatic_steps</span>
@@ -484,7 +485,9 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.unsteady</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">build_unsteady_3d_case</span><span class="p">,</span>
                                                         <span class="n">build_unsteady_case</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mode_3d</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">build_unsteady_3d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.threed</span><span class="w"> </span><span class="kn">import</span> <span class="n">three_d_case</span>
+
+            <span class="k">return</span> <span class="n">build_unsteady_3d_case</span><span class="p">(</span><span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">build_unsteady_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">control_sections</span><span class="o">=</span><span class="n">control_sections</span><span class="p">)</span>
 
     <span class="c1"># -- run ----------------------------------------------------------------------</span>
@@ -530,6 +533,9 @@
                 <span class="n">remedy</span><span class="o">=</span><span class="s2">"Use one of: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_3D_VARIANTS</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="n">cas_name</span> <span class="o">=</span> <span class="n">_3D_VARIANTS</span><span class="p">[</span><span class="n">variant</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.threed</span><span class="w"> </span><span class="kn">import</span> <span class="n">three_d_case</span>
+
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">prepare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cas_name</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cas_name</span><span class="si">}</span><span class="s2"> has not been written yet"</span><span class="p">,</span>
@@ -547,6 +553,10 @@
                       <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">_ignored</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">run</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">mode_3d</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.threed</span><span class="w"> </span><span class="kn">import</span> <span class="n">three_d_case</span>
+
+            <span class="n">cfg</span> <span class="o">=</span> <span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">prepare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">cas</span> <span class="o">=</span> <span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results3d_unsteady_slf</span> <span class="ow">and</span> <span class="s2">"unsteady3d.cas"</span><span class="p">)</span> <span class="k">if</span> <span class="n">mode_3d</span> <span class="k">else</span> \
             <span class="n">cfg</span><span class="o">.</span><span class="n">unsteady_cas_file</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="n">cas_file</span><span class="o">=</span><span class="n">cas</span><span class="p">,</span> <span class="n">ncsize</span><span class="o">=</span><span class="n">ncsize</span><span class="p">,</span>
@@ -680,13 +690,17 @@
                               <span class="n">layer_counts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                               <span class="o">**</span><span class="n">_ignored</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.threed</span><span class="w"> </span><span class="kn">import</span> <span class="n">three_d_case</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.vertical_convergence</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_vertical_convergence</span>
+        <span class="c1"># the layers are studied on the horizontal mesh of the 3D model; the report</span>
+        <span class="c1"># stays with the case's other studies</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">postprocessing_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"vertical-convergence"</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"tolerance"</span><span class="p">:</span> <span class="n">tolerance</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">layer_counts</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">"counts"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">layer_counts</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ncsize</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">"n_processors"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ncsize</span>
-        <span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">postprocessing_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"vertical-convergence"</span>
         <span class="n">report</span> <span class="o">=</span> <span class="n">run_vertical_convergence</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">base</span><span class="p">,</span>
                                           <span class="n">on_level</span><span class="o">=</span><span class="n">_level_progress</span><span class="p">(</span><span class="n">ctx</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">_write_study_report</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="s2">"vertical-convergence"</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
@@ -896,27 +910,30 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">threed</span>
 
         <span class="n">post</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"postproc"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># the 3D runs work in a folder of their own when the case gives them a mesh</span>
+        <span class="c1"># of their own (mesh.size_scale_3d)</span>
+        <span class="n">c3</span> <span class="o">=</span> <span class="n">threed</span><span class="o">.</span><span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">prepare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># Results, in the order a user wants them: the thing that was computed first.</span>
         <span class="c1"># The last column is the dataset the velocity is styled by. A 2D result prints</span>
         <span class="c1"># the scalar velocity; the depth-averaged companion of a 3D run carries the</span>
         <span class="c1"># two components only, which QGIS reads as one vector group named VELOCITY.</span>
         <span class="c1"># The hydrostatic 3D run keeps its results under names of its own.</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">velocity</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">case</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (steady)"</span><span class="p">,</span>
-             <span class="s2">"SCALAR VELOCITY"</span><span class="p">),</span>
+             <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
             <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_unsteady_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (unsteady)"</span><span class="p">,</span>
-             <span class="s2">"SCALAR VELOCITY"</span><span class="p">),</span>
+             <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
             <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_hydrology_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (hydrology)"</span><span class="p">,</span>
-             <span class="s2">"SCALAR VELOCITY"</span><span class="p">),</span>
+             <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
             <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results2d_from_3d_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-             <span class="s2">"TELEMAC-3D result (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">),</span>
+             <span class="s2">"TELEMAC-3D result (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">,</span> <span class="n">c3</span><span class="p">),</span>
             <span class="p">(</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_2D</span><span class="p">,</span>
-             <span class="s2">"TELEMAC-3D result, hydrostatic (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">),</span>
+             <span class="s2">"TELEMAC-3D result, hydrostatic (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">,</span> <span class="n">c3</span><span class="p">),</span>
         <span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                 <span class="k">continue</span>
             <span class="c1"># Which maps the case asks for (postproc.telemac_maps), and the predefined</span>
@@ -945,7 +962,7 @@
                             <span class="p">(</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_3D</span><span class="p">,</span>
                              <span class="s2">"TELEMAC-3D result, hydrostatic"</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
-                <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> (3D file, not a map layer)"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> (3D file, not a map layer)"</span><span class="p">,</span> <span class="n">c3</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
                            <span class="n">kind</span><span class="o">=</span><span class="s2">"file"</span><span class="p">)</span>
 
         <span class="n">hydrology</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_hydrology_slf"</span><span class="p">,</span> <span class="s2">"r2d-hydrology.slf"</span><span class="p">))</span>

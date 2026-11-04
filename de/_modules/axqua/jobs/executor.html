@@ -381,7 +381,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span><span class="p">,</span> <span class="n">contextmanager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
@@ -677,7 +677,8 @@
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"running </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">verb</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">as_kwargs</span><span class="p">())</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_pre_step</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">))</span>
-            <span class="n">artifacts</span> <span class="o">=</span> <span class="n">verb</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">capability</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">_surfaced</span><span class="p">(</span><span class="n">manifest</span><span class="p">):</span>
+                <span class="n">artifacts</span> <span class="o">=</span> <span class="n">verb</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">capability</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">cancel</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
 
             <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">JobState</span><span class="o">.</span><span class="n">POSTPROCESSING</span><span class="p">)</span>
@@ -716,6 +717,40 @@
             <span class="k">if</span> <span class="n">ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">ctx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">status_sink</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="c1">#: Loggers whose warnings the user has to see, not only find in the log: the plugin</span>
+<span class="c1">#: shows the ``warnings`` of the result manifest when the results are loaded.</span>
+<span class="n">SURFACED_LOGGERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"axqua.near_boundary"</span><span class="p">,)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_Collector</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manifest</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultManifest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span> <span class="o">=</span> <span class="n">manifest</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">getMessage</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                           <span class="c1"># noqa: BLE001 - never break a job</span>
+            <span class="k">return</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"warnings"</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_surfaced</span><span class="p">(</span><span class="n">manifest</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultManifest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Put the warnings of :data:`SURFACED_LOGGERS` into *manifest* while the block runs."""</span>
+    <span class="n">collector</span> <span class="o">=</span> <span class="n">_Collector</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
+    <span class="n">loggers</span> <span class="o">=</span> <span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">SURFACED_LOGGERS</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">one</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+        <span class="n">one</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">collector</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">one</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+            <span class="n">one</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">collector</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_pre_step</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ExecutionContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>

@@ -1479,6 +1479,11 @@
     <span class="c1"># silently override the *_size fallbacks). The mesh-convergence study varies</span>
     <span class="c1"># this to coarsen/refine the whole sizing field uniformly.</span>
     <span class="n">size_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># size_scale of the horizontal mesh of the TELEMAC-3D runs; None = the 2D mesh.</span>
+    <span class="c1"># A 3D run costs far more per horizontal cell (the vertical dimension, and a time</span>
+    <span class="c1"># step set by the layer thickness), so the 3D model often gets a coarser mesh;</span>
+    <span class="c1"># it is built in its own folder (solvers.telemac.threed.three_d_case).</span>
+    <span class="n">size_scale_3d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># anisotropic, flow-aligned strategy (channel/floodplain zones + centerline)</span>
     <span class="n">channel_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>           <span class="c1"># channel edge length (m); fallback if not in the gpkg</span>

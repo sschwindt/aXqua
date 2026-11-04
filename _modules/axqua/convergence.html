@@ -1595,20 +1595,6 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_liquid_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""The inflow and outflow lines of the case as one geometry, or None."""</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"boundaries"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"liquid_boundaries"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
-
-    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
-        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-
-
 <div class="viewcode-block" id="default_probes">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.convergence.default_probes">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">default_probes</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -1620,12 +1606,13 @@
 <span class="sd">    when the case names its ground truth: a table compiled by an earlier build stays</span>
 <span class="sd">    in the preprocessing folder after the case drops its sources.</span>
 
-<span class="sd">    No point lies within *boundary_distance* of the inflow and outflow lines (default:</span>
-<span class="sd">    :func:`boundary_clearance` of the case). The centerline points are spaced evenly</span>
-<span class="sd">    between that distance from both ends of the line, with half a step to spare; the</span>
-<span class="sd">    distance is cut to a quarter of the line where the reach is short. Measurement</span>
-<span class="sd">    points closer to a liquid boundary line are left out; if fewer than three remain,</span>
-<span class="sd">    the centerline points are used.</span>
+<span class="sd">    No point lies close to the inflow and outflow. Measurement points less than</span>
+<span class="sd">    :data:`axqua.bayescal.MIN_BOUNDARY_NODES` mesh nodes from a liquid boundary are left</span>
+<span class="sd">    out with a warning, as in the calibration (:func:`axqua.bayescal.away_from_liquid_boundaries`);</span>
+<span class="sd">    if fewer than three remain, the centerline points are used. The centerline points</span>
+<span class="sd">    keep *boundary_distance* from both ends of the line (default:</span>
+<span class="sd">    :func:`boundary_clearance` of the case), spaced evenly in between with half a step to</span>
+<span class="sd">    spare; the distance is cut to a quarter of the line where the reach is short.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">boundary_distance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">boundary_distance</span><span class="p">,</span> <span class="n">why</span> <span class="o">=</span> <span class="n">boundary_clearance</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
@@ -1650,20 +1637,16 @@
             <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">_inside_the_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">t</span><span class="p">[[</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">]])</span>
                              <span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
                              <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="p">{</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">columns</span><span class="p">)])</span>
-            <span class="n">lines</span> <span class="o">=</span> <span class="n">_liquid_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">keep</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">lines</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.bayescal</span><span class="w"> </span><span class="kn">import</span> <span class="n">MIN_BOUNDARY_NODES</span><span class="p">,</span> <span class="n">away_from_liquid_boundaries</span>
 
-                <span class="n">far</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lines</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">keep</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">])</span>
-                <span class="k">if</span> <span class="p">(</span><span class="o">~</span><span class="n">far</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"mesh convergence: </span><span class="si">%d</span><span class="s2"> of </span><span class="si">%d</span><span class="s2"> measurement points lie within "</span>
-                             <span class="s2">"</span><span class="si">%.0f</span><span class="s2"> m of an inflow or outflow line and are left out (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
-                             <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">far</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">),</span> <span class="n">keep</span><span class="p">,</span> <span class="n">why</span><span class="p">)</span>
+                <span class="n">far</span> <span class="o">=</span> <span class="n">away_from_liquid_boundaries</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">pts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
                 <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[</span><span class="n">far</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">far</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"mesh convergence: fewer than three measurement points "</span>
-                                <span class="s2">"lie </span><span class="si">%.0f</span><span class="s2"> m or more from the inflow and outflow lines; "</span>
-                                <span class="s2">"the study uses points along the centerline"</span><span class="p">,</span> <span class="n">keep</span><span class="p">)</span>
+                                <span class="s2">"lie </span><span class="si">%d</span><span class="s2"> nodes or more from the inflow and outflow; the "</span>
+                                <span class="s2">"study uses points along the centerline"</span><span class="p">,</span>
+                                <span class="n">MIN_BOUNDARY_NODES</span><span class="p">)</span>
                     <span class="n">pts</span> <span class="o">=</span> <span class="n">pts</span><span class="p">[:</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">pts</span>

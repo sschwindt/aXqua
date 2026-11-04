@@ -3114,12 +3114,13 @@ along the channel centerline (falling back to the ROI bbox diagonal).</p>
 <p>Only the positions of measurements are used, never the measured values, and only
 when the case names its ground truth: a table compiled by an earlier build stays
 in the preprocessing folder after the case drops its sources.</p>
-<p>No point lies within <em>boundary_distance</em> of the inflow and outflow lines (default:
-<a class="reference internal" href="#axqua.convergence.boundary_clearance" title="axqua.convergence.boundary_clearance"><code class="xref py py-func docutils literal notranslate"><span class="pre">boundary_clearance()</span></code></a> of the case). The centerline points are spaced evenly
-between that distance from both ends of the line, with half a step to spare; the
-distance is cut to a quarter of the line where the reach is short. Measurement
-points closer to a liquid boundary line are left out; if fewer than three remain,
-the centerline points are used.</p>
+<p>No point lies close to the inflow and outflow. Measurement points less than
+<a class="reference internal" href="#axqua.bayescal.MIN_BOUNDARY_NODES" title="axqua.bayescal.MIN_BOUNDARY_NODES"><code class="xref py py-data docutils literal notranslate"><span class="pre">axqua.bayescal.MIN_BOUNDARY_NODES</span></code></a> mesh nodes from a liquid boundary are left
+out with a warning, as in the calibration (<a class="reference internal" href="#axqua.bayescal.away_from_liquid_boundaries" title="axqua.bayescal.away_from_liquid_boundaries"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.bayescal.away_from_liquid_boundaries()</span></code></a>);
+if fewer than three remain, the centerline points are used. The centerline points
+keep <em>boundary_distance</em> from both ends of the line (default:
+<a class="reference internal" href="#axqua.convergence.boundary_clearance" title="axqua.convergence.boundary_clearance"><code class="xref py py-func docutils literal notranslate"><span class="pre">boundary_clearance()</span></code></a> of the case), spaced evenly in between with half a step to
+spare; the distance is cut to a quarter of the line where the reach is short.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4187,6 +4188,45 @@ carried alongside. Reads <code class="docutils literal notranslate"><span class=
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>, pandas.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.MIN_BOUNDARY_NODES">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">MIN_BOUNDARY_NODES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></span><a class="headerlink" href="#axqua.bayescal.MIN_BOUNDARY_NODES" title="Link to this definition"></a></dt>
+<dd><p>Measurement points closer to an inflow or outflow line than this many mesh nodes are
+not used: there the flow is what the boundary prescribes, not what the river does
+(the user’s rule of 2026-11-04). Applies to the calibration and the mesh study.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.NEAR_BOUNDARY_REMEDY">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">NEAR_BOUNDARY_REMEDY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Increase</span> <span class="pre">ROI</span> <span class="pre">beyond</span> <span class="pre">the</span> <span class="pre">concerned</span> <span class="pre">liquid</span> <span class="pre">boundary.'</span></span><a class="headerlink" href="#axqua.bayescal.NEAR_BOUNDARY_REMEDY" title="Link to this definition"></a></dt>
+<dd><p>The remedy the user named for points too close to a liquid boundary.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.near_boundary_log">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">near_boundary_log</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Logger</span> <span class="pre">axqua.near_boundary</span> <span class="pre">(WARNING)&gt;</span></span><a class="headerlink" href="#axqua.bayescal.near_boundary_log" title="Link to this definition"></a></dt>
+<dd><p>The logger of that warning; a job puts its records into the result manifest.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.away_from_liquid_boundaries">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">away_from_liquid_boundaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#away_from_liquid_boundaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.away_from_liquid_boundaries" title="Link to this definition"></a></dt>
+<dd><p>Which points lie at least <em>min_nodes</em> mesh nodes from every liquid boundary.</p>
+<p>Measured on the built mesh of the case (<code class="docutils literal notranslate"><span class="pre">geometry.slf</span></code> and <code class="docutils literal notranslate"><span class="pre">boundaries.cli</span></code> of
+the model folder) by the node nearest to each point
+(<a class="reference internal" href="telemac.html#axqua.solvers.telemac.boundary.liquid_boundary_hops" title="axqua.solvers.telemac.boundary.liquid_boundary_hops"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.solvers.telemac.boundary.liquid_boundary_hops()</span></code></a>). Returns a boolean
+array; all True when the case is not built yet. Points that fail are reported as a
+warning that names the boundary and the remedy (<a class="reference internal" href="#axqua.bayescal.NEAR_BOUNDARY_REMEDY" title="axqua.bayescal.NEAR_BOUNDARY_REMEDY"><code class="xref py py-data docutils literal notranslate"><span class="pre">NEAR_BOUNDARY_REMEDY</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>min_nodes</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>)</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

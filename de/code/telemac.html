@@ -1380,6 +1380,26 @@ line up with the boundary numbering TELEMAC derives from the geometry.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.boundary.liquid_boundary_hops">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.boundary.</span></span><span class="sig-name descname"><span class="pre">liquid_boundary_hops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cli</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/boundary.html#liquid_boundary_hops"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.boundary.liquid_boundary_hops" title="Link to this definition"></a></dt>
+<dd><p>How many mesh nodes each node lies from the nearest liquid boundary.</p>
+<p>Returns <code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">hops,</span> <span class="pre">kind)</span></code>: the node coordinates of <em>geometry</em> (double
+precision), the number of mesh edges on the shortest path from the node to a node
+of an inflow or outflow line of <em>cli</em> (0 on the line, -1 where no liquid boundary
+is reachable), and <code class="docutils literal notranslate"><span class="pre">&quot;inflow&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;outflow&quot;</span></code> for the boundary that is nearest.
+A node of the <code class="docutils literal notranslate"><span class="pre">.cli</span></code> is liquid when its depth code is not a wall (2); it is an
+inflow when it prescribes the velocity or the discharge (code 5 or 6).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geometry</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>cli</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-axqua.solvers.telemac.steering">
 <span id="steering-and-friction-files"></span><h2>Akten über Lenkung und Reibung<a class="headerlink" href="#module-axqua.solvers.telemac.steering" title="Link to this heading"></a></h2>
@@ -3458,6 +3478,85 @@ from <strong>one</strong> read of <code class="docutils literal notranslate"><sp
 </dd>
 <dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.threed.THREE_D_DIR">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.threed.</span></span><span class="sig-name descname"><span class="pre">THREE_D_DIR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'simulation-3d'</span></span><a class="headerlink" href="#axqua.solvers.telemac.threed.THREE_D_DIR" title="Link to this definition"></a></dt>
+<dd><p>The model folder of the 3D runs when <code class="docutils literal notranslate"><span class="pre">mesh.size_scale_3d</span></code> gives them a horizontal
+mesh of their own (beside the case’s <code class="docutils literal notranslate"><span class="pre">simulation</span></code> folder).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.threed.three_d_case">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.threed.</span></span><span class="sig-name descname"><span class="pre">three_d_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/threed.html#three_d_case"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.threed.three_d_case" title="Link to this definition"></a></dt>
+<dd><p>The case as the 3D runs see it.</p>
+<p>Without <code class="docutils literal notranslate"><span class="pre">mesh.size_scale_3d</span></code> (or with the size scale of the 2D mesh) that is
+<em>cfg</em> itself: the 3D runs use the mesh of the 2D model, in its folder. Otherwise
+a copy whose <code class="docutils literal notranslate"><span class="pre">size_scale</span></code> is the 3D one and whose model folder is
+<a class="reference internal" href="#axqua.solvers.telemac.threed.THREE_D_DIR" title="axqua.solvers.telemac.threed.THREE_D_DIR"><code class="xref py py-data docutils literal notranslate"><span class="pre">THREE_D_DIR</span></code></a>. A 3D run costs far more per horizontal cell than a 2D run
+(one more dimension, and a time step set by the layer thickness), so the 3D model
+often gets a coarser mesh than the 2D model of the same case.</p>
+<p>With <em>prepare</em>, the folder gets its build (<a class="reference internal" href="#axqua.solvers.telemac.threed.prepare_three_d_mesh" title="axqua.solvers.telemac.threed.prepare_three_d_mesh"><code class="xref py py-func docutils literal notranslate"><span class="pre">prepare_three_d_mesh()</span></code></a>); without,
+only the paths are returned (to list results).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>prepare</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.threed.prepare_three_d_mesh">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.threed.</span></span><span class="sig-name descname"><span class="pre">prepare_three_d_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/threed.html#prepare_three_d_mesh"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.threed.prepare_three_d_mesh" title="Link to this definition"></a></dt>
+<dd><p>Build the horizontal mesh of the 3D model and give it the 2D flow field.</p>
+<p>The mesh is built by the same pipeline as the case (<code class="docutils literal notranslate"><span class="pre">geometry.slf</span></code>,
+<code class="docutils literal notranslate"><span class="pre">boundaries.cli</span></code>, the 2D steering file whose prescriptions the 3D runs copy),
+at <code class="docutils literal notranslate"><span class="pre">mesh.size_scale_3d</span></code>, again whenever the case was built after it or the size
+scale changed. The steady 2D result of the case is then interpolated onto it as
+<code class="docutils literal notranslate"><span class="pre">r2d.slf</span></code> (last frame; linear in the triangles of the 2D mesh, read on its
+double-precision geometry), which the 3D runs start from (median depth, layer
+count, time step, and <code class="docutils literal notranslate"><span class="pre">FILE</span> <span class="pre">FOR</span> <span class="pre">2D</span> <span class="pre">CONTINUATION</span></code>). Returns the folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>c3</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.threed.interpolate_result">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.threed.</span></span><span class="sig-name descname"><span class="pre">interpolate_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_geometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_geometry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/threed.html#interpolate_result"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.threed.interpolate_result" title="Link to this definition"></a></dt>
+<dd><p>Write the last frame of the 2D result <em>source</em> onto the mesh of <em>target_geometry</em>.</p>
+<p>Every variable is interpolated linearly in the triangles of the source mesh
+(nearest node outside it), except the bottom, which is the target’s own, and the
+free surface, which is that bottom plus the interpolated depth. Written in single
+precision, as TELEMAC writes a result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>source_geometry</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>target_geometry</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>out</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a></p>
 </dd>
 </dl>
 </dd></dl>

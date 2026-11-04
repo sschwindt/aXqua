@@ -989,6 +989,157 @@
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> skipped: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">UNSTEADY3D_CAS</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">setups</span></div>
 
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># the horizontal mesh of the 3D model</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<span class="c1">#: The model folder of the 3D runs when ``mesh.size_scale_3d`` gives them a horizontal</span>
+<span class="c1">#: mesh of their own (beside the case's ``simulation`` folder).</span>
+<span class="n">THREE_D_DIR</span> <span class="o">=</span> <span class="s2">"simulation-3d"</span>
+<span class="n">_STAMP</span> <span class="o">=</span> <span class="s2">"mesh-3d.json"</span>
+
+
+<div class="viewcode-block" id="three_d_case">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.three_d_case">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">prepare</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Config</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The case as the 3D runs see it.</span>
+
+<span class="sd">    Without ``mesh.size_scale_3d`` (or with the size scale of the 2D mesh) that is</span>
+<span class="sd">    *cfg* itself: the 3D runs use the mesh of the 2D model, in its folder. Otherwise</span>
+<span class="sd">    a copy whose ``size_scale`` is the 3D one and whose model folder is</span>
+<span class="sd">    :data:`THREE_D_DIR`. A 3D run costs far more per horizontal cell than a 2D run</span>
+<span class="sd">    (one more dimension, and a time step set by the layer thickness), so the 3D model</span>
+<span class="sd">    often gets a coarser mesh than the 2D model of the same case.</span>
+
+<span class="sd">    With *prepare*, the folder gets its build (:func:`prepare_three_d_mesh`); without,</span>
+<span class="sd">    only the paths are returned (to list results).</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+    <span class="n">mesh</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"mesh"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"size_scale_3d"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scale</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">scale</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">cfg</span>
+    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span>
+
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span><span class="s2">"mesh.size_scale_3d must be larger than 0"</span><span class="p">,</span>
+                                 <span class="n">subject</span><span class="o">=</span><span class="s2">"mesh.size_scale_3d"</span><span class="p">,</span>
+                                 <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter a positive factor, or leave it empty to "</span>
+                                        <span class="s2">"use the mesh of the 2D model."</span><span class="p">)</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">THREE_D_DIR</span>
+    <span class="c1"># the HydroBayesCal files of a build belong to the 2D model; a calibration of the</span>
+    <span class="c1"># 3D model keeps its own beside the 3D runs</span>
+    <span class="n">c3</span><span class="o">.</span><span class="n">calibration_dir</span> <span class="o">=</span> <span class="n">c3</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">/</span> <span class="s2">"calibration-validation"</span>
+    <span class="k">if</span> <span class="n">prepare</span><span class="p">:</span>
+        <span class="n">prepare_three_d_mesh</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">c3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">c3</span></div>
+
+
+
+<div class="viewcode-block" id="prepare_three_d_mesh">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.prepare_three_d_mesh">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_three_d_mesh</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">c3</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build the horizontal mesh of the 3D model and give it the 2D flow field.</span>
+
+<span class="sd">    The mesh is built by the same pipeline as the case (``geometry.slf``,</span>
+<span class="sd">    ``boundaries.cli``, the 2D steering file whose prescriptions the 3D runs copy),</span>
+<span class="sd">    at ``mesh.size_scale_3d``, again whenever the case was built after it or the size</span>
+<span class="sd">    scale changed. The steady 2D result of the case is then interpolated onto it as</span>
+<span class="sd">    ``r2d.slf`` (last frame; linear in the triangles of the 2D mesh, read on its</span>
+<span class="sd">    double-precision geometry), which the 3D runs start from (median depth, layer</span>
+<span class="sd">    count, time step, and ``FILE FOR 2D CONTINUATION``). Returns the folder.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">pipeline</span>
+
+    <span class="n">model</span><span class="p">,</span> <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">),</span> <span class="n">Path</span><span class="p">(</span><span class="n">c3</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">source</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"2D result not found: </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">. Run the steady 2D simulation of the case "</span>
+            <span class="s2">"first: the 3D model starts from its flow field."</span><span class="p">)</span>
+    <span class="n">case_geometry</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span>
+    <span class="n">stamp</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">_STAMP</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">stamp</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">c3</span><span class="o">.</span><span class="n">geometry_slf</span>
+    <span class="n">stale</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="n">geometry</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">known</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"size_scale"</span><span class="p">)</span> <span class="o">!=</span> <span class="n">c3</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span>
+             <span class="ow">or</span> <span class="p">(</span><span class="n">case_geometry</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+                 <span class="ow">and</span> <span class="n">case_geometry</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">&gt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">stale</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"3D model: building its horizontal mesh at size scale </span><span class="si">%.3f</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> "</span>
+                 <span class="s2">"(the 2D model uses </span><span class="si">%.3f</span><span class="s2">)"</span><span class="p">,</span> <span class="n">c3</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span>
+                 <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span><span class="p">)</span>
+        <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">c3</span><span class="p">,</span> <span class="n">validate_env</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_to_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">c3</span><span class="o">.</span><span class="n">results_slf</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">stale</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">known</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"source_mtime"</span><span class="p">)</span>
+            <span class="o">!=</span> <span class="n">source</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">):</span>
+        <span class="n">interpolate_result</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">case_geometry</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"3D model: the steady 2D result of the case interpolated onto the 3D "</span>
+                 <span class="s2">"mesh (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+    <span class="n">stamp</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">"size_scale"</span><span class="p">:</span> <span class="n">c3</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span><span class="p">,</span>
+                                 <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">),</span>
+                                 <span class="s2">"source_mtime"</span><span class="p">:</span> <span class="n">source</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">},</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">readme</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"README.md"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">readme</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">readme</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="s2">"# The 3D model of this case</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="s2">"The case sets `mesh.size_scale_3d`, so the TELEMAC-3D runs use a horizontal "</span>
+            <span class="s2">"mesh of their own, built here at that size scale. `r2d.slf` in this folder "</span>
+            <span class="s2">"is no simulation: it is the steady 2D result of the case interpolated onto "</span>
+            <span class="s2">"this mesh, the flow field the 3D runs start from.</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">folder</span></div>
+
+
+
+<div class="viewcode-block" id="interpolate_result">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.interpolate_result">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">interpolate_result</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">source_geometry</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">target_geometry</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                       <span class="n">out</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write the last frame of the 2D result *source* onto the mesh of *target_geometry*.</span>
+
+<span class="sd">    Every variable is interpolated linearly in the triangles of the source mesh</span>
+<span class="sd">    (nearest node outside it), except the bottom, which is the target's own, and the</span>
+<span class="sd">    free surface, which is that bottom plus the interpolated depth. Written in single</span>
+<span class="sd">    precision, as TELEMAC writes a result.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.convergence</span><span class="w"> </span><span class="kn">import</span> <span class="n">_mesh_sampler</span><span class="p">,</span> <span class="n">mesh_coordinates</span>
+
+    <span class="n">sf</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">SelafinFile</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ikle</span> <span class="o">=</span> <span class="n">mesh_coordinates</span><span class="p">({</span><span class="s2">"x"</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="s2">"ikle"</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">ikle</span><span class="p">},</span>
+                                  <span class="n">source_geometry</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">target_geometry</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="n">_mesh_sampler</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ikle</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">target</span><span class="p">[</span><span class="s2">"x"</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]]))</span>
+    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: the mesh cannot be triangulated"</span><span class="p">)</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="s2">"values"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BOTTOM"</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">unit_of</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">((</span><span class="n">n</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sf</span><span class="o">.</span><span class="n">var_names</span><span class="p">),</span>
+                       <span class="nb">getattr</span><span class="p">(</span><span class="n">sf</span><span class="p">,</span> <span class="s2">"var_units"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">""</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">var_names</span><span class="p">)))</span>
+    <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="n">unit_of</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s2">""</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">sample</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span><span class="p">}</span>
+    <span class="k">if</span> <span class="s2">"WATER DEPTH"</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="n">fields</span><span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"FREE SURFACE"</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="n">fields</span><span class="p">[</span><span class="s2">"FREE SURFACE"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">fields</span><span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">"BOTTOM"</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="n">fields</span><span class="p">[</span><span class="s2">"BOTTOM"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bottom</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">fields</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">units</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">selafin</span><span class="o">.</span><span class="n">_write_selafin</span><span class="p">(</span>
+        <span class="n">Path</span><span class="p">(</span><span class="n">out</span><span class="p">),</span> <span class="n">target</span><span class="p">[</span><span class="s2">"x"</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="s2">"y"</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="s2">"ikle"</span><span class="p">],</span> <span class="n">target</span><span class="p">[</span><span class="s2">"ipobo"</span><span class="p">],</span> <span class="n">variables</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> interpolated onto the 3D mesh"</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">double_precision</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
