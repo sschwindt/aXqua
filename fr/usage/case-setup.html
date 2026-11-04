@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/usage/case-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4208cb91"></script>
+      <script src="../_static/documentation_options.js?v=97a505d1"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -625,7 +625,7 @@
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">duration</span></code> doit être assez longue pour que le tronçon se remplisse et que le flux devienne stable. Un régime permanent est atteint lorsque le même débit quitte le modèle qui l’entre. aXqua évalue cet équilibre après chaque course et compare la différence relative avec <code class="docutils literal notranslate"><span class="pre">flux_tolerance</span></code>. La valeur par défaut de 0,1 % est bien inférieure à l’incertitude d’une mesure débit.</p>
-<p>Avec <code class="docutils literal notranslate"><span class="pre">turbulence_model:</span> <span class="pre">auto</span></code>, aXqua sélectionne le modèle de turbulence de la résolution du maillage par rapport à la hauteur d’eau. Le pas de temps est adapté automatiquement pendant la course, de sorte que la simulation reste stable (<code class="docutils literal notranslate"><span class="pre">desired_courant</span></code>).</p>
+<p>Avec <code class="docutils literal notranslate"><span class="pre">turbulence_model:</span> <span class="pre">auto</span></code>, aXqua sélectionne le modèle k-epsilon où les cellules chenal sont plus grandes que le modèle hauteur d’eau et Smagorinsky avec les turbulences générées au lit où elles sont plus fines (<a class="reference internal" href="preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC choix</span></a>). Le pas de temps est adapté automatiquement pendant la course, de sorte que la simulation reste stable (<code class="docutils literal notranslate"><span class="pre">desired_courant</span></code>).</p>
 <p>Le nombre de cœurs de processeur est une propriété de l’ordinateur et est défini dans son profil (<code class="docutils literal notranslate"><span class="pre">mpi_processes</span></code>, <a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Définir les liaisons solveur</span></a>). Lorsque le profil ne donne aucun numéro, <code class="docutils literal notranslate"><span class="pre">telemac.n_processors</span></code> du fichier de cas s’applique. Les paramètres de la simulation 3D avec OpenFOAM sont décrits dans <a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">Choix OpenFOAM</span></a>.</p>
 </section>
 <section id="hydrology">

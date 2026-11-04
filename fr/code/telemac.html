@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/code/telemac.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4208cb91"></script>
+      <script src="../_static/documentation_options.js?v=97a505d1"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -1391,6 +1391,65 @@ coefficient column of this table during calibration.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">.cas</span></code> is assembled from a small set of building blocks plus user overrides
 so the case is reproducible and the prescribed boundary values stay consistent
 with the liquid-boundary numbering from stage 3.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.FlowScale">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">FlowScale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#FlowScale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.FlowScale" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Representative depth [m] of the flowing water, with the velocity [m/s] and the wetted width [m] where known, and where the numbers come from.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>velocity</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.FlowScale.depth">
+<span class="sig-name descname"><span class="pre">depth</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#axqua.solvers.telemac.steering.FlowScale.depth" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.FlowScale.source">
+<span class="sig-name descname"><span class="pre">source</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#axqua.solvers.telemac.steering.FlowScale.source" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.FlowScale.velocity">
+<span class="sig-name descname"><span class="pre">velocity</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#axqua.solvers.telemac.steering.FlowScale.velocity" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.FlowScale.width">
+<span class="sig-name descname"><span class="pre">width</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#axqua.solvers.telemac.steering.FlowScale.width" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.flow_scale">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">flow_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#flow_scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.flow_scale" title="Lien vers cette définition"></a></dt>
+<dd><p>The depth the turbulence closure is chosen for, best source first.</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">hydrodynamics.turbulence_length_scale</span></code>, when the case sets it;</p></li>
+<li><p>0.1 m for the overland flow of a hydrology case;</p></li>
+<li><p>the steady result of the case (<code class="docutils literal notranslate"><span class="pre">r2d.slf</span></code> in the model folder): the median depth of the wetted nodes, and their median velocity;</p></li>
+<li><p>normal flow at the case discharge through the channel cross-sections (<code class="xref py py-func docutils literal notranslate"><span class="pre">_normal_flow_sections()</span></code>, needs <em>mesh</em>, a centerline and a discharge): the median hydraulic depth A/B, velocity Q/A and wetted width B. Normal flow ignores the backwater of the outflow level, so it can be off by a factor of 1.5 (Inn KB15: 0.57 m against 0.89 m of the steady result); it serves the first build, before any result exists;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">initialization.prewet_depth</span></code>;</p></li>
+<li><p>1 m, with a warning.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#axqua.solvers.telemac.steering.FlowScale" title="axqua.solvers.telemac.steering.FlowScale"><em>FlowScale</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.steering.read_cas_values">
 <span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">read_cas_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">keywords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#read_cas_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.read_cas_values" title="Lien vers cette définition"></a></dt>
@@ -1428,8 +1487,8 @@ with the liquid-boundary numbering from stage 3.</p>
 <dd><p>Depth-averaged turbulent eddy viscosity [m2/s] from the velocity guess.</p>
 <p>Elder-type closure <code class="docutils literal notranslate"><span class="pre">nu_t</span> <span class="pre">=</span> <span class="pre">alpha</span> <span class="pre">*</span> <span class="pre">u_star</span> <span class="pre">*</span> <span class="pre">h</span></code> with the shear velocity
 <code class="docutils literal notranslate"><span class="pre">u_star</span> <span class="pre">~</span> <span class="pre">0.1</span> <span class="pre">*</span> <span class="pre">U</span></code> (a skin-friction proxy C_f ~ 0.01) and the transverse-mixing
-coefficient <code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">=</span> <span class="pre">0.6</span></code>; <code class="docutils literal notranslate"><span class="pre">h</span></code> is the turbulence length scale (flow depth).
-Used as the constant VELOCITY DIFFUSIVITY (model 1) and reported for context.</p>
+coefficient <code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">=</span> <span class="pre">0.6</span></code>; <code class="docutils literal notranslate"><span class="pre">h</span></code> is the depth of <a class="reference internal" href="#axqua.solvers.telemac.steering.flow_scale" title="axqua.solvers.telemac.steering.flow_scale"><code class="xref py py-func docutils literal notranslate"><span class="pre">flow_scale()</span></code></a>.
+Used as the constant VELOCITY DIFFUSIVITY (model 1).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
@@ -1441,27 +1500,49 @@ Used as the constant VELOCITY DIFFUSIVITY (model 1) and reported for context.</p
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.select_turbulence_model">
-<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">select_turbulence_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#select_turbulence_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.select_turbulence_model" title="Lien vers cette définition"></a></dt>
-<dd><p>Pick the TELEMAC turbulence model from the mesh resolution and velocity guess.</p>
-<p>An explicit <code class="docutils literal notranslate"><span class="pre">hydrodynamics.turbulence_model</span></code> (int or name) is honored as-is.
-With <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> the choice follows the channel cell size <code class="docutils literal notranslate"><span class="pre">dx</span></code> relative to the
-turbulence length scale <code class="docutils literal notranslate"><span class="pre">L</span></code> (the flow depth) - a mesh-size/velocity criterion:</p>
-<ul class="simple">
-<li><p><strong>Smagorinski LES (4)</strong> when the mesh resolves &gt;=80% of the TKE
-(<code class="docutils literal notranslate"><span class="pre">dx/L</span> <span class="pre">&lt;=</span> <span class="pre">0.2**1.5</span></code>, ~11+ cells per <code class="docutils literal notranslate"><span class="pre">L</span></code>): the sub-grid model then handles
-&lt;20% of the dissipation, the LES validity requirement.</p></li>
-<li><p><strong>k-epsilon (3)</strong> at moderate resolution (&gt;= ~4 cells per <code class="docutils literal notranslate"><span class="pre">L</span></code> but below the
-LES gate): a full two-equation RANS closure resolving the mean shear.</p></li>
-<li><p><strong>Spalart-Allmaras (6)</strong> on coarse meshes (&lt; ~4 cells per <code class="docutils literal notranslate"><span class="pre">L</span></code>): a robust,
-economical one-equation RANS model, tolerant of the stretched channel cells.</p></li>
-</ul>
-<p>The velocity guess sets the eddy-viscosity scale (and the steady initial flow
-field); for a fixed <code class="docutils literal notranslate"><span class="pre">L</span></code> it cancels from the resolution ratio, so the cell size
-drives the choice. Returns <code class="docutils literal notranslate"><span class="pre">(model_number,</span> <span class="pre">rationale)</span></code>.</p>
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.filter_width">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">filter_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#filter_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.filter_width" title="Lien vers cette définition"></a></dt>
+<dd><p>Median Smagorinski filter width [m] of the triangles (of the channel, with <em>mask</em>).</p>
+<p>TELEMAC-2D’s <code class="docutils literal notranslate"><span class="pre">smagor.f</span></code> multiplies the strain rate by the integral of the test function of each node, which it takes as the square of the mesh size: a third of the area of the triangles around the node, or twice the area of one triangle on a regular mesh. The width is therefore <code class="docutils literal notranslate"><span class="pre">sqrt(2</span> <span class="pre">A)</span></code>, which is about 1.5 times the nominal channel size of the anisotropic channel mesh of Inn KB15 and 0.93 times the edge of an equilateral triangle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.mesh_from_geometry">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">mesh_from_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#mesh_from_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.mesh_from_geometry" title="Lien vers cette définition"></a></dt>
+<dd><p>The nodes, triangles, bed and roughness of a geometry SELAFIN as a light mesh, or None.</p>
+<p>Enough for <a class="reference internal" href="#axqua.solvers.telemac.steering.flow_scale" title="axqua.solvers.telemac.steering.flow_scale"><code class="xref py py-func docutils literal notranslate"><span class="pre">flow_scale()</span></code></a> and <code class="xref py py-func docutils literal notranslate"><span class="pre">_channel_cell_size()</span></code> where no <code class="xref py py-class docutils literal notranslate"><span class="pre">axqua.mesh.Mesh</span></code> is at hand (the mesh-convergence study).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.geometry_filter_width">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">geometry_filter_width</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#geometry_filter_width"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.geometry_filter_width" title="Lien vers cette définition"></a></dt>
+<dd><p><a class="reference internal" href="#axqua.solvers.telemac.steering.filter_width" title="axqua.solvers.telemac.steering.filter_width"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_width()</span></code></a> of the channel cells of a geometry SELAFIN, or None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.select_turbulence_model">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">select_turbulence_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#select_turbulence_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.select_turbulence_model" title="Lien vers cette définition"></a></dt>
+<dd><p>Pick the TELEMAC-2D turbulence model from the cell size and the flow depth.</p>
+<p>An explicit <code class="docutils literal notranslate"><span class="pre">hydrodynamics.turbulence_model</span></code> (int or name) is honored; Spalart-Allmaras is checked by <a class="reference internal" href="#axqua.solvers.telemac.steering.spalart_allmaras_note" title="axqua.solvers.telemac.steering.spalart_allmaras_note"><code class="xref py py-func docutils literal notranslate"><span class="pre">spalart_allmaras_note()</span></code></a>. A hydrology case uses a constant viscosity. Otherwise <a class="reference internal" href="#axqua.solvers.telemac.steering.turbulence_pick_for_dx" title="axqua.solvers.telemac.steering.turbulence_pick_for_dx"><code class="xref py py-func docutils literal notranslate"><span class="pre">turbulence_pick_for_dx()</span></code></a> decides from the Smagorinski filter width of the channel cells (<code class="xref py py-func docutils literal notranslate"><span class="pre">_channel_cell_size()</span></code>) and the depth of <a class="reference internal" href="#axqua.solvers.telemac.steering.flow_scale" title="axqua.solvers.telemac.steering.flow_scale"><code class="xref py py-func docutils literal notranslate"><span class="pre">flow_scale()</span></code></a>. Returns <code class="docutils literal notranslate"><span class="pre">(model_number,</span> <span class="pre">rationale)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>scale</strong> (<a class="reference internal" href="#axqua.solvers.telemac.steering.FlowScale" title="axqua.solvers.telemac.steering.FlowScale"><em>FlowScale</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]</p>
@@ -1471,22 +1552,42 @@ drives the choice. Returns <code class="docutils literal notranslate"><span clas
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.steering.turbulence_pick_for_dx">
-<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">turbulence_pick_for_dx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#turbulence_pick_for_dx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.turbulence_pick_for_dx" title="Lien vers cette définition"></a></dt>
-<dd><p>The mesh-resolution auto-selection of <a class="reference internal" href="#axqua.solvers.telemac.steering.select_turbulence_model" title="axqua.solvers.telemac.steering.select_turbulence_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">select_turbulence_model()</span></code></a> for an
-arbitrary channel cell size <em>dx</em> [m], ignoring any explicit
-<code class="docutils literal notranslate"><span class="pre">hydrodynamics.turbulence_model</span></code> override.</p>
-<p>Used by the mesh-convergence validity check to ask « what <em>would</em> auto-selection
-pick at this refinement? » while the study runs with the closure pinned to the
-baseline choice. Returns <code class="docutils literal notranslate"><span class="pre">(model_number,</span> <span class="pre">rationale)</span></code>.</p>
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">turbulence_pick_for_dx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#turbulence_pick_for_dx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.turbulence_pick_for_dx" title="Lien vers cette définition"></a></dt>
+<dd><p>The automatic choice for a Smagorinski filter width <em>dx</em> [m], ignoring an explicit <code class="docutils literal notranslate"><span class="pre">hydrodynamics.turbulence_model</span></code>.</p>
+<p>A depth-averaged model never resolves eddies smaller than the depth: they are three-dimensional, and the turbulence the bed generates is always modeled. What a fine mesh can resolve are the horizontal eddies from the depth scale up, such as the shear layer at a bar edge.</p>
+<ul class="simple">
+<li><p><strong>Smagorinski LES (4)</strong> once the filter width is no more than <code class="docutils literal notranslate"><span class="pre">hydrodynamics.les_depth_ratio</span></code> (1) depths: the mesh resolves the horizontal eddies, and a RANS closure would damp the eddies it resolves. The Smagorinski viscosity scales with the cell size, so its results change with the mesh by design. <code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.solvers.telemac.turbulence_fortran</span></code> adds the turbulence generated at the bed, which TELEMAC’s <code class="docutils literal notranslate"><span class="pre">smagor.f</span></code> lacks (depth-averaged LES, Hinterberger et al. 2007).</p></li>
+<li><p><strong>k-epsilon (3)</strong> on coarser meshes: no eddy is resolved, and the depth-averaged k-epsilon model of TELEMAC (Rastogi and Rodi production at the bed, <code class="docutils literal notranslate"><span class="pre">kepsil.f</span></code>) models all of the turbulence. Its viscosity does not depend on the cell size, so a mesh convergence study measures the mesh alone. It is solved with GMRES (<code class="docutils literal notranslate"><span class="pre">keps_solver</span></code>), reset on nodes shallower than <code class="docutils literal notranslate"><span class="pre">keps_shallow_depth</span></code> and its length scale kept at most <code class="docutils literal notranslate"><span class="pre">keps_length_limit</span></code> depths (a generated <code class="docutils literal notranslate"><span class="pre">corvis.f</span></code>); without these it diverged on the wetting and drying Inn KB15 meshes.</p></li>
+</ul>
+<p>Spalart-Allmaras is never chosen automatically (see <code class="xref py py-data docutils literal notranslate"><span class="pre">SA_MAX_WIDTH_DEPTH</span></code>). Used by the mesh-convergence validity check to ask what the choice <em>would</em> be at a refinement while the study keeps the model of the baseline. Returns <code class="docutils literal notranslate"><span class="pre">(model_number,</span> <span class="pre">rationale)</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
 <li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+<li><p><strong>scale</strong> (<a class="reference internal" href="#axqua.solvers.telemac.steering.FlowScale" title="axqua.solvers.telemac.steering.FlowScale"><em>FlowScale</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.spalart_allmaras_note">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">spalart_allmaras_note</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#spalart_allmaras_note"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.spalart_allmaras_note" title="Lien vers cette définition"></a></dt>
+<dd><p>Warning text for Spalart-Allmaras in 2D where it misses the bed turbulence (”” where it fits).</p>
+<p>TELEMAC-2D’s Spalart-Allmaras takes its length scale from the distance to the solid boundaries and has no production at the bed. It fits a flow bounded by walls, a channel no wider than <code class="xref py py-data docutils literal notranslate"><span class="pre">SA_MAX_WIDTH_DEPTH</span></code> depths; a wider reach is a river, where the bed generates the turbulence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>scale</strong> (<a class="reference internal" href="#axqua.solvers.telemac.steering.FlowScale" title="axqua.solvers.telemac.steering.FlowScale"><em>FlowScale</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -2999,9 +3100,14 @@ step, so we size the fixed <code class="docutils literal notranslate"><span clas
 <code class="xref py py-data docutils literal notranslate"><span class="pre">TARGET_COURANT</span></code> (0.6) from the 2D velocity and the cell sizes.</p></li>
 </ul>
 <p>TELEMAC-3D cannot run with finite volumes, so the 3D case is always the
-finite-element kernel (the 2D <code class="docutils literal notranslate"><span class="pre">finite_volumes</span></code> flag is irrelevant here). Zonal
-friction is not carried over - TELEMAC-3D has no <code class="docutils literal notranslate"><span class="pre">FRICTION</span> <span class="pre">DATA</span> <span class="pre">FILE</span></code> - so a
-single representative bottom-friction law/coefficient is written instead.</p>
+finite-element kernel (the 2D <code class="docutils literal notranslate"><span class="pre">finite_volumes</span></code> flag is irrelevant here). TELEMAC-3D
+has no <code class="docutils literal notranslate"><span class="pre">FRICTION</span> <span class="pre">DATA</span> <span class="pre">FILE</span></code>, but it reads the per-node <code class="docutils literal notranslate"><span class="pre">BOTTOM</span> <span class="pre">FRICTION</span></code> variable of
+<code class="docutils literal notranslate"><span class="pre">geometry.slf</span></code> (<code class="docutils literal notranslate"><span class="pre">FONSTR</span></code>, listing: « FRICTION COEFFICIENTS READ IN THE GEOMETRY FILE »),
+which the build writes from the roughness zones, so the 3D bed has the same ks per node
+as the 2D one. The <code class="docutils literal notranslate"><span class="pre">FRICTION</span> <span class="pre">COEFFICIENT</span> <span class="pre">FOR</span> <span class="pre">THE</span> <span class="pre">BOTTOM</span></code> written here is only the
+fallback for a geometry without that variable. What differs is how the ks acts: the 3D
+bed shear is a log law evaluated at the first plane above the bed (<code class="docutils literal notranslate"><span class="pre">tfond.f</span></code>), so it
+depends on the thickness of the lowest layer.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.threed.VerticalDiscretization">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.threed.</span></span><span class="sig-name descname"><span class="pre">VerticalDiscretization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_levels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'int'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'float'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'float'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'float'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aspect</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'float'</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="s"><span class="pre">'str'</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/threed.html#VerticalDiscretization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.threed.VerticalDiscretization" title="Lien vers cette définition"></a></dt>
@@ -3252,7 +3358,7 @@ this is how the requested Courant is honored.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.threed.build_3d_cas">
-<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.threed.</span></span><span class="sig-name descname"><span class="pre">build_3d_cas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_2d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cas_2d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_time_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hotstart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'continuation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unsteady</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liquid_boundaries_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaia_cas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results3d_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results2d_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_hydrostatic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listing_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphic_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/threed.html#build_3d_cas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.threed.build_3d_cas" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.threed.</span></span><span class="sig-name descname"><span class="pre">build_3d_cas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_2d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cas_2d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_time_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hotstart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'continuation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unsteady</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liquid_boundaries_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gaia_cas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results3d_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results2d_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_hydrostatic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listing_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphic_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphic_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/threed.html#build_3d_cas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.threed.build_3d_cas" title="Lien vers cette définition"></a></dt>
 <dd><p>Write <code class="docutils literal notranslate"><span class="pre">&lt;case-name&gt;3d.cas</span></code> next to the 2D case and return the setup summary.</p>
 <p><em>results_2d</em> defaults to <code class="docutils literal notranslate"><span class="pre">&lt;model_dir&gt;/&lt;results_slf&gt;</span></code> (the <code class="docutils literal notranslate"><span class="pre">initial_run</span></code>
 output); <em>cas_2d</em> to the steady 2D steering, whose prescribed boundary values
@@ -3272,7 +3378,9 @@ hydrostatic solver and drops the pressure-Poisson keywords - the cheap variant
 for a long boundary-flux convergence run). <em>n_time_steps</em> forces the step count
 (overriding the flow-through/duration sizing); <em>listing_period</em> /
 <em>graphic_period</em> override the printout spacing (e.g. a short listing period so
-the flux-convergence analysis gets enough printouts). <em>data</em> is an optional
+the flux-convergence analysis gets enough printouts); <em>graphic_frames</em> asks for that
+many result frames over the run instead of the default 5 (the vertical convergence
+study averages over the second half of each run). <em>data</em> is an optional
 pre-read 2D result (<code class="docutils literal notranslate"><span class="pre">selafin.read_slf</span></code>) so several variants can be built from
 one read of a large results file.</p>
 <p><em>hotstart</em> selects how the 3D run is initialized from the 2D result:</p>
@@ -3306,6 +3414,7 @@ convergence study, where every per-layer run must reach steady state.</p></li>
 <li><p><strong>n_time_steps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>listing_period</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>graphic_period</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>graphic_frames</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>min_depth</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em> | </em><em>None</em>)</p></li>
 </ul>

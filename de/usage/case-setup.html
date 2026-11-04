@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/usage/case-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=b7fbfc99"></script>
+      <script src="../_static/documentation_options.js?v=625632d9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -625,7 +625,7 @@
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">duration</span></code> muss lang genug sein, damit sich der Flussabschnitt füllt und der Fluss stetig wird. Ein stationärer Zustand wird erreicht, wenn derselbe Abfluss das Modell verlässt, das in ihn eintritt. aXqua wertet diesen Saldo nach jedem Lauf aus und vergleicht die relative Differenz mit <code class="docutils literal notranslate"><span class="pre">flux_tolerance</span></code>. Die Vorgabe von 0,1 % ist weit kleiner als die Unsicherheit einer Abfluss-Messung.</p>
-<p>Mit <code class="docutils literal notranslate"><span class="pre">turbulence_model:</span> <span class="pre">auto</span></code> wählt aXqua das Turbulenzmodell aus der Netzauflösung relativ zur Wassertiefe aus. Der Zeitschritt wird während des Laufs automatisch angepasst, so dass die Simulation stabil bleibt (<code class="docutils literal notranslate"><span class="pre">desired_courant</span></code>).</p>
+<p>Mit <code class="docutils literal notranslate"><span class="pre">turbulence_model:</span> <span class="pre">auto</span></code> wählt aXqua das k-Epsilon-Modell aus, bei dem die Gerinne-Zellen größer sind als das Wassertiefe- und das Smagorinsky-Modell, wobei die Turbulenzen am Bett erzeugt werden, wo sie feiner sind (<a class="reference internal" href="preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC-Entscheidungen</span></a>). Der Zeitschritt wird während des Laufs automatisch angepasst, so dass die Simulation stabil bleibt (<code class="docutils literal notranslate"><span class="pre">desired_courant</span></code>).</p>
 <p>Die Anzahl der Prozessorkerne ist eine Eigenschaft des Computers und wird in seinem Profil (<code class="docutils literal notranslate"><span class="pre">mpi_processes</span></code>, <a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Definieren Sie Solver Bindungen</span></a>) festgelegt. Wo das Profil keine Nummer nennt, gilt <code class="docutils literal notranslate"><span class="pre">telemac.n_processors</span></code> der Fall-Datei. Die Einstellungen der 3D-Simulation mit OpenFOAM sind in <a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">OpenFOAM-Auswahl</span></a> beschrieben.</p>
 </section>
 <section id="hydrology">

@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/code/workflow.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4208cb91"></script>
+      <script src="../_static/documentation_options.js?v=97a505d1"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -2550,9 +2550,30 @@ non-interactive session it stops and reports instead).</p>
 <p>The TELEMAC execution is injected (the <code class="docutils literal notranslate"><span class="pre">simulate</span></code> callable), so the report
 maths are unit-testable without the solver.</p>
 <dl class="py function">
+<dt class="sig sig-object py" id="axqua.convergence.mesh_coordinates">
+<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">mesh_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#mesh_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.mesh_coordinates" title="Lien vers cette définition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">ikle)</span></code> to sample <em>data</em> on: those of <em>geometry</em> where it matches.</p>
+<p>TELEMAC writes a result in single precision, coordinates included, and a float32
+northing near 5,300,000 m resolves only 0.5 m. On the Inn KB15 ladder this set the
+shortest edge of both fine meshes to exactly 0.50 m (they have 0.77 and 0.58 m) and
+moved the mean depth at the measurement points by up to 1.6 %, a fifth of the
+change between two meshes. <code class="docutils literal notranslate"><span class="pre">geometry.slf</span></code> is written in double precision, so a
+level is read on it. Without a geometry file, or with one of another node count (a
+merged parallel result can repeat interface nodes), the result’s own coordinates
+are used as before.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="axqua.convergence.extract_at_points">
-<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">extract_at_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slf_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#extract_at_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.extract_at_points" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">extract_at_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slf_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#extract_at_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.extract_at_points" title="Lien vers cette définition"></a></dt>
 <dd><p>Read the last frame of <em>slf_path</em> and sample <em>quantities</em> at <em>points</em>.</p>
+<p>With <em>geometry</em> (the level’s <code class="docutils literal notranslate"><span class="pre">geometry.slf</span></code>) the field is interpolated in the
+triangles of that double-precision mesh (<a class="reference internal" href="#axqua.convergence.mesh_coordinates" title="axqua.convergence.mesh_coordinates"><code class="xref py py-func docutils literal notranslate"><span class="pre">mesh_coordinates()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)">numpy.ndarray</a>]</p>
@@ -2560,9 +2581,81 @@ maths are unit-testable without the solver.</p>
 </dl>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.convergence.TIME_WINDOW">
+<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">TIME_WINDOW</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></span><a class="headerlink" href="#axqua.convergence.TIME_WINDOW" title="Lien vers cette définition"></a></dt>
+<dd><p>share of the simulated time at the end of each run that a level’s values are
+averaged over. With k-epsilon the 2D flow of Inn KB15 oscillates at the inflow
+(point 1: 0.97 to 1.36 m/s, period ~1,100 s, on the baseline mesh), so a snapshot
+would mix the phase of the oscillation into the change between meshes.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="axqua.convergence.TimeAverage">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">TimeAverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluctuation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#TimeAverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.TimeAverage" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Values at the points averaged over the end of a run, and how much they move.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)"><em>numpy.ndarray</em></a><em>]</em>)</p></li>
+<li><p><strong>fluctuation</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>]</em>)</p></li>
+<li><p><strong>n_frames</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.convergence.TimeAverage.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.convergence.TimeAverage.mean" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.convergence.TimeAverage.fluctuation">
+<span class="sig-name descname"><span class="pre">fluctuation</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.convergence.TimeAverage.fluctuation" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.convergence.TimeAverage.n_frames">
+<span class="sig-name descname"><span class="pre">n_frames</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#axqua.convergence.TimeAverage.n_frames" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.convergence.TimeAverage.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#axqua.convergence.TimeAverage.start" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.convergence.TimeAverage.end">
+<span class="sig-name descname"><span class="pre">end</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#axqua.convergence.TimeAverage.end" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.convergence.extract_mean_at_points">
+<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">extract_mean_at_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slf_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#extract_mean_at_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.extract_mean_at_points" title="Lien vers cette définition"></a></dt>
+<dd><p>Average <em>quantities</em> at <em>points</em> over the last <em>window</em> of the simulated time.</p>
+<p>A snapshot is enough where the flow is steady. The 3D runs of the vertical study
+are not, near bars and wet edges: on the Inn KB15 reach, 19 of 30 verticals moved
+by 1 to 5 cm in depth and 0.1 to 0.3 m/s in velocity between two outputs 1,000 s
+apart, as much as the change between two layer counts. The mean over the frames of
+the window compares the layer counts, and <code class="docutils literal notranslate"><span class="pre">fluctuation</span></code> (the spread over time
+in the norm the relative change uses) says how far a single frame can be off.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>window</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#axqua.convergence.TimeAverage" title="axqua.convergence.TimeAverage"><em>TimeAverage</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.convergence.LevelResult">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">LevelResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_edge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qoi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#LevelResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.LevelResult" title="Lien vers cette définition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">LevelResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_edge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qoi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluctuation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#LevelResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.LevelResult" title="Lien vers cette définition"></a></dt>
 <dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>One mesh in the sequence: its resolution, size and sampled QoI.</p>
 <dl class="field-list simple">
@@ -2580,6 +2673,8 @@ maths are unit-testable without the solver.</p>
 <li><p><strong>mean_depth</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>mean_velocity</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>validity</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><em>object</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>fluctuation</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a>)</p></li>
+<li><p><strong>n_frames</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -2641,6 +2736,22 @@ maths are unit-testable without the solver.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="axqua.convergence.LevelResult.validity">
 <span class="sig-name descname"><span class="pre">validity</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><span class="pre">object</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#axqua.convergence.LevelResult.validity" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.convergence.LevelResult.fluctuation">
+<span class="sig-name descname"><span class="pre">fluctuation</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><span class="pre">dict</span></a></span><a class="headerlink" href="#axqua.convergence.LevelResult.fluctuation" title="Lien vers cette définition"></a></dt>
+<dd><p>spread over time / mean} at the points, over the averaged frames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>{quantity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.convergence.LevelResult.n_frames">
+<span class="sig-name descname"><span class="pre">n_frames</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#axqua.convergence.LevelResult.n_frames" title="Lien vers cette définition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -2758,6 +2869,17 @@ maths are unit-testable without the solver.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="axqua.convergence.ConvergenceReport.unsteady_quantities">
+<span class="sig-name descname"><span class="pre">unsteady_quantities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#ConvergenceReport.unsteady_quantities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.ConvergenceReport.unsteady_quantities" title="Lien vers cette définition"></a></dt>
+<dd><p>Quantities whose last change is within the fluctuation in time of the two finest runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="axqua.convergence.ConvergenceReport.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#ConvergenceReport.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.ConvergenceReport.save" title="Lien vers cette définition"></a></dt>
 <dd><dl class="field-list simple">
@@ -2794,6 +2916,25 @@ a one-line reason, and the runtime speed-up versus the finest mesh.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.convergence.plot_report">
+<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">plot_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">report</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cell</span> <span class="pre">size</span> <span class="pre">[m]'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#plot_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.plot_report" title="Lien vers cette définition"></a></dt>
+<dd><p>Draw a study: values at the points, their mean, and the change per refinement.</p>
+<p>One row per quantity. Left: the value at each probe point on each mesh (light =
+coarse, dark = fine), which shows where the meshes disagree. Middle: the mean over
+the points against the cell size, the number the verdict is drawn from. Right: the
+relative change from one mesh to the next against the tolerance; a study that
+converges shows these bars falling below the line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size_name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -2919,6 +3060,12 @@ one finer level at a time via <code class="docutils literal notranslate"><span c
 <span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">default_probes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#default_probes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.default_probes" title="Lien vers cette définition"></a></dt>
 <dd><p>Probe points for the QoI: the ground-truth points if available, else samples
 along the channel centerline (falling back to the ROI bbox diagonal).</p>
+<p>Only the positions of measurements are used, never the measured values, and only
+when the case names its ground truth: a table compiled by an earlier build stays
+in the preprocessing folder after the case drops its sources. The centerline
+points are spaced from half a step after the inflow to half a step before the
+outflow. On the Inn KB15 ladder, a point on the inflow line read 0.09, 0.36, 0.12
+and 0.40 m of depth on the four meshes, the depth of one boundary node or another.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2934,7 +3081,7 @@ along the channel centerline (falling back to the ROI bbox diagonal).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.convergence.make_telemac_simulator">
-<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">make_telemac_simulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discharge</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_processors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#make_telemac_simulator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.make_telemac_simulator" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.convergence.</span></span><span class="sig-name descname"><span class="pre">make_telemac_simulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discharge</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_processors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinned_turbulence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/convergence.html#make_telemac_simulator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.convergence.make_telemac_simulator" title="Lien vers cette définition"></a></dt>
 <dd><p>Build a <code class="docutils literal notranslate"><span class="pre">simulate(label,</span> <span class="pre">ch,</span> <span class="pre">fp,</span> <span class="pre">probes,</span> <span class="pre">quantities)</span> <span class="pre">-&gt;</span> <span class="pre">LevelResult</span></code> that
 builds the case at the given resolution, runs TELEMAC once at constant
 <em>discharge</em> (variable time step for per-mesh CFL), and samples the QoI.</p>
@@ -2944,6 +3091,7 @@ baseline</strong>: the level copy is built with <code class="docutils literal no
 per-zone <code class="docutils literal notranslate"><span class="pre">Max</span> <span class="pre">Edge</span> <span class="pre">Length</span> <span class="pre">(m)</span></code> values from the mesh-zones gpkg, which would
 otherwise silently override the per-level sizes and leave every « level » with
 the same mesh (the bug behind the invalid first ering study).</p>
+<p><em>pinned_turbulence</em> is the turbulence model of every level (default: the choice for <em>cfg</em> without a mesh); <a class="reference internal" href="#axqua.convergence.run_mesh_convergence" title="axqua.convergence.run_mesh_convergence"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_mesh_convergence()</span></code></a> passes the choice for the case’s own mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2951,6 +3099,7 @@ the same mesh (the bug behind the invalid first ering study).</p>
 <li><p><strong>discharge</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
 <li><p><strong>base_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
 <li><p><strong>n_processors</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>pinned_turbulence</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -3187,7 +3336,7 @@ Manning/Strickler coefficients are converted via the Strickler relation.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.mesh_validity.MeshValidity">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.mesh_validity.</span></span><span class="sig-name descname"><span class="pre">MeshValidity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_star</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_plus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks_plus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx_over_ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_plus_ok</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks_regime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx_below_ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbulence_pick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbulence_pick_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinned_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regime_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warnings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/mesh_validity.html#MeshValidity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.mesh_validity.MeshValidity" title="Lien vers cette définition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.mesh_validity.</span></span><span class="sig-name descname"><span class="pre">MeshValidity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_star</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_plus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks_plus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx_over_ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_plus_ok</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks_regime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'unknown'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx_below_ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbulence_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbulence_pick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">turbulence_pick_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinned_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regime_change</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">warnings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/mesh_validity.html#MeshValidity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.mesh_validity.MeshValidity" title="Lien vers cette définition"></a></dt>
 <dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Validity of the turbulence + roughness modeling at one cell size.</p>
 <dl class="field-list simple">
@@ -3204,6 +3353,8 @@ Manning/Strickler coefficients are converted via the Strickler relation.</p>
 <li><p><strong>y_plus_ok</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>ks_regime</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
 <li><p><strong>dx_below_ks</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>filter_width</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+<li><p><strong>turbulence_depth</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
 <li><p><strong>turbulence_pick</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>turbulence_pick_name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
 <li><p><strong>pinned_model</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
@@ -3269,6 +3420,16 @@ Manning/Strickler coefficients are converted via the Strickler relation.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.mesh_validity.MeshValidity.filter_width">
+<span class="sig-name descname"><span class="pre">filter_width</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">nan</span></span><a class="headerlink" href="#axqua.mesh_validity.MeshValidity.filter_width" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.mesh_validity.MeshValidity.turbulence_depth">
+<span class="sig-name descname"><span class="pre">turbulence_depth</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">nan</span></span><a class="headerlink" href="#axqua.mesh_validity.MeshValidity.turbulence_depth" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="axqua.mesh_validity.MeshValidity.turbulence_pick">
 <span class="sig-name descname"><span class="pre">turbulence_pick</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#axqua.mesh_validity.MeshValidity.turbulence_pick" title="Lien vers cette définition"></a></dt>
 <dd></dd></dl>
@@ -3313,12 +3474,14 @@ Manning/Strickler coefficients are converted via the Strickler relation.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.mesh_validity.check_level">
-<span class="sig-prename descclassname"><span class="pre">axqua.mesh_validity.</span></span><span class="sig-name descname"><span class="pre">check_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinned_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/mesh_validity.html#check_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.mesh_validity.check_level" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.mesh_validity.</span></span><span class="sig-name descname"><span class="pre">check_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pinned_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/mesh_validity.html#check_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.mesh_validity.check_level" title="Lien vers cette définition"></a></dt>
 <dd><p>Run the validity checks for one cell size <em>dx</em> (see the module docstring).</p>
 <p><em>depth</em>/<em>velocity</em> are the level’s mean probe values (or the finest completed
 level’s, for a candidate refinement; then set <code class="docutils literal notranslate"><span class="pre">estimated=True</span></code> when they are
 placeholders). <em>ks</em> defaults to <a class="reference internal" href="#axqua.mesh_validity.channel_ks" title="axqua.mesh_validity.channel_ks"><code class="xref py py-func docutils literal notranslate"><span class="pre">channel_ks()</span></code></a>; <em>pinned_model</em> is the
 turbulence model the study is pinned to (None skips the consistency check).
+<em>filter_width</em> is the Smagorinski filter width measured on the level’s mesh
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.steering.filter_width()</span></code>); the turbulence choice uses it, else <em>dx</em>.
 The turbulence auto-pick deliberately ignores any explicit
 <code class="docutils literal notranslate"><span class="pre">hydrodynamics.turbulence_model</span></code> (the study pins that on each level copy).</p>
 <dl class="field-list simple">
@@ -3331,6 +3494,7 @@ The turbulence auto-pick deliberately ignores any explicit
 <li><p><strong>ks</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>pinned_model</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>estimated</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>filter_width</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
@@ -3357,9 +3521,15 @@ count roughly doubles), so the same Richardson/GCI maths as the 2D study apply -
 report helpers are reused from <a class="reference internal" href="#module-axqua.convergence" title="axqua.convergence"><code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.convergence</span></code></a>. The TELEMAC execution is
 injected (the <code class="docutils literal notranslate"><span class="pre">simulate</span></code> callable), so the report maths are unit-testable without
 the solver.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.vertical_convergence.FRAMES">
+<span class="sig-prename descclassname"><span class="pre">axqua.vertical_convergence.</span></span><span class="sig-name descname"><span class="pre">FRAMES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#axqua.vertical_convergence.FRAMES" title="Lien vers cette définition"></a></dt>
+<dd><p>result frames each run writes; the values are averaged over the second half</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalLevel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.vertical_convergence.</span></span><span class="sig-name descname"><span class="pre">VerticalLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nodes3d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elem3d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qoi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/vertical_convergence.html#VerticalLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.vertical_convergence.VerticalLevel" title="Lien vers cette définition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.vertical_convergence.</span></span><span class="sig-name descname"><span class="pre">VerticalLevel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nodes3d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_elem3d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qoi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fluctuation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/vertical_convergence.html#VerticalLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.vertical_convergence.VerticalLevel" title="Lien vers cette définition"></a></dt>
 <dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>One vertical resolution: its layer count, thickness and sampled QoI.</p>
 <dl class="field-list simple">
@@ -3372,6 +3542,8 @@ the solver.</p>
 <li><p><strong>time_step</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>runtime_s</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>qoi</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)"><em>numpy.ndarray</em></a><em>]</em>)</p></li>
+<li><p><strong>fluctuation</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>]</em>)</p></li>
+<li><p><strong>n_frames</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -3408,6 +3580,22 @@ the solver.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalLevel.qoi">
 <span class="sig-name descname"><span class="pre">qoi</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.vertical_convergence.VerticalLevel.qoi" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalLevel.fluctuation">
+<span class="sig-name descname"><span class="pre">fluctuation</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.vertical_convergence.VerticalLevel.fluctuation" title="Lien vers cette définition"></a></dt>
+<dd><p>spread over time / mean} at the points, over the averaged frames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>{quantity</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalLevel.n_frames">
+<span class="sig-name descname"><span class="pre">n_frames</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#axqua.vertical_convergence.VerticalLevel.n_frames" title="Lien vers cette définition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -3505,12 +3693,34 @@ the solver.</p>
 <span class="sig-name descname"><span class="pre">case</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#axqua.vertical_convergence.VerticalConvergenceReport.case" title="Lien vers cette définition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalConvergenceReport.size_name">
+<span class="sig-name descname"><span class="pre">size_name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'layer</span> <span class="pre">thickness</span> <span class="pre">dz</span> <span class="pre">[m]'</span></span><a class="headerlink" href="#axqua.vertical_convergence.VerticalConvergenceReport.size_name" title="Lien vers cette définition"></a></dt>
+<dd><p>what the grid size of this study is, for the axis of its figure</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalConvergenceReport.level_name">
+<span class="sig-name descname"><span class="pre">level_name</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'layer</span> <span class="pre">counts'</span></span><a class="headerlink" href="#axqua.vertical_convergence.VerticalConvergenceReport.level_name" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalConvergenceReport.format">
 <span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/vertical_convergence.html#VerticalConvergenceReport.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.vertical_convergence.VerticalConvergenceReport.format" title="Lien vers cette définition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="axqua.vertical_convergence.VerticalConvergenceReport.unsteady_quantities">
+<span class="sig-name descname"><span class="pre">unsteady_quantities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/vertical_convergence.html#VerticalConvergenceReport.unsteady_quantities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.vertical_convergence.VerticalConvergenceReport.unsteady_quantities" title="Lien vers cette définition"></a></dt>
+<dd><p>Quantities whose last change is within the fluctuation of the two runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3569,6 +3779,27 @@ baseline number of intervals.</p>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.vertical_convergence.level_from_results">
+<span class="sig-prename descclassname"><span class="pre">axqua.vertical_convergence.</span></span><span class="sig-name descname"><span class="pre">level_from_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantities</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/vertical_convergence.html#level_from_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.vertical_convergence.level_from_results" title="Lien vers cette définition"></a></dt>
+<dd><p>Read one finished layer count in <em>d</em>: the mean over the last half of the run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>lc</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>n_levels</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>dz</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+<li><p><strong>time_step</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>runtime_s</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#axqua.vertical_convergence.VerticalLevel" title="axqua.vertical_convergence.VerticalLevel"><em>VerticalLevel</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -3967,7 +4198,27 @@ outside a running calibration when that calibration was killed, by a cancelled j
 or a power cut, before it could restore the case itself. The copy is then the case
 as built, and what is in the model folder is the last parameter set the driver had
 reached. Every TELEMAC run of the case calls this first, so a cancelled calibration
-cannot leak into the next simulation.</p>
+cannot leak into the next simulation, and every build discards the copy
+(<a class="reference internal" href="#axqua.bayescal.discard_as_built" title="axqua.bayescal.discard_as_built"><code class="xref py py-func docutils literal notranslate"><span class="pre">discard_as_built()</span></code></a>), so it cannot replace a newer build either.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.discard_as_built">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">discard_as_built</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#discard_as_built"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.discard_as_built" title="Lien vers cette définition"></a></dt>
+<dd><p>Drop the copy a killed calibration set aside, because the case is built anew.</p>
+<p>The copy holds the files of the build the calibration started from. Once the case
+is rebuilt, restoring it would put the old build back over the new one: on the Isar
+example a calibration cancelled during its first run, then a build with a longer
+<code class="docutils literal notranslate"><span class="pre">DURATION</span></code>, then a steady run gave the old steering file and the old duration.
+Returns whether there was a copy.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>

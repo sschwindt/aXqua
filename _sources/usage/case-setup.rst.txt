@@ -336,7 +336,7 @@ The ``hydrodynamics`` block controls the hydraulic simulation with TELEMAC. Most
 
 ``duration`` has to be long enough for the reach to fill and for the flow to become steady. A steady state is reached when the same discharge leaves the model that enters it. aXqua evaluates this balance after each run and compares the relative difference with ``flux_tolerance``. The default of 0.1 % is far smaller than the uncertainty of a discharge measurement.
 
-With ``turbulence_model: auto``, aXqua selects the turbulence model from the mesh resolution relative to the water depth. The time step is adapted automatically during the run, so that the simulation remains stable (``desired_courant``).
+With ``turbulence_model: auto``, aXqua selects the k-epsilon model where the channel cells are larger than the water depth and the Smagorinsky model with the turbulence generated at the bed where they are finer (:ref:`preprocessing-telemac-choices`). The time step is adapted automatically during the run, so that the simulation remains stable (``desired_courant``).
 
 The number of processor cores is a property of the computer and is set in its profile (``mpi_processes``, :ref:`solver-bindings`). Where the profile names no number, ``telemac.n_processors`` of the case file applies. The settings of the 3D simulation with OpenFOAM are described in :ref:`preprocessing-openfoam-choices`.
 

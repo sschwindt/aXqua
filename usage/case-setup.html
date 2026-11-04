@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/usage/case-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ca842793"></script>
+      <script src="../_static/documentation_options.js?v=1f29e9d3"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -624,7 +624,7 @@
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">duration</span></code> has to be long enough for the reach to fill and for the flow to become steady. A steady state is reached when the same discharge leaves the model that enters it. aXqua evaluates this balance after each run and compares the relative difference with <code class="docutils literal notranslate"><span class="pre">flux_tolerance</span></code>. The default of 0.1 % is far smaller than the uncertainty of a discharge measurement.</p>
-<p>With <code class="docutils literal notranslate"><span class="pre">turbulence_model:</span> <span class="pre">auto</span></code>, aXqua selects the turbulence model from the mesh resolution relative to the water depth. The time step is adapted automatically during the run, so that the simulation remains stable (<code class="docutils literal notranslate"><span class="pre">desired_courant</span></code>).</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">turbulence_model:</span> <span class="pre">auto</span></code>, aXqua selects the k-epsilon model where the channel cells are larger than the water depth and the Smagorinsky model with the turbulence generated at the bed where they are finer (<a class="reference internal" href="preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC choices</span></a>). The time step is adapted automatically during the run, so that the simulation remains stable (<code class="docutils literal notranslate"><span class="pre">desired_courant</span></code>).</p>
 <p>The number of processor cores is a property of the computer and is set in its profile (<code class="docutils literal notranslate"><span class="pre">mpi_processes</span></code>, <a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Define solver bindings</span></a>). Where the profile names no number, <code class="docutils literal notranslate"><span class="pre">telemac.n_processors</span></code> of the case file applies. The settings of the 3D simulation with OpenFOAM are described in <a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">OpenFOAM choices</span></a>.</p>
 </section>
 <section id="hydrology">

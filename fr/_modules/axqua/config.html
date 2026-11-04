@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/config.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=4208cb91"></script>
+      <script src="../../_static/documentation_options.js?v=97a505d1"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -1662,20 +1662,46 @@
     <span class="c1"># EPSILON). TELEMAC's default 50 is too few while the dry-start domain is still</span>
     <span class="c1"># ill-conditioned; 120 lets the turbulence solve converge without relaxing accuracy.</span>
     <span class="n">max_keps_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">120</span>
-    <span class="c1"># turbulence closure. "auto" (the default) picks among k-epsilon (3),</span>
-    <span class="c1"># Spalart-Allmaras (6) and Smagorinski LES (4) from the channel mesh resolution</span>
-    <span class="c1"># relative to the turbulence length scale (the flow depth) and the velocity guess</span>
-    <span class="c1"># below, applying the 80%-TKE LES criterion - see steering.select_turbulence_model.</span>
-    <span class="c1"># A literal int or name (1 const-visc, 3 k-epsilon, 4 Smagorinski, 6</span>
-    <span class="c1"># Spalart-Allmaras) overrides the auto choice. NOTE: finite volumes accept ONLY</span>
-    <span class="c1"># model 1; "auto"/3/4/6 require finite_volumes=False (the default kernel).</span>
+    <span class="c1"># solver of the k-epsilon system (SOLVER FOR K-EPSILON MODEL). TELEMAC's default 1,</span>
+    <span class="c1"># the conjugate gradient, needs a symmetric matrix, which the k-epsilon system with</span>
+    <span class="c1"># its sources is not: on the pre-wetted Inn KB15 mesh it failed about three times</span>
+    <span class="c1"># per time step, some with a NaN precision (785 failures in 300 s); GMRES (7) failed</span>
+    <span class="c1"># 59 times, at a median precision of 4e-4, and never with a NaN.</span>
+    <span class="n">keps_solver</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="c1"># depth [m] below which a generated user_fortran/corvis.f resets k and epsilon to</span>
+    <span class="c1"># their floors and the viscosity to the molecular one (TELEMAC's own threshold for</span>
+    <span class="c1"># the shear production of k). Without it, k grew without bound at dry nodes of the</span>
+    <span class="c1"># pre-wetted Inn KB15 mesh and the run diverged after 26 s; 0 leaves it out.</span>
+    <span class="n">keps_shallow_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.02</span>
+    <span class="c1"># the same routine keeps the turbulent length scale C_mu^0.75 k^1.5 / epsilon at most</span>
+    <span class="c1"># this many flow depths by raising epsilon. The run starts with k = 0 and epsilon at</span>
+    <span class="c1"># its floor, and in the start-up transient k grew far faster than epsilon (KB15,</span>
+    <span class="c1"># mesh finer by 1.3: k 0.18 -&gt; 482 m2/s2 in a second, viscosity 1e5 m2/s, diverged</span>
+    <span class="c1"># after 10 s). In the steady flow the length is ~3 cm in 0.9 m: inactive. 0: off.</span>
+    <span class="n">keps_length_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># turbulence closure. "auto" (the default) picks k-epsilon (3) where the channel</span>
+    <span class="c1"># cells are larger than the flow depth, and Smagorinski LES (4) with the turbulence</span>
+    <span class="c1"># generated at the bed (a generated smagor.f in user_fortran/) where their filter</span>
+    <span class="c1"># width is at most les_depth_ratio depths - see steering.select_turbulence_model.</span>
+    <span class="c1"># A literal int or name (1 const-visc, 3 k-epsilon, 4 Smagorinski, 5 mixing length,</span>
+    <span class="c1"># 6 Spalart-Allmaras) overrides the auto choice. Spalart-Allmaras is never chosen</span>
+    <span class="c1"># automatically: in TELEMAC-2D it has no turbulence from the bed and suits a flume</span>
+    <span class="c1"># no wider than ten depths, not a river. NOTE: finite volumes accept ONLY model 1.</span>
     <span class="n">turbulence_model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span>
-    <span class="c1"># mean-flow velocity guess [m/s] - the assumed initial average flow used to size</span>
-    <span class="c1"># the turbulent eddy viscosity and feed the turbulence-model selection criteria.</span>
+    <span class="c1"># mean-flow velocity guess [m/s], used for the constant eddy viscosity of model 1.</span>
     <span class="n">initial_velocity_guess</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
-    <span class="c1"># turbulence integral length scale [m] for the resolution criterion; defaults to</span>
-    <span class="c1"># the flow depth scale (prewet_depth, else 1.0 m) when left None.</span>
+    <span class="c1"># representative flow depth [m] for the choice of the turbulence model; when None it</span>
+    <span class="c1"># is the median wetted depth of the steady result, else the normal-flow depth of the</span>
+    <span class="c1"># channel cross-sections at the case discharge (steering.flow_scale).</span>
     <span class="n">turbulence_length_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Smagorinski LES is chosen once the filter width of the channel cells is at most</span>
+    <span class="c1"># this many flow depths (eddies smaller than the depth are never resolved in 2D).</span>
+    <span class="n">les_depth_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># coefficient alpha of the eddy viscosity alpha * u* * h that the turbulence</span>
+    <span class="c1"># generated at the bed adds to the Smagorinski viscosity (kappa/6, the depth average</span>
+    <span class="c1"># of the parabolic profile, as in TELEMAC's mixing-length model); 0 leaves out the</span>
+    <span class="c1"># generated routine and runs TELEMAC's own Smagorinski model.</span>
+    <span class="n">les_bed_coefficient</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0667</span>
     <span class="n">velocity_diffusivity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># eddy viscosity [m2/s]; auto from U for model 1</span>
     <span class="n">extra_keywords</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>  <span class="c1"># raw .cas overrides</span></div>
 

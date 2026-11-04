@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/bayescal.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=4208cb91"></script>
+      <script src="../../_static/documentation_options.js?v=97a505d1"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -691,7 +691,8 @@
 <span class="sd">    or a power cut, before it could restore the case itself. The copy is then the case</span>
 <span class="sd">    as built, and what is in the model folder is the last parameter set the driver had</span>
 <span class="sd">    reached. Every TELEMAC run of the case calls this first, so a cancelled calibration</span>
-<span class="sd">    cannot leak into the next simulation.</span>
+<span class="sd">    cannot leak into the next simulation, and every build discards the copy</span>
+<span class="sd">    (:func:`discard_as_built`), so it cannot replace a newer build either.</span>
 <span class="sd">    """</span>
     <span class="n">keep</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration_path</span><span class="p">(</span><span class="n">AS_BUILT</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">keep</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
@@ -701,6 +702,25 @@
         <span class="n">target</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="n">source</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span>
         <span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">keep</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="discard_as_built">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.discard_as_built">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">discard_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Drop the copy a killed calibration set aside, because the case is built anew.</span>
+
+<span class="sd">    The copy holds the files of the build the calibration started from. Once the case</span>
+<span class="sd">    is rebuilt, restoring it would put the old build back over the new one: on the Isar</span>
+<span class="sd">    example a calibration cancelled during its first run, then a build with a longer</span>
+<span class="sd">    ``DURATION``, then a steady run gave the old steering file and the old duration.</span>
+<span class="sd">    Returns whether there was a copy.</span>
+<span class="sd">    """</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration_path</span><span class="p">(</span><span class="n">AS_BUILT</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">keep</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">keep</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">True</span></div>
 
