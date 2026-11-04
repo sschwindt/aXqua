@@ -20,6 +20,24 @@
 #                created with `git worktree add` if it does not exist)
 set -euo pipefail
 
+# Every command that talks to GitHub goes through this function. During an incident at GitHub a key
+# that works is refused at random ("Permission denied (publickey)"; 2 of 5 logins on 2026-11-04),
+# so a refused or dropped connection is tried again up to five times before the deploy stops.
+# Fetch, push and ls-remote are safe to repeat.
+github() {
+  local n
+  for n in 1 2 3 4 5; do
+    if "$@"; then return 0; fi
+    if [ "$n" -lt 5 ]; then
+      echo "   GitHub did not answer ($*), trying again in $((n * 10)) s" >&2
+      sleep $((n * 10))
+    fi
+  done
+  echo "ERROR: GitHub refused five times: $*" >&2
+  echo "   If 'ssh -T git@github.com' answers 'Hi <user>!', the key is fine: see https://www.githubstatus.com" >&2
+  return 1
+}
+
 PUSH=0
 for arg in "$@"; do
   case "$arg" in
@@ -53,7 +71,7 @@ if [ "$PUSH" = "1" ]; then
     echo "$dirty"
     exit 1
   fi
-  git -C "$REPO" fetch -q origin main
+  github git -C "$REPO" fetch -q origin main
   if ! git -C "$REPO" merge-base --is-ancestor origin/main main; then
     echo "ERROR: origin/main has commits that main does not have. Pull first: git pull --ff-only"
     exit 1
@@ -68,7 +86,7 @@ fi
 # The worktree of gh-pages. rsync --delete empties whatever folder it is given, so the folder has
 # to be that worktree and nothing else.
 if [ ! -e "$DEPLOY_DIR" ]; then
-  git -C "$REPO" fetch -q origin gh-pages || true
+  github git -C "$REPO" fetch -q origin gh-pages || true
   git -C "$REPO" worktree add "$DEPLOY_DIR" gh-pages
 fi
 if [ ! -e "$DEPLOY_DIR/.git" ]; then
@@ -81,7 +99,7 @@ if [ "$deploy_branch" != "gh-pages" ]; then
   exit 1
 fi
 if [ "$PUSH" = "1" ]; then
-  git -C "$DEPLOY_DIR" fetch -q origin gh-pages
+  github git -C "$DEPLOY_DIR" fetch -q origin gh-pages
   if ! git -C "$DEPLOY_DIR" merge --ff-only -q origin/gh-pages; then
     echo "ERROR: gh-pages in $DEPLOY_DIR and on GitHub have diverged. Sort that out first."
     exit 1
@@ -141,9 +159,10 @@ if [ "$locale_changes" -gt 0 ]; then
 else
   echo "   the translations did not change"
 fi
-git -C "$REPO" push origin main
+github git -C "$REPO" push origin main
 main_sha=$(git -C "$REPO" rev-parse main)
-if [ "$(git -C "$REPO" ls-remote origin refs/heads/main | cut -f1)" != "$main_sha" ]; then
+remote_main=$(github git -C "$REPO" ls-remote origin refs/heads/main | cut -f1)
+if [ "$remote_main" != "$main_sha" ]; then
   echo "ERROR: origin/main is not at $main_sha: the push of main did not take effect"
   exit 1
 fi
@@ -154,9 +173,10 @@ if git -C "$DEPLOY_DIR" diff --cached --quiet; then
 else
   git -C "$DEPLOY_DIR" commit -q -m "Publish the documentation of main ${main_sha:0:7}"
 fi
-git -C "$DEPLOY_DIR" push origin gh-pages
+github git -C "$DEPLOY_DIR" push origin gh-pages
 pages_sha=$(git -C "$DEPLOY_DIR" rev-parse HEAD)
-if [ "$(git -C "$DEPLOY_DIR" ls-remote origin refs/heads/gh-pages | cut -f1)" != "$pages_sha" ]; then
+remote_pages=$(github git -C "$DEPLOY_DIR" ls-remote origin refs/heads/gh-pages | cut -f1)
+if [ "$remote_pages" != "$pages_sha" ]; then
   echo "ERROR: origin/gh-pages is not at $pages_sha: the push did not take effect"
   exit 1
 fi
