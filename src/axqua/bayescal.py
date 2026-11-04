@@ -162,6 +162,7 @@ def build_velocity_csv(cfg: Config, *, vel_err_floor: float = campaigns.VELOCITY
         df["h"], [f"pt-{i + 1}" for i in range(len(df))],
         vel_err_floor, depth_err_floor).drop(columns="label")
     out = _inside_the_model(cfg, out)
+    out = _away_from_liquid_boundaries(cfg, out)
     path = cfg.calibration_path(cfg.calibration_csv)
     path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(path, index=False)
@@ -207,6 +208,75 @@ def _inside_the_model(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
         points = points.loc[inside].reset_index(drop=True)
         if "id" in points.columns:
             points["id"] = range(1, len(points) + 1)
+    return points
+
+
+#: Measurement points closer to an inflow or outflow line than this many mesh nodes are
+#: not used: there the flow is what the boundary prescribes, not what the river does
+#: (the user's rule of 2026-11-04). Applies to the calibration and the mesh study.
+MIN_BOUNDARY_NODES = 15
+#: The remedy the user named for points too close to a liquid boundary.
+NEAR_BOUNDARY_REMEDY = "Increase ROI beyond the concerned liquid boundary."
+#: The logger of that warning; a job puts its records into the result manifest.
+near_boundary_log = logging.getLogger("axqua.near_boundary")
+
+
+def away_from_liquid_boundaries(cfg: Config, x, y, *, labels=None,
+                                min_nodes: int = MIN_BOUNDARY_NODES):
+    """Which points lie at least *min_nodes* mesh nodes from every liquid boundary.
+
+    Measured on the built mesh of the case (``geometry.slf`` and ``boundaries.cli`` of
+    the model folder) by the node nearest to each point
+    (:func:`axqua.solvers.telemac.boundary.liquid_boundary_hops`). Returns a boolean
+    array; all True when the case is not built yet. Points that fail are reported as a
+    warning that names the boundary and the remedy (:data:`NEAR_BOUNDARY_REMEDY`).
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    keep = np.ones(len(x), dtype=bool)
+    model = getattr(cfg, "model_dir", None)
+    if not len(x) or model is None:
+        return keep
+    geometry = Path(model) / cfg.geometry_slf
+    cli = Path(model) / cfg.boundary_cli
+    if not geometry.exists() or not cli.exists():
+        return keep
+    try:
+        from scipy.spatial import cKDTree
+
+        from axqua.solvers.telemac.boundary import liquid_boundary_hops
+
+        nx, ny, hops, kind = liquid_boundary_hops(geometry, cli)
+        _, near = cKDTree(np.column_stack([nx, ny])).query(np.column_stack([x, y]))
+    except Exception as exc:                     # noqa: BLE001 - never lose the data
+        log.warning("could not tell how far the measurement points lie from the inflow "
+                    "and outflow (%s); all of them are used", exc)
+        return keep
+    close = (hops[near] >= 0) & (hops[near] < int(min_nodes))
+    keep = ~close
+    if close.any():
+        names = list(labels) if labels is not None else [str(i + 1) for i in range(len(x))]
+        for side in ("inflow", "outflow"):
+            hit = [names[i] for i in np.flatnonzero(close & (kind[near] == side))]
+            if hit:
+                near_boundary_log.warning(
+                    "%d of %d measurement points lie less than %d nodes from the %s "
+                    "boundary and are not used (%s). %s", len(hit), len(x), min_nodes,
+                    side, ", ".join(hit), NEAR_BOUNDARY_REMEDY)
+    return keep
+
+
+def _away_from_liquid_boundaries(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
+    """*points* without the rows :func:`away_from_liquid_boundaries` leaves out."""
+    if points.empty:
+        return points
+    labels = (points["id"].astype(str).tolist() if "id" in points.columns else None)
+    keep = away_from_liquid_boundaries(cfg, points["x"], points["y"], labels=labels)
+    if keep.all():
+        return points
+    points = points.loc[keep].reset_index(drop=True)
+    if "id" in points.columns:
+        points["id"] = range(1, len(points) + 1)
     return points
 
 
@@ -594,7 +664,7 @@ def compile_flow_csvs(cfg: Config, flows: list[FlowSpec],
     paths: dict[str, Path] = {}
     print("compiling per-flow calibration points:")
     for f in flows:
-        df = f.compile(cfg.crs_epsg)
+        df = _away_from_liquid_boundaries(cfg, f.compile(cfg.crs_epsg))
         out = multiflow_dir / f"measurements-calibration-{f.name}.csv"
         df.to_csv(out, index=False)
         paths[f.name] = out

@@ -164,6 +164,10 @@ mesh:
   # size_scale: 1.0            # global multiplier on EVERY target edge length above
   #                            # INCLUDING the per-zone gpkg values; the mesh-
   #                            # convergence study varies this per level - leave at 1
+  # size_scale_3d: 1.3          # size_scale of the horizontal mesh of the TELEMAC-3D
+  #                            # runs (empty: the 2D mesh); a 3D run costs much more per
+  #                            # cell, so it often gets a coarser mesh than the 2D model
+  #                            # (built in axqua-case/simulation-3d/)
   growth_ratio: 1.2            # max edge-size growth per element (channel -> floodplain)
   channel_anisotropy: 4.0      # along-flow / cross-flow edge ratio in the channel
   max_aspect_ratio: 4.0        # hard cap on cell aspect ratio (longest:shortest edge);

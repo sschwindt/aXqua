@@ -28,7 +28,7 @@ from __future__ import annotations
 import logging
 import os
 import time
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
@@ -288,7 +288,8 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
             log.info("running %s.%s for %s", spec.solver, meta.verb, spec.kind.value)
             kwargs = dict(spec.options.as_kwargs())
             kwargs.update(_pre_step(spec, cfg, ctx))
-            artifacts = verb(cfg, meta.capability, ctx=ctx, **kwargs)
+            with _surfaced(manifest):
+                artifacts = verb(cfg, meta.capability, ctx=ctx, **kwargs)
             cancel.check()
 
             status.transition(JobState.POSTPROCESSING)
@@ -327,6 +328,40 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
             if ctx is not None:
                 ctx.close()
             status_sink.close()
+
+
+#: Loggers whose warnings the user has to see, not only find in the log: the plugin
+#: shows the ``warnings`` of the result manifest when the results are loaded.
+SURFACED_LOGGERS = ("axqua.near_boundary",)
+
+
+class _Collector(logging.Handler):
+    def __init__(self, manifest: results.ResultManifest) -> None:
+        super().__init__(level=logging.WARNING)
+        self.manifest = manifest
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            text = record.getMessage()
+        except Exception:                           # noqa: BLE001 - never break a job
+            return
+        found = self.manifest.summary.setdefault("warnings", [])
+        if text not in found:
+            found.append(text)
+
+
+@contextmanager
+def _surfaced(manifest: results.ResultManifest):
+    """Put the warnings of :data:`SURFACED_LOGGERS` into *manifest* while the block runs."""
+    collector = _Collector(manifest)
+    loggers = [logging.getLogger(name) for name in SURFACED_LOGGERS]
+    for one in loggers:
+        one.addHandler(collector)
+    try:
+        yield
+    finally:
+        for one in loggers:
+            one.removeHandler(collector)
 
 
 def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:

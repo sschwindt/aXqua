@@ -1183,20 +1183,6 @@ def boundary_clearance(cfg: Config) -> tuple[float, str]:
                   f"{depth:.2f} m and ks {ks:.3f} m")
 
 
-def _liquid_lines(cfg: Config):
-    """The inflow and outflow lines of the case as one geometry, or None."""
-    path = getattr(getattr(cfg, "boundaries", None), "liquid_boundaries", None)
-    if path is None or not Path(path).exists():
-        return None
-    import geopandas as gpd
-    from shapely.ops import unary_union
-
-    gdf = gpd.read_file(path)
-    if gdf.crs and gdf.crs.to_epsg() != cfg.crs_epsg:
-        gdf = gdf.to_crs(epsg=cfg.crs_epsg)
-    return unary_union(gdf.geometry.values) if len(gdf) else None
-
-
 def default_probes(cfg: Config, n: int = 40, *,
                    boundary_distance: float | None = None) -> np.ndarray:
     """Probe points for the QoI: the ground-truth points if available, else samples
@@ -1206,12 +1192,13 @@ def default_probes(cfg: Config, n: int = 40, *,
     when the case names its ground truth: a table compiled by an earlier build stays
     in the preprocessing folder after the case drops its sources.
 
-    No point lies within *boundary_distance* of the inflow and outflow lines (default:
-    :func:`boundary_clearance` of the case). The centerline points are spaced evenly
-    between that distance from both ends of the line, with half a step to spare; the
-    distance is cut to a quarter of the line where the reach is short. Measurement
-    points closer to a liquid boundary line are left out; if fewer than three remain,
-    the centerline points are used.
+    No point lies close to the inflow and outflow. Measurement points less than
+    :data:`axqua.bayescal.MIN_BOUNDARY_NODES` mesh nodes from a liquid boundary are left
+    out with a warning, as in the calibration (:func:`axqua.bayescal.away_from_liquid_boundaries`);
+    if fewer than three remain, the centerline points are used. The centerline points
+    keep *boundary_distance* from both ends of the line (default:
+    :func:`boundary_clearance` of the case), spaced evenly in between with half a step to
+    spare; the distance is cut to a quarter of the line where the reach is short.
     """
     if boundary_distance is None:
         boundary_distance, why = boundary_clearance(cfg)
@@ -1236,20 +1223,16 @@ def default_probes(cfg: Config, n: int = 40, *,
             pts = np.vstack([_inside_the_model(cfg, t[["x", "y"]])
                              .to_numpy(dtype=float)
                              for t in tables.values() if {"x", "y"} <= set(t.columns)])
-            lines = _liquid_lines(cfg) if keep > 0 and len(pts) else None
-            if lines is not None:
-                from shapely.geometry import Point
+            if len(pts):
+                from axqua.bayescal import MIN_BOUNDARY_NODES, away_from_liquid_boundaries
 
-                far = np.array([lines.distance(Point(x, y)) >= keep for x, y in pts])
-                if (~far).any():
-                    log.info("mesh convergence: %d of %d measurement points lie within "
-                             "%.0f m of an inflow or outflow line and are left out (%s)",
-                             int((~far).sum()), len(pts), keep, why)
+                far = away_from_liquid_boundaries(cfg, pts[:, 0], pts[:, 1])
                 pts = pts[far]
-                if len(pts) < 3:
+                if not far.all() and len(pts) < 3:
                     log.warning("mesh convergence: fewer than three measurement points "
-                                "lie %.0f m or more from the inflow and outflow lines; "
-                                "the study uses points along the centerline", keep)
+                                "lie %d nodes or more from the inflow and outflow; the "
+                                "study uses points along the centerline",
+                                MIN_BOUNDARY_NODES)
                     pts = pts[:0]
             if len(pts):
                 return pts

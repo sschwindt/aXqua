@@ -606,3 +606,145 @@ def build_3d_cases(cfg: Config,
         setups["unsteady"] = None
         log.info("%s skipped: %s", UNSTEADY3D_CAS, exc)
     return setups
+
+
+# --------------------------------------------------------------------------- #
+# the horizontal mesh of the 3D model
+# --------------------------------------------------------------------------- #
+
+#: The model folder of the 3D runs when ``mesh.size_scale_3d`` gives them a horizontal
+#: mesh of their own (beside the case's ``simulation`` folder).
+THREE_D_DIR = "simulation-3d"
+_STAMP = "mesh-3d.json"
+
+
+def three_d_case(cfg: Config, *, prepare: bool = True) -> Config:
+    """The case as the 3D runs see it.
+
+    Without ``mesh.size_scale_3d`` (or with the size scale of the 2D mesh) that is
+    *cfg* itself: the 3D runs use the mesh of the 2D model, in its folder. Otherwise
+    a copy whose ``size_scale`` is the 3D one and whose model folder is
+    :data:`THREE_D_DIR`. A 3D run costs far more per horizontal cell than a 2D run
+    (one more dimension, and a time step set by the layer thickness), so the 3D model
+    often gets a coarser mesh than the 2D model of the same case.
+
+    With *prepare*, the folder gets its build (:func:`prepare_three_d_mesh`); without,
+    only the paths are returned (to list results).
+    """
+    import copy
+
+    mesh = getattr(cfg, "mesh", None)
+    scale = getattr(mesh, "size_scale_3d", None)
+    if scale is None or math.isclose(float(scale), float(mesh.size_scale)):
+        return cfg
+    if float(scale) <= 0:
+        from axqua.core import errors
+
+        raise errors.ConfigError("mesh.size_scale_3d must be larger than 0",
+                                 subject="mesh.size_scale_3d",
+                                 remedy="Enter a positive factor, or leave it empty to "
+                                        "use the mesh of the 2D model.")
+    c3 = copy.deepcopy(cfg)
+    c3.mesh.size_scale = float(scale)
+    c3.model_dir = Path(cfg.model_dir).parent / THREE_D_DIR
+    # the HydroBayesCal files of a build belong to the 2D model; a calibration of the
+    # 3D model keeps its own beside the 3D runs
+    c3.calibration_dir = c3.model_dir / "calibration-validation"
+    if prepare:
+        prepare_three_d_mesh(cfg, c3)
+    return c3
+
+
+def prepare_three_d_mesh(cfg: Config, c3: Config) -> Path:
+    """Build the horizontal mesh of the 3D model and give it the 2D flow field.
+
+    The mesh is built by the same pipeline as the case (``geometry.slf``,
+    ``boundaries.cli``, the 2D steering file whose prescriptions the 3D runs copy),
+    at ``mesh.size_scale_3d``, again whenever the case was built after it or the size
+    scale changed. The steady 2D result of the case is then interpolated onto it as
+    ``r2d.slf`` (last frame; linear in the triangles of the 2D mesh, read on its
+    double-precision geometry), which the 3D runs start from (median depth, layer
+    count, time step, and ``FILE FOR 2D CONTINUATION``). Returns the folder.
+    """
+    import json
+
+    from axqua.solvers.telemac import pipeline
+
+    model, folder = Path(cfg.model_dir), Path(c3.model_dir)
+    source = model / cfg.results_slf
+    if not source.exists():
+        raise FileNotFoundError(
+            f"2D result not found: {source}. Run the steady 2D simulation of the case "
+            "first: the 3D model starts from its flow field.")
+    case_geometry = model / cfg.geometry_slf
+    stamp = folder / _STAMP
+    try:
+        known = json.loads(stamp.read_text())
+    except (OSError, ValueError):
+        known = {}
+    geometry = folder / c3.geometry_slf
+    stale = (not geometry.exists() or known.get("size_scale") != c3.mesh.size_scale
+             or (case_geometry.exists()
+                 and case_geometry.stat().st_mtime > geometry.stat().st_mtime))
+    if stale:
+        log.info("3D model: building its horizontal mesh at size scale %.3f in %s "
+                 "(the 2D model uses %.3f)", c3.mesh.size_scale, folder,
+                 cfg.mesh.size_scale)
+        folder.mkdir(parents=True, exist_ok=True)
+        pipeline.run(c3, validate_env=False, log_to_file=False)
+    result = folder / c3.results_slf
+    if (stale or not result.exists() or known.get("source_mtime")
+            != source.stat().st_mtime):
+        interpolate_result(source, case_geometry, geometry, result)
+        log.info("3D model: the steady 2D result of the case interpolated onto the 3D "
+                 "mesh (%s)", result)
+    stamp.write_text(json.dumps({"size_scale": c3.mesh.size_scale,
+                                 "source": str(source),
+                                 "source_mtime": source.stat().st_mtime}, indent=2) + "\n")
+    readme = folder / "README.md"
+    if not readme.exists():
+        readme.write_text(
+            "# The 3D model of this case\n\n"
+            "The case sets `mesh.size_scale_3d`, so the TELEMAC-3D runs use a horizontal "
+            "mesh of their own, built here at that size scale. `r2d.slf` in this folder "
+            "is no simulation: it is the steady 2D result of the case interpolated onto "
+            "this mesh, the flow field the 3D runs start from.\n")
+    return folder
+
+
+def interpolate_result(source: Path, source_geometry: Path, target_geometry: Path,
+                       out: Path) -> Path:
+    """Write the last frame of the 2D result *source* onto the mesh of *target_geometry*.
+
+    Every variable is interpolated linearly in the triangles of the source mesh
+    (nearest node outside it), except the bottom, which is the target's own, and the
+    free surface, which is that bottom plus the interpolated depth. Written in single
+    precision, as TELEMAC writes a result.
+    """
+    from axqua.convergence import _mesh_sampler, mesh_coordinates
+
+    sf = selafin.SelafinFile(source)
+    values = sf.frame(-1)
+    x, y, ikle = mesh_coordinates({"x": sf.x, "y": sf.y, "ikle": sf.ikle},
+                                  source_geometry)
+    target = selafin.read_slf(target_geometry, frame=0)
+    sample = _mesh_sampler(x, y, ikle, np.column_stack([target["x"], target["y"]]))
+    if sample is None:
+        raise ValueError(f"{source.name}: the mesh cannot be triangulated")
+    bottom = np.asarray(target["values"].get("BOTTOM"), dtype=float)
+    names = list(values)
+    unit_of = dict(zip((n.strip() for n in sf.var_names),
+                       getattr(sf, "var_units", None) or [""] * len(sf.var_names)))
+    units = [unit_of.get(n.strip(), "") for n in names]
+    fields = {n: sample(np.asarray(values[n], dtype=float)) for n in names}
+    if "WATER DEPTH" in fields:
+        fields["WATER DEPTH"] = np.maximum(fields["WATER DEPTH"], 0.0)
+        if "FREE SURFACE" in fields:
+            fields["FREE SURFACE"] = bottom + fields["WATER DEPTH"]
+    if "BOTTOM" in fields:
+        fields["BOTTOM"] = bottom
+    variables = [(n, u, fields[n]) for n, u in zip(names, units)]
+    return selafin._write_selafin(
+        Path(out), target["x"], target["y"], target["ikle"], target["ipobo"], variables,
+        title=f"{source.name} interpolated onto the 3D mesh", date=(2026, 1, 1, 0, 0, 0),
+        double_precision=False)

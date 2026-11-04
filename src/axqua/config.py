@@ -1037,6 +1037,11 @@ class MeshConfig:
     # silently override the *_size fallbacks). The mesh-convergence study varies
     # this to coarsen/refine the whole sizing field uniformly.
     size_scale: float = 1.0
+    # size_scale of the horizontal mesh of the TELEMAC-3D runs; None = the 2D mesh.
+    # A 3D run costs far more per horizontal cell (the vertical dimension, and a time
+    # step set by the layer thickness), so the 3D model often gets a coarser mesh;
+    # it is built in its own folder (solvers.telemac.threed.three_d_case).
+    size_scale_3d: float | None = None
 
     # anisotropic, flow-aligned strategy (channel/floodplain zones + centerline)
     channel_size: float = 0.5           # channel edge length (m); fallback if not in the gpkg

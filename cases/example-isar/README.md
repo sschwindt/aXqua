@@ -18,7 +18,7 @@ The model covers a braided reach of the Isar River of about 6.6 ha. The terrain 
 | Calibration data | 33 verticals of a SonTek FlowTracker2, measured on November 24 and 25, 2025 at 2.6 m³/s; the readings of each vertical are combined into its depth-averaged velocity; the calibration uses this velocity and the water depth of each vertical |
 | Calibration parameters | k_s of roughness zone 4 (coarse gravel, 17 verticals) and of zone 5 (coarse gravel with cobbles, 11 verticals) |
 | Calibration runs | 8 initial simulations and 4 simulations selected by Bayesian active learning |
-| Validation data | 83 verticals, measured on September 30, 2025 at 5.3 m³/s |
+| Validation data | 83 verticals, measured on September 30, 2025 at 5.3 m³/s (54 of them 15 mesh nodes or more from the outflow and used) |
 
 **Two measurement campaigns, two flow situations.** The case has velocity measurements of two days. On November 24 and 25, 2025, the FlowTracker2 recorded 2.6 m³/s in the main channel, which is the discharge of the model. These measurements are the calibration data. The campaign comprises 56 verticals, of which 23 lie upstream of the model, in the cross sections at which the two inflows were gauged. aXqua leaves measurement points outside the model out and reports their number. On September 30, 2025, the main channel carried 5.3 m³/s and the side channel 0.2 m³/s. These measurements are the validation data: the calibration does not use them, and they describe another flow situation. The positions of both campaigns are those of the DGPS survey as corrected in October 2026.
 
@@ -142,19 +142,19 @@ A validation examines whether the calibrated roughness values also hold in anoth
 
 1. On the tab *Calibration & validation*, the box *Validation with data of another flow situation* shows the validation layer and the two inflows of the model, each with the discharge that it carries in the calibrated case (0.8 and 1.6 m³/s) and the discharge of the validation situation (0.2 and 5.1 m³/s).
 2. Click *Validate*. The job takes about 2.5 min.
-3. When the job has ended, the box summarizes the result. *Open the figure* shows the modeled against the measured values.
+3. When the job has ended, the box summarizes the result. *Open the figure* shows the modeled against the measured values. *Load results* in the job list also shows a warning: 29 of the 83 September verticals lie less than 15 mesh nodes from the outflow and are not used, because the flow there is what the outflow boundary prescribes. The remedy the warning names, *Increase ROI beyond the concerned liquid boundary.*, would mean a model outline that reaches further downstream than the measurements.
 
 The validation runs the calibrated model with the discharges of the validation situation. aXqua derives the water level at the outflow for 5.3 m³/s in the same way as for the discharge of the case. The steering file `validation-september-2025.cas` in `axqua-case/simulation/` differs from that of the built case only in the discharges, the water level at the outflow, the names of its own result and friction files, and the two calibrated roughness values. The results are written to `axqua-case/calibration-validation/validation/`:
 
 | File | Content |
 | --- | --- |
-| `validation-september-2025.csv` | measured and modeled flow velocity and water depth at each of the 83 verticals |
+| `validation-september-2025.csv` | measured and modeled flow velocity and water depth at each of the 54 verticals that are used |
 | `validation-september-2025.json` | the statistics, and the boundary values and roughness values of the run |
 | `validation-september-2025.png` | modeled against measured values with the errors of the measurements |
 
-In this example, the calibrated model underestimates the flow velocity of the validation situation by 0.09 m/s on average (11 %) and the water depth by 0.01 m (3 %). The root mean square errors are 0.32 m/s and 0.20 m. Five verticals are dry in the model although water was measured there. Inflow and outflow differ by 0.02 % at the end of the run.
+In this example, the calibrated model underestimates the flow velocity of the validation situation by 0.15 m/s on average (17 %) and overestimates the water depth by 0.01 m (2 %). The root mean square errors are 0.22 m/s and 0.11 m. One vertical is dry in the model although water was measured there. Inflow and outflow differ by 0.02 % at the end of the run.
 
-The mean deviations are smaller than in the calibration situation, but the scatter is not: 24 % of the velocities and 16 % of the depths lie within one measurement error of the measured value, and modeled and measured depths correlate at only 0.45. With both roughness values at the limits of their ranges, a small mean deviation is no evidence that the roughness is right: the calibration has adjusted the roughness to a deviation of another origin. Showing this is the purpose of a validation with independent data. A validation with a part of the calibration data would not have shown it.
+Away from the outflow, the model reproduces the pattern of the flow well: modeled and measured values correlate at 0.90 for the velocity and 0.83 for the depth. Yet the model is too slow throughout, and only 33 % of the velocities and 17 % of the depths lie within one measurement error of the measured value. With both roughness values at the limits of their ranges, this systematic deviation is no matter of roughness: the calibration has adjusted the roughness to a deviation of another origin. Showing this is the purpose of a validation with independent data. A validation with a part of the calibration data would not have shown it.
 
 The numbers of a repeated run differ slightly from those above, because the mesh generator does not reproduce a mesh node by node.
 

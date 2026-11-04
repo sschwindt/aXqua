@@ -111,7 +111,8 @@ class TelemacBackend(BaseBackend):
 
     def _build_3d(self, cfg, *, ctx: Any = None, hydrostatic_steps: int | None = None,
                   n_levels: int | None = None, **_ignored):
-        from axqua.solvers.telemac.threed import build_3d_cases
+        from axqua.solvers.telemac.threed import build_3d_cases, three_d_case
+        cfg = three_d_case(cfg)
         kwargs: dict[str, Any] = {}
         if hydrostatic_steps is not None:
             kwargs["hydrostatic_steps"] = hydrostatic_steps
@@ -124,7 +125,9 @@ class TelemacBackend(BaseBackend):
         from axqua.solvers.telemac.unsteady import (build_unsteady_3d_case,
                                                         build_unsteady_case)
         if mode_3d:
-            return build_unsteady_3d_case(cfg)
+            from axqua.solvers.telemac.threed import three_d_case
+
+            return build_unsteady_3d_case(three_d_case(cfg))
         return build_unsteady_case(cfg, control_sections=control_sections)
 
     # -- run ----------------------------------------------------------------------
@@ -167,6 +170,9 @@ class TelemacBackend(BaseBackend):
                 remedy="Use one of: " + ", ".join(_3D_VARIANTS),
             )
         cas_name = _3D_VARIANTS[variant][0]
+        from axqua.solvers.telemac.threed import three_d_case
+
+        cfg = three_d_case(cfg, prepare=False)
         if not cfg.model_path(cas_name).exists():
             raise errors.ConfigError(
                 f"{cas_name} has not been written yet",
@@ -184,6 +190,10 @@ class TelemacBackend(BaseBackend):
                       ncsize: int | None = None, run: bool = True, **_ignored):
         if not run:
             return None
+        if mode_3d:
+            from axqua.solvers.telemac.threed import three_d_case
+
+            cfg = three_d_case(cfg, prepare=False)
         cas = (cfg.results3d_unsteady_slf and "unsteady3d.cas") if mode_3d else \
             cfg.unsteady_cas_file
         return self._launch(cfg, ctx=ctx, cas_file=cas, ncsize=ncsize,
@@ -314,13 +324,17 @@ class TelemacBackend(BaseBackend):
                               layer_counts: list[int] | None = None,
                               tolerance: float = 0.05, ncsize: int | None = None,
                               **_ignored):
+        from axqua.solvers.telemac.threed import three_d_case
         from axqua.vertical_convergence import run_vertical_convergence
+        # the layers are studied on the horizontal mesh of the 3D model; the report
+        # stays with the case's other studies
+        base = Path(cfg.postprocessing_dir) / "vertical-convergence"
+        cfg = three_d_case(cfg)
         kwargs: dict[str, Any] = {"tolerance": tolerance}
         if layer_counts:
             kwargs["counts"] = list(layer_counts)
         if ncsize:
             kwargs["n_processors"] = ncsize
-        base = Path(cfg.postprocessing_dir) / "vertical-convergence"
         report = run_vertical_convergence(cfg, base_dir=base,
                                           on_level=_level_progress(ctx), **kwargs)
         _write_study_report(report, base, "vertical-convergence", ctx)
@@ -522,27 +536,30 @@ class TelemacBackend(BaseBackend):
         from axqua.solvers.telemac import threed
 
         post = getattr(cfg, "postproc", None)
+        # the 3D runs work in a folder of their own when the case gives them a mesh
+        # of their own (mesh.size_scale_3d)
+        c3 = threed.three_d_case(cfg, prepare=False)
 
         # Results, in the order a user wants them: the thing that was computed first.
         # The last column is the dataset the velocity is styled by. A 2D result prints
         # the scalar velocity; the depth-averaged companion of a 3D run carries the
         # two components only, which QGIS reads as one vector group named VELOCITY.
         # The hydrostatic 3D run keeps its results under names of its own.
-        for name, label, velocity in (
+        for name, label, velocity, case in (
             (getattr(cfg, "results_slf", None), "TELEMAC result (steady)",
-             "SCALAR VELOCITY"),
+             "SCALAR VELOCITY", cfg),
             (getattr(cfg, "results_unsteady_slf", None), "TELEMAC result (unsteady)",
-             "SCALAR VELOCITY"),
+             "SCALAR VELOCITY", cfg),
             (getattr(cfg, "results_hydrology_slf", None), "TELEMAC result (hydrology)",
-             "SCALAR VELOCITY"),
+             "SCALAR VELOCITY", cfg),
             (getattr(cfg, "results2d_from_3d_slf", None),
-             "TELEMAC-3D result (depth-averaged)", "VELOCITY"),
+             "TELEMAC-3D result (depth-averaged)", "VELOCITY", c3),
             (threed.HYDROSTATIC_RESULT_2D,
-             "TELEMAC-3D result, hydrostatic (depth-averaged)", "VELOCITY"),
+             "TELEMAC-3D result, hydrostatic (depth-averaged)", "VELOCITY", c3),
         ):
             if not name:
                 continue
-            path = cfg.model_path(name)
+            path = case.model_path(name)
             if not path.exists():
                 continue
             # Which maps the case asks for (postproc.telemac_maps), and the predefined
@@ -571,7 +588,7 @@ class TelemacBackend(BaseBackend):
                             (threed.HYDROSTATIC_RESULT_3D,
                              "TELEMAC-3D result, hydrostatic")):
             if name:
-                ctx.record(f"{label} (3D file, not a map layer)", cfg.model_path(name),
+                ctx.record(f"{label} (3D file, not a map layer)", c3.model_path(name),
                            kind="file")
 
         hydrology = cfg.model_path(getattr(cfg, "results_hydrology_slf", "r2d-hydrology.slf"))

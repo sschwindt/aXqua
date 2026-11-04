@@ -724,26 +724,25 @@ def test_centerline_probes_keep_their_distance_from_the_liquid_boundaries(tmp_pa
 
 
 def test_measurement_points_near_a_liquid_boundary_are_left_out(tmp_path):
-    import geopandas as gpd
+    """Less than 15 mesh nodes from the inflow or outflow: not a probe (the user's rule
+    of 2026-11-04, the same as in the calibration)."""
     import pandas as pd
-    from shapely.geometry import LineString
 
     from axqua import ground_truth
     from axqua.convergence import default_probes
+    from test_near_boundary import _strip
 
-    liquid = tmp_path / "liquid.gpkg"
-    gpd.GeoDataFrame({"Type (inflow/outflow)": ["inflow", "outflow"]},
-                     geometry=[LineString([(0, -5), (0, 5)]),
-                               LineString([(100, -5), (100, 5)])],
-                     crs="EPSG:25832").to_file(liquid)
+    model = _strip(tmp_path / "simulation")                  # 41 nodes, 1 m apart
     table = tmp_path / "ground-truth.xlsx"
-    xs = [2.0, 30.0, 50.0, 70.0, 99.0]
     ground_truth.write_tidy({"hydraulics": pd.DataFrame(
-        {"x": xs, "y": 0.0, "z": 0.0, "u": 1.0})}, table)
-    cfg = _centerline_case(tmp_path, liquid=liquid, table=table)
-    cfg.geodata.boundary = None
-    probes = default_probes(cfg, n=4, boundary_distance=10.0)
-    assert probes[:, 0].tolist() == [30.0, 50.0, 70.0]
+        {"x": [3.0, 16.0, 20.0, 24.0, 38.0], "y": 1.0, "z": 0.0, "u": 1.0})}, table)
+    cfg = _centerline_case(tmp_path, table=table)
+    cfg.model_dir, cfg.geometry_slf, cfg.boundary_cli = model, "geometry.slf", \
+        "boundaries.cli"
+    probes = default_probes(cfg, n=4, boundary_distance=0.0)
+    assert probes[:, 0].tolist() == [16.0, 20.0, 24.0]
     # too few left: the centerline takes over
-    probes = default_probes(cfg, n=4, boundary_distance=35.0)
+    ground_truth.write_tidy({"hydraulics": pd.DataFrame(
+        {"x": [3.0, 20.0, 38.0], "y": 1.0, "z": 0.0, "u": 1.0})}, table)
+    probes = default_probes(cfg, n=4, boundary_distance=0.0)
     assert len(probes) == 4 and probes[:, 1].tolist() == [0.0] * 4

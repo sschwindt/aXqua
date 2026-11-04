@@ -831,3 +831,51 @@ def write_cli(cfg: Config, mesh: Mesh) -> tuple[Path, list[LiquidBoundary]]:
 # same lines that drive the .cli; the underscore spellings stay as aliases.
 _load_liquid_lines = liquid_lines
 _boundary_line_details = liquid_line_details
+
+
+def liquid_boundary_hops(geometry: str | Path, cli: str | Path):
+    """How many mesh nodes each node lies from the nearest liquid boundary.
+
+    Returns ``(x, y, hops, kind)``: the node coordinates of *geometry* (double
+    precision), the number of mesh edges on the shortest path from the node to a node
+    of an inflow or outflow line of *cli* (0 on the line, -1 where no liquid boundary
+    is reachable), and ``"inflow"`` or ``"outflow"`` for the boundary that is nearest.
+    A node of the ``.cli`` is liquid when its depth code is not a wall (2); it is an
+    inflow when it prescribes the velocity or the discharge (code 5 or 6).
+    """
+    from collections import deque
+
+    import numpy as np
+
+    from axqua.core import selafin
+
+    geo = selafin.read_slf(geometry, frame=0)
+    x, y = np.asarray(geo["x"], float), np.asarray(geo["y"], float)
+    n = len(x)
+    hops = np.full(n, -1, dtype=int)
+    kind = np.full(n, "", dtype=object)
+    queue: deque = deque()
+    for line in Path(cli).read_text().splitlines():
+        cols = line.split("#")[0].split()
+        if len(cols) < 12:
+            continue
+        lih, liu, node = int(cols[0]), int(cols[1]), int(cols[11]) - 1
+        if lih == 2 or not 0 <= node < n or hops[node] == 0:
+            continue
+        hops[node] = 0
+        kind[node] = "inflow" if liu in (5, 6) else "outflow"
+        queue.append(node)
+    ikle = np.asarray(geo["ikle"], dtype=int)
+    neighbors: list[set] = [set() for _ in range(n)]
+    for a, b, c in ikle[:, :3]:
+        neighbors[a].update((b, c))
+        neighbors[b].update((a, c))
+        neighbors[c].update((a, b))
+    while queue:
+        node = queue.popleft()
+        for other in neighbors[node]:
+            if hops[other] < 0:
+                hops[other] = hops[node] + 1
+                kind[other] = kind[node]
+                queue.append(other)
+    return x, y, hops, kind

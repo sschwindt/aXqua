@@ -300,6 +300,10 @@ class JobsWidget(QWidget):
         from ..core.result_loader import ResultLoader
         self.actions["load"].setEnabled(True)
         self.status_line.setText("")
+        # what the job itself asked the user to see (measurement points left out near
+        # an inflow or outflow, with the remedy), also for a job without map layers
+        for warning in results.summary.get("warnings") or []:
+            self.ctx.warn(str(warning))
         if not results.layers:
             self.ctx.warn(
                 f"{job.job_id} has produced nothing QGIS can open yet."

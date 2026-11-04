@@ -45,9 +45,19 @@ changelog=1.3.0
       time, and says when the last change is smaller than that fluctuation.
       No point lies close to the inflow or outflow line: the points keep four
       flow adaptation lengths (Struiksma et al. 1985) from both, 190 m on the
-      Inn KB15 case, where the inflow had decided the verdict. Measurement
-      positions closer to the lines are left out. A ground-truth table of an
-      earlier build is no longer used once the case names no ground truth.
+      Inn KB15 case, where the inflow had decided the verdict. A ground-truth
+      table of an earlier build is no longer used once the case names no
+      ground truth.
+    - Measurement points less than 15 mesh nodes from an inflow or outflow
+      line are left out of the calibration, the validation and the mesh
+      convergence study. A warning names them and the boundary, with the
+      remedy "Increase ROI beyond the concerned liquid boundary."; the plugin
+      shows it when the results of the job are loaded.
+    - TELEMAC-3D can use a horizontal mesh of its own: 'mesh.size_scale_3d'
+      (Factor on all edge lengths in 3D). A 3D run costs much more per cell,
+      so the 3D model often gets a coarser mesh than the 2D model. aXqua
+      builds it in axqua-case/simulation-3d/ and starts the 3D runs from the
+      steady 2D result interpolated onto it.
     - Calibration requires HydroBayesCal 1.11.0 or newer: older versions stop
       when a measurement point is dry in every run. A build made after a
       cancelled calibration is no longer replaced by the previous build.

@@ -325,6 +325,11 @@ CURATED: dict[str, dict[str, Any]] = {
     "mesh.size_scale": _c("Factor on all edge lengths", "number", "-",
                           help="2 doubles every edge length, which gives a mesh with "
                                "about a quarter of the cells. Useful for a first run."),
+    "mesh.size_scale_3d": _c("Factor on all edge lengths in 3D", "number", "-",
+                             help="The horizontal mesh of the TELEMAC-3D runs. Empty: "
+                                  "the mesh of the 2D model. A 3D run costs much more "
+                                  "per cell, so a coarser mesh than in 2D is often the "
+                                  "affordable choice."),
     "mesh.channel_anisotropy": _c("Length to width of channel cells", "number", "-"),
     "friction.roughness_law": _c(
         "Roughness law", "int",
