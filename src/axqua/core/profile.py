@@ -305,7 +305,9 @@ class SolverBinding:
         """Only what is set: a written profile records decisions, not defaults."""
         out: dict[str, Any] = {}
         if self.setup_script is not None:
-            out["setup_script"] = str(self.setup_script)
+            # a script inside WSL is a Linux path; on Windows its Path spells it \\opt\\..., which is no path a person reads as Linux
+            out["setup_script"] = (Path(str(self.setup_script)).as_posix()
+                                   if self.environment == "wsl" else str(self.setup_script))
         for key in ("environment", "shell", "distro", "config_name", "mpi_launcher",
                     "mpi_processes"):
             value = getattr(self, key)
@@ -649,12 +651,24 @@ INSTALLATION_FIELDS = {"config_name": None, "overrides": {}, "shell": None}
 
 
 def absolute_script(script) -> Path:
-    """*script* as a full path (``~`` expanded, links followed where the file exists), so that one file named two ways is one file."""
+    """*script* as a full path (``~`` expanded, links followed where the file exists), so that one file named two ways is one file.
+
+    On Windows, a Linux path (``/opt/...``) and a path into a WSL distribution (``\\\\wsl.localhost\\...``) stay as they are: made absolute against a Windows drive, ``/opt/x.sh`` became ``C:\\opt\\x.sh``, a file on neither side.
+    """
+    text = str(script)
+    if os.name == "nt" and (text.startswith(("/", "\\")) and not text.startswith("\\\\")
+                            or _wsl_path(text)):
+        return Path(text)
     path = Path(script).expanduser()
     try:
         return path.resolve() if path.exists() else path.absolute()
     except OSError:
         return path.absolute()
+
+
+def _wsl_path(text: str) -> bool:
+    from axqua.core.wsl import is_unc
+    return is_unc(text)
 
 
 def same_script(old, new) -> bool:

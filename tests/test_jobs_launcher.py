@@ -300,3 +300,15 @@ def test_the_fake_solver_prints_a_listing_the_real_parser_understands(tmp_path):
         progress.feed(line)
     assert progress.iteration == 400
     assert progress.time == pytest.approx(100.0)
+
+
+def test_a_clock_correction_does_not_make_a_new_boot():
+    """The derived boot id moves with the wall clock; a 2 s correction across a minute
+    boundary had settled a running job as FAILED (review of 2026-11-06)."""
+    from axqua.jobs import procs
+
+    assert procs.same_boot("boot-29384711", "boot-29384712")
+    assert not procs.same_boot("boot-29384711", "boot-29385711")
+    assert not procs.same_boot("windows-boot-41", "windows-boot-42")
+    assert procs.same_boot(None, "windows-boot-42") and procs.same_boot("x", "x")
+    assert not procs.same_boot("4f0c-linux", "9a1e-linux")

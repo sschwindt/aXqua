@@ -43,6 +43,34 @@ JOB_MIGRATIONS: dict[int, Callable[[dict], dict]] = {}
 STATUS_MIGRATIONS: dict[int, Callable[[dict], dict]] = {}
 
 
+#: How long a replace waits for a reader on Windows, in seconds.
+REPLACE_PATIENCE = 2.0
+
+
+def _replace(tmp: Path, path: Path) -> None:
+    """``os.replace``, which on Windows waits for a reader that holds *path* open.
+
+    Windows refuses to replace a file another process has open without delete sharing: the
+    plugin polling ``status.json``, the reaper, a virus scanner looking at the new file, or
+    a folder that OneDrive synchronizes. Raised once, the error ended a running job in the
+    middle of a progress update (review of 2026-11-06); such a hold lasts milliseconds.
+    """
+    if os.name != "nt":
+        os.replace(tmp, path)
+        return
+    deadline = time.monotonic() + REPLACE_PATIENCE
+    pause = 0.01
+    while True:
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(pause)
+            pause = min(pause * 2, 0.2)
+
+
 def write_json_atomic(path: str | os.PathLike, payload: dict[str, Any], *,
                       fsync: bool = True) -> Path:
     """Replace *path* with *payload* atomically. Returns the path."""
@@ -56,7 +84,7 @@ def write_json_atomic(path: str | os.PathLike, payload: dict[str, Any], *,
             fh.flush()
             if fsync:
                 os.fsync(fh.fileno())
-        os.replace(tmp, path)
+        _replace(tmp, path)
         if fsync:
             _fsync_dir(path.parent)
     finally:

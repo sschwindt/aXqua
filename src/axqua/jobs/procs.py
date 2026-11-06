@@ -27,7 +27,7 @@ import sys
 import time
 from pathlib import Path
 
-__all__ = ["boot_id", "host_id", "pid_alive", "process_start_time", "self_start_time"]
+__all__ = ["boot_id", "host_id", "pid_alive", "process_start_time", "same_boot", "self_start_time"]
 
 
 def host_id() -> str:
@@ -51,11 +51,46 @@ def boot_id() -> str | None:
             return linux.read_text(encoding="utf-8").strip()
     except OSError:
         pass
+    counted = _windows_boot_count()
+    if counted is not None:
+        return f"windows-boot-{counted}"
     try:
         booted = time.time() - time.monotonic()
     except (OSError, ValueError):   # pragma: no cover
         return None
     return f"boot-{int(booted // 60)}"      # minute resolution: coarse on purpose
+
+
+#: How far apart, in minutes, two derived boot ids (``boot-<minute>``) may be and still name one boot: the wall clock is corrected while the computer runs (time service, a manual change), which moves the derived boot instant, and a new boot is never a few minutes from the last.
+DERIVED_TOLERANCE = 5
+
+
+def same_boot(recorded: str | None, current: str | None) -> bool:
+    """Whether two boot ids name the same boot; unknown counts as the same (nothing to judge by)."""
+    if not recorded or not current or recorded == current:
+        return True
+    if recorded.startswith("boot-") and current.startswith("boot-"):
+        try:
+            return abs(int(recorded[5:]) - int(current[5:])) <= DERIVED_TOLERANCE
+        except ValueError:
+            return False
+    return False
+
+
+def _windows_boot_count() -> int | None:
+    """The boot counter Windows keeps (``BootId`` of the prefetcher), which a clock correction does not move."""
+    if os.name != "nt":
+        return None
+    try:   # pragma: no cover - Windows only
+        import winreg
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                             r"SYSTEM\CurrentControlSet\Control\Session Manager"
+                             r"\Memory Management\PrefetchParameters")
+        with key:
+            value, _ = winreg.QueryValueEx(key, "BootId")
+        return int(value)
+    except (ImportError, OSError, ValueError, TypeError):
+        return None
 
 
 def pid_alive(pid: int | None) -> bool:

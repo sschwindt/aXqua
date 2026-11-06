@@ -65,7 +65,11 @@ class SettingsDialog(QDialog):
         layout.addWidget(buttons)
 
     def _browse(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(self, "Where is axqua?")
+        import os
+
+        # on Windows the program is axqua.exe in the Scripts folder of its environment
+        wanted = "axqua (axqua.exe);;All files (*)" if os.name == "nt" else ""
+        path, _ = QFileDialog.getOpenFileName(self, "Where is axqua?", "", wanted)
         if path:
             self.executable.setText(path)
 

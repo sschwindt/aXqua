@@ -248,3 +248,30 @@ def test_a_dead_pid_is_not_alive():
     assert not procs.pid_alive(_dead_pid())
     assert not procs.pid_alive(0)
     assert not procs.pid_alive(None)
+
+
+def test_a_status_write_waits_for_a_reader_on_windows(monkeypatch, tmp_path):
+    """Windows refuses to replace a file another process has open; the plugin's poll or a
+    virus scanner holds it for milliseconds, and the error used to end the job (review of 2026-11-06)."""
+    from axqua.jobs import store
+
+    class OnWindows:
+        name = "nt"
+
+        def __getattr__(self, attr):
+            return getattr(os, attr)
+
+    real_replace = os.replace
+    refusals = []
+
+    def replace(src, dst):
+        if len(refusals) < 3:
+            refusals.append(dst)
+            raise PermissionError(13, "The process cannot access the file")
+        real_replace(src, dst)
+
+    fake_os = OnWindows()
+    fake_os.replace = replace
+    monkeypatch.setattr(store, "os", fake_os)
+    target = store.write_json_atomic(tmp_path / "status.json", {"state": "RUNNING"}, fsync=False)
+    assert len(refusals) == 3 and json.loads(target.read_text())["state"] == "RUNNING"

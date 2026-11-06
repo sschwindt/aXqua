@@ -100,7 +100,14 @@ def settings_path() -> Path:
     if os.environ.get("AXQUA_HOME"):
         return Path(os.environ["AXQUA_HOME"]) / SETTINGS_NAME
     base = os.environ.get("XDG_CONFIG_HOME") or (Path.home() / ".config")
-    return Path(base) / "axqua" / SETTINGS_NAME
+    unix_style = Path(base) / "axqua"
+    if os.name == "nt" and os.environ.get("APPDATA"):
+        # %APPDATA%\axqua, the folder of profiles.yml and the job settings too; a computer
+        # that already has its settings in ~/.config/axqua (aXqua 1.3 and older) keeps them
+        appdata = Path(os.environ["APPDATA"]) / "axqua"
+        legacy = any((unix_style / name).is_file() for name in (SETTINGS_NAME, "default.axq-profile"))
+        return (unix_style if legacy else appdata) / SETTINGS_NAME
+    return unix_style / SETTINGS_NAME
 
 
 def _read_yaml(path: Path) -> dict:

@@ -146,7 +146,7 @@ def _pull(home: Path, paths: list[Path]) -> subprocess.CompletedProcess:
         ["git", "-C", str(home), "lfs", "pull",
          "--include=" + ",".join(str(path).replace(os.sep, "/") for path in paths),
          "--exclude="],
-        capture_output=True, text=True, check=False)
+        capture_output=True, encoding="utf-8", errors="replace", check=False)
 
 
 def fetch_inputs(home: str | os.PathLike, *, chunk: int = CHUNK, retries: int = 3,

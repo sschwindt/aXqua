@@ -221,7 +221,9 @@ def launch_driver(environment: SolverEnvironment, driver: Path, config_path: Pat
     if env:
         import os
         merged = {**os.environ, **{k: str(v) for k, v in env.items()}}
-    return subprocess.run(argv, env=merged).returncode
+    from axqua.core.environment import process_args
+
+    return subprocess.run(process_args(argv), env=merged).returncode
 
 
 #: The name of the log a HydroBayesCal driver keeps in its results folder, and the line

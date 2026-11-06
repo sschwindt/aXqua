@@ -897,3 +897,31 @@ def test_every_code_of_the_profile_check_is_explained_in_the_documentation():
     missing = sorted(code for code in codes
                      if f".. _{code.replace('.', '-').replace('_', '-')}:" not in pages)
     assert missing == []
+
+
+def test_a_wsl_script_is_not_made_a_windows_path(as_windows):
+    """On Windows, Path('/opt/x.sh').absolute() is C:\\opt\\x.sh: a file on neither side (review of 2026-11-06)."""
+    from axqua.core import profile as profiles
+
+    as_windows(profiles)
+    kept = profiles.absolute_script("/opt/telemac/configs/pysource.sh")
+    assert kept.as_posix() == "/opt/telemac/configs/pysource.sh"      # not C:/opt/...
+    unc = r"\\wsl.localhost\Ubuntu\home\u\opt\pysource.sh"
+    assert str(profiles.absolute_script(unc)) == unc
+    binding = profiles.SolverBinding(setup_script=Path("/opt/telemac/configs/pysource.sh"),
+                                     environment="wsl", distro="Ubuntu")
+    assert binding.as_dict()["setup_script"] == "/opt/telemac/configs/pysource.sh"
+
+
+def test_on_windows_the_profile_lives_in_appdata_unless_an_older_one_is_in_dot_config(monkeypatch, tmp_path, as_windows):
+    from axqua.core import machine
+
+    monkeypatch.delenv("AXQUA_HOME", raising=False)
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+    monkeypatch.setenv("APPDATA", str(tmp_path / "Roaming"))
+    monkeypatch.setattr(machine.Path, "home", classmethod(lambda cls: tmp_path))
+    as_windows(machine)
+    assert machine.settings_path().parent == tmp_path / "Roaming" / "axqua"
+    (tmp_path / ".config" / "axqua").mkdir(parents=True)
+    (tmp_path / ".config" / "axqua" / "default.axq-profile").write_text("name: old\n")
+    assert machine.settings_path().parent == tmp_path / ".config" / "axqua"

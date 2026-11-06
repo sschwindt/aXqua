@@ -23,7 +23,9 @@ from pathlib import Path
 from typing import Callable
 
 from axqua.config import TelemacEnv
-from axqua.core.environment import SolverEnvironment
+from axqua.core.environment import (
+    EnvironmentKind, SolverEnvironment, output_encoding, process_args,
+)
 
 
 class ShellRuntime:
@@ -76,19 +78,32 @@ class ShellRuntime:
         *env* replaces the child's environment wholesale, which is how a detached job
         hands over an already-captured solver environment instead of sourcing it again.
         """
-        args = self._wrap(command)
+        argv = self._wrap(command)
+        # cmd writes the OEM code page, everything else UTF-8; a byte that does not decode
+        # becomes a replacement character instead of an exception in the middle of a run
+        text_kwargs = {"encoding": output_encoding(self.environment.kind,
+                                                   cmd=argv[0].lower() in ("cmd", "cmd.exe")),
+                       "errors": "replace"}
+        args = process_args(argv)
+        if self.environment.kind is EnvironmentKind.WSL:
+            from axqua.core.wsl import environment as wsl_environment
+            env = wsl_environment(env)          # WSL_UTF8: wsl.exe's own messages readable
         cwd = str(cwd) if cwd else None
+        popen_kwargs: dict = {}
+        if os.name == "nt":
+            # a console window per step would pop up from QGIS, and closing it kills the step
+            popen_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
         if on_line is None:
             return subprocess.run(
-                args, cwd=cwd, check=check, text=True, capture_output=True, env=env,
+                args, cwd=cwd, check=check, capture_output=True, env=env,
+                **text_kwargs, **popen_kwargs,
             )
         # A new session makes the child a process-group leader, so killpg reaches every
         # descendant. Harmless when nothing ever cancels.
-        popen_kwargs: dict = {}
         if os.name != "nt":
             popen_kwargs["start_new_session"] = True
         proc = subprocess.Popen(
-            args, cwd=cwd, text=True, bufsize=1, env=env,
+            args, cwd=cwd, bufsize=1, env=env, **text_kwargs,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **popen_kwargs,
         )
         captured: list[str] = []

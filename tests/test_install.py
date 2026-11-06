@@ -1477,3 +1477,13 @@ def test_a_terminal_asks_with_sudo_and_the_desktop_with_pkexec(monkeypatch):
     assert runner.elevated(["/bin/true"], interactive=False) == ["pkexec", "/bin/true"]
     monkeypatch.setattr(recipes, "elevation", lambda: "")
     assert runner.elevated(["/bin/true"], interactive=False) is None
+
+
+def test_installer_steps_run_in_english_whatever_the_computer_is_set_to(monkeypatch):
+    """apt's answers are parsed in English, and a German system writes them in German (review of 2026-11-06)."""
+    monkeypatch.setenv("LANG", "de_DE.UTF-8")
+    monkeypatch.setenv("LC_ALL", "de_DE.UTF-8")
+    monkeypatch.setenv("LANGUAGE", "de_DE:de")
+    env = recipes.clean_environment()
+    assert env["LANG"] == env["LC_ALL"] == "C.UTF-8"
+    assert "LANGUAGE" not in env

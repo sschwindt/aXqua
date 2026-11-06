@@ -380,3 +380,62 @@ def test_the_commands_own_exit_code_still_propagates(tmp_path):
     script.write_text("export MARKER=set\n")
     env = SolverEnvironment(kind=EnvironmentKind.POSIX, setup_script=script)
     assert subprocess.run(env.command("exit 42")).returncode == 42
+
+
+# --------------------------------------------------------------------------- #
+# Windows: cmd quoting, the code page, PATH spelled Path (review of 2026-11-06)
+# --------------------------------------------------------------------------- #
+
+
+def test_a_cmd_payload_goes_to_windows_as_one_string(monkeypatch, as_windows):
+    """list2cmdline escapes the quotes of `call "C:\\Program Files\\x.bat"` as \\", which
+    cmd does not understand, so the batch file was never called."""
+    from axqua.core import environment as envmod
+
+    env = SolverEnvironment(kind="windows", setup_script=r"C:\Program Files\TELEMAC\env.bat")
+    argv = env.command("telemac2d.py case.cas")
+    as_windows(envmod)
+    line = envmod.process_args(argv)
+    assert line == r'cmd /s /c "call "C:\Program Files\TELEMAC\env.bat" && telemac2d.py case.cas"'
+    assert '\\"' not in line
+    bash = SolverEnvironment(kind="posix").command("echo hi")
+    assert envmod.process_args(bash) == bash
+    monkeypatch.setattr(envmod, "os", __import__("os"))
+    assert envmod.process_args(argv) == argv
+
+
+def test_set_output_gives_upper_case_names_like_os_environ_on_windows():
+    from axqua.core.environment import _parse_set
+
+    parsed = _parse_set("Path=C:\\TELEMAC\\bin;C:\\Windows\nHOMETEL=C:\\TELEMAC\nwindir=C:\\Windows")
+    assert parsed["PATH"] == "C:\\TELEMAC\\bin;C:\\Windows"
+    assert "Path" not in parsed and parsed["WINDIR"] == "C:\\Windows"
+
+
+def test_cmd_output_is_read_in_the_oem_code_page_on_windows(monkeypatch, as_windows):
+    from axqua.core import environment as envmod
+
+    as_windows(envmod)
+    assert envmod.output_encoding("windows", cmd=True) == "oem"
+    assert envmod.output_encoding("windows", cmd=False) == "utf-8"     # a bundled bash
+    assert envmod.output_encoding("wsl") == "utf-8"
+    monkeypatch.setattr(envmod, "os", __import__("os"))
+    assert envmod.output_encoding("windows", cmd=True) == "utf-8"
+
+
+def test_a_path_inside_wsl_has_a_windows_spelling_through_its_distribution():
+    env = SolverEnvironment(kind="wsl", distro="Ubuntu-24.04")
+    assert env.untranslate("/srv/stud/case/r2d.slf") == r"\\wsl.localhost\Ubuntu-24.04\srv\stud\case\r2d.slf"
+    assert env.untranslate("/mnt/c/Users/x") == "C:\\Users\\x"
+    assert env.translate(r"\\wsl.localhost\Ubuntu-24.04\srv\stud\x.sh") == "/srv/stud/x.sh"
+    assert windows_to_wsl(r"\\wsl$\Ubuntu\opt\telemac") == "/opt/telemac"
+
+
+def test_what_the_shell_wrote_stays_out_of_the_english_sentence():
+    from axqua.core.environment import EnvironmentCaptureError
+
+    exc = EnvironmentCaptureError("could not enter the wsl environment via /opt/x.sh",
+                                  "Das System kann die angegebene Datei nicht finden.")
+    assert exc.message.endswith("/opt/x.sh")
+    assert str(exc).splitlines()[1] == "System output: Das System kann die angegebene Datei nicht finden."
+    assert str(EnvironmentCaptureError("plain")) == "plain"

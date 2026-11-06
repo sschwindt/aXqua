@@ -63,7 +63,7 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 
 log = logging.getLogger("axqua")
 
@@ -181,10 +181,15 @@ class SolverEnvironment:
         return windows_to_wsl(text)
 
     def untranslate(self, path: str) -> str:
-        """A target-environment path as the host spells it (the WSL inverse)."""
+        """A target-environment path as the host spells it (the WSL inverse).
+
+        A path below ``/mnt/<drive>`` is the Windows drive path; any other path inside the distribution is reached through ``\\\\wsl.localhost\\<distro>\\...`` (the default distribution where none is named, which is the one ``wsl.exe`` runs).
+        """
         if self.kind is not EnvironmentKind.WSL:
             return path
-        return wsl_to_windows(path)
+        from axqua.core import wsl
+        distro = self.distro or (wsl.default_distro() if os.name == "nt" else None)
+        return wsl_to_windows(path, distro)
 
     # --------------------------------------------------------------- launching
     def command(self, command: str) -> list[str]:
@@ -323,12 +328,19 @@ class SolverEnvironment:
             # variables do often enough that line-splitting silently truncates them
             argv = self._bash_command(f"printf '%s' {_MARKER}; env -0")
             parse = _parse_env0
-        proc = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+        proc = subprocess.run(process_args(argv), capture_output=True, timeout=timeout,
+                              env=_wsl_env() if self.kind is EnvironmentKind.WSL else None)
+        encoding = output_encoding(self.kind, cmd=parse is _parse_set)
+        stdout = proc.stdout.decode(encoding, "replace")
         if proc.returncode != 0:
+            stderr = proc.stderr.decode(encoding, "replace")
+            if self.kind is EnvironmentKind.WSL:
+                from axqua.core.wsl import decode
+                stderr = decode(proc.stderr)       # wsl.exe's own messages are UTF-16
             raise EnvironmentCaptureError(
-                f"could not enter the {self.kind} environment via {self.setup_script}: "
-                f"{(proc.stderr or proc.stdout or '').strip()[:400]}")
-        captured = parse(_after_marker(proc.stdout))
+                f"could not enter the {self.kind} environment via {self.setup_script}",
+                (stderr or stdout or "").strip()[:400])
+        captured = parse(_after_marker(stdout))
         captured.update(self.overrides)
         return captured
 
@@ -420,7 +432,40 @@ class SolverEnvironment:
 
 
 class EnvironmentCaptureError(RuntimeError):
-    """Raised when a setup script cannot be entered."""
+    """Raised when a setup script cannot be entered.
+
+    *output* is what the shell or ``wsl.exe`` wrote, in the language of the computer; it is kept apart from the English message and shown on a line of its own (``System output:``), never inside the English sentence.
+    """
+
+    def __init__(self, message: str, output: str = "") -> None:
+        self.message = message
+        self.output = output
+        super().__init__(f"{message}\nSystem output: {output}" if output else message)
+
+
+def output_encoding(kind: "EnvironmentKind | str", *, cmd: bool = False) -> str:
+    """The encoding a program of this environment writes to a pipe.
+
+    ``cmd.exe`` and the programs of a Windows console write the OEM code page (850 on a German Windows, where Python would assume the ANSI page 1252 and turn ``ü`` into an error); Linux, WSL and bash write UTF-8.
+    """
+    del kind    # a bash of a Windows installation (MSYS) writes UTF-8 like any other bash
+    return "oem" if os.name == "nt" and cmd else "utf-8"
+
+
+def process_args(argv: list[str]) -> "list[str] | str":
+    """What to hand to :mod:`subprocess` for *argv* from :meth:`SolverEnvironment.command`.
+
+    On Windows, a list is joined by ``subprocess.list2cmdline``, which escapes the quotes inside ``call "C:\\Program Files\\x.bat" && ...`` as ``\\"``; ``cmd.exe`` does not know that escape, so the batch file was never called. A ``cmd /c`` payload therefore goes as the one string ``cmd /s /c "<payload>"``, which cmd takes verbatim. Everything else stays a list.
+    """
+    if os.name == "nt" and len(argv) == 3 and argv[0].lower() in ("cmd", "cmd.exe") \
+            and argv[1].lower() == "/c":
+        return f'{argv[0]} /s /c "{argv[2]}"'
+    return argv
+
+
+def _wsl_env() -> dict[str, str]:
+    from axqua.core.wsl import environment
+    return environment()
 
 
 # --------------------------------------------------------------------------- #
@@ -461,6 +506,10 @@ def _parse_set(text: str) -> dict[str, str]:
     for line in text.splitlines():
         name, sep, value = line.partition("=")
         if sep and name and not name.startswith(" "):
+            # Windows names are case-insensitive and ``set`` writes ``Path``; upper case is how
+            # ``os.environ`` spells them on Windows, so a lookup of PATH finds it and a merge
+            # with os.environ gives one PATH, not PATH (the old one, found first) and Path
+            name = name.upper()
             out[name] = value
             last = name
         elif last is not None:
@@ -474,32 +523,18 @@ def _parse_set(text: str) -> dict[str, str]:
 
 
 def windows_to_wsl(path: str) -> str:
-    """``C:\\scratch\\case`` -> ``/mnt/c/scratch/case``.
+    """``C:\\scratch\\case`` -> ``/mnt/c/scratch/case``; ``\\\\wsl.localhost\\<distro>\\home\\x`` -> ``/home/x``.
 
-    Done arithmetically rather than by shelling out to ``wslpath``: this is called for
-    every path crossing the boundary, and a subprocess per path would dominate the cost
-    of building a case. A path that is already POSIX passes through unchanged, so the
-    function is idempotent.
+    Done arithmetically rather than by shelling out to ``wslpath`` (see :func:`axqua.core.wsl.to_linux`): this is called for every path crossing the boundary. A path that is already POSIX passes through unchanged, so the function is idempotent.
     """
-    if not path or path.startswith("/"):
-        return path.replace("\\", "/") if "\\" in path else path
-    pure = PureWindowsPath(path)
-    drive = pure.drive.rstrip(":").lower()
-    if not drive:
-        return path.replace("\\", "/")
-    rest = "/".join(pure.parts[1:])
-    return f"/mnt/{drive}/{rest}" if rest else f"/mnt/{drive}"
+    from axqua.core.wsl import to_linux
+    return to_linux(path)
 
 
-def wsl_to_windows(path: str) -> str:
-    """``/mnt/c/scratch/case`` -> ``C:\\scratch\\case`` (the inverse)."""
-    pure = PurePosixPath(path)
-    parts = pure.parts
-    if len(parts) >= 3 and parts[0] == "/" and parts[1] == "mnt" and len(parts[2]) == 1:
-        drive = parts[2].upper()
-        rest = "\\".join(parts[3:])
-        return f"{drive}:\\{rest}" if rest else f"{drive}:\\"
-    return path
+def wsl_to_windows(path: str, distro: str | None = None) -> str:
+    """``/mnt/c/scratch/case`` -> ``C:\\scratch\\case``; with *distro*, ``/home/x`` -> ``\\\\wsl.localhost\\<distro>\\home\\x``."""
+    from axqua.core.wsl import to_windows
+    return to_windows(path, distro)
 
 
 def wsl_available() -> bool:

@@ -405,14 +405,19 @@ def clean_environment() -> dict[str, str]:
     The proxy and certificate variables are kept, because without them a download
     behind a proxy fails; the display variables are kept for the graphical installers
     of the postprocessors.
+
+    The language is English (``C.UTF-8``) whatever the computer is set to: aXqua reads the
+    answers of apt (``Unable to locate package``, ``selecting ... instead of``), which a
+    German system writes in German, and an English installation log is one language with
+    the English lines of aXqua (review of 2026-11-06).
     """
-    keep = {"HOME", "USER", "LOGNAME", "TERM", "LANG", "LC_ALL", "DISPLAY",
+    keep = {"HOME", "USER", "LOGNAME", "TERM", "DISPLAY",
             "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS",
             "XAUTHORITY", "http_proxy", "https_proxy", "no_proxy",
             "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "SSL_CERT_FILE"}
     env = {key: value for key, value in os.environ.items() if key in keep}
     env["PATH"] = SYSTEM_PATH
-    env.setdefault("LANG", "C.UTF-8")
+    env["LANG"] = env["LC_ALL"] = "C.UTF-8"
     # The OpenFOAM installer is Python. Without this, running it leaves compiled
     # files beside its sources, which for a local copy of the scripts
     # (AXQUA_INSTALLERS) is somebody's working folder: the first real runs left 17
@@ -424,8 +429,8 @@ def clean_environment() -> dict[str, str]:
 
 def _run(argv: list[str], *, timeout: float = 120.0, cwd: Path | None = None
          ) -> subprocess.CompletedProcess:
-    return subprocess.run([str(a) for a in argv], capture_output=True, text=True,
-                          timeout=timeout, env=clean_environment(),
+    return subprocess.run([str(a) for a in argv], capture_output=True, encoding="utf-8",
+                          errors="replace", timeout=timeout, env=clean_environment(),
                           cwd=str(cwd) if cwd else None, check=False)
 
 

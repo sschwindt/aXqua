@@ -288,6 +288,68 @@ def test_arguments_are_passed_as_a_list_never_a_shell_string(tmp_path, monkeypat
     assert "/tmp/a case/with 'quotes'/case-config.yml" in seen["argv"]
 
 
+def test_axqua_is_started_without_the_python_and_the_libraries_of_qgis(monkeypatch, tmp_path):
+    """QGIS for Windows sets PYTHONHOME, PYTHONPATH, GDAL_DATA and PROJ_DATA for its own
+    Python; inherited, they made the axqua of a Miniforge environment start QGIS's Python or
+    read another proj.db (review of 2026-11-06)."""
+    qgis = tmp_path / "OSGeo4W"
+    base = {"PYTHONHOME": str(qgis / "apps" / "Python312"), "PYTHONPATH": "x", "GDAL_DATA": "g",
+            "PROJ_DATA": "p", "proj_lib": "p", "QT_PLUGIN_PATH": "q", "HOME": "h",
+            "PATH": os.pathsep.join([str(qgis / "bin"), str(tmp_path / "miniforge3" / "Scripts"), "/usr/bin"])}
+    env = runner_client.backend_env(base, root=qgis)
+    for name in ("PYTHONHOME", "PYTHONPATH", "GDAL_DATA", "PROJ_DATA", "proj_lib", "QT_PLUGIN_PATH"):
+        assert name not in env
+    assert env["HOME"] == "h" and env["PYTHONIOENCODING"] == "utf-8" and env["PYTHONUTF8"] == "1"
+    monkeypatch.setattr(runner_client, "os", _OnWindows())
+    env = runner_client.backend_env(base, root=qgis)
+    assert str(qgis / "bin") not in env["PATH"].split(os.pathsep)
+    assert str(tmp_path / "miniforge3" / "Scripts") in env["PATH"].split(os.pathsep)
+
+    seen = {}
+
+    def fake_run(argv, **kwargs):
+        seen.update(kwargs)
+        class Proc:
+            returncode = 0
+            stdout = '{"ok": true, "data": {}}'
+            stderr = ""
+        return Proc()
+
+    monkeypatch.setattr(runner_client, "os", os)
+    monkeypatch.setattr(runner_client.subprocess, "run", fake_run)
+    monkeypatch.setenv("PYTHONHOME", "/somewhere/qgis/python")
+    client = runner_client.RunnerClient("stub")
+    client._info = runner_client.RunnerInfo("stub", "1.3.1", "settings")
+    client.list_jobs()
+    assert "PYTHONHOME" not in seen["env"]
+    assert seen["encoding"] == "utf-8" and seen["errors"] == "replace"
+
+
+class _OnWindows:
+    name = "nt"
+
+    def __getattr__(self, attr):
+        return getattr(os, attr)
+
+
+def test_what_windows_said_is_on_a_line_of_its_own():
+    error = runner_client.RunnerError("could not run axqua",
+                                      stderr="[WinError 2] Das System kann die angegebene Datei nicht finden")
+    lines = error.user_text().splitlines()
+    assert lines[0] == "could not run axqua"
+    assert lines[1] == "System output:" and lines[2].startswith("[WinError 2]")
+
+
+def test_an_axqua_in_the_python_of_qgis_is_named_as_such(monkeypatch, tmp_path):
+    root = tmp_path / "QGIS 3.44"
+    monkeypatch.setattr(runner_client, "qgis_root", lambda: root)
+    monkeypatch.setattr(runner_client, "os", _OnWindows())
+    inside = str(root / "apps" / "Python312" / "Scripts" / "axqua.exe")
+    assert runner_client.in_qgis_python(inside)
+    assert not runner_client.in_qgis_python(str(tmp_path / "miniforge3" / "envs" / "axqua-env" / "Scripts" / "axqua.exe"))
+    assert "Python of QGIS" in runner_client.RunnerInfo(inside, "1.3.1", "PATH").describe()
+
+
 # -------------------------------------------------------------------- the project
 
 

@@ -62,7 +62,7 @@ def reconcile(job_dir: JobDir | str | os.PathLike, *, write: bool = True
 
     recorded_boot = handle.get("boot_id")
     current_boot = procs.boot_id()
-    if recorded_boot and current_boot and recorded_boot != current_boot:
+    if not procs.same_boot(recorded_boot, current_boot):
         return _settle(jd, status, _resolution(jd),
                        "the machine restarted while the job was running", write=write)
 

@@ -35,6 +35,7 @@ import json
 import os
 import shutil
 import subprocess  # nosec B404
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
@@ -44,6 +45,16 @@ ENV_VAR = "AXQUA_EXE"
 #: rename is not something the plugin should silently ignore.
 LEGACY_ENV_VAR = "HYDROMATE_EXE"
 SETTINGS_KEY = "axqua/executable"
+
+#: Variables that QGIS sets for its own Python and its own libraries. Inherited, they make
+#: the axqua of another Python environment start QGIS's Python (``PYTHONHOME``), import
+#: QGIS's packages (``PYTHONPATH``) or read a ``proj.db`` and GDAL plugins of other versions:
+#: on QGIS for Windows the first call failed before aXqua said a word (review of 2026-11-06).
+QGIS_VARIABLES = (
+    "PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP", "PYTHONEXECUTABLE", "PYTHONUSERBASE",
+    "PYTHONNOUSERSITE", "GDAL_DATA", "GDAL_DRIVER_PATH", "GDAL_FILENAME_IS_UTF8",
+    "PROJ_DATA", "PROJ_LIB", "QT_PLUGIN_PATH", "QGIS_PREFIX_PATH",
+)
 
 #: Short calls only. Nothing here ever runs a solver - that is the whole point of the
 #: job runner - so a call that takes this long has gone wrong.
@@ -78,12 +89,13 @@ class RunnerError(RuntimeError):
         if self.remedy:
             parts.append(self.remedy)
         else:
+            # what the program or Windows wrote, in the language of the computer: on a line
+            # of its own, never inside the English sentence
             detail = _tail(self.stderr)
             if self.returncode:
-                parts.append(f"axqua exited with code {self.returncode}."
-                             + (f"\n{detail}" if detail else ""))
-            elif detail:
-                parts.append(detail)
+                parts.append(f"axqua exited with code {self.returncode}.")
+            if detail:
+                parts.append(f"System output:\n{detail}")
         return "\n".join(parts)
 
 
@@ -111,7 +123,8 @@ class RunnerInfo:
     source: str          # settings | environment | PATH
 
     def describe(self) -> str:
-        return f"axqua {self.version} at {self.path} (found via {self.source})"
+        text = f"axqua {self.version} at {self.path} (found via {self.source})"
+        return text + ("\n\n" + QGIS_PYTHON_WARNING if in_qgis_python(self.path) else "")
 
 
 @dataclass
@@ -144,7 +157,8 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
         try:
             version = _probe(path)
         except RunnerError as exc:
-            problems.append(f"  {source}: {path} - {exc.message}")
+            problems.append(f"  {source}: {path} - {exc.message}"
+                            + (f"\n    System output: {_tail(exc.stderr, 2)}" if exc.stderr else ""))
             continue
         return RunnerInfo(path=path, version=version, source=source)
 
@@ -175,20 +189,24 @@ def _probe(path: str) -> str:
         raise RunnerError("no such file")
     if not os.access(resolved, os.X_OK):
         raise RunnerError("not executable")
+    if os.name == "nt" and resolved.suffix.lower() not in (".exe", ".bat", ".cmd", ".com"):
+        # os.access says yes to any file on Windows; running it fails with a WinError 193
+        raise RunnerError("not a Windows program: select the axqua.exe in the Scripts "
+                          "folder of the environment aXqua is installed in")
     try:
         # A list, never a string, and never shell=True: the argument vector goes to
         # execve untouched, so nothing in *path* can be interpreted as a command,
         # a pipe or a redirection. This is what makes an arbitrary configured path
         # safe to run rather than merely usual.
         proc = subprocess.run(  # nosec B603
-            [str(resolved), "--version"], capture_output=True, text=True,
-            timeout=30, **_no_window())
+            [str(resolved), "--version"], capture_output=True, **_text(),
+            timeout=30, env=backend_env(), **_no_window())
     except FileNotFoundError:
         raise RunnerError("no such file") from None
     except PermissionError:
         raise RunnerError("not executable") from None
     except (OSError, subprocess.SubprocessError) as exc:
-        raise RunnerError(str(exc)) from exc
+        raise RunnerError("it could not be started", stderr=str(exc)) from exc
     text = (proc.stdout or proc.stderr or "").strip()
     if proc.returncode != 0:
         raise RunnerError(f"'--version' exited with {proc.returncode}: {text[:200]}")
@@ -222,6 +240,69 @@ def _require_minimum(version: str) -> None:
             f"this plugin needs axqua {MINIMUM_VERSION[0]}.{MINIMUM_VERSION[1]} or "
             f"newer, and this one is {version}",
             remedy="Upgrade it with 'pip install --upgrade axqua' in its Python environment.")
+
+
+def qgis_root() -> Path | None:
+    """The folder QGIS for Windows is installed in (``C:\\OSGeo4W``, ``C:\\Program Files\\QGIS 3.44.5``), or ``None``."""
+    if os.environ.get("OSGEO4W_ROOT"):
+        return Path(os.environ["OSGEO4W_ROOT"])
+    try:
+        from qgis.core import QgsApplication
+        prefix = Path(QgsApplication.prefixPath())
+    except Exception:  # noqa: BLE001 - outside QGIS there is no QGIS folder
+        return None
+    return prefix.parents[1] if prefix.parent.name.lower() == "apps" else None
+
+
+def _inside(path: str, folder: Path | None) -> bool:
+    if folder is None or not path:
+        return False
+    try:
+        return os.path.normcase(os.path.abspath(path)).startswith(
+            os.path.normcase(os.path.abspath(str(folder))) + os.sep)
+    except (OSError, ValueError):
+        return False
+
+
+def backend_env(base: dict | None = None, *, root: Path | None = None) -> dict:
+    """The environment axqua is started with: QGIS's, without what belongs to QGIS's Python.
+
+    On Windows the folders of QGIS also leave ``PATH``, so the DLLs of QGIS's GDAL are not
+    found before those of aXqua's. The backend runs in Python's UTF-8 mode, so what it
+    writes and reads is UTF-8 on every computer.
+    """
+    env = {key: value for key, value in (os.environ if base is None else base).items()
+           if key.upper() not in QGIS_VARIABLES}
+    if os.name == "nt":
+        root = root if root is not None else qgis_root()
+        for key in [k for k in env if k.upper() == "PATH"]:
+            env[key] = os.pathsep.join(entry for entry in env[key].split(os.pathsep)
+                                       if entry and not _inside(entry, root))
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"
+    return env
+
+
+def in_qgis_python(path: str) -> bool:
+    """Whether *path* is an axqua installed into the Python of QGIS itself.
+
+    It passes ``--version`` there and fails at the first mesh (no gmsh, no rasterio), and
+    ``pip install axqua`` into QGIS's Python can break QGIS's own numpy, PROJ and GDAL.
+    """
+    return os.name == "nt" and (_inside(path, qgis_root()) or _inside(path, Path(sys.prefix)))
+
+
+#: Said about an axqua inside QGIS's Python.
+QGIS_PYTHON_WARNING = (
+    "This axqua is installed in the Python of QGIS. It lacks the programs aXqua needs for "
+    "meshes and rasters, and installing them there can break QGIS. Install axqua in an "
+    "environment of its own (Miniforge or Anaconda: conda create -n axqua-env python=3.12, "
+    "then pip install axqua) and enter that axqua.exe here.")
+
+
+def _text() -> dict:
+    """How the output of axqua is read: UTF-8, and a byte that is not UTF-8 is replaced, not an error."""
+    return {"encoding": "utf-8", "errors": "replace"}
 
 
 def _no_window() -> dict:
@@ -284,15 +365,15 @@ class RunnerClient:
             # space, a quote or a semicolon stays one argument and cannot start a
             # second command.
             proc = subprocess.run(  # nosec B603
-                argv, capture_output=True, text=True, input=input_text,
-                timeout=timeout or self.timeout, **_no_window())
+                argv, capture_output=True, **_text(), input=input_text,
+                timeout=timeout or self.timeout, env=backend_env(), **_no_window())
         except subprocess.TimeoutExpired as exc:
             raise RunnerError(
                 f"axqua did not answer within {timeout or self.timeout:.0f}s",
                 remedy="The job root may be on a slow or unreachable filesystem.",
             ) from exc
         except (OSError, subprocess.SubprocessError) as exc:
-            raise RunnerError(f"could not run axqua: {exc}") from exc
+            raise RunnerError("could not run axqua", stderr=str(exc)) from exc
 
         if not expect_json:
             return Result(ok=proc.returncode == 0, command=" ".join(args),

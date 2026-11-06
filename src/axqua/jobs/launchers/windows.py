@@ -18,6 +18,8 @@ The object must be **named**
     exactly the failure the Job Object was introduced to prevent. Hence
     ``Local\\axqua-<job_id>`` plus ``OpenJobObjectW`` at cancel time.
 
+The name lives as long as a handle does, so the handle is duplicated into the runner (:meth:`WindowsJobObjectLauncher._hand_over`): the object and its name then last as long as the job.
+
 **Never executed against a real Windows install.** The argv and flag construction are
 unit-tested because they are host-independent; the ``kernel32`` calls are not, and this
 module says so rather than implying a coverage it does not have.
@@ -76,18 +78,31 @@ class WindowsJobObjectLauncher:
         handle_out = open(stdout_path, "ab")
         try:
             proc = self._spawn(argv, cwd, env, creationflags, handle_out)
-            assigned = self._assign(job, proc)
-            if not assigned:
+            assigned = self._assign(job, proc) if job else False
+            if job and not assigned:
                 # The submitter is itself inside a job that forbids nesting (some CI
                 # runners and terminals do this). Retry breaking away, and if that also
                 # fails, run detached without a job object and say so - a job that runs
                 # and is awkward to cancel beats a job that will not start.
                 proc.kill()
-                proc = self._spawn(argv, cwd, env,
-                                   creationflags | CREATE_BREAKAWAY_FROM_JOB, handle_out)
-                assigned = self._assign(job, proc)
+                try:
+                    proc = self._spawn(argv, cwd, env,
+                                       creationflags | CREATE_BREAKAWAY_FROM_JOB, handle_out)
+                    assigned = self._assign(job, proc)
+                except AxquaEnvironmentError:
+                    # breaking away is refused too: without a job object, as promised
+                    proc = self._spawn(argv, cwd, env, creationflags, handle_out)
+            if assigned:
+                # The name of a kernel object goes with its last handle, and the handle
+                # of this process closes when `axqua submit` exits: a later `axqua cancel`
+                # found no object of that name and always fell back to taskkill (review of
+                # 2026-11-06). A handle duplicated into the runner keeps the name as long
+                # as the runner lives.
+                self._hand_over(job, proc)
         finally:
             handle_out.close()
+            if job:
+                self._close(job)
 
         if not assigned:
             log.warning("could not assign the job to a Job Object; cancellation will "
@@ -178,6 +193,34 @@ class WindowsJobObjectLauncher:
         finally:
             kernel32.CloseHandle(handle)
 
+    def _hand_over(self, job, proc) -> bool:  # pragma: no cover - Windows only
+        """Duplicate the handle of *job* into the process *proc*, which then keeps the object and its name."""
+        try:
+            import ctypes
+            from ctypes import wintypes
+            kernel32 = self._kernel32()
+            kernel32.OpenProcess.restype = wintypes.HANDLE
+            kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+            target = kernel32.OpenProcess(0x0040, False, proc.pid)      # PROCESS_DUP_HANDLE
+            if not target:
+                return False
+            try:
+                copied = wintypes.HANDLE()
+                return bool(kernel32.DuplicateHandle(
+                    kernel32.GetCurrentProcess(), job, target, ctypes.byref(copied),
+                    0, False, 0x00000002))                               # DUPLICATE_SAME_ACCESS
+            finally:
+                kernel32.CloseHandle(target)
+        except Exception as exc:  # noqa: BLE001 - cancel then falls back to taskkill
+            log.debug("could not hand the job object to pid %s: %s", proc.pid, exc)
+            return False
+
+    def _close(self, handle) -> None:  # pragma: no cover - Windows only
+        try:
+            self._kernel32().CloseHandle(handle)
+        except Exception:  # noqa: BLE001
+            pass
+
     # -- inspection ---------------------------------------------------------------
     def status(self, handle: LaunchHandle) -> LaunchState:
         if not handle.pid:
@@ -201,7 +244,8 @@ class WindowsJobObjectLauncher:
             # /T is the tree, /F is force. Weaker than a Job Object because it walks
             # parent-child links, which a re-parented rank has already lost.
             subprocess.run(["taskkill", "/PID", str(handle.pid), "/T", "/F"],
-                           capture_output=True, text=True, timeout=max(30.0, grace))
+                           capture_output=True, encoding="oem" if os.name == "nt" else "utf-8",
+                           errors="replace", timeout=max(30.0, grace))
         except (OSError, subprocess.SubprocessError) as exc:
             log.error("taskkill failed: %s", exc)
             return False

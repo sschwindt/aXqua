@@ -114,7 +114,7 @@ class JobLock:
             return False, (f"held on {record.host}, not {here}; axqua will not judge "
                            "a process on another machine")
         current_boot = procs.boot_id()
-        if record.boot_id and current_boot and record.boot_id != current_boot:
+        if not procs.same_boot(record.boot_id, current_boot):
             return True, "the machine has restarted since the lock was taken"
         if not procs.pid_alive(record.pid):
             return True, f"process {record.pid} is gone"

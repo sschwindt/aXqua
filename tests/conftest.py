@@ -139,3 +139,25 @@ def has_systemd_user() -> bool:
 
 requires_posix = pytest.mark.skipif(os.name == "nt",
                                     reason="POSIX process groups only")
+
+
+class _OsOnWindows:
+    """The ``os`` module as a module sees it on Windows: ``name`` is ``"nt"``, all else is this computer's.
+
+    Patched into one module (``monkeypatch.setattr(module, "os", _OsOnWindows())``) rather than setting ``os.name`` itself, which would make :mod:`pathlib` build Windows paths it cannot build on Linux.
+    """
+
+    name = "nt"
+
+    def __getattr__(self, attr):
+        import os
+        return getattr(os, attr)
+
+
+@pytest.fixture
+def as_windows(monkeypatch):
+    """Call with the modules that should believe they run on Windows."""
+    def patch(*modules):
+        for module in modules:
+            monkeypatch.setattr(module, "os", _OsOnWindows())
+    return patch
