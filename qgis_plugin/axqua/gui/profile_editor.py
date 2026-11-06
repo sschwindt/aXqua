@@ -44,9 +44,13 @@ FIELDS = (
     ("installations.telemac", "TELEMAC installation folder", "folder", "TELEMAC"),
     ("solvers.telemac.setup_script", "TELEMAC environment script", "file", "TELEMAC"),
     ("solvers.telemac.mpi_processes", "Processor cores", "int", "TELEMAC"),
+    ("solvers.telemac.environment", "Runs in", "choice", "TELEMAC"),
+    ("solvers.telemac.distro", "WSL distribution", "text", "TELEMAC"),
     ("installations.openfoam", "OpenFOAM installation folder", "folder", "OpenFOAM"),
     ("solvers.openfoam.setup_script", "OpenFOAM environment script", "file", "OpenFOAM"),
     ("solvers.openfoam.mpi_processes", "Processor cores", "int", "OpenFOAM"),
+    ("solvers.openfoam.environment", "Runs in", "choice", "OpenFOAM"),
+    ("solvers.openfoam.distro", "WSL distribution", "text", "OpenFOAM"),
     ("installations.paraview", "ParaView installation folder", "folder",
      "Postprocessors"),
     ("postprocessors.paraview", "ParaView program", "file", "Postprocessors"),
@@ -60,6 +64,11 @@ FIELDS = (
 )
 
 LAUNCHERS = ("auto", "systemd", "posix", "windows", "wsl")
+#: Where a code runs: empty is this computer's own system; ``wsl`` is a distribution of the Windows Subsystem for Linux (on Windows, TELEMAC and OpenFOAM run there).
+ENVIRONMENTS = ("", "posix", "windows", "wsl")
+#: ``choice row -> its answers``; the first is what an entry without a value shows.
+CHOICE_VALUES = {"jobs.launcher": LAUNCHERS, "solvers.telemac.environment": ENVIRONMENTS,
+                 "solvers.openfoam.environment": ENVIRONMENTS}
 
 #: ``folder row -> (program, the row its file is entered in, what that file is)``.
 LOCATED = {
@@ -84,6 +93,8 @@ HINTS = {
     "solvers.telemac.setup_script": "for example .../telemac-mascaret/configs/pysource.sh",
     "solvers.openfoam.setup_script": "for example .../openfoam2406/etc/bashrc",
     "jobs.root": "leave empty for the default folder of aXqua",
+    "solvers.telemac.distro": "WSL only: for example Ubuntu-24.04; empty for the default distribution",
+    "solvers.openfoam.distro": "WSL only: for example Ubuntu-24.04; empty for the default distribution",
     "python.executable": "leave empty to use the Python that runs aXqua",
 }
 
@@ -169,7 +180,7 @@ class ProfileEditor(EditorDialog):
             widget.setSingleStep(0.01)
         elif kind == "choice":
             widget = QComboBox()
-            widget.addItems(LAUNCHERS)
+            widget.addItems(CHOICE_VALUES[key])
         else:
             widget = QLineEdit()
             widget.setPlaceholderText(HINTS.get(key, ""))
@@ -255,7 +266,7 @@ class ProfileEditor(EditorDialog):
                 widget.setValue(float(value if value is not None else
                                       (0.01 if key.endswith("min_depth") else 5.0)))
             elif kind == "choice":
-                index = widget.findText(str(value or "auto"))
+                index = widget.findText(str(value or CHOICE_VALUES[key][0]))
                 widget.setCurrentIndex(max(index, 0))
             else:
                 widget.setText("" if value is None else str(value))

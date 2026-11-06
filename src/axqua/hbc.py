@@ -211,6 +211,16 @@ def launch_driver(environment: SolverEnvironment, driver: Path, config_path: Pat
 
     Returns the driver's exit code.
     """
+    import os
+
+    if os.name == "nt" and str(getattr(environment, "kind", "")) == "wsl":
+        from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
+        raise AxquaEnvironmentError(
+            "the Bayesian calibration with HydroBayesCal is not yet available on Windows with TELEMAC inside WSL",
+            subject="calibration",
+            remedy="HydroBayesCal starts TELEMAC itself and has to run where TELEMAC is. Run the calibration on a "
+                   "Linux computer (or inside the WSL distribution with an aXqua installed there); the build, the "
+                   "simulations and the validation work on Windows.")
     inner = (f"cd {shlex.quote(str(driver.parent))}; "
              f"{shlex.quote(sys.executable)} -u {shlex.quote(driver.name)} "
              f"--config {shlex.quote(str(config_path))}"
@@ -219,7 +229,6 @@ def launch_driver(environment: SolverEnvironment, driver: Path, config_path: Pat
     print(f"\nlaunching {note}:\n  {' '.join(argv[:2])} {inner}\n")
     merged = None
     if env:
-        import os
         merged = {**os.environ, **{k: str(v) for k, v in env.items()}}
     from axqua.core.environment import process_args
 

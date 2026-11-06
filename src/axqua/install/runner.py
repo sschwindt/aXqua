@@ -72,9 +72,12 @@ def installs_root() -> Path:
 
 
 def _write(folder: Path, status: dict[str, Any]) -> None:
-    tmp = folder / ".status.json.tmp"
+    from axqua.jobs.store import _replace
+
+    tmp = folder / f".status.json.{os.getpid()}.tmp"
     tmp.write_text(json.dumps(status, indent=2, default=str), encoding="utf-8")
-    os.replace(tmp, folder / "status.json")
+    # waits for a reader: the plugin in Windows reads the file the runner inside WSL replaces
+    _replace(tmp, folder / "status.json")
 
 
 def _load(folder: Path) -> dict[str, Any]:
@@ -115,6 +118,15 @@ def _alive(status: dict[str, Any]) -> bool | None:
     """Whether the runner of *status* still exists; ``None`` when it cannot be told."""
     from axqua.jobs import procs
 
+    if status.get("distro") and os.name == "nt":
+        # an installation into WSL: the runner is a Linux process, kept alive by the wsl.exe this computer started for it, and that one is what Windows can ask about
+        keeper = status.get("windows_pid")
+        if not keeper:
+            return None
+        if not procs.pid_alive(int(keeper)):
+            return False
+        began, now = status.get("windows_started"), procs.process_start_time(int(keeper))
+        return not (began is not None and now is not None and abs(float(now) - float(began)) > 1e-6)
     if status.get("host") and status["host"] != procs.host_id():
         return None                             # another computer's installation
     pid = status.get("pid")
@@ -157,6 +169,9 @@ def read(ident: str | os.PathLike, *, lines: int = 0) -> dict[str, Any]:
                     remedy="Start the installation again. It continues with what is "
                            "already downloaded and built.").as_dict())
             _write(folder, status)
+    if status.get("state") == "succeeded" and status.get("distro") and os.name == "nt" \
+            and status.get("bind_windows") and not status.get("bound") and status.get("outputs"):
+        _bind_from_wsl(folder, status)
     status["folder"] = str(folder)
     status["log"] = str(folder / "install.log")
     end = status.get("finished") or time.time()
@@ -165,6 +180,95 @@ def read(ident: str | os.PathLike, *, lines: int = 0) -> dict[str, Any]:
     if lines:
         status["log_tail"] = tail(folder / "install.log", lines)
     return status
+
+
+def _bind_from_wsl(folder: Path, status: dict[str, Any]) -> None:
+    """Enter what an installation inside WSL produced in the profile of this Windows computer, once.
+
+    The runner inside the distribution does not bind (its profile would be one nobody reads): its outputs are Linux paths, entered here as the \\\\wsl.localhost paths of the distribution, which the profile takes as ``environment: wsl`` (:func:`axqua.core.profile.rebound`).
+    """
+    from axqua.core import wsl
+
+    distro = str(status["distro"])
+    outputs = {key: (wsl.to_unc(distro, value) if str(value).startswith("/") else value)
+               for key, value in (status.get("outputs") or {}).items()
+               if key.startswith("solvers.")}
+    try:
+        written, found, _known = bind(outputs)
+        status["bound"] = str(written)
+        status.setdefault("findings", []).extend(f.as_dict() for f in found)
+    except Exception as exc:                    # noqa: BLE001 - the build succeeded
+        status["bound"] = ""
+        status.setdefault("findings", []).append(Finding(
+            WARNING, "axqua.install.not_bound",
+            f"the installation could not be entered in the profile: {exc}",
+            subject=f"install.{status.get('target', '')}",
+            remedy="Enter it in the profile editor: "
+                   + ", ".join(f"{k} = {v}" for k, v in outputs.items())).as_dict())
+        status["bind_windows"] = False
+    _write(folder, status)
+
+
+def start_in_wsl(plan: dict[str, Any], distro: str, *, detach: bool = True, echo: bool = False,
+                 bind_here: bool = True) -> dict[str, Any]:
+    """Run *plan*, made inside the WSL distribution *distro* (:mod:`axqua.install.wslproxy`), from Windows.
+
+    The folder of the installation is on the Windows side; the runner inside the distribution writes into it through ``/mnt/c``. The ``wsl.exe`` started here is what keeps the runner, and the WSL machine with it, alive while it builds (WSL stops a distribution whose last client has gone), so it is started as a process of its own that outlives QGIS.
+    """
+    from axqua.core import wsl
+    from axqua.core.errors import ConfigError
+    from axqua.install import wslproxy
+    from axqua.jobs import procs
+
+    if not plan.get("ready"):
+        first = next((f for f in plan.get("findings") or [] if f.get("severity") == ERROR), {})
+        raise ConfigError(first.get("message") or "this installation has nothing to run",
+                          subject=f"install.{plan.get('target', '')}", remedy=first.get("remedy", ""))
+    folder = _new_folder(str(plan["target"]))
+    (folder / "plan.json").write_text(json.dumps(plan, indent=2, default=str), encoding="utf-8")
+    _write(folder, {
+        "id": folder.name, "target": plan["target"], "title": recipes.TITLES[plan["target"]],
+        "state": "queued", "created": time.time(), "host": procs.host_id(),
+        "step": 0, "steps": [step["name"] for step in plan.get("steps") or []], "step_name": "",
+        "folder_installed": str(plan.get("folder", "")), "detached": detach, "message": "",
+        "findings": [], "outputs": {}, "bound": "", "distro": distro, "bind_windows": bind_here,
+    })
+    argv = wslproxy.remote_command(["install", "run", wsl.to_linux(str(folder))], distro)
+    flags = 0
+    if os.name == "nt":
+        flags = getattr(subprocess, "CREATE_NO_WINDOW", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    with open(folder / "runner.log", "ab") as out:
+        proc = subprocess.Popen(argv, cwd=str(folder), stdin=subprocess.DEVNULL, stdout=out,
+                                stderr=subprocess.STDOUT, env=wsl.environment(), creationflags=flags)
+    status = _load(folder)
+    status.update(windows_pid=proc.pid, windows_started=procs.process_start_time(proc.pid))
+    _write(folder, status)
+    if not detach:
+        log_path, shown = folder / "install.log", 0
+        while proc.poll() is None:
+            time.sleep(0.5)
+            if echo and log_path.exists():
+                shown = _echo(log_path, shown)
+        if echo and log_path.exists():
+            _echo(log_path, shown)
+    return read(folder)
+
+
+def _new_folder(target: str) -> Path:
+    from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
+
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    installs_root().mkdir(parents=True, exist_ok=True)
+    for attempt in range(1, 100):
+        # two installations may be started within one second: the second gets a suffix
+        folder = installs_root() / (f"{stamp}-{target}" + (f"-{attempt}" if attempt > 1 else ""))
+        try:
+            folder.mkdir()
+            return folder
+        except FileExistsError:
+            continue
+    raise AxquaEnvironmentError("no folder for this installation could be made",  # pragma: no cover
+                                subject=str(installs_root()))
 
 
 def list_all() -> list[dict[str, Any]]:
@@ -271,9 +375,12 @@ def elevated(argv: list[str], *, interactive: bool) -> list[str] | None:
     In a terminal, sudo asks there. Otherwise pkexec opens the password dialog of the
     desktop, so the password never passes through aXqua.
     """
+    way = recipes.elevation()
+    if way == "wsl":
+        return recipes.wsl_root(argv)
     if interactive and shutil.which("sudo"):
         return ["sudo", "--", *argv]
-    if recipes.elevation() == "pkexec":
+    if way == "pkexec":
         return ["pkexec", *argv]
     return None
 
@@ -609,6 +716,29 @@ def bind(outputs: dict[str, str], *, probe: bool = True
 # ------------------------------------------------------------------------ cancelling
 
 
+def _cancel_in_wsl(folder: Path, status: dict[str, Any], *, grace: float) -> dict[str, Any]:
+    """Stop an installation running inside WSL: the runner sees the request and stops its own command.
+
+    Its numbers are Linux process ids, which mean other processes in Windows: they are only ever signalled inside the distribution, after the grace time, and the wsl.exe that kept the runner alive is ended last.
+    """
+    from axqua.core import wsl
+
+    deadline = time.time() + grace
+    while time.time() < deadline and _alive(_load(folder) or status):
+        time.sleep(0.3)
+    current = _load(folder) or status
+    if _alive(current):
+        pids = [str(int(current[key])) for key in ("pid",) if current.get(key)]
+        group = [f"-{int(current['child_pid'])}"] if current.get("child_pid") else []
+        if pids or group:
+            wsl.run(["kill", "-KILL", *group, *pids], str(current["distro"]), timeout=30)
+        keeper = current.get("windows_pid")
+        if keeper:
+            subprocess.run(["taskkill", "/PID", str(int(keeper)), "/T", "/F"], capture_output=True,
+                           timeout=30, check=False)
+    return read(folder)
+
+
 def cancel(ident: str | os.PathLike, *, grace: float = 20.0) -> dict[str, Any]:
     """Stop an installation. What is already downloaded and built stays."""
     folder = _folder(ident)
@@ -616,6 +746,8 @@ def cancel(ident: str | os.PathLike, *, grace: float = 20.0) -> dict[str, Any]:
     if status.get("state") not in ACTIVE:
         return status
     (folder / "cancel.request").write_text(str(time.time()), encoding="utf-8")
+    if status.get("distro") and os.name == "nt":
+        return _cancel_in_wsl(folder, status, grace=grace)
     pid = status.get("pid")
     if pid and _alive(status):
         try:

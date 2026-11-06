@@ -1,0 +1,153 @@
+"""Installing into WSL from Windows (install/wslproxy.py, runner.start_in_wsl), on Linux.
+
+``wsl.exe`` is replaced by a script that runs the command right here, so the Linux half (``axqua install run`` under the system's ``python3``, importing this aXqua from where the Windows side has it) really runs, and the Windows half is told it runs on Windows through the ``as_windows`` fixture.
+"""
+from __future__ import annotations
+
+import json
+import shutil
+import sys
+
+import pytest
+
+from axqua import installcli
+from axqua.core import wsl
+from axqua.install import runner, wslproxy
+
+FAKE_WSL = """#!/bin/sh
+# wsl.exe [-d distro] [-u user] [--cd folder] -- program args: the program runs here
+while [ $# -gt 0 ]; do
+  case "$1" in -d|-u|--cd) shift 2 ;; --) shift; break ;; *) break ;; esac
+done
+exec "$@"
+"""
+
+
+@pytest.fixture
+def fake_wsl(tmp_path, monkeypatch):
+    if shutil.which("python3") is None:
+        pytest.skip("no python3 to stand in for the distribution's")
+    script = tmp_path / "wsl.exe"
+    script.write_text(FAKE_WSL)
+    script.chmod(0o755)
+    monkeypatch.setattr(wsl, "executable", lambda: str(script))
+    monkeypatch.setattr(wsl, "distros", lambda timeout=30.0: [wsl.Distro("Ubuntu", True, 2)])
+    return script
+
+
+def test_the_installer_code_needs_nothing_but_the_standard_library():
+    """What the distribution's python3 imports from the Windows folder of aXqua."""
+    import subprocess
+
+    code = ("import sys; sys.path.append(sys.argv[1]); before = set(sys.modules); "
+            "import axqua.installcli, axqua.install.recipes, axqua.install.runner, axqua.install.telemac_examples; "
+            "print(sorted(m for m in set(sys.modules) - before if not m.startswith(('axqua', '_')) "
+            "and m.split('.')[0] not in sys.stdlib_module_names))")
+    python = shutil.which("python3") or sys.executable
+    done = subprocess.run([python, "-I", "-c", code, wslproxy.package_root()], capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+    assert done.stdout.strip() == "[]"
+
+
+def test_a_plan_on_windows_is_made_in_wsl_and_binds_in_windows(monkeypatch, capsys, fake_wsl, as_windows):
+    seen = {}
+
+    def call(args, distro, **kwargs):
+        seen["args"], seen["distro"] = list(args), distro
+        return {"ok": True, "data": {"target": "openfoam", "ready": True, "findings": [], "notes": [], "steps": [],
+                                     "outputs": {}, "options": {"bind": False}, "folder": "/srv/stud/openfoam",
+                                     "estimate": "", "host": {"description": "Ubuntu 24.04.1 LTS", "supported": True},
+                                     "title": "OpenFOAM"}}
+
+    as_windows(installcli)
+    monkeypatch.setattr(wslproxy, "call", call)
+    assert installcli.run_install(["plan", "openfoam", "--json"]) == 0
+    data = json.loads(capsys.readouterr().out)["data"]
+    assert seen["distro"] == "Ubuntu" and seen["args"][:3] == ["install", "plan", "openfoam"]
+    assert "--no-bind" in seen["args"] and "--no-visualization" in seen["args"]
+    assert data["host"]["system"] == "windows" and data["distro"] == "Ubuntu"
+    assert data["options"]["bind"] is True          # bound on this side, into the Windows profile
+
+
+def test_windows_without_wsl_gets_one_finding_for_its_administrator(monkeypatch, capsys, as_windows):
+    as_windows(installcli)
+    monkeypatch.setattr(wsl, "executable", lambda: None)
+    assert installcli.run_install(["plan", "telemac", "--json"]) == 0
+    data = json.loads(capsys.readouterr().out)["data"]
+    codes = [f["code"] for f in data["findings"]]
+    assert codes == ["axqua.install.windows_needs_wsl"]
+    assert "administrator" in data["findings"][0]["remedy"] and "/opt" not in json.dumps(data["findings"])
+    assert data["wsl"]["present"] is False and not data["ready"]
+
+
+def test_postprocessors_are_windows_programs_on_windows(monkeypatch, capsys, fake_wsl, as_windows):
+    as_windows(installcli)
+    assert installcli.run_install(["plan", "postprocessors", "--json"]) != 0
+    answer = json.loads(capsys.readouterr().out)
+    assert "Windows programs" in answer["error"]["message"]
+
+
+def test_an_installation_into_wsl_runs_there_and_is_entered_in_the_windows_profile(
+        monkeypatch, tmp_path, fake_wsl, as_windows):
+    built = tmp_path / "linux" / "telemac-mascaret" / "configs" / "pysource.ubuntu24.sh"
+    plan = {"target": "telemac", "ready": True, "findings": [], "folder": str(tmp_path / "linux"),
+            "options": {"bind": False}, "expects": [], "outputs": {"solvers.telemac.setup_script": str(built)},
+            "steps": [{"name": "Build TELEMAC", "argv": ["sh", "-c", f"mkdir -p {built.parent} && touch {built}"],
+                       "cwd": "", "env": {}, "optional": False, "admin": False}]}
+    entered = {}
+
+    def bind(outputs, probe=True):
+        entered.update(outputs)
+        return tmp_path / "default.axq-profile", [], set(outputs)
+
+    as_windows(runner)
+    monkeypatch.setattr(runner, "bind", bind)
+    status = runner.start_in_wsl(plan, "Ubuntu", detach=False)
+    assert status["state"] == "succeeded", (status.get("message"), runner.tail(status["log"]))
+    assert built.is_file()                                     # the step ran on the Linux side
+    assert status["distro"] == "Ubuntu" and status["windows_pid"]
+    assert entered == {"solvers.telemac.setup_script": wsl.to_unc("Ubuntu", str(built))}
+    assert status["bound"].endswith("default.axq-profile")
+    # read again: entered once, not on every poll of the plugin
+    entered.clear()
+    runner.read(status["folder"])
+    assert entered == {}
+
+
+def test_cancel_of_an_installation_in_wsl_never_signals_a_linux_pid_in_windows(monkeypatch, tmp_path, as_windows):
+    folder = tmp_path / "installs" / "x"
+    folder.mkdir(parents=True)
+    runner._write(folder, {"id": "x", "target": "telemac", "state": "running", "distro": "Ubuntu",
+                           "pid": 4242, "windows_pid": None, "created": 0})
+    as_windows(runner)
+    killed = []
+    monkeypatch.setattr(runner.os, "kill", lambda pid, sig: killed.append(pid), raising=False)
+    answers = iter([True])        # running when asked, gone once the request is there
+    monkeypatch.setattr(runner, "_alive", lambda status: next(answers, False))
+    runner.cancel(folder, grace=0.1)
+    assert killed == [] and (folder / "cancel.request").exists()
+
+
+def test_inside_wsl_administrator_steps_run_as_the_root_of_the_distribution(monkeypatch, tmp_path):
+    """No password and no administrator of Windows: the student's computer can install the packages (2026-11-06)."""
+    from axqua.install import recipes
+
+    exe = tmp_path / "wsl.exe"
+    exe.write_text("#!/bin/sh\n")
+    exe.chmod(0o755)
+    monkeypatch.setenv("WSL_DISTRO_NAME", "Ubuntu-24.04")
+    monkeypatch.setenv("PATH", f"{tmp_path}:/usr/bin:/bin")
+    monkeypatch.setenv("DISPLAY", ":0")                   # WSLg: a display, but no polkit agent
+    assert recipes.elevation() == "wsl"
+    assert runner.elevated(["install", "-d", "/opt/telemac"], interactive=True) == \
+        [str(exe), "-d", "Ubuntu-24.04", "-u", "root", "--", "install", "-d", "/opt/telemac"]
+    monkeypatch.delenv("WSL_DISTRO_NAME")
+    assert recipes.elevation() != "wsl"
+
+
+def test_paths_from_a_windows_dialog_reach_the_distribution_as_linux_paths():
+    argv = ["start", "telemac", "--folder", r"\\wsl.localhost\Ubuntu\srv\stud\opt",
+            r"--salome=C:\Users\stud\Downloads\salome.tar.gz", "--reuse-openfoam", "auto"]
+    assert installcli._linux_paths(argv) == [
+        "start", "telemac", "--folder", "/srv/stud/opt", "--salome=/mnt/c/Users/stud/Downloads/salome.tar.gz",
+        "--reuse-openfoam", "auto"]

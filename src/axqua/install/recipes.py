@@ -735,14 +735,37 @@ def admin_command(target: str, missing: list[str]) -> str:
 
 
 def elevation() -> str:
-    """How this session can ask for administrator rights: ``pkexec`` or ``""``.
+    """How this session can get administrator rights: ``wsl``, ``pkexec`` or ``""``.
 
-    ``pkexec`` shows the password dialog of the desktop, so aXqua never sees a
-    password. It needs a graphical session; in a plain terminal session the command is
-    shown instead and the administrator runs it.
+    Inside WSL, ``wsl.exe -u root`` gives the root of the distribution without a password and without an administrator of Windows (that is how WSL works), so the student's computer without administrator rights can still install the system packages. ``pkexec`` shows the password dialog of a Linux desktop, so aXqua never sees a password; WSLg sets ``DISPLAY`` but has no polkit agent, which is why ``wsl`` is asked first. Without either, the command is shown and an administrator runs it.
     """
+    if _wsl_exe() and _wsl_distro():
+        return "wsl"
     graphical = os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")
     return "pkexec" if graphical and _which("pkexec") else ""
+
+
+def _wsl_distro() -> str:
+    """The distribution this process runs in, or ``""`` outside WSL."""
+    return os.environ.get("AXQUA_WSL_DISTRO") or os.environ.get("WSL_DISTRO_NAME") or ""
+
+
+def _wsl_exe() -> str:
+    """``wsl.exe`` of Windows as a program inside WSL reaches it (interoperability), or ``""``."""
+    if not _wsl_distro():
+        return ""
+    found = shutil.which("wsl.exe")
+    if found:
+        return found
+    for candidate in ("/mnt/c/Windows/System32/wsl.exe", "/mnt/c/WINDOWS/system32/wsl.exe"):
+        if os.access(candidate, os.X_OK):
+            return candidate
+    return ""
+
+
+def wsl_root(argv: list[str]) -> list[str]:
+    """*argv* as the root of this WSL distribution."""
+    return [_wsl_exe(), "-d", _wsl_distro(), "-u", "root", "--", *argv]
 
 
 def install_packages(target: str, missing: list[str], log_dir: Path) -> dict[str, Any]:
@@ -758,7 +781,8 @@ def install_packages(target: str, missing: list[str], log_dir: Path) -> dict[str
     command = admin_command(target, names)
     if not names:
         return {"returncode": 0, "log": "", "message": "nothing to install"}
-    if elevation() != "pkexec":
+    way = elevation()
+    if way not in ("pkexec", "wsl"):
         return {"returncode": 127, "log": "",
                 "message": "this session cannot ask for administrator rights; an "
                            "administrator runs: " + command}
@@ -770,7 +794,8 @@ def install_packages(target: str, missing: list[str], log_dir: Path) -> dict[str
     log_path = log_dir / f"packages-{time.strftime('%Y%m%d-%H%M%S')}.log"
     with open(log_path, "ab") as out:
         try:
-            code = subprocess.call(["pkexec", "/bin/sh", "-c", script],
+            elevated = wsl_root(["/bin/sh", "-c", script]) if way == "wsl" else ["pkexec", "/bin/sh", "-c", script]
+            code = subprocess.call(elevated,
                                    stdin=subprocess.DEVNULL, stdout=out,
                                    stderr=subprocess.STDOUT, env=clean_environment())
         except OSError as exc:
@@ -938,6 +963,13 @@ def _free_gb(folder: Path) -> float | None:
         return None
 
 
+#: What a Windows computer without WSL needs, once. Everything after it happens in the plugin, without an administrator.
+WINDOWS_REMEDY = ("An administrator of this computer sets up WSL once: 'wsl --install -d Ubuntu-24.04' in a "
+                  "terminal with administrator rights, then a restart. Open Ubuntu from the Start menu and "
+                  "create a Linux user. The Setup Wizard then installs TELEMAC and OpenFOAM into it, "
+                  "without an administrator.")
+
+
 def plan(target: str, options: Options | None = None, *,
          host: hosts.Host | None = None, check_packages: bool = True) -> Plan:
     """What installing *target* on this computer takes. Never raises for a finding.
@@ -968,11 +1000,8 @@ def plan(target: str, options: Options | None = None, *,
     # ---- the computer ------------------------------------------------------------
     if host.system == "windows":
         add(ERROR, "axqua.install.windows_needs_wsl",
-            "TELEMAC and OpenFOAM are installed in the Windows Subsystem for Linux, "
-            "not in Windows itself",
-            "Install a distribution with 'wsl --install -d Ubuntu-24.04' in a "
-            "PowerShell with administrator rights, install aXqua in it, and start "
-            "this installation there.")
+            "TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2), which is not set up on this computer" + (f" ({host.pretty})" if host.pretty else ""),
+            WINDOWS_REMEDY)
         return out
     if not host.supported:
         add(ERROR, "axqua.install.unsupported_system",
@@ -1165,7 +1194,9 @@ def _for_all_users(out: Plan, add, *, gone: bool = False) -> None:
         "asked twice, before the build to create the folder and at its end to hand it "
         "over to root. Every user can run the programs; only an administrator can "
         "change them.")
-    if elevation() != "pkexec":
+    if elevation() == "wsl":
+        out.notes[-1] = ("Installed for all users of the WSL distribution: the folder is created before the build and handed over to root at its end, as the root of the distribution, which needs no password.")
+    elif elevation() != "pkexec":
         out.notes.append(
             "This session has no password dialog of the desktop. Start the installation "
             "in a terminal with 'axqua install start ... --foreground', where sudo asks "

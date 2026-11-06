@@ -52,7 +52,8 @@ def _replace(tmp: Path, path: Path) -> None:
 
     Windows refuses to replace a file another process has open without delete sharing: the plugin polling ``status.json``, the reaper, a virus scanner looking at the new file, or a folder that OneDrive synchronizes. Raised once, the error ended a running job in the middle of a progress update (review of 2026-11-06); such a hold lasts milliseconds.
     """
-    if os.name != "nt":
+    if os.name != "nt" and not os.environ.get("WSL_DISTRO_NAME"):
+        # inside WSL the folder may be one of Windows (/mnt/c), held open by a reader there
         os.replace(tmp, path)
         return
     deadline = time.monotonic() + REPLACE_PATIENCE

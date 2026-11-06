@@ -11,6 +11,7 @@ The window decides nothing about an installation: what is usable is the answer o
 from __future__ import annotations
 
 import html
+import os
 
 from qgis.PyQt.QtWidgets import (QButtonGroup, QDialog, QFileDialog, QFormLayout,
                                  QHBoxLayout, QLabel, QLineEdit, QPushButton,
@@ -65,6 +66,14 @@ PATTERNS = {
         "An OpenFOAM without the sediment solvers runs the free-surface simulations; "
         "the check says which aXqua modules do not work with it."),
 }
+
+#: On Windows, TELEMAC and OpenFOAM are installed inside WSL (the user's decision of 2026-11-06), and the file dialog of Windows reaches them below Linux.
+WINDOWS_NOTE = ("<p>On Windows, the installation is inside the WSL distribution: in the file dialog, "
+                "open <b>Linux</b> (or type <code>\\\\wsl.localhost</code>), then the distribution, for "
+                "example <code>Ubuntu-24.04</code>, then the folders above. aXqua enters the script "
+                "with its distribution.</p>")
+if os.name == "nt":
+    PATTERNS = {key: text + WINDOWS_NOTE for key, text in PATTERNS.items()}
 
 #: The filters of the file dialog, per program.
 FILTERS = {
@@ -209,7 +218,7 @@ class SetupWizard(QDialog):
 
     # -- the existing installation ------------------------------------------------
     def browse(self) -> None:
-        start = self.script_edit.text().strip()
+        start = self.script_edit.text().strip() or ("\\\\wsl.localhost" if os.name == "nt" else "")
         path, _ = QFileDialog.getOpenFileName(self, f"Environment script of {self.name}",
                                               start, FILTERS[self.target])
         if path:

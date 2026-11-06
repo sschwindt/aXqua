@@ -16,7 +16,9 @@ them. ``run`` is what a detached installation executes and is not meant to be ty
 from __future__ import annotations
 
 import argparse
+import json
 import logging
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -93,6 +95,9 @@ def _parser() -> argparse.ArgumentParser:
                         "administrator password in a dialog of the desktop")
     p.add_argument("--tail", type=int, default=0, metavar="N",
                    help="status: include the last N lines of the log")
+    p.add_argument("--distro", default="",
+                   help="Windows: the WSL distribution to install into (default: the default distribution)")
+    p.add_argument("--installed", default="", help=argparse.SUPPRESS)   # overview inside WSL: what the Windows profile names
     return _common(p)
 
 
@@ -128,6 +133,9 @@ def run_install(argv: list[str]) -> int:
     try:
         from axqua.install import recipes, runner
 
+        if os.name == "nt" and args.action in WINDOWS_TO_WSL:
+            return _on_windows(args, argv, command)
+
         if args.action == "run":
             return runner.execute(Path(args.target or "."))
 
@@ -149,7 +157,7 @@ def run_install(argv: list[str]) -> int:
             return 0 if not done["missing"] else 1
 
         if args.action == "overview":
-            data = _overview()
+            data = _overview(json.loads(args.installed) if args.installed else None)
             return emit(command, data, as_json=args.as_json, lines=_overview_lines(data))
 
         if args.action == "list":
@@ -229,26 +237,38 @@ def run_install(argv: list[str]) -> int:
 # ------------------------------------------------------------------------- reporting
 
 
-def _overview() -> dict:
-    """What a person needs to see before deciding to install anything."""
+KEYS = {"telemac": ("telemac",), "openfoam": ("openfoam",), "postprocessors": ("paraview", "visit")}
+
+
+def _installed_here() -> dict[str, str]:
+    """``program -> file`` aXqua runs for it on this computer (profile, settings, discovery)."""
     from axqua.core import machine
+
+    installed = {}
+    for key in (k for keys in KEYS.values() for k in keys):
+        try:
+            found = machine.resolve(key)
+        except Exception:                       # noqa: BLE001 - a hint, never fatal
+            found = None
+        if found:
+            installed[key] = str(found.path)
+        elif key in ("paraview", "visit") and shutil.which(key):
+            installed[key] = shutil.which(key)
+    return installed
+
+
+def _overview(installed_all: dict[str, str] | None = None) -> dict:
+    """What a person needs to see before deciding to install anything.
+
+    *installed_all* replaces what is found here: inside WSL on behalf of Windows, what the profile of Windows names.
+    """
     from axqua.install import host, recipes, runner
 
     here = host.detect()
-    keys = {"telemac": ("telemac",), "openfoam": ("openfoam",),
-            "postprocessors": ("paraview", "visit")}
+    found_all = _installed_here() if installed_all is None else installed_all
     targets = []
     for target in recipes.TARGETS:
-        installed = {}
-        for key in keys[target]:
-            try:
-                found = machine.resolve(key)
-            except Exception:                   # noqa: BLE001 - a hint, never fatal
-                found = None
-            if found:
-                installed[key] = str(found.path)
-            elif key in ("paraview", "visit") and shutil.which(key):
-                installed[key] = shutil.which(key)
+        installed = {key: found_all[key] for key in KEYS[target] if key in found_all}
         targets.append({
             "target": target, "title": recipes.TITLES[target], "installed": installed,
             "running": runner.latest(target, active_only=True),
@@ -278,7 +298,7 @@ def _overview_lines(data: dict) -> list[str]:
 
 
 def _plan_lines(plan) -> list[str]:
-    data = plan.as_dict()
+    data = plan if isinstance(plan, dict) else plan.as_dict()
     lines = [f"{data['title']} on {data['host']['description']}",
              f"folder: {data['folder']}"]
     lines += [f"  {note}" for note in data["notes"]]
@@ -289,9 +309,10 @@ def _plan_lines(plan) -> list[str]:
         lines.append(f"  $ {step['command']}")
     for key, value in data["outputs"].items():
         lines.append(f"enters in the profile: {key} = {value}")
-    lines += [f.line() for f in plan.findings]
-    scope = " --for-all-users" if plan.options.scope == "system" else ""
-    lines.append("ready to start: axqua install start " + plan.target + scope if plan.ready
+    lines += [f"{f['severity'].upper()} [{f['code']}]: {f['message']} {f.get('remedy', '')}".rstrip()
+              for f in data["findings"]]
+    scope = " --for-all-users" if data["options"].get("scope") == "system" else ""
+    lines.append("ready to start: axqua install start " + data["target"] + scope if data["ready"]
                  else "this installation cannot be started as it is")
     return lines
 
@@ -320,6 +341,135 @@ def _status_lines(status: dict) -> list[str]:
     if status.get("log_tail"):
         lines += ["--- " + str(status.get("log", "")), status["log_tail"]]
     return lines
+
+
+# ------------------------------------------------------------------------- Windows
+
+#: What Windows hands over to the WSL distribution; status, list and cancel read the folders on this side.
+WINDOWS_TO_WSL = ("overview", "plan", "packages", "start", "telemac-examples")
+
+
+def _without(argv: list[str], *names: str) -> list[str]:
+    """*argv* without the options *names* and their values."""
+    out, skip = [], False
+    for arg in argv:
+        if skip:
+            skip = False
+            continue
+        if arg in names:
+            skip = True
+            continue
+        if any(arg.startswith(name + "=") for name in names):
+            continue
+        out.append(arg)
+    return out
+
+
+#: Options whose value is a path: a Windows dialog gives C:\... or \\wsl.localhost\..., the distribution needs its Linux spelling.
+PATH_OPTIONS = ("--folder", "--salome", "--installers", "--reuse-openfoam")
+
+
+def _linux_paths(argv: list[str]) -> list[str]:
+
+    out = list(argv)
+    for index, arg in enumerate(out):
+        name, sep, value = arg.partition("=")
+        if sep and name in PATH_OPTIONS:
+            out[index] = f"{name}={_to_linux(value)}"
+        elif index and out[index - 1] in PATH_OPTIONS:
+            out[index] = _to_linux(arg)
+    return out
+
+
+def _to_linux(value: str) -> str:
+    from axqua.core import wsl
+    return value if value in ("auto", "no", "") else wsl.to_linux(value)
+
+
+def _windows_host(data: dict, distro: str | None, status) -> None:
+    """Say in an answer of WSL that it is about this Windows computer and its distribution."""
+    import platform
+
+    inside = data.get("host") or {}
+    windows = f"Windows {platform.release()}".strip()
+    data["host"] = {**inside, "system": "windows", "windows": windows, "distro_wsl": distro or "",
+                    "supported": bool(inside.get("supported")) and distro is not None,
+                    "description": (f"{windows}, TELEMAC and OpenFOAM in WSL: {inside.get('description', '')}"
+                                    if distro else f"{windows}, without a WSL distribution")}
+    data["wsl"] = status.as_dict()
+
+
+def _on_windows(args, argv: list[str], command: str) -> int:
+    """``axqua install`` on Windows: the installer code of this aXqua runs inside the WSL distribution (:mod:`axqua.install.wslproxy`)."""
+    from axqua.core import wsl
+    from axqua.core.errors import ConfigError
+    from axqua.install import recipes, runner, wslproxy
+
+    distro, status = wslproxy.choose_distro(args.distro or None)
+    if args.distro and distro is None:
+        raise ConfigError(f"there is no WSL 2 distribution {args.distro} on this computer", subject="install.distro",
+                          remedy="Installed: " + (", ".join(d.name for d in status.distros) or "none"))
+    if args.action == "overview":
+        if distro is None:
+            data = _overview()
+        else:
+            here = _installed_here()
+            linux = {key: wsl.to_linux(value) for key, value in here.items() if wsl.is_unc(value)}
+            data = wslproxy.require(wslproxy.call(["install", "overview", "--installed", json.dumps(linux)], distro))
+            for entry in data.get("targets") or []:
+                entry["installed"] = {key: here[key] for key in KEYS[entry["target"]] if key in here}
+        _windows_host(data, distro, status)
+        return emit(command, data, as_json=args.as_json, lines=_overview_lines(data))
+
+    target = args.target if args.action != "telemac-examples" else None
+    if target is not None:
+        target = _need_target(args)
+    if distro is None:
+        # no WSL: the plan of this computer says so (axqua.install.windows_needs_wsl)
+        if args.action == "start":
+            raise ConfigError("TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2), which is not set up on this computer",
+                              subject="install.distro", remedy=recipes.WINDOWS_REMEDY)
+        from axqua.install import host as hosts
+        data = recipes.plan(target or "telemac", _options(args), host=hosts.detect(system="win32")).as_dict()
+        _windows_host(data, None, status)
+        if args.action == "packages":
+            data = {**data["packages"], "wsl": data["wsl"]}
+        return emit(command, data, as_json=args.as_json, lines=_plan_lines(data) if args.action == "plan" else [])
+    if target == "postprocessors":
+        raise ConfigError("on Windows, ParaView and VisIt are Windows programs, not part of the installation into WSL",
+                          subject="install.postprocessors",
+                          remedy="Install ParaView (paraview.org; its ZIP needs no administrator) and VisIt for Windows, "
+                                 "and enter them in the profile on the Configuration tab.")
+
+    forwarded = ["install", *_linux_paths(_without(argv, "--distro", "--json"))]
+    if args.action == "telemac-examples":
+        home = args.target or ""
+        forwarded = [a if a != home else wsl.to_linux(home) for a in forwarded]
+        answer = wslproxy.call(forwarded, distro, timeout=None, stream_stderr=True)
+        return emit(command, wslproxy.require(answer), as_json=args.as_json, lines=[])
+    planned = (["install", "plan"] + forwarded[forwarded.index(args.action, 1) + 1:]) if args.action == "start" else list(forwarded)
+    # the profile is the one of Windows (bound by runner.read); the viewers are Windows programs
+    if "--no-bind" not in planned:
+        planned.append("--no-bind")
+    if target == "openfoam" and "--no-visualization" not in planned:
+        planned.append("--no-visualization")
+    data = wslproxy.require(wslproxy.call(planned, distro))
+    if args.action == "packages":
+        _windows_host(data, distro, status)
+        lines = [f"{len(data.get('needed') or [])} system packages are needed, {len(data.get('missing') or [])} are not installed"]
+        return emit(command, data, as_json=args.as_json, lines=lines)
+    _windows_host(data, distro, status)
+    data["distro"] = distro
+    data.setdefault("options", {})["bind"] = not args.no_bind
+    if args.action == "plan":
+        return emit(command, data, as_json=args.as_json, lines=_plan_lines(data))
+    started = runner.start_in_wsl(data, distro, detach=not args.foreground, echo=args.foreground,
+                                  bind_here=not args.no_bind)
+    lines = _status_lines(started)
+    if not args.foreground:
+        lines += ["The installation runs by itself. Follow it with:", f"  axqua install status {started['id']} --tail 20"]
+    emit(command, started, as_json=args.as_json, lines=lines)
+    return 0 if started.get("state") in ("queued", "running", "succeeded") else 1
 
 
 __all__ = ["run_install"]

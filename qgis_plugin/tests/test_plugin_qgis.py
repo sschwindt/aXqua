@@ -3792,3 +3792,12 @@ def test_a_cancelled_checkup_lets_the_user_check_again(qgis_app, tmp_path, monke
     box.refresh()                    # the data are on their way, the checkup is not
     assert _asked(calls, 3) == ["checkup"]
     box.deleteLater()
+
+def test_a_folder_inside_wsl_is_shown_to_the_windows_dialog_and_back_as_linux():
+    """On Windows the installation folder is a Linux folder in WSL, and the folder dialog is of Windows (2026-11-06)."""
+    from axqua_plugin.gui import install_wizard
+
+    assert install_wizard.unc("Ubuntu-24.04", "/srv/stud/opt") == r"\\wsl.localhost\Ubuntu-24.04\srv\stud\opt"
+    assert install_wizard.linux(r"\\wsl.localhost\Ubuntu-24.04\srv\stud\opt") == "/srv/stud/opt"
+    assert install_wizard.linux("//wsl$/Ubuntu/srv/x") == "/srv/x"
+    assert install_wizard.linux(r"C:\Users\stud") == r"C:\Users\stud"

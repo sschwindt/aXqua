@@ -25,6 +25,7 @@ does the same in a terminal.
 
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 
@@ -96,12 +97,32 @@ REQUIRED = ("folder",)
 #: The switches that are on unless the user turns them off.
 ON_BY_DEFAULT = ("smoke_test", "bind")
 
+def unc(distro: str, linux: str) -> str:
+    """A path inside the WSL distribution *distro* as Windows (and its file dialog) names it."""
+    rest = linux.strip("/").replace("/", "\\")
+    return f"\\\\wsl.localhost\\{distro}\\{rest}" if rest else f"\\\\wsl.localhost\\{distro}"
+
+
+def linux(path: str) -> str:
+    """The Linux path of a ``\\\\wsl.localhost\\<distro>\\...`` path, else *path* as it is."""
+    text = path.replace("/", "\\")
+    for share in ("\\\\wsl.localhost\\", "\\\\wsl$\\"):
+        if text.lower().startswith(share.lower()):
+            rest = text[len(share):].split("\\", 1)
+            return "/" + (rest[1].replace("\\", "/") if len(rest) > 1 else "")
+    return path
+
+
 #: ``option -> ((value, text), ...)`` of the settings with a fixed set of answers. The
 #: first entry is the default.
 CHOICES = {
     "scope": (
         ("user", "Me only, in my home folder (no administrator rights)"),
         ("system", "All users of this computer, below /opt (administrator password)"),
+    ) if os.name != "nt" else (
+        # TELEMAC and OpenFOAM are installed into WSL (the user's decision of 2026-11-06)
+        ("user", "Me only, in my Linux home folder in WSL (no administrator rights)"),
+        ("system", "All users of the WSL distribution, below /opt (no password)"),
     ),
     "telemac_examples": (
         ("inputs", "Input files of examples only (about 360 files, 460 MB)"),
@@ -435,12 +456,20 @@ class InstallWizard(QDialog):
     def _browse(self, key: str, folder: bool) -> None:
         edit = self._widgets[key]
         start = edit.text() or ""
+        distro = self._distro()
+        if folder and distro and start.startswith("/"):
+            start = unc(distro, start)          # the folder is inside WSL; the dialog is of Windows
         if folder:
             chosen = QFileDialog.getExistingDirectory(self, "Select a folder", start)
         else:
             chosen, _ = QFileDialog.getOpenFileName(self, "Select a file", start)
         if chosen:
-            edit.setText(chosen)
+            edit.setText(linux(chosen) if folder and distro else chosen)
+
+    def _distro(self) -> str:
+        """The WSL distribution this Windows computer installs into, or ``""``."""
+        host = (self.overview or {}).get("host") or {}
+        return str(host.get("distro_wsl") or "")
 
     def _check_page(self) -> QWidget:
         page = QWidget()
@@ -615,8 +644,9 @@ class InstallWizard(QDialog):
         host = plan.get("host") or {}
         if host.get("description"):
             self.host_label.setText("This computer: " + str(host["description"]))
-        lines = [f"<b>{plan.get('title', '')}</b> is installed in "
-                 f"{plan.get('folder', '')}."]
+        inside = f" of the WSL distribution {plan['distro']}" if plan.get("distro") else ""
+        lines = [f"<b>{plan.get('title', '')}</b> is installed in the folder "
+                 f"{plan.get('folder', '')}{inside}."]
         lines += [str(note) for note in plan.get("notes") or []]
         if plan.get("estimate"):
             lines.append("Time: " + str(plan["estimate"]) + ".")
@@ -643,12 +673,14 @@ class InstallWizard(QDialog):
         for widget in (self.actions_heading, self.package_command, self.copy_button,
                        self.fix_button):
             widget.setVisible(bool(missing))
-        desktop = packages.get("elevation") == "pkexec"
+        way = packages.get("elevation")
+        desktop = way in ("pkexec", "wsl")
         self.fix_button.setEnabled(bool(missing) and not self._fixing
                                    and (desktop or bool(terminal_argv("true"))))
         self.fix_button.setToolTip(
             "Run the command above, check again, and repeat while that helps. "
-            + ("The desktop asks for the password of an administrator." if desktop else
+            + ("aXqua installs them as the root of the WSL distribution; no password is needed." if way == "wsl" else
+               "The desktop asks for the password of an administrator." if desktop else
                "A terminal window opens and asks for the password."))
 
         found = fnd.from_payload(plan)
@@ -687,7 +719,7 @@ class InstallWizard(QDialog):
         self._missing_before = self.missing()
         self.fix_button.setEnabled(False)
         self.report_button.setVisible(False)
-        if packages.get("elevation") == "pkexec":
+        if packages.get("elevation") in ("pkexec", "wsl"):
             self._fixing = "desktop"
             self.install_packages()
             return
