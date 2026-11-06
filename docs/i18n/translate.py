@@ -264,22 +264,21 @@ class Glossary:
         return self.lookup.get(_normal(matched))
 
 
-#: Words before an English word that make it a verb ("can reach", "to reach", "does not reach").
+#: Words before an English word that make it a verb ("can reach", "to reach", "does not reach"); none of them stands before the noun.
 VERB_BEFORE = {"to", "not", "never", "cannot", "can", "could", "will", "would", "may", "might", "must", "should",
-               "does", "do", "did", "it", "they", "which", "who", "often", "rarely", "only", "first", "finally"}
-#: Words after an English word that make it a verb ("reaches the outflow", "reach 5 GB", "reach tens of").
+               "does", "do", "did", "it", "they", "often", "rarely", "finally"}
+#: Words after an English word that make it a verb ("reaches the outflow", "reach tens of gigabytes"); a number does not ("Reach 2 is the side channel").
 VERB_AFTER = {"the", "a", "an", "its", "their", "his", "her", "this", "that", "these", "those", "every", "each",
-              "all", "some", "several", "tens", "hundreds", "thousands", "up", "about", "into", "beyond", "it",
-              "them", "steady", "zero", "one", "two"}
+              "some", "several", "tens", "hundreds", "thousands", "it", "them"}
 
 
 def used_as_verb(text: str, start: int, end: int) -> bool:
     """Whether the English word ``text[start:end]`` is a verb, told from its neighbors (a glossary term marked ``noun``)."""
-    before = re.findall(r"[A-Za-z']+", text[:start])
-    after = re.match(r"\s*([A-Za-z]+|\d)", text[end:])
+    before = re.findall(r"[A-Za-z']+", text[max(0, start - 40):start])
+    after = re.match(r"\s*([A-Za-z]+)", text[end:end + 40])
     if before and before[-1].lower() in VERB_BEFORE:
         return True
-    return bool(after) and (after.group(1).isdigit() or after.group(1).lower() in VERB_AFTER)
+    return bool(after) and after.group(1).lower() in VERB_AFTER
 
 
 def _normal(text: str) -> str:

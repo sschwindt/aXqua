@@ -74,7 +74,16 @@ def same_boot(recorded: str | None, current: str | None) -> bool:
             return abs(int(recorded[5:]) - int(current[5:])) <= DERIVED_TOLERANCE
         except ValueError:
             return False
+    if _scheme(recorded) != _scheme(current):
+        # recorded by another version of aXqua (an update while a job runs), or the boot counter could not be read once: nothing to judge by
+        return True
     return False
+
+
+def _scheme(ident: str) -> str:
+    if ident.startswith("windows-boot-"):
+        return "windows"
+    return "derived" if ident.startswith("boot-") else "linux"
 
 
 def _windows_boot_count() -> int | None:

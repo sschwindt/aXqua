@@ -144,6 +144,13 @@ def select_launcher(env: SolverEnvironment | None = None, *,
     registry = _registry()
     prefer = prefer or os.environ.get(ENV_LAUNCHER) or None
 
+    if env is not None and env.kind is EnvironmentKind.WSL and os.name == "nt":
+        # aXqua runs in Windows and its solvers in WSL (the user's decision of 2026-11-06): the runner is this Windows aXqua, and every solver command crosses into the distribution through wsl.exe (SolverEnvironment never takes a WSL environment as entered). The wsl launcher started the Windows python.exe inside bash, where it does not exist (review of 2026-11-06).
+        if prefer and prefer not in ("auto", "windows"):
+            log.warning("ignoring launcher %r: the job runs in Windows and its solver in "
+                        "WSL", prefer)
+        return registry["windows"]()
+
     if env is not None and env.kind is EnvironmentKind.WSL:
         if prefer and prefer not in ("auto", "wsl"):
             log.warning("ignoring launcher %r: a wsl environment must be launched "

@@ -188,7 +188,7 @@ class SolverEnvironment:
         if self.kind is not EnvironmentKind.WSL:
             return path
         from axqua.core import wsl
-        distro = self.distro or (wsl.default_distro() if os.name == "nt" else None)
+        distro = self.distro or (wsl.cached_default_distro() if os.name == "nt" else None)
         return wsl_to_windows(path, distro)
 
     # --------------------------------------------------------------- launching
@@ -330,13 +330,14 @@ class SolverEnvironment:
             parse = _parse_env0
         proc = subprocess.run(process_args(argv), capture_output=True, timeout=timeout,
                               env=_wsl_env() if self.kind is EnvironmentKind.WSL else None)
-        encoding = output_encoding(self.kind, cmd=parse is _parse_set)
+        encoding = output_encoding(cmd_builtin=parse is _parse_set)
         stdout = proc.stdout.decode(encoding, "replace")
         if proc.returncode != 0:
             stderr = proc.stderr.decode(encoding, "replace")
             if self.kind is EnvironmentKind.WSL:
                 from axqua.core.wsl import decode
-                stderr = decode(proc.stderr)       # wsl.exe's own messages are UTF-16
+                # wsl.exe's own messages can be UTF-16 on either stream (Windows 10 ignores WSL_UTF8)
+                stdout, stderr = decode(proc.stdout), decode(proc.stderr)
             raise EnvironmentCaptureError(
                 f"could not enter the {self.kind} environment via {self.setup_script}",
                 (stderr or stdout or "").strip()[:400])
@@ -443,13 +444,9 @@ class EnvironmentCaptureError(RuntimeError):
         super().__init__(f"{message}\nSystem output: {output}" if output else message)
 
 
-def output_encoding(kind: "EnvironmentKind | str", *, cmd: bool = False) -> str:
-    """The encoding a program of this environment writes to a pipe.
-
-    ``cmd.exe`` and the programs of a Windows console write the OEM code page (850 on a German Windows, where Python would assume the ANSI page 1252 and turn ``ü`` into an error); Linux, WSL and bash write UTF-8.
-    """
-    del kind    # a bash of a Windows installation (MSYS) writes UTF-8 like any other bash
-    return "oem" if os.name == "nt" and cmd else "utf-8"
+def output_encoding(*, cmd_builtin: bool = False) -> str:
+    """The encoding to read a pipe with: OEM for what a built-in command of ``cmd.exe`` writes (``set``: code page 850 on a German Windows, where Python would assume the ANSI page 1252 and turn ``ü`` into an error), UTF-8 for everything else (Linux, WSL, bash, and the programs cmd starts, which aXqua runs in UTF-8 mode)."""
+    return "oem" if os.name == "nt" and cmd_builtin else "utf-8"
 
 
 def process_args(argv: list[str]) -> "list[str] | str":
@@ -506,9 +503,7 @@ def _parse_set(text: str) -> dict[str, str]:
     for line in text.splitlines():
         name, sep, value = line.partition("=")
         if sep and name and not name.startswith(" "):
-            # Windows names are case-insensitive and ``set`` writes ``Path``; upper case is how
-            # ``os.environ`` spells them on Windows, so a lookup of PATH finds it and a merge
-            # with os.environ gives one PATH, not PATH (the old one, found first) and Path
+            # Windows names are case-insensitive and ``set`` writes ``Path``; upper case is how ``os.environ`` spells them on Windows, so a lookup of PATH finds it and a merge with os.environ gives one PATH, not PATH (the old one, found first) and Path
             name = name.upper()
             out[name] = value
             last = name

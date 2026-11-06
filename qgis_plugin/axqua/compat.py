@@ -254,3 +254,23 @@ def log_message(text: str, level=None) -> None:
         # message log has gone - a headless run, an application being torn down - must
         # not turn a diagnostic into a second failure on top of the first.
         return
+
+
+def start_detached(program: str, arguments: list[str]) -> bool:
+    """Start *program* as a process of its own, which stays open when QGIS is closed, without the Python and the libraries of QGIS.
+
+    ParaView and VisIt bring their own Python and Qt; with QGIS's ``PYTHONHOME``, ``PYTHONPATH`` and ``QT_PLUGIN_PATH`` their Python or their Qt platform plugin does not load (review of 2026-11-06). The environment is the one aXqua itself is started with (:func:`.core.runner_client.backend_env`).
+    """
+    from qgis.PyQt.QtCore import QProcess, QProcessEnvironment
+
+    from .core.runner_client import backend_env
+
+    process = QProcess()
+    process.setProgram(program)
+    process.setArguments(list(arguments))
+    environment = QProcessEnvironment()
+    for key, value in backend_env().items():
+        environment.insert(key, value)
+    process.setProcessEnvironment(environment)
+    started = process.startDetached()
+    return bool(started[0] if isinstance(started, tuple) else started)

@@ -341,11 +341,10 @@ FRAMES = (("all", "All time steps"), ("last", "Only the last time step"))
 
 
 def launch(program: str, arguments: list[str]) -> bool:
-    """Start a program of its own, which stays open when QGIS is closed."""
-    from qgis.PyQt.QtCore import QProcess
+    """Start a program of its own, which stays open when QGIS is closed, without the environment of QGIS's Python."""
+    from ..compat import start_detached
 
-    started = QProcess.startDetached(program, arguments)
-    return bool(started[0] if isinstance(started, tuple) else started)
+    return start_detached(program, arguments)
 
 
 class ProgramPage(QWidget):

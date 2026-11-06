@@ -148,8 +148,11 @@ def inspect(solver: str, script: str | os.PathLike, *, binding=None,
     from axqua.core.environment import SolverEnvironment, default_kind
     from axqua.core.profile import installation_of
 
+    from axqua.core import wsl
+
     subject = subject or f"solvers.{solver}.setup_script"
-    script = Path(script).expanduser()
+    unc = wsl.from_unc(script)
+    script = Path(script) if unc else Path(script).expanduser()
     out = Inspection(solver=solver, script=str(script), valid=False)
     folder = installation_of(solver, script)
     out.folder = str(folder or "")
@@ -158,13 +161,18 @@ def inspect(solver: str, script: str | os.PathLike, *, binding=None,
         out.findings.append(Finding(severity, code, message, subject=subject,
                                     remedy=remedy))
 
-    kind = getattr(binding, "environment", None) or default_kind()
+    kind = getattr(binding, "environment", None) or ("wsl" if unc else default_kind())
     in_wsl = str(kind) == "wsl"
+    distro = getattr(binding, "distro", None) or (unc[0] if unc else None)
+    if in_wsl and distro is None and os.name == "nt":
+        distro = wsl.default_distro()
+    # From Windows, a file inside WSL is reached through \\wsl.localhost\<distro>\..., so its parts can be looked for as on Linux (they used to be "not checked")
+    look = not in_wsl or (os.name == "nt" and distro is not None)
     if solver not in SCRIPT_PATTERNS:
         out.detail = f"aXqua knows no simulation code called {solver}"
         add(ERROR, "axqua.environment.solver_unreachable", out.detail)
         return out
-    if not in_wsl and not script.is_file():
+    if (not in_wsl or unc) and not script.is_file():
         out.detail = f"the file {script} does not exist"
         add(ERROR, "axqua.environment.script_missing",
             f"the environment script of {solver} does not exist: {script}",
@@ -181,7 +189,7 @@ def inspect(solver: str, script: str | os.PathLike, *, binding=None,
         overrides.setdefault("USETELCFG", binding.config_name)
     environment = SolverEnvironment(
         kind=kind, setup_script=script, shell=getattr(binding, "shell", None),
-        distro=getattr(binding, "distro", None),
+        distro=distro,
         mpi_launcher=getattr(binding, "mpi_launcher", None), overrides=overrides)
     status = environment.validate(solver, timeout=timeout)
     if not status.ok:
@@ -198,12 +206,14 @@ def inspect(solver: str, script: str | os.PathLike, *, binding=None,
             "itself sets up the installation.")
 
     variables = dict(status.variables)
+    if in_wsl and look:
+        variables = seen_from_windows(variables, distro)
     if solver == "telemac":
         out.version = _telemac_version(variables)
-        out.modules = _telemac_modules(variables, checked=not in_wsl)
+        out.modules = _telemac_modules(variables, checked=look)
     else:
         out.version = str(variables.get("WM_PROJECT_VERSION", ""))
-        out.modules = _openfoam_modules(variables, checked=not in_wsl)
+        out.modules = _openfoam_modules(variables, checked=look)
 
     lacking = [m for m in out.modules if m.required and m.available is False]
     out.valid = not lacking
@@ -247,9 +257,39 @@ def _named_like(solver: str, script: Path) -> bool:
                for pattern in SCRIPT_PATTERNS[solver])
 
 
+#: Marks variables of a WSL installation translated into the paths Windows sees them by.
+SEEN_FROM_WINDOWS = "AXQUA_SEEN_FROM_WINDOWS"
+
+
 def _which(name: str, variables: dict[str, str]) -> str | None:
     # on the PATH the script set, not on the one of this process
+    if variables.get(SEEN_FROM_WINDOWS):
+        # Linux programs have no extension Windows would accept, so shutil.which cannot find them
+        for folder in variables.get("PATH", "").split(";"):
+            candidate = Path(folder) / name if folder else None
+            if candidate is not None and candidate.is_file():
+                return str(candidate)
+        return None
     return _find(name, path=variables.get("PATH", ""))
+
+
+def seen_from_windows(variables: dict[str, str], distro: str) -> dict[str, str]:
+    """The variables a script set inside the WSL distribution *distro*, with their Linux paths as Windows reaches them (``\\\\wsl.localhost\\<distro>\\...``), so the parts of the installation can be looked for from Windows."""
+    from axqua.core.wsl import to_unc, to_windows
+
+    def one(path: str) -> str:
+        return to_windows(path, distro) if path.startswith("/mnt/") else to_unc(distro, path)
+
+    out = {}
+    for key, value in variables.items():
+        if key == "PATH":
+            out[key] = ";".join(one(part) for part in value.split(":") if part.startswith("/"))
+        elif value.startswith("/") and ":" not in value and "\n" not in value:
+            out[key] = one(value)
+        else:
+            out[key] = value
+    out[SEEN_FROM_WINDOWS] = "1"
+    return out
 
 
 # --------------------------------------------------------------------------- TELEMAC

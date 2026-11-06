@@ -124,7 +124,9 @@ def test_a_term_marked_noun_is_left_alone_where_it_is_a_verb(tmp_path):
     for verb in ("The results can reach tens of gigabytes.", "It tells aXqua how to reach a code.",
                  "The water reaches the outflow.", "The file does not reach 5 GB."):
         assert "Flussabschnitt" not in tr.prepare(verb, glossary, []).text, verb
-    for noun in ("On a reach with 47,000 nodes.", "The reach is filled.", "Both reaches drain."):
+    for noun in ("On a reach with 47,000 nodes.", "The reach is filled.", "Both reaches drain.",
+                 "The first reach of the Inn.", "Which reach is modeled?", "Reach 2 is the side channel.",
+                 "The reach up to the weir."):
         assert "Flussabschnitt" in tr.prepare(noun, glossary, []).text, noun
     assert glossary.terms[0].noun_only and not glossary.terms[0].gender
 

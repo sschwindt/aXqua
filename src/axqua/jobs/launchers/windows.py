@@ -93,11 +93,7 @@ class WindowsJobObjectLauncher:
                     # breaking away is refused too: without a job object, as promised
                     proc = self._spawn(argv, cwd, env, creationflags, handle_out)
             if assigned:
-                # The name of a kernel object goes with its last handle, and the handle
-                # of this process closes when `axqua submit` exits: a later `axqua cancel`
-                # found no object of that name and always fell back to taskkill (review of
-                # 2026-11-06). A handle duplicated into the runner keeps the name as long
-                # as the runner lives.
+                # The name of a kernel object goes with its last handle, and the handle of this process closes when `axqua submit` exits: a later `axqua cancel` found no object of that name and always fell back to taskkill (review of 2026-11-06). A handle duplicated into the runner keeps the name as long as the runner lives.
                 self._hand_over(job, proc)
         finally:
             handle_out.close()
@@ -201,6 +197,12 @@ class WindowsJobObjectLauncher:
             kernel32 = self._kernel32()
             kernel32.OpenProcess.restype = wintypes.HANDLE
             kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+            # declared: the pseudo-handle -1 of GetCurrentProcess does not fit the default C int
+            kernel32.DuplicateHandle.argtypes = [
+                wintypes.HANDLE, wintypes.HANDLE, wintypes.HANDLE, ctypes.POINTER(wintypes.HANDLE),
+                wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+            kernel32.DuplicateHandle.restype = wintypes.BOOL
+            kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
             target = kernel32.OpenProcess(0x0040, False, proc.pid)      # PROCESS_DUP_HANDLE
             if not target:
                 return False
@@ -217,7 +219,10 @@ class WindowsJobObjectLauncher:
 
     def _close(self, handle) -> None:  # pragma: no cover - Windows only
         try:
-            self._kernel32().CloseHandle(handle)
+            from ctypes import wintypes
+            kernel32 = self._kernel32()
+            kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+            kernel32.CloseHandle(handle)
         except Exception:  # noqa: BLE001
             pass
 

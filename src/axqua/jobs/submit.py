@@ -201,7 +201,11 @@ def _validate_and_capture(profile: profiles.Profile, env, spec: JobSpec
 
 def _launch(jd: JobDir, spec: JobSpec, env, captured: dict[str, str],
             profile: profiles.Profile) -> None:
-    if not captured:
+    if os.name == "nt" and str(getattr(env, "kind", "")) == "wsl":
+        # The runner is a Windows process and enters WSL for every solver command; the captured Linux variables (a Linux PATH) would only break the Windows side.
+        captured = {}
+        captured.update(os.environ)
+    elif not captured:
         try:
             captured = env.capture()
         except Exception as exc:                    # noqa: BLE001

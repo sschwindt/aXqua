@@ -86,6 +86,53 @@ DISCOVERY = {
                  "*/ParaView*/bin/paraview"),
 }
 
+#: On Windows, below the home folders of a WSL distribution: where aXqua's own installers put TELEMAC and OpenFOAM when they install for one user (``~/opt``, ``~/.local``).
+WSL_HOME_DISCOVERY = {
+    "telemac": ("opt/telemac-mascaret/configs/pysource.*.sh",),
+    "openfoam": (".local/openfoam-sediment*/shell-rc.sh",),
+}
+
+
+def _wsl_distros() -> list[str]:
+    """The WSL 2 distributions of this user, the default first (Windows only; cached per process)."""
+    global _WSL_DISTROS
+    if _WSL_DISTROS is None:
+        from axqua.core import wsl
+        found = [d for d in wsl.distros() if d.version != 1]
+        _WSL_DISTROS = [d.name for d in sorted(found, key=lambda d: not d.default)]
+    return _WSL_DISTROS
+
+
+_WSL_DISTROS: list[str] | None = None
+
+
+def _discover_in_wsl(key: str) -> Path | None:
+    """An installation inside a WSL distribution, as Windows reaches it (``\\\\wsl.localhost\\<distro>\\...``).
+
+    TELEMAC and OpenFOAM run in WSL on Windows (the user's decision of 2026-11-06), so a Windows computer whose programs are installed has them there; looked for only where nothing else named one.
+    """
+    if os.name != "nt" or key not in WSL_HOME_DISCOVERY:
+        return None
+    from axqua.core import wsl
+    for distro in _wsl_distros():
+        root = Path(wsl.to_unc(distro, "/"))
+        matches: list[Path] = []
+        for pattern in DISCOVERY.get(key, ()):
+            if pattern.startswith("/"):
+                matches += sorted(root.glob(pattern.lstrip("/")))
+        try:
+            homes = sorted(p for p in (root / "home").iterdir() if p.is_dir())
+        except OSError:
+            homes = []
+        for home in homes:
+            for pattern in WSL_HOME_DISCOVERY[key]:
+                matches += sorted(home.glob(pattern))
+        readable = [m for m in matches if m.is_file() and "template" not in m.name]
+        if readable:
+            return readable[-1]
+    return None
+
+
 #: Roots the relative DISCOVERY patterns are joined to. ``AXQUA_SOLVER_ROOT``
 #: lets a site add its own (e.g. a shared software folder) without that root
 #: ever appearing in the repository.
@@ -102,8 +149,7 @@ def settings_path() -> Path:
     base = os.environ.get("XDG_CONFIG_HOME") or (Path.home() / ".config")
     unix_style = Path(base) / "axqua"
     if os.name == "nt" and os.environ.get("APPDATA"):
-        # %APPDATA%\axqua, the folder of profiles.yml and the job settings too; a computer
-        # that already has its settings in ~/.config/axqua (aXqua 1.3 and older) keeps them
+        # %APPDATA%\axqua, the folder of profiles.yml and the job settings too; a computer that already has its settings in ~/.config/axqua (aXqua 1.3 and older) keeps them
         appdata = Path(os.environ["APPDATA"]) / "axqua"
         legacy = any((unix_style / name).is_file() for name in (SETTINGS_NAME, "default.axq-profile"))
         return (unix_style if legacy else appdata) / SETTINGS_NAME
@@ -152,7 +198,7 @@ def _discover(key: str) -> Path | None:
             readable = [m for m in matches if m.is_file()]
             if readable:
                 return readable[-1]     # the highest-sorting, i.e. newest version
-    return None
+    return _discover_in_wsl(key)
 
 
 @dataclass(frozen=True)

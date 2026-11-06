@@ -50,10 +50,7 @@ REPLACE_PATIENCE = 2.0
 def _replace(tmp: Path, path: Path) -> None:
     """``os.replace``, which on Windows waits for a reader that holds *path* open.
 
-    Windows refuses to replace a file another process has open without delete sharing: the
-    plugin polling ``status.json``, the reaper, a virus scanner looking at the new file, or
-    a folder that OneDrive synchronizes. Raised once, the error ended a running job in the
-    middle of a progress update (review of 2026-11-06); such a hold lasts milliseconds.
+    Windows refuses to replace a file another process has open without delete sharing: the plugin polling ``status.json``, the reaper, a virus scanner looking at the new file, or a folder that OneDrive synchronizes. Raised once, the error ended a running job in the middle of a progress update (review of 2026-11-06); such a hold lasts milliseconds.
     """
     if os.name != "nt":
         os.replace(tmp, path)

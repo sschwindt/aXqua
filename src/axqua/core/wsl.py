@@ -169,6 +169,16 @@ def default_distro(found: Sequence[Distro] | None = None) -> str | None:
     return found[0].name if found else None
 
 
+_DEFAULT: list[str | None] = []
+
+
+def cached_default_distro() -> str | None:
+    """:func:`default_distro`, asked once per process: a path conversion must not start a ``wsl.exe`` for every path."""
+    if not _DEFAULT:
+        _DEFAULT.append(default_distro())
+    return _DEFAULT[0]
+
+
 @dataclass
 class WslStatus:
     """Whether TELEMAC and OpenFOAM can be installed and run in WSL on this computer."""

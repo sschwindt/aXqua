@@ -697,10 +697,10 @@ class InstallWizard(QDialog):
             self.package_label.setText("No terminal program was found. Copy the "
                                        "command into a terminal and click Check again.")
             return
-        from qgis.PyQt.QtCore import QProcess
+        from ..compat import start_detached
 
         self._fixing = "terminal"
-        QProcess.startDetached(argv[0], argv[1:])
+        start_detached(argv[0], argv[1:])
         self._terminal_polls = 0
         self.fix_timer.start()
         self.package_label.setText("A terminal window runs the command and asks for "

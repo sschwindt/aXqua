@@ -78,14 +78,15 @@ class ShellRuntime:
         *env* replaces the child's environment wholesale, which is how a detached job
         hands over an already-captured solver environment instead of sourcing it again.
         """
+        in_wsl = self.environment.kind is EnvironmentKind.WSL
+        if cwd and in_wsl:
+            # the folder as the distribution spells it: wsl.exe would guess it from the Windows folder it is started in, which fails for a \\wsl.localhost path
+            command = f"cd {shlex.quote(self.environment.translate(cwd))} && {command}"
         argv = self._wrap(command)
-        # cmd writes the OEM code page, everything else UTF-8; a byte that does not decode
-        # becomes a replacement character instead of an exception in the middle of a run
-        text_kwargs = {"encoding": output_encoding(self.environment.kind,
-                                                   cmd=argv[0].lower() in ("cmd", "cmd.exe")),
-                       "errors": "replace"}
+        # UTF-8 (aXqua runs what it starts in UTF-8 mode, Linux writes it anyway); a byte that does not decode becomes a replacement character instead of an exception in the middle of a run
+        text_kwargs = {"encoding": output_encoding(), "errors": "replace"}
         args = process_args(argv)
-        if self.environment.kind is EnvironmentKind.WSL:
+        if in_wsl:
             from axqua.core.wsl import environment as wsl_environment
             env = wsl_environment(env)          # WSL_UTF8: wsl.exe's own messages readable
         cwd = str(cwd) if cwd else None
@@ -93,6 +94,17 @@ class ShellRuntime:
         if os.name == "nt":
             # a console window per step would pop up from QGIS, and closing it kills the step
             popen_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        if on_line is None and in_wsl:
+            from axqua.core.wsl import decode
+
+            # wsl.exe's own messages may be UTF-16 (Windows 10 ignores WSL_UTF8)
+            done = subprocess.run(args, cwd=cwd, capture_output=True, env=env, **popen_kwargs)
+            result = subprocess.CompletedProcess(args, done.returncode, decode(done.stdout),
+                                                 decode(done.stderr))
+            if check and done.returncode:
+                raise subprocess.CalledProcessError(done.returncode, args, result.stdout,
+                                                    result.stderr)
+            return result
         if on_line is None:
             return subprocess.run(
                 args, cwd=cwd, check=check, capture_output=True, env=env,
@@ -111,6 +123,8 @@ class ShellRuntime:
         assert proc.stdout is not None
         try:
             for line in proc.stdout:
+                if in_wsl:
+                    line = line.replace("\x00", "")
                 captured.append(line)
                 on_line(line.rstrip("\n"))
                 if should_stop is not None and should_stop():
@@ -181,10 +195,17 @@ class TelemacRuntime(ShellRuntime):
         """The sourced ``pysource.*.sh`` (kept as its own name for readability)."""
         return self.env_script
 
+    def _default_python(self) -> str:
+        """The interpreter of TELEMAC's launchers when none is named: aXqua's own, which has numpy, or inside WSL the distribution's ``python3`` (a Windows ``python.exe`` does not run in Linux; TELEMAC's installer sets up numpy for it)."""
+        if self.environment.kind is EnvironmentKind.WSL:
+            return "python3"
+        return sys.executable
+
     def python(self, code: str, cwd: str | Path | None = None,
                check: bool = True) -> subprocess.CompletedProcess:
         """Execute a Python snippet using TELEMAC's interpreter (has data_manip)."""
-        wrapped = "python - <<'__TMSETUP_PY__'\n" + code + "\n__TMSETUP_PY__"
+        interpreter = "python3" if self.environment.kind is EnvironmentKind.WSL else "python"
+        wrapped = f"{interpreter} - <<'__TMSETUP_PY__'\n" + code + "\n__TMSETUP_PY__"
         return self.run(wrapped, cwd=cwd, check=check)
 
     def run_solver(self, cas_file: str | Path, cwd: str | Path,
@@ -233,9 +254,10 @@ class TelemacRuntime(ShellRuntime):
         # the case where a *different* interpreter is genuinely wanted.
         python = (getattr(self.env, "solver_python", None)
                   or os.environ.get("AXQUA_TELEMAC_PYTHON")
-                  or sys.executable)
+                  or self._default_python())
+        cas = self.environment.translate(cas_file)
         cmd = (f'{shlex.quote(str(python))} "$(command -v {launcher}.py)" '
-               f"{shlex.quote(str(cas_file))}{parallel}{sortie_flags}")
+               f"{shlex.quote(cas)}{parallel}{sortie_flags}")
         return self.run(cmd, cwd=cwd, check=check, on_line=on_line,
                         should_stop=should_stop)
 

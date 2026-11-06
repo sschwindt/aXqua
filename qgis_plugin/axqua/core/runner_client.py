@@ -46,10 +46,7 @@ ENV_VAR = "AXQUA_EXE"
 LEGACY_ENV_VAR = "HYDROMATE_EXE"
 SETTINGS_KEY = "axqua/executable"
 
-#: Variables that QGIS sets for its own Python and its own libraries. Inherited, they make
-#: the axqua of another Python environment start QGIS's Python (``PYTHONHOME``), import
-#: QGIS's packages (``PYTHONPATH``) or read a ``proj.db`` and GDAL plugins of other versions:
-#: on QGIS for Windows the first call failed before aXqua said a word (review of 2026-11-06).
+#: Variables that QGIS sets for its own Python and its own libraries. Inherited, they make the axqua of another Python environment start QGIS's Python (``PYTHONHOME``), import QGIS's packages (``PYTHONPATH``) or read a ``proj.db`` and GDAL plugins of other versions: on QGIS for Windows the first call failed before aXqua said a word (review of 2026-11-06).
 QGIS_VARIABLES = (
     "PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP", "PYTHONEXECUTABLE", "PYTHONUSERBASE",
     "PYTHONNOUSERSITE", "GDAL_DATA", "GDAL_DRIVER_PATH", "GDAL_FILENAME_IS_UTF8",
@@ -89,8 +86,7 @@ class RunnerError(RuntimeError):
         if self.remedy:
             parts.append(self.remedy)
         else:
-            # what the program or Windows wrote, in the language of the computer: on a line
-            # of its own, never inside the English sentence
+            # what the program or Windows wrote, in the language of the computer: on a line of its own, never inside the English sentence
             detail = _tail(self.stderr)
             if self.returncode:
                 parts.append(f"axqua exited with code {self.returncode}.")
@@ -191,8 +187,7 @@ def _probe(path: str) -> str:
         raise RunnerError("not executable")
     if os.name == "nt" and resolved.suffix.lower() not in (".exe", ".bat", ".cmd", ".com"):
         # os.access says yes to any file on Windows; running it fails with a WinError 193
-        raise RunnerError("not a Windows program: select the axqua.exe in the Scripts "
-                          "folder of the environment aXqua is installed in")
+        raise RunnerError("not a Windows program: select the axqua.exe in the Scripts folder of the environment aXqua is installed in")
     try:
         # A list, never a string, and never shell=True: the argument vector goes to
         # execve untouched, so nothing in *path* can be interpreted as a command,
@@ -254,22 +249,34 @@ def qgis_root() -> Path | None:
     return prefix.parents[1] if prefix.parent.name.lower() == "apps" else None
 
 
+def _long(path: str) -> str:
+    """*path* in its long form: QGIS for Windows often names its folder in 8.3 form (``C:\\PROGRA~1\\QGIS34~1.5``) while ``PATH`` has the long names, or the other way round."""
+    absolute = os.path.abspath(path)
+    if os.name != "nt":
+        return absolute
+    try:   # pragma: no cover - Windows only
+        import ctypes
+        buffer = ctypes.create_unicode_buffer(32768)
+        if ctypes.windll.kernel32.GetLongPathNameW(absolute, buffer, len(buffer)):
+            return buffer.value
+    except (AttributeError, OSError, ValueError):
+        pass
+    return absolute
+
+
 def _inside(path: str, folder: Path | None) -> bool:
     if folder is None or not path:
         return False
     try:
-        return os.path.normcase(os.path.abspath(path)).startswith(
-            os.path.normcase(os.path.abspath(str(folder))) + os.sep)
+        return os.path.normcase(_long(path)).startswith(os.path.normcase(_long(str(folder))) + os.sep)
     except (OSError, ValueError):
         return False
 
 
 def backend_env(base: dict | None = None, *, root: Path | None = None) -> dict:
-    """The environment axqua is started with: QGIS's, without what belongs to QGIS's Python.
+    """The environment axqua, ParaView and VisIt are started with: QGIS's, without what belongs to QGIS's Python.
 
-    On Windows the folders of QGIS also leave ``PATH``, so the DLLs of QGIS's GDAL are not
-    found before those of aXqua's. The backend runs in Python's UTF-8 mode, so what it
-    writes and reads is UTF-8 on every computer.
+    On Windows the folders of QGIS also leave ``PATH``, so the DLLs of QGIS's GDAL are not found before those of aXqua's. The backend runs in Python's UTF-8 mode, so what it writes and reads is UTF-8 on every computer.
     """
     env = {key: value for key, value in (os.environ if base is None else base).items()
            if key.upper() not in QGIS_VARIABLES}
@@ -286,8 +293,7 @@ def backend_env(base: dict | None = None, *, root: Path | None = None) -> dict:
 def in_qgis_python(path: str) -> bool:
     """Whether *path* is an axqua installed into the Python of QGIS itself.
 
-    It passes ``--version`` there and fails at the first mesh (no gmsh, no rasterio), and
-    ``pip install axqua`` into QGIS's Python can break QGIS's own numpy, PROJ and GDAL.
+    It passes ``--version`` there and fails at the first mesh (no gmsh, no rasterio), and ``pip install axqua`` into QGIS's Python can break QGIS's own numpy, PROJ and GDAL.
     """
     return os.name == "nt" and (_inside(path, qgis_root()) or _inside(path, Path(sys.prefix)))
 

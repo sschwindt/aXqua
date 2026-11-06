@@ -436,7 +436,7 @@ The runoff of a catchment carries soil: the flow detaches it where its shear str
 
 **The Sediment transport wizard.** *Sediment transport wizard...* on the sub-tab *Simulations > Hydrology* opens a window with four tabs:
 
-#. *Soil layer*: the thickness of the soil that can erode, above a bed that does not. On a field this is the plough layer, about 0.3 m on the subsoil; on a hillslope, the topsoil on the rock or on a compacted layer. Where the flow has removed the whole layer, erosion stops.
+#. *Soil layer*: the thickness of the soil that can erode, above a bed that does not. On a field this is the plow layer, about 0.3 m on the subsoil; on a hillslope, the topsoil on the rock or on a compacted layer. Where the flow has removed the whole layer, erosion stops.
 #. *Grain sizes*: what the soil is made of: a USDA texture class (the one the case gives for the infiltration, ``hydrology.soil_texture``, comes first), *Clay*, *Sand*, the shares of sand, silt and clay, or the median grain size :math:`d_{50}` from a sieve analysis. A texture class stands for the shares at the middle of its field in the texture triangle, so the shares or :math:`d_{50}` of the soil itself are better.
 #. *Recommendation*: the transport formula and the sediment classes that aXqua recommends for the soil and the median slope of the catchment, with the reasons and what to look out for. The check box *Transport sediment (strongly recommended)* is ticked.
 #. *Save* writes the block ``morphodynamics`` into the case file. With the check box unticked, the case is saved with ``enabled: false`` and remains hydraulic only; the checkup then no longer asks. Build the case again after a change.

@@ -306,8 +306,9 @@ class SolverBinding:
         out: dict[str, Any] = {}
         if self.setup_script is not None:
             # a script inside WSL is a Linux path; on Windows its Path spells it \\opt\\..., which is no path a person reads as Linux
-            out["setup_script"] = (Path(str(self.setup_script)).as_posix()
-                                   if self.environment == "wsl" else str(self.setup_script))
+            text = str(self.setup_script)
+            out["setup_script"] = (Path(text).as_posix()
+                                   if self.environment == "wsl" and not _wsl_path(text) else text)
         for key in ("environment", "shell", "distro", "config_name", "mpi_launcher",
                     "mpi_processes"):
             value = getattr(self, key)
@@ -631,7 +632,10 @@ def detect(name: str | None = None) -> AxquaProfile:
     for solver in SOLVERS:
         found = machine.resolve(solver, use_profile=False)
         if found:
-            profile.solvers[solver] = SolverBinding(setup_script=found.path)
+            inside = _wsl_location(found.path)
+            profile.solvers[solver] = SolverBinding(
+                setup_script=found.path, environment="wsl" if inside else None,
+                distro=inside[0] if inside else None)
     for program_name in POSTPROCESSORS:
         found = machine.resolve(program_name, use_profile=False)
         if found:
@@ -656,8 +660,8 @@ def absolute_script(script) -> Path:
     On Windows, a Linux path (``/opt/...``) and a path into a WSL distribution (``\\\\wsl.localhost\\...``) stay as they are: made absolute against a Windows drive, ``/opt/x.sh`` became ``C:\\opt\\x.sh``, a file on neither side.
     """
     text = str(script)
-    if os.name == "nt" and (text.startswith(("/", "\\")) and not text.startswith("\\\\")
-                            or _wsl_path(text)):
+    if _wsl_path(text) or (os.name == "nt" and text.startswith(("/", "\\"))
+                           and not text.startswith("\\\\")):
         return Path(text)
     path = Path(script).expanduser()
     try:
@@ -687,7 +691,16 @@ def rebound(profile: "AxquaProfile | None", solver: str, script) -> "SolverBindi
         for name, empty in INSTALLATION_FIELDS.items():
             setattr(new, name, copy.copy(empty))
     new.setup_script = absolute_script(script)
+    inside = _wsl_location(script)
+    if inside is not None:
+        # \\wsl.localhost\<distro>\...: the file names its distribution, and is entered there
+        new.environment, new.distro = "wsl", inside[0]
     return new
+
+
+def _wsl_location(script) -> "tuple[str, str] | None":
+    from axqua.core.wsl import from_unc
+    return from_unc(str(script)) if script is not None else None
 
 
 # ------------------------------------------------------------------------ checking

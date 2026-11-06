@@ -406,10 +406,7 @@ def clean_environment() -> dict[str, str]:
     behind a proxy fails; the display variables are kept for the graphical installers
     of the postprocessors.
 
-    The language is English (``C.UTF-8``) whatever the computer is set to: aXqua reads the
-    answers of apt (``Unable to locate package``, ``selecting ... instead of``), which a
-    German system writes in German, and an English installation log is one language with
-    the English lines of aXqua (review of 2026-11-06).
+    The language is English (``C.UTF-8``) whatever the computer is set to: aXqua reads the answers of apt (``Unable to locate package``, ``selecting ... instead of``), which a German system writes in German, and an English installation log is one language with the English lines of aXqua (review of 2026-11-06).
     """
     keep = {"HOME", "USER", "LOGNAME", "TERM", "DISPLAY",
             "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS",

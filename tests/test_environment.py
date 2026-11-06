@@ -416,11 +416,10 @@ def test_cmd_output_is_read_in_the_oem_code_page_on_windows(monkeypatch, as_wind
     from axqua.core import environment as envmod
 
     as_windows(envmod)
-    assert envmod.output_encoding("windows", cmd=True) == "oem"
-    assert envmod.output_encoding("windows", cmd=False) == "utf-8"     # a bundled bash
-    assert envmod.output_encoding("wsl") == "utf-8"
+    assert envmod.output_encoding(cmd_builtin=True) == "oem"       # `set` of cmd
+    assert envmod.output_encoding() == "utf-8"                     # the programs cmd starts
     monkeypatch.setattr(envmod, "os", __import__("os"))
-    assert envmod.output_encoding("windows", cmd=True) == "utf-8"
+    assert envmod.output_encoding(cmd_builtin=True) == "utf-8"
 
 
 def test_a_path_inside_wsl_has_a_windows_spelling_through_its_distribution():
