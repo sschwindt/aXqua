@@ -86,7 +86,8 @@ def command(argv: Sequence[str], distro: str | None = None, *, user: str | None 
         out += ["-u", user]
     if cd:
         out += ["--cd", cd]
-    return out + ["--", *[str(a) for a in argv]]
+    # --exec, not --: after --, wsl.exe hands the command line to the default shell of the distribution, which would expand $(...) and re-split the quoting of Windows before our own bash sees it
+    return out + ["--exec", *[str(a) for a in argv]]
 
 
 @dataclass

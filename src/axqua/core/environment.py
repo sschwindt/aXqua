@@ -284,7 +284,8 @@ class SolverEnvironment:
         prefix = ["wsl.exe"]
         if self.distro:
             prefix += ["-d", self.distro]
-        return prefix + ["--"]
+        # --exec: after --, the default shell of the distribution would expand $(command -v ...) before the sourced bash runs it
+        return prefix + ["--exec"]
 
     def mpi_command(self, command: str, processes: int) -> str:
         """Prefix *command* with this environment's MPI launcher.

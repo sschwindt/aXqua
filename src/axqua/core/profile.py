@@ -695,7 +695,15 @@ def rebound(profile: "AxquaProfile | None", solver: str, script) -> "SolverBindi
     if inside is not None:
         # \\wsl.localhost\<distro>\...: the file names its distribution, and is entered there
         new.environment, new.distro = "wsl", inside[0]
+    elif new.environment == "wsl" and _drive_path(str(script)):
+        # a file of Windows (C:\...) is no installation inside WSL, whatever the old entry was
+        new.environment, new.distro = None, None
     return new
+
+
+def _drive_path(text: str) -> bool:
+    import re
+    return re.match(r"^[A-Za-z]:[\\/]", text) is not None
 
 
 def _wsl_location(script) -> "tuple[str, str] | None":

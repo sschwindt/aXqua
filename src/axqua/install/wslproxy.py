@@ -21,8 +21,8 @@ from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
 
 __all__ = ["choose_distro", "call", "package_root", "remote_command", "remote_env"]
 
-#: The program the distribution's python3 runs: this aXqua's command line, from the Windows folder of the package, appended to the path so that nothing of Windows shadows a module of the distribution.
-LAUNCH = ("import runpy, sys; sys.path.append({root!r}); sys.argv = ['axqua'] + sys.argv[1:]; "
+#: The program the distribution's python3 runs: this aXqua's command line, from the Windows folder of the package, first on the path, so that an older aXqua installed in the distribution (as the documentation once asked) cannot answer in its place. The install code imports the standard library only, so nothing else of the Windows folder is read.
+LAUNCH = ("import runpy, sys; sys.path.insert(0, {root!r}); sys.argv = ['axqua'] + sys.argv[1:]; "
           "runpy.run_module('axqua', run_name='__main__', alter_sys=True)")
 
 

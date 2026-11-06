@@ -2629,6 +2629,34 @@ def _load_environment(raw, cfg_dir: Path) -> "Environment":
     return Environment(**data)
 
 
+def _machine_environment(solver: str, environment: "Environment", script) -> "Environment":
+    """*environment* of the case, or where it names no kind, how the profile of this computer enters *solver*.
+
+    Where the program lives is the profile's, and so is how it is entered: on Windows, TELEMAC and OpenFOAM are entered in WSL (``environment: wsl`` and the distribution of the profile entry, or a script named by its \\\\wsl.localhost path). The case used to take the script from the profile and the kind from nowhere, so a job on Windows sourced a Linux script through cmd (review of 2026-11-06).
+    """
+    if environment.kind is not None:
+        return environment
+    from axqua.core import wsl as _wsl
+    from axqua.core.profile import load_active
+
+    binding = None
+    try:
+        active = load_active()
+        binding = active.solvers.get(solver) if active is not None else None
+    except Exception:  # noqa: BLE001 - an unreadable profile is reported by its own check
+        binding = None
+    inside = _wsl.from_unc(str(script)) if script is not None else None
+    kind = getattr(binding, "environment", None) or ("wsl" if inside else None)
+    if kind not in ("wsl", "windows"):
+        return environment          # posix is what an environment without a kind is on Linux anyway
+    distro = environment.distro or getattr(binding, "distro", None) or (inside[0] if inside else None)
+    return Environment(kind=kind, setup_script=environment.setup_script,
+                       shell=environment.shell or getattr(binding, "shell", None),
+                       distro=distro if kind == "wsl" else None,
+                       mpi_launcher=environment.mpi_launcher or getattr(binding, "mpi_launcher", None),
+                       overrides=dict(environment.overrides))
+
+
 def _load_gain_lose(raw: dict, cfg_dir: Path) -> GainLose:
     """Build the :class:`GainLose` block from ``gain_lose:`` or the deprecated
     ``percolation:``.
@@ -2706,7 +2734,8 @@ def load_config(path: str | os.PathLike) -> Config:
 
     _t = _machine.resolve("telemac", configured=tdict.get("pysource"), case_dir=cfg_dir)
     tdict["pysource"] = _t.path if _t else _resolve(cfg_dir, tdict.get("pysource"))
-    tdict["environment"] = _load_environment(tdict.get("environment"), cfg_dir)
+    tdict["environment"] = _machine_environment(
+        "telemac", _load_environment(tdict.get("environment"), cfg_dir), tdict.get("pysource"))
     telemac = TelemacEnv(**_only_known(TelemacEnv, tdict))
 
     # CAD surfaces: parsed before geodata because, when present, they *supply* the
@@ -2816,7 +2845,8 @@ def load_config(path: str | os.PathLike) -> Config:
                            case_dir=cfg_dir)
     if _of:
         ofdict["bashrc"] = _of.path
-    ofdict["environment"] = _load_environment(ofdict.get("environment"), cfg_dir)
+    ofdict["environment"] = _machine_environment(
+        "openfoam", _load_environment(ofdict.get("environment"), cfg_dir), ofdict.get("bashrc"))
     ofdict["pre_run"] = PreRun(**_only_known(PreRun, dict(ofdict.get("pre_run") or {})))
     openfoam = OpenFoam(**_only_known(OpenFoam, ofdict))
     openfoam_dir = _resolve(cfg_dir, project.get("openfoam_dir")) if \

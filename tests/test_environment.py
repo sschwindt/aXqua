@@ -83,13 +83,13 @@ def test_wsl_wraps_bash_in_the_distro():
     env = SolverEnvironment(kind="wsl", distro="Ubuntu-22.04",
                             setup_script="/opt/openfoam9/etc/bashrc")
     argv = env.command("interFoam -parallel")
-    assert argv[:4] == ["wsl.exe", "-d", "Ubuntu-22.04", "--"]
+    assert argv[:4] == ["wsl.exe", "-d", "Ubuntu-22.04", "--exec"]
     assert argv[4] == "bash" and "source /opt/openfoam9/etc/bashrc" in argv[6]
 
 
 def test_wsl_without_a_distro_uses_the_default_one():
     env = SolverEnvironment(kind="wsl", setup_script="/opt/of/etc/bashrc")
-    assert env.command("x")[:2] == ["wsl.exe", "--"]
+    assert env.command("x")[:2] == ["wsl.exe", "--exec"]
 
 
 def test_no_setup_script_still_produces_a_runnable_command():

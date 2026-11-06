@@ -113,24 +113,34 @@ def _discover_in_wsl(key: str) -> Path | None:
     """
     if os.name != "nt" or key not in WSL_HOME_DISCOVERY:
         return None
+    if key in _WSL_FOUND:
+        return _WSL_FOUND[key]
     from axqua.core import wsl
+    found = None
     for distro in _wsl_distros():
+        if distro.lower().startswith("docker-desktop"):
+            continue                       # Docker's own, never an installation; looking would start it
         root = Path(wsl.to_unc(distro, "/"))
-        matches: list[Path] = []
-        for pattern in DISCOVERY.get(key, ()):
-            if pattern.startswith("/"):
-                matches += sorted(root.glob(pattern.lstrip("/")))
         try:
             homes = sorted(p for p in (root / "home").iterdir() if p.is_dir())
         except OSError:
             homes = []
-        for home in homes:
-            for pattern in WSL_HOME_DISCOVERY[key]:
-                matches += sorted(home.glob(pattern))
-        readable = [m for m in matches if m.is_file() and "template" not in m.name]
-        if readable:
-            return readable[-1]
-    return None
+        # in the order of preference, as on Linux: the first pattern with a file wins, its newest version
+        groups = [[root.glob(p.lstrip("/"))] for p in DISCOVERY.get(key, ()) if p.startswith("/")]
+        groups += [[home.glob(p) for home in homes] for p in WSL_HOME_DISCOVERY[key]]
+        for group in groups:
+            readable = sorted(m for matches in group for m in matches if m.is_file() and "template" not in m.name)
+            if readable:
+                found = readable[-1]
+                break
+        if found is not None:
+            break
+    _WSL_FOUND[key] = found
+    return found
+
+
+#: What was found in WSL, per program (asked once per process: each look starts the distribution).
+_WSL_FOUND: dict[str, Path | None] = {}
 
 
 #: Roots the relative DISCOVERY patterns are joined to. ``AXQUA_SOLVER_ROOT``

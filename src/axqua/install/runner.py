@@ -63,6 +63,10 @@ START_GRACE = 60.0
 BIND_WAIT = 30.0
 
 
+#: The file in which Windows records the wsl.exe that keeps an installation inside WSL alive.
+KEEPER = "keeper.json"
+
+
 def installs_root() -> Path:
     from axqua.jobs import paths
     return paths.data_dir() / "installs"
@@ -120,12 +124,17 @@ def _alive(status: dict[str, Any]) -> bool | None:
 
     if status.get("distro") and os.name == "nt":
         # an installation into WSL: the runner is a Linux process, kept alive by the wsl.exe this computer started for it, and that one is what Windows can ask about
-        keeper = status.get("windows_pid")
+        try:
+            held = json.loads((Path(status["folder"]) / KEEPER).read_text(encoding="utf-8")) \
+                if status.get("folder") else {}
+        except (OSError, ValueError):
+            held = {}
+        keeper = held.get("pid") or status.get("windows_pid")
         if not keeper:
             return None
         if not procs.pid_alive(int(keeper)):
             return False
-        began, now = status.get("windows_started"), procs.process_start_time(int(keeper))
+        began, now = held.get("started"), procs.process_start_time(int(keeper))
         return not (began is not None and now is not None and abs(float(now) - float(began)) > 1e-6)
     if status.get("host") and status["host"] != procs.host_id():
         return None                             # another computer's installation
@@ -149,6 +158,7 @@ def read(ident: str | os.PathLike, *, lines: int = 0) -> dict[str, Any]:
     if not status:
         raise ConfigError(f"no installation {Path(ident).name}", subject=str(ident),
                           remedy="List them with 'axqua install list'.")
+    status["folder"] = str(folder)
     if status.get("state") in ACTIVE:
         alive = _alive(status)
         lost = alive is False or (
@@ -224,6 +234,12 @@ def start_in_wsl(plan: dict[str, Any], distro: str, *, detach: bool = True, echo
         first = next((f for f in plan.get("findings") or [] if f.get("severity") == ERROR), {})
         raise ConfigError(first.get("message") or "this installation has nothing to run",
                           subject=f"install.{plan.get('target', '')}", remedy=first.get("remedy", ""))
+    running = latest(str(plan["target"]), active_only=True)
+    if running is not None:
+        from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
+        raise AxquaEnvironmentError(
+            f"an installation of {recipes.TITLES[plan['target']]} is already running ({running['id']})",
+            subject=running["id"], remedy=f"Wait for it, or cancel it with 'axqua install cancel {running['id']}'.")
     folder = _new_folder(str(plan["target"]))
     (folder / "plan.json").write_text(json.dumps(plan, indent=2, default=str), encoding="utf-8")
     _write(folder, {
@@ -240,9 +256,9 @@ def start_in_wsl(plan: dict[str, Any], distro: str, *, detach: bool = True, echo
     with open(folder / "runner.log", "ab") as out:
         proc = subprocess.Popen(argv, cwd=str(folder), stdin=subprocess.DEVNULL, stdout=out,
                                 stderr=subprocess.STDOUT, env=wsl.environment(), creationflags=flags)
-    status = _load(folder)
-    status.update(windows_pid=proc.pid, windows_started=procs.process_start_time(proc.pid))
-    _write(folder, status)
+    # a file of its own: the runner inside WSL keeps status.json in memory and writes it back whole, so a field added there from here would be lost
+    (folder / KEEPER).write_text(json.dumps({"pid": proc.pid, "started": procs.process_start_time(proc.pid)}),
+                                 encoding="utf-8")
     if not detach:
         log_path, shown = folder / "install.log", 0
         while proc.poll() is None:
@@ -318,20 +334,8 @@ def start(plan: recipes.Plan, *, detach: bool = True, echo: bool = False
             remedy="Wait for it, or cancel it with 'axqua install cancel "
                    f"{running['id']}'.")
 
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    installs_root().mkdir(parents=True, exist_ok=True)
-    for attempt in range(1, 100):
-        # two installations may be started within one second: the second gets a suffix
-        ident = f"{stamp}-{plan.target}" + (f"-{attempt}" if attempt > 1 else "")
-        folder = installs_root() / ident
-        try:
-            folder.mkdir()
-            break
-        except FileExistsError:
-            continue
-    else:                                       # pragma: no cover - 99 in one second
-        raise AxquaEnvironmentError("no folder for this installation could be made",
-                                    subject=str(installs_root()))
+    folder = _new_folder(plan.target)
+    ident = folder.name
     (folder / "plan.json").write_text(json.dumps(plan.as_dict(), indent=2, default=str),
                                       encoding="utf-8")
     from axqua.jobs import procs
@@ -724,15 +728,18 @@ def _cancel_in_wsl(folder: Path, status: dict[str, Any], *, grace: float) -> dic
     from axqua.core import wsl
 
     deadline = time.time() + grace
-    while time.time() < deadline and _alive(_load(folder) or status):
+    while time.time() < deadline and _alive({**(_load(folder) or status), "folder": str(folder)}):
         time.sleep(0.3)
-    current = _load(folder) or status
+    current = {**(_load(folder) or status), "folder": str(folder)}
     if _alive(current):
         pids = [str(int(current[key])) for key in ("pid",) if current.get(key)]
         group = [f"-{int(current['child_pid'])}"] if current.get("child_pid") else []
         if pids or group:
             wsl.run(["kill", "-KILL", *group, *pids], str(current["distro"]), timeout=30)
-        keeper = current.get("windows_pid")
+        try:
+            keeper = json.loads((folder / KEEPER).read_text(encoding="utf-8")).get("pid")
+        except (OSError, ValueError):
+            keeper = None
         if keeper:
             subprocess.run(["taskkill", "/PID", str(int(keeper)), "/T", "/F"], capture_output=True,
                            timeout=30, check=False)

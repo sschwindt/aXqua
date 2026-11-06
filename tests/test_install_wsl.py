@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 import shutil
 import sys
 
@@ -17,7 +18,7 @@ from axqua.install import runner, wslproxy
 FAKE_WSL = """#!/bin/sh
 # wsl.exe [-d distro] [-u user] [--cd folder] -- program args: the program runs here
 while [ $# -gt 0 ]; do
-  case "$1" in -d|-u|--cd) shift 2 ;; --) shift; break ;; *) break ;; esac
+  case "$1" in -d|-u|--cd) shift 2 ;; --|--exec|-e) shift; break ;; *) break ;; esac
 done
 exec "$@"
 """
@@ -66,7 +67,7 @@ def test_a_plan_on_windows_is_made_in_wsl_and_binds_in_windows(monkeypatch, caps
     assert seen["distro"] == "Ubuntu" and seen["args"][:3] == ["install", "plan", "openfoam"]
     assert "--no-bind" in seen["args"] and "--no-visualization" in seen["args"]
     assert data["host"]["system"] == "windows" and data["distro"] == "Ubuntu"
-    assert data["options"]["bind"] is True          # bound on this side, into the Windows profile
+    assert data["bind_windows"] is True and data["options"]["bind"] is False   # bound in Windows, not by the runner in WSL
 
 
 def test_windows_without_wsl_gets_one_finding_for_its_administrator(monkeypatch, capsys, as_windows):
@@ -105,7 +106,7 @@ def test_an_installation_into_wsl_runs_there_and_is_entered_in_the_windows_profi
     status = runner.start_in_wsl(plan, "Ubuntu", detach=False)
     assert status["state"] == "succeeded", (status.get("message"), runner.tail(status["log"]))
     assert built.is_file()                                     # the step ran on the Linux side
-    assert status["distro"] == "Ubuntu" and status["windows_pid"]
+    assert status["distro"] == "Ubuntu" and (Path(status["folder"]) / runner.KEEPER).is_file()
     assert entered == {"solvers.telemac.setup_script": wsl.to_unc("Ubuntu", str(built))}
     assert status["bound"].endswith("default.axq-profile")
     # read again: entered once, not on every poll of the plugin
@@ -151,3 +152,18 @@ def test_paths_from_a_windows_dialog_reach_the_distribution_as_linux_paths():
     assert installcli._linux_paths(argv) == [
         "start", "telemac", "--folder", "/srv/stud/opt", "--salome=/mnt/c/Users/stud/Downloads/salome.tar.gz",
         "--reuse-openfoam", "auto"]
+
+
+def test_a_flag_is_removed_without_the_option_after_it():
+    """`--json --folder D:\\tm` lost the folder with the flag (review of 2026-11-06)."""
+    assert installcli._without(["start", "telemac", "--json", "--folder", "D:\\tm", "--distro", "Ubuntu"],
+                               "--distro", "--json") == ["start", "telemac", "--folder", "D:\\tm"]
+
+
+def test_a_script_of_windows_after_a_wsl_entry_is_no_wsl_entry():
+    from axqua.core import profile as profiles
+
+    old = profiles.AxquaProfile(solvers={"telemac": profiles.SolverBinding(
+        setup_script=r"\\wsl.localhost\Ubuntu\opt\telemac\configs\pysource.sh", environment="wsl", distro="Ubuntu")})
+    new = profiles.rebound(old, "telemac", r"C:\telemac\configs\pysource.win.bat")
+    assert new.environment is None and new.distro is None

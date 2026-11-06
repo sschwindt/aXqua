@@ -65,7 +65,7 @@ def test_the_list_of_distributions_is_read_in_any_language():
 def test_a_command_inside_a_distribution(monkeypatch):
     monkeypatch.setattr(wsl, "executable", lambda: "wsl.exe")
     assert wsl.command(["apt-get", "install", "-y", "gfortran"], "Ubuntu", user="root") == \
-        ["wsl.exe", "-d", "Ubuntu", "-u", "root", "--", "apt-get", "install", "-y", "gfortran"]
+        ["wsl.exe", "-d", "Ubuntu", "-u", "root", "--exec", "apt-get", "install", "-y", "gfortran"]
     seen = {}
 
     def fake(args, **kwargs):
@@ -75,7 +75,7 @@ def test_a_command_inside_a_distribution(monkeypatch):
     monkeypatch.setattr(wsl.subprocess, "run", fake)
     assert str(wsl.home("Ubuntu")) == "/srv/stud"
     assert seen["env"]["WSL_UTF8"] == "1"
-    assert seen["args"][:4] == ["wsl.exe", "-d", "Ubuntu", "--"]
+    assert seen["args"][:4] == ["wsl.exe", "-d", "Ubuntu", "--exec"]
 
 
 def test_without_wsl_exe_the_status_says_so(monkeypatch):

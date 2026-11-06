@@ -64,7 +64,7 @@ class WslLauncher:
         prefix = [exe]
         if distro:
             prefix += ["-d", distro]
-        return prefix + ["--"]
+        return prefix + ["--exec"]          # not --: the default shell would parse the payload first
 
     def _bash(self, distro: str | None, payload: str) -> list[str]:
         return self._prefix(distro) + ["bash", "-lc", payload]

@@ -78,7 +78,22 @@ def test_telemac_inside_wsl_runs_with_the_distributions_python_and_linux_paths(m
     monkeypatch.delenv("AXQUA_TELEMAC_PYTHON", raising=False)
     runtime.run_solver(r"C:\Users\stud\case\steady2d.cas", cwd=r"C:\Users\stud\case")
     payload = seen["args"][-1]
-    assert seen["args"][:4] == ["wsl.exe", "-d", "Ubuntu", "--"] or seen["args"][1:4] == ["-d", "Ubuntu", "--"]
+    assert seen["args"][:4] == ["wsl.exe", "-d", "Ubuntu", "--exec"] or seen["args"][1:4] == ["-d", "Ubuntu", "--exec"]
     assert "cd /mnt/c/Users/stud/case && python3 " in payload
     assert "'/mnt/c/Users/stud/case/steady2d.cas'" in payload or "/mnt/c/Users/stud/case/steady2d.cas" in payload
     assert "python.exe" not in payload
+
+
+def test_a_case_on_windows_enters_telemac_the_way_the_profile_says(monkeypatch, tmp_path):
+    """The profile's environment: wsl never reached the case, so a job sourced the Linux script through cmd (review of 2026-11-06)."""
+    from axqua import config as config_mod
+
+    binding = profiles.SolverBinding(setup_script=UNC, environment="wsl", distro="Ubuntu-24.04")
+    monkeypatch.setattr(profiles, "load_active", lambda: profiles.AxquaProfile(solvers={"telemac": binding}))
+    env = config_mod._machine_environment("telemac", config_mod.Environment(), UNC)
+    assert env.kind == "wsl" and env.distro == "Ubuntu-24.04"
+    explicit = config_mod.Environment(kind="posix")
+    assert config_mod._machine_environment("telemac", explicit, UNC) is explicit       # the case decides where it says
+    monkeypatch.setattr(profiles, "load_active", lambda: None)
+    assert config_mod._machine_environment("telemac", config_mod.Environment(), UNC).kind == "wsl"   # the path says
+    assert config_mod._machine_environment("telemac", config_mod.Environment(), "/opt/x.sh").kind is None

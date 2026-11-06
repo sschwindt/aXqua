@@ -349,15 +349,20 @@ def _status_lines(status: dict) -> list[str]:
 WINDOWS_TO_WSL = ("overview", "plan", "packages", "start", "telemac-examples")
 
 
+#: Options of `axqua install` that take no value.
+FLAGS = ("--json", "--for-all-users", "--no-telemac-examples", "--no-visualization", "--no-visit", "--examples",
+         "--no-smoke-test", "--no-bind", "--foreground", "--elevate", "--verbose", "-v", "--quiet", "-q")
+
+
 def _without(argv: list[str], *names: str) -> list[str]:
-    """*argv* without the options *names* and their values."""
+    """*argv* without the options *names* and, for an option that takes one, its value."""
     out, skip = [], False
     for arg in argv:
         if skip:
             skip = False
             continue
         if arg in names:
-            skip = True
+            skip = arg not in FLAGS
             continue
         if any(arg.startswith(name + "=") for name in names):
             continue
@@ -460,7 +465,8 @@ def _on_windows(args, argv: list[str], command: str) -> int:
         return emit(command, data, as_json=args.as_json, lines=lines)
     _windows_host(data, distro, status)
     data["distro"] = distro
-    data.setdefault("options", {})["bind"] = not args.no_bind
+    # entered in the Windows profile by runner.read; options.bind stays False, so the runner inside WSL does not enter it in a profile of its own
+    data["bind_windows"] = not args.no_bind
     if args.action == "plan":
         return emit(command, data, as_json=args.as_json, lines=_plan_lines(data))
     started = runner.start_in_wsl(data, distro, detach=not args.foreground, echo=args.foreground,
