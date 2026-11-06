@@ -32,6 +32,8 @@ from qgis.PyQt.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDial
                                  QProgressBar, QPushButton, QSpinBox, QVBoxLayout,
                                  QWidget)
 
+from ..compat import english_buttons
+
 DEFAULT_FPS = 8
 DEFAULT_WIDTH = 1920
 #: A long encode of a long animation, but still bounded.
@@ -142,6 +144,7 @@ class MovieDialog(QDialog):
 
         self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
                                         | QDialogButtonBox.StandardButton.Cancel)
+        english_buttons(self.buttons)
         self.buttons.accepted.connect(self._export)
         self.buttons.rejected.connect(self._cancel)
         layout.addWidget(self.buttons)

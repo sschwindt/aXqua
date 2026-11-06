@@ -67,7 +67,7 @@ msgstr "Auf diese Weise sind einige Dutzend Modellläufe ausreichend, wo eine di
 msgid "Ground truth data setup"
 msgstr "Einrichtung von Referenzdaten"
 
-# machine translation: argos 24311241a868
+# machine translation: argos 0e1d7d97f066
 msgid "Field measurements are called ground truth. aXqua accepts them in a workbook with a fixed structure, which is called the calibration target template. Create it for a case with:"
 msgstr "Feldmessungen werden als Referenzdaten bezeichnet. aXqua akzeptiert sie in einer Arbeitsmappe mit einer festen Struktur, die als Kalibrierzielvorlage bezeichnet wird. Erstellen Sie es für einen Fall mit:"
 
@@ -87,7 +87,7 @@ msgstr "Inhalt"
 msgid "One row per measurement point: velocity components, their fluctuations, water depth and bed elevation. The velocity magnitude and the turbulent kinetic energy are computed by formulas in the sheet."
 msgstr "Eine Reihe pro Messpunkt: Geschwindigkeitskomponenten, ihre Schwankungen, Wassertiefe und Sohlhöhe. Die Geschwindigkeitsgröße und die turbulente kinetische Energie werden durch Formeln im Blatt berechnet."
 
-# machine translation: argos 4b35d8796acf
+# machine translation: argos 6db111e2eeec
 msgid "Grain sizes (d16 to d90) and the fraction of fine sediment per sample. The measured bed change is filled in automatically from the DEM of difference (:ref:`case-morphodynamics`)."
 msgstr "Korngrößen (d16 bis d90) und der Feinsedimentanteil je Probe. Der gemessene Bettwechsel wird automatisch aus dem DGM der Differenz (:ref:`case-morphodynamics`) ausgefüllt."
 
@@ -95,9 +95,9 @@ msgstr "Korngrößen (d16 bis d90) und der Feinsedimentanteil je Probe. Der geme
 msgid "The calibration parameters with their lower and upper limits, selected from a list of available TELEMAC and GAIA parameters."
 msgstr "Der Kalibrierparameter mit seinen unteren und oberen Grenzen, ausgewählt aus einer Liste der verfügbaren TELEMAC- und GAIA-Parameter."
 
-# machine translation: argos 26d25108fa1e
+# machine translation: argos 1ae1a6d5cfaa
 msgid "Each row carries an ID. The positions of the measurements are read from a point layer that contains the same IDs, so that coordinates do not have to be typed in. Enter the workbook and the point layers in the case file:"
-msgstr "Jede Zeile trägt eine ID. Die Positionen der Messungen werden von einem Punktlayer ausgelesen, der die gleichen IDs enthält, so dass Koordinaten nicht eingegeben werden müssen. Geben Sie die Arbeitsmappe und den Punktlayer in die Fall-Datei ein:"
+msgstr "Jede Zeile trägt eine ID. Die Positionen der Messungen werden von einem Punktlayer ausgelesen, der die gleichen IDs enthält, so dass Koordinaten nicht eingegeben werden müssen. Geben Sie das Arbeitsbuch und den Punktlayer im Falldatei ein:"
 
 # machine translation: argos 966b2d4355e1
 msgid "Then repeat the preprocessing, which compiles the measurements into the tables that the calibration reads. The IDs have to be unique within a sheet. Measurements of several survey days whose numbering restarts at zero therefore need distinct IDs."
@@ -111,7 +111,7 @@ msgstr "Es gibt zwei Alternativen zur Arbeitsmappe. ``ground_truth.measurements`
 msgid "**Measurements in one layer or table.** If the measured values and their positions already exist in one file, this file is sufficient. Enter it as a source of the kind ``points``:"
 msgstr "**Messungen in einem Layer oder Tabelle.** Wenn die Messwerte und deren Positionen bereits in einer Datei vorhanden sind, reicht diese aus. Betreten Sie es als Quelle der Art ``points``:"
 
-# machine translation: argos 33a7dffa185a
+# machine translation: argos c74a15f4fc34
 msgid "The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate reference system, or a table (CSV file or Excel workbook) with the columns ``x`` and ``y`` in the coordinate reference system of the case. aXqua recognizes the following column names, in upper or lower case and with or without a unit in square brackets or parentheses, for example ``v(x) [m/s]`` or ``v_x (m/s)``:"
 msgstr "Die Datei ist ein Punktlayer (GeoPackage, Shapefile oder GeoJSON) in einem beliebigen Koordinatenbezugssystem oder eine Tabelle (CSV-Datei oder Excel-Arbeitsmappe) mit den Spalten ``x`` und ``y`` im Koordinatenbezugssystem des Falls. aXqua erkennt die folgenden Spaltennamen in Groß- oder Kleinschreibung und mit oder ohne Einheit in eckigen Klammern oder Klammern, zum Beispiel ``v(x) [m/s]`` oder ``v_x (m/s)``:"
 
@@ -155,9 +155,9 @@ msgstr "Tiefe einer Anzeige unterhalb des Wasserspiegels in m"
 msgid "``MeasD`` or ``Meas. Depth``"
 msgstr "``MeasD`` oder ``Meas. Depth``"
 
-# machine translation: argos bbd95ae33e00
+# machine translation: argos 20ebf7c9a8be
 msgid "The velocity magnitude that is compared with the model is computed from the horizontal components. If a layer contains several readings at one position, aXqua uses the reading that is closest to 0.6 of the water depth below the surface, which approximates the depth-averaged velocity. Points outside the model outline are left out of the calibration, and so are points less than 15 mesh nodes from an inflow or outflow line: there, the flow is what the boundary prescribes, not what the river does. aXqua names these points and the boundary they are close to in a warning, which the plugin shows when the results of the job are loaded, together with the remedy: *Increase ROI beyond the concerned liquid boundary.* A model outline that reaches further upstream or downstream than the measurements keeps them away from the boundaries. In the plugin, the files are entered in the case settings (*Open case settings...* on the *Case Setup* tab), page *Calibration and validation*, in the table *Measurement files* of the frame *Measurements*. *Add file...* adds a point layer or a table, and the column *Use for* assigns each file to the calibration or to the validation. A file for the validation needs the name of its flow situation and its discharge (:ref:`validation situation <validation-setup>`)."
-msgstr "Die Geschwindigkeitsgröße, die mit dem Modell verglichen wird, wird aus den horizontalen Komponenten berechnet. Wenn ein Layer mehrere Messwerte an einer Position enthält, verwendet aXqua den Messwert, der 0,6 der Wassertiefe unter der Oberfläche am nächsten liegt, was der Tiefe-gemittelten Geschwindigkeit nahe kommt. Punkte außerhalb der Modellgrenze bleiben bei der Kalibrierung außen vor, ebenso Punkte weniger als 15 Rechennetzknoten von einer Zufluss- oder Ausflusslinie: Dort ist der Fluss das, was der Rand vorschreibt, nicht das, was der Fluss tut. aXqua benennt diese Punkte und den Rand, an dem sie sich befinden, in einer Warnung, die das Plugin zeigt, wenn die Ergebnisse des Jobs geladen werden, zusammen mit dem Heilmittel: *Increase ROI beyond the concerned liquid boundary.* Eine Modellgrenze, die Flussabschnitte weiter stromaufwärts oder stromabwärts als die Messungen hält sie vom Ränder fern. Im Plugin werden die Dateien in den Fall-Einstellungen (*Open case settings...* auf der Registerkarte *Case Setup*) eingegeben, Seite *Calibration and validation*, in der Tabelle *Measurement files* des Frames *Measurements*. *Add file...* fügt einen Punktlayer oder eine Tabelle hinzu, und die Spalte *Use for* weist jede Datei der Kalibrierung oder der Validierung zu. Eine Datei für die Validierung benötigt den Namen ihrer Abflusssituation und ihrer Abfluss (:ref:`Validierungssituation <validation-setup>`)."
+msgstr "Die Geschwindigkeitsgröße, die mit dem Modell verglichen wird, wird aus den horizontalen Komponenten berechnet. Wenn ein Layer mehrere Messwerte an einer Position enthält, verwendet aXqua den Messwert, der 0,6 der Wassertiefe unter der Oberfläche am nächsten liegt, was der Tiefe-gemittelten Geschwindigkeit nahe kommt. Punkte außerhalb der Modellgrenze bleiben bei der Kalibrierung außen vor, ebenso Punkte weniger als 15 Rechennetzknoten von einer Zufluss- oder Ausflusslinie: Dort ist der Fluss das, was der Rand vorschreibt, nicht das, was der Fluss tut. aXqua benennt diese Punkte und den Rand, an dem sie sich befinden, in einer Warnung, die das Plugin zeigt, wenn die Ergebnisse des Jobs geladen werden, zusammen mit der Abhilfe: *Increase ROI beyond the concerned liquid boundary.* Eine Modellgrenze, die Flussabschnitte weiter stromaufwärts oder stromabwärts als die Messungen hält sie vom Ränder fern. Im Plugin werden die Dateien in den Falleinstellungen (*Open case settings...* auf der *Case Setup* Registerkarte), Seite *Calibration and validation*, in der Tabelle *Measurement files* des Frames *Measurements* eingetragen. *Add file...* fügt einen Punktlayer oder eine Tabelle hinzu, und die Spalte *Use for* weist jede Datei der Kalibrierung oder der Validierung zu. Eine Datei für die Validierung benötigt den Namen ihrer Abflusssituation und ihrer Abfluss (:ref:`Validierungssituation <validation-setup>`)."
 
 # machine translation: argos fbe98ea670c0
 msgid "Velocity measurements with a SonTek FlowTracker2 are transferred into the ``hydraulics`` sheet with the script ``extract_flowtracker.py``, which aXqua places next to the workbook. Note that the velocity fluctuation is the standard deviation of the velocity samples. It is not the column ``VxErr`` of the instrument export, which is the standard error of the mean velocity."
@@ -167,9 +167,9 @@ msgstr "Geschwindigkeitsmessungen mit einem SonTek FlowTracker2 werden in das ``
 msgid "Bayesian calibration & validation setup"
 msgstr "Bayessche Kalibrierung und Validierung"
 
-# machine translation: argos e5575b9a2232
+# machine translation: argos be1d5d3c533e
 msgid "The ``calibration`` block of the case file defines what is calibrated against which measurements:"
-msgstr "Der ``calibration``-Block der Fall-Datei definiert, was mit welchen Messungen kalibriert wird:"
+msgstr "Der ``calibration``-Block der Falldatei definiert, was mit welchen Messungen kalibriert wird:"
 
 # machine translation: argos d24f61e60fc4
 msgid "``calibration_quantities`` are the calibration targets. The names are those of the TELEMAC result variables: ``WATER DEPTH``, ``SCALAR VELOCITY``, ``TURBULENT ENERG.`` (requires the k-epsilon turbulence model) and ``CUMUL BED EVOL`` (requires GAIA)."
@@ -191,9 +191,9 @@ msgstr "**Validierung.** Eine Validierung prüft, ob die kalibrierten Parameter 
 msgid "All measurements of the ``ground_truth`` block are calibration data. aXqua does not withhold a part of them for a validation. The measurements of one survey are taken within a few hours in one flow field, and neighboring points are therefore not independent of each other. A model that predicts some of these points from the others (leave-one-out cross-validation, k-fold cross-validation or a random share) demonstrates that it interpolates within that flow field. It does not demonstrate that its roughness values hold at another discharge, at which other parts of the bed are wetted and other roughness elements are submerged."
 msgstr "Alle Messungen des ``ground_truth`` Blocks sind Kalibrierungsdaten. aXqua hält keinen Teil davon für eine Validierung zurück. Die Messungen einer Vermessung werden innerhalb weniger Stunden in einem Strömungsfeld durchgeführt und benachbarte Punkte sind daher nicht unabhängig voneinander. Ein Modell, das einige dieser Punkte von den anderen vorhersagt (einzige Kreuzvalidierung, k-fache Kreuzvalidierung oder einen zufälligen Anteil), zeigt, dass es innerhalb dieses Flussfeldes interpoliert. Es zeigt nicht, dass seine Rauheit-Werte an einem anderen Abfluss gelten, an dem andere Teile des Bettes benetzt und andere Rauheit-Elemente untergetaucht sind."
 
-# machine translation: argos d58ca821875b
+# machine translation: argos ab5c56b396f1
 msgid "The validation data are defined in the case file as a **situation**, with its measurements and its boundary values:"
-msgstr "Die Validierungsdaten werden in der Fall-Datei als **situation** mit ihren Messungen und ihren Rand-Werten definiert:"
+msgstr "Die Validierungsdaten werden im Falldatei als **situation** definiert, mit ihren Messungen und ihren Randwerten:"
 
 # machine translation: argos 78fd8e170f75
 msgid "Entry"
@@ -211,51 +211,51 @@ msgstr "Ein kurzer Name der Situation. Es benennt die Dateien der Validierung."
 msgid "The measurements, in the form of the sources of the ``ground_truth`` block."
 msgstr "Die Messungen, in Form der Quellen des ``ground_truth`` Block."
 
-# machine translation: argos 0892f086c412
+# machine translation: argos 2067af919cb1
 msgid "The total discharge of the situation in m³/s. For a model with several inflows, the discharge is distributed among them in the proportions of the calibrated case."
 msgstr "Der gesamte Abfluss der Situation in m3/s. Bei einem Modell mit mehreren Zuflüssen wird der Abfluss unter ihnen in den Proportionen des kalibrierten Falls verteilt."
 
-# machine translation: argos 1ec8eca705b4
+# machine translation: argos 8485b6589a20
 msgid "The discharge of each inflow in m³/s, for a reach whose branches carried another share of the flow. The inflows are identified by the number of their liquid boundary. ``axqua validation <case-file>`` lists the inflows of the model with the discharge that each carries in the calibrated case."
 msgstr "Der Abfluss jedes Zuflusses in m3/s, für einen Flussabschnitt, dessen Zweige einen anderen Anteil des Flusses trugen. Die Zuflüsse werden durch die Nummer ihres täters Rand identifiziert. ``axqua validation <case-file>`` listet die Zuflüsse des Modells mit dem Abfluss auf, den jeder im kalibrierten Fall trägt."
 
-# machine translation: argos bb3c768b7411
+# machine translation: argos 6b97ba707ac5
 msgid "The water level at the outflow in m, for a case with ``outflow_condition: elevation``. With a rating curve, aXqua derives the water level from the discharge of the situation."
 msgstr "Der Wasserstand am Ausfluss in m, für einen Fall mit ``outflow_condition: elevation``. Mit einer Abflusskurve leitet aXqua den Wasserstand vom Abfluss der Situation ab."
 
-# machine translation: argos fc584d196493
+# machine translation: argos 301aa9679344
 msgid "The simulated time in seconds, if it differs from that of the case."
 msgstr "Die simulierte Zeit in Sekunden, wenn sie sich von der des Falls unterscheidet."
 
-# machine translation: argos 1d9d4865af71
+# machine translation: argos 5b3413ac6885
 msgid "**In the plugin.** The tab *Calibration & validation* has the box *Validation with data of another flow situation*. Select the point layer with the validation data with *Browse...*, or with *From QGIS...* from the point layers that are open in QGIS. Enter the discharge of each inflow: the box lists the inflows of the model with the discharge of the calibrated case. *Save* writes the situation into the case file. The same situations appear in the case settings (*Open case settings...*, page *Calibration and validation*): in the table *Measurement files*, each file whose column *Use for* says *Validation* belongs to the situation named in the column *Situation*, with the discharge of that situation. The discharge belongs to the situation, so a change in one row changes it in every row of that situation, and a path in the columns *File* and *Positions* can be corrected in place. Settings of a situation that the table does not show, such as the discharge of each inflow, are kept."
-msgstr "**Im Plugin.** Die Registerkarte *Calibration & validation* hat die Box *Validation with data of another flow situation*. Wählen Sie den Punktlayer mit den Validierungsdaten mit *Browse...* oder mit *From QGIS...* aus dem Punktlayer, die in QGIS geöffnet sind. Geben Sie den Abfluss jedes Zuflusses ein: Das Feld listet die Zuflüsse des Modells mit dem Abfluss des kalibrierten Falls auf. *Save* schreibt die Situation in die Fall-Datei. Die gleichen Situationen erscheinen in den Herbst-Einstellungen (*Open case settings...*, Seite *Calibration and validation*): In der Tabelle *Measurement files*, jede Datei, deren Spalte *Use for* sagt *Validation* gehört zu der Situation in der Spalte *Situation*, mit dem Abfluss dieser Situation. Der Abfluss gehört zur Situation, so dass eine Änderung in einer Zeile sie in jeder Zeile dieser Situation ändert, und ein Pfad in den Spalten *File* und *Positions* kann an Ort und Stelle korrigiert werden. Einstellungen einer Situation, die die Tabelle nicht zeigt, wie der Abfluss jedes Zuflusses, werden beibehalten."
+msgstr "**Im Plugin.** Die Registerkarte *Calibration & validation* hat die Box *Validation with data of another flow situation*. Wählen Sie den Punktlayer mit den Validierungsdaten mit *Browse...* oder mit *From QGIS...* aus dem Punktlayer, die in QGIS geöffnet sind. Geben Sie den Abfluss jedes Zuflusses ein: Das Feld listet die Zuflüsse des Modells mit dem Abfluss des kalibrierten Falls auf. *Save* schreibt die Situation in die Falldatei. Die gleichen Situationen erscheinen in den Falleinstellungen (*Open case settings...*, Seite *Calibration and validation*): In der Tabelle *Measurement files*, jede Datei, deren Spalte *Use for* sagt, dass *Validation* zu der in der Spalte *Situation* genannten Situation gehört, mit dem Abfluss dieser Situation. Der Abfluss gehört zur Situation, so dass eine Änderung in einer Zeile sie in jeder Zeile dieser Situation ändert, und ein Pfad in den Spalten *File* und *Positions* kann an Ort und Stelle korrigiert werden. Einstellungen einer Situation, die die Tabelle nicht zeigt, wie der Abfluss jedes Zuflusses, werden beibehalten."
 
 # machine translation: argos 7b83ba404562
 msgid "Run HydroBayesCal"
 msgstr "Lauf HydroBayesCal"
 
-# machine translation: argos 354650a9d1d9
+# machine translation: argos a2c22f42433e
 msgid "The calibration requires the additional package HydroBayesCal (:doc:`../installation/qgis-plugin`) and a built case with a completed steady simulation. Each run of the calibration repeats this steady simulation with another set of parameter values."
 msgstr "Die Kalibrierung erfordert das zusätzliche Paket HydroBayesCal (:doc:`../installation/qgis-plugin`) und einen gebauten Fall mit einer abgeschlossenen stationären Simulation. Jeder Lauf der Kalibrierung wiederholt diese stationäre Simulation mit einem anderen Satz von Parameterwerten."
 
-# machine translation: argos d3fd341e93f2
+# machine translation: argos 276d0954e7a4
 msgid "In the plugin, click *Submit* on the *Calibration & validation* tab. The option *Prepare only* writes all input files without starting the runs, so that they can be inspected first. In a terminal:"
-msgstr "Klicken Sie im Plugin auf *Submit* auf der Registerkarte *Calibration & validation*. Die Option *Prepare only* schreibt alle Eingabedateien, ohne die Runs zu starten, so dass sie zuerst inspiziert werden können. In einem Terminal:"
+msgstr "Klicken Sie im Plugin auf *Submit* auf der *Calibration & validation* Registerkarte. Die Option *Prepare only* schreibt alle Eingabedateien, ohne die Runs zu starten, so dass sie zuerst inspiziert werden können. In einem Terminal:"
 
-# machine translation: argos 9d71b5bc9d25
+# machine translation: argos dcc0ce6d4c28
 msgid "The Calibration & validation tab of the plugin"
-msgstr "Der Tab Kalibrierung & Validierung des Plugins"
+msgstr "Die Calibration & Validation Registerkarte des Plugins"
 
-# machine translation: argos 8210c618d6f2
+# machine translation: argos 785a0021b049
 msgid "The tab *Calibration & validation* for a case with measurements. (1) The option *Prepare only*. (2) *Submit* starts the calibration. (3) The measurements of the validation situation, selected as a file or from the layers that are open in QGIS, and below them the discharge of each inflow in that situation. (4) *Save* stores the validation situation in the case file, and *Validate* runs it."
-msgstr "Die Registerkarte *Calibration & validation* für ein Fall mit Messungen. (1) Die Option *Prepare only*. (2) *Submit* startet die Kalibrierung. (3) Die Messungen der Validierungssituation, ausgewählt als Datei oder von Layer, die in QGIS geöffnet sind, und darunter der Abfluss von jedem Zufluss in dieser Situation. (4) *Save* speichert die Validierungssituation in der Fall-Datei und *Validate* führt sie aus."
+msgstr "Das Registerkarte *Calibration & validation* für ein Fall mit Messungen. (1) Die Option *Prepare only*. (2) *Submit* startet die Kalibrierung. (3) Die Messungen der Validierungssituation, ausgewählt als Datei oder von Layer, die in QGIS geöffnet sind, und darunter der Abfluss von jedem Zufluss in dieser Situation. (4) *Save* speichert die Validierungssituation in Falldatei und *Validate* betreibt sie."
 
 # machine translation: argos ce186a0ad335
 msgid "The computing time is approximately the number of runs (``max_runs``) times the duration of one steady simulation. The job list shows the number of the current run, for example ``iter 5/12``."
 msgstr "Die Rechenzeit ist ungefähr die Anzahl der Durchläufe (``max_runs``) mal die Dauer einer stationären Simulation. Die Jobliste zeigt die Nummer des aktuellen Laufs, zum Beispiel ``iter 5/12``."
 
-# machine translation: argos b783f87afec1
+# machine translation: argos c629e8c4a153
 msgid "HydroBayesCal performs its runs in the folder of the built case (``axqua-case/simulation/``) and writes each tested set of parameter values into the friction table and the steering file there. aXqua restores both files when the calibration ends, so that a later simulation uses the case as it was built. For the same reason, jobs of one case run one after the other: a job that is submitted during a calibration waits until the calibration has ended. The folder ``cases/example-isar/`` of the repository contains a complete example with a run time of about half an hour, including a step-by-step guide for the plugin."
 msgstr "HydroBayesCal führt seine Läufe im Ordner des gebauten Falls aus (``axqua-case/simulation/``) und schreibt jeden getesteten Satz von Parameterwerten in den Friktionstisch und den dortigen Steuerdatei. aXqua stellt beide Dateien nach Beendigung der Kalibrierung wieder her, so dass eine spätere Simulation den Fall so verwendet, wie er gebaut wurde. Aus dem gleichen Grund laufen Jobs von einem Fall nach dem anderen: Ein Job, der während einer Kalibrierung eingereicht wird, wartet, bis die Kalibrierung beendet ist. Der Ordner ``cases/example-isar/`` des Repositorys enthält ein vollständiges Beispiel mit einer Laufzeit von etwa einer halben Stunde, einschließlich einer Schritt-für-Schritt-Anleitung für das Plugin."
 
@@ -263,19 +263,19 @@ msgstr "HydroBayesCal führt seine Läufe im Ordner des gebauten Falls aus (``ax
 msgid "**Validation run.** After the calibration, click *Validate* in the box *Validation with data of another flow situation*, or submit the job in a terminal:"
 msgstr "**Validierungslauf.** Klicken Sie nach der Kalibrierung auf *Validate* in der Box *Validation with data of another flow situation* oder senden Sie den Job in einem Terminal:"
 
-# machine translation: argos 891ddd64967d
+# machine translation: argos a344a6ff13fb
 msgid "The validation runs the calibrated model with the boundary values of the validation situation. Its steering file is derived from that of the built case and differs only in the prescribed discharges and water levels, in the names of its own result files, and in the calibrated parameter values. The mesh and all other settings are those of the calibrated model, so that a difference between model and measurement cannot stem from a model that was built differently. The calibrated values are the most probable combination of the posterior (the joint posterior maximum) of the last calibration. The files of the built case and the result of the steady simulation are not changed."
 msgstr "Die Validierung führt das kalibrierte Modell mit den Randwerten der Validierungssituation aus. Sein Steuerdatei leitet sich von dem des gebauten Falls ab und unterscheidet sich nur in den vorgeschriebenen Abflüssen und Wasserständen, in den Namen der eigenen Ergebnisdateien und in den kalibrierten Parameterwerten. Das Rechennetz und alle anderen Einstellungen sind die des kalibrierten Modells, so dass ein Unterschied zwischen Modell und Messung nicht von einem Modell herrühren kann, das anders gebaut wurde. Die kalibrierten Werte sind die wahrscheinlichste Kombination der A-posteriori-Verteilung (das gemeinsame A-posteriori-Verteilung Maximum) der letzten Kalibrierung. Die Dateien des gebauten Falls und das Ergebnis der stationären Simulation werden nicht verändert."
 
-# machine translation: argos 881e2d0aaea2
+# machine translation: argos ca649ca272e7
 msgid "aXqua then reads the model at the validation points and writes three files into ``axqua-case/calibration-validation/validation/``: a table with the measured and the modeled value at each point (``validation-<name>.csv``), a summary (``validation-<name>.json``), and a figure of the modeled against the measured values (``validation-<name>.png``). Measurement points outside the model are counted and excluded, and points less than 15 mesh nodes from an inflow or outflow line are left out with the same warning as in the calibration."
 msgstr "aXqua liest dann das Modell an den Validierungspunkten und schreibt drei Dateien in ``axqua-case/calibration-validation/validation/``: eine Tabelle mit dem gemessenen und dem modellierten Wert an jedem Punkt (``validation-<name>.csv``), eine Zusammenfassung (``validation-<name>.json``) und eine Zahl des modellierten gegen die gemessenen Werte (``validation-<name>.png``). Messpunkte außerhalb des Modells werden gezählt und ausgeschlossen, und Punkte mit weniger als 15 Rechennetzknoten aus einer Zufluss- oder Ausflusslinie werden mit der gleichen Warnung wie bei der Kalibrierung ausgelassen."
 
-# machine translation: argos d48d9b53aa7c
+# machine translation: argos 16858dcc4885
 msgid "**Several discharges.** Roughness values that were calibrated at one discharge are not necessarily valid at another one. The script ``run_Bayes_cal_multiflow.py`` in the case folder calibrates one common set of parameters against measurements at several discharges. Run it with ``--smoke`` first. This short test with three runs verifies the complete chain before days of computing time are spent."
 msgstr "**Mehrere Abflüsse.** Rauheit-Werte, die an einem Abfluss kalibriert wurden, sind nicht unbedingt an einem anderen gültig. Das Skript ``run_Bayes_cal_multiflow.py`` im Fall-Ordner kalibriert einen gemeinsamen Satz von Parametern gegen Messungen an mehreren Abflüssen. Führen Sie es mit ``--smoke`` zuerst. Dieser kurze Test mit drei Durchläufen überprüft die gesamte Kette, bevor Tage der Rechenzeit verbracht werden."
 
-# machine translation: argos 517b60a161ed
+# machine translation: argos 865f1151707b
 msgid "**OpenFOAM.** An OpenFOAM model can be calibrated against measured velocity components with the script ``run_Bayes_cal_openfoam.py``. Because a calibration requires dozens of runs, they are performed with a coarse mesh in the mode ``rigid-lid``. The script ``openfoam_verify_posterior.py`` then repeats the calibrated case at full resolution in the mode ``vof``. The roughness of an OpenFOAM model is calibrated as one value for the entire bed. It is therefore not comparable with the roughness values per zone of a TELEMAC calibration."
 msgstr "**OpenFOAM.** Ein OpenFOAM-Modell kann mit dem Skript ``run_Bayes_cal_openfoam.py`` gegen gemessene Geschwindigkeitskomponenten kalibriert werden. Da eine Kalibrierung Dutzende von Durchläufen erfordert, werden sie mit einem groben Rechennetz im Modus ``rigid-lid`` durchgeführt. Das Skript ``openfoam_verify_posterior.py`` wiederholt dann den kalibrierten Fall mit voller Auflösung im Modus ``vof``. Die Rauheit eines OpenFOAM-Modells wird als ein Wert für das gesamte Bett kalibriert. Sie ist daher nicht vergleichbar mit den Rauheit-Werten pro Zone einer TELEMAC-Kalibrierung."
 
@@ -283,7 +283,7 @@ msgstr "**OpenFOAM.** Ein OpenFOAM-Modell kann mit dem Skript ``run_Bayes_cal_op
 msgid "Quality analysis"
 msgstr "Qualitätsanalyse"
 
-# machine translation: argos 03e3d41be914
+# machine translation: argos 026364c34722
 msgid "HydroBayesCal writes its results into the folder ``auto-saved-results-HydroBayesCal`` within ``axqua-case/calibration-validation/``. Assess a calibration in four steps:"
 msgstr "HydroBayesCal schreibt seine Ergebnisse in den Ordner ``auto-saved-results-HydroBayesCal`` innerhalb ``axqua-case/calibration-validation/``. Beurteilen Sie eine Kalibrierung in vier Schritten:"
 
@@ -295,7 +295,7 @@ msgstr "**Hat sich das aktive Lernen angenähert?** HydroBayesCal zeichnet nach 
 msgid "**Is the posterior narrower than the prior?** Compare the two distributions of each parameter. A posterior that is clearly narrower than the prior and lies inside the range identifies the parameter. A posterior at a limit of the range calls for a wider range. A posterior that resembles the prior means that the measurements do not constrain this parameter."
 msgstr "**Ist die A-posteriori-Verteilung schmaler als die A-priori-Verteilung?** Vergleichen Sie die beiden Verteilungen jedes Parameters. Eine A-posteriori-Verteilung, die deutlich schmaler als die A-priori-Verteilung ist und innerhalb des Bereichs liegt, identifiziert den Parameter. Eine A-posteriori-Verteilung an einer Grenze des Bereichs erfordert eine größere Reichweite. Eine A-posteriori-Verteilung, die der A-priori-Verteilung ähnelt, bedeutet, dass die Messungen diesen Parameter nicht einschränken."
 
-# machine translation: argos 5ad6b182d326
+# machine translation: argos ed5df2fcf28f
 msgid "**Does the calibrated model reproduce the calibration targets?** The calibrated parameter set is the most probable combination of the posterior. HydroBayesCal compares the model results for this set with the measurements. Check whether the remaining differences are of the size of the measurement errors, and whether they are distributed randomly or concentrated in one part of the reach. A systematic deviation indicates an error in the model, for example in the terrain data or the boundary conditions, that no parameter value can compensate."
 msgstr "**Reproduziert das kalibrierte Modell die Kalibrierziele?** Der kalibrierte Parametersatz ist die wahrscheinlichste Kombination der A-posteriori-Verteilung. HydroBayesCal vergleicht die Modellergebnisse für dieses Set mit den Messungen. Prüfen Sie, ob die verbleibenden Differenzen der Größe der Messfehler entsprechen und ob sie zufällig verteilt oder in einem Teil des Flussabschnitts konzentriert sind. Eine systematische Abweichung weist auf einen Fehler im Modell hin, beispielsweise in den Geländedaten oder den Randbedingungen, den kein Parameterwert kompensieren kann."
 
@@ -359,7 +359,7 @@ msgstr "Anteil am Messfehler"
 msgid "The share of points at which model and measurement differ by no more than the error of the measurement. The error is that of the instrument combined with the relative ``measurement_error`` of the calibration. About 68 % are expected for a model without systematic deviation, and about 95 % within twice the error."
 msgstr "Der Anteil der Punkte, an denen sich Modell und Messung um nicht mehr als den Fehler der Messung unterscheiden. Der Fehler ist der des Instruments kombiniert mit dem relativen ``measurement_error`` der Kalibrierung. Für ein Modell ohne systematische Abweichung werden etwa 68 % und innerhalb des doppelten Fehlers etwa 95 % erwartet."
 
-# machine translation: argos 5672f210fb86
+# machine translation: argos 2ac0e4b432ee
 msgid "The validation also states the remaining difference between inflow and outflow at the end of its run. If this difference exceeds the tolerance of the case, the run had not reached a steady state, and the ``duration`` of the validation situation has to be increased."
 msgstr "Die Validierung gibt auch die verbleibende Differenz zwischen Zufluss und Ausfluss am Ende des Laufs an. Wenn dieser Unterschied die Toleranz des Falls übersteigt, hatte der Lauf keinen stationären Zustand erreicht und der ``duration`` der Validierungssituation muss erhöht werden."
 

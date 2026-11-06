@@ -2,7 +2,7 @@
 
 *Help* opens a copy of the documentation built on this computer when there is one (the user's decision of 2026-10-18), because it describes the installed version of aXqua, and the published documentation at ``https://axqua.eu`` otherwise (the decision of 2026-10-16 had been the published one alone, then at ``axqua.readthedocs.io``). Where the copy is, and whether the default browser may read it, is the answer of ``axqua docs`` (a browser in a snap or Flatpak sandbox reads no file outside the home folder). The panel asks it once per session, in the background and with the axqua program of the plugin settings, as soon as that program has answered (:func:`ask`); until the answer is there, *Help* opens the published documentation.
 
-The language follows QGIS: German and French pages where QGIS is set to German or French and the documentation has them (the published one has both, at ``/de/`` and ``/fr/``).
+The language is English, the language of the plugin, unless *aXqua > Settings* chooses German, French or the language of QGIS (the published documentation has German and French at ``/de/`` and ``/fr/``).
 
 **A local page is opened through a small page that forwards to it.** On Linux, ``xdg-open`` drops the part after ``#`` of a ``file://`` address before the browser sees it, and Chromium and Chrome do so on Windows as well, so the page opened at its top instead of at the section of the tab. The forwarding page has no ``#`` in its own address and carries the whole address inside. It is written beside the documentation (``_help/open.html``), where a browser that may read the documentation may read it too; ``/tmp`` would be out of reach of a snap browser.
 """
@@ -67,14 +67,43 @@ def ask(client) -> None:
         _asking = (mine, task)
 
 
-def language() -> str:
-    """The language of QGIS, as the documentation names it: ``en``, ``de`` or ``fr``."""
-    try:
-        from qgis.core import QgsApplication
+#: The plugin setting that chooses the language of the documentation (aXqua > Settings).
+SETTINGS_KEY = "axqua/docs_language"
+#: ``value -> what the settings window shows``; the first is the default.
+LANGUAGES = (("en", "English"), ("de", "Deutsch (machine translation)"),
+             ("fr", "Français (traduction automatique)"), ("qgis", "The language of QGIS"))
 
-        name = (QgsApplication.locale() or "").lower()
-    except Exception:  # noqa: BLE001
+
+def language(choice: str | None = None) -> str:
+    """The language Help opens: ``en``, ``de`` or ``fr``.
+
+    English unless the settings name another one, because the plugin itself is in English: a German QGIS used to open the machine-translated German pages beside the English labels of the plugin, and a student on a German computer found the mix confusing (2026-11-06). ``qgis`` follows the language of QGIS, as Help did before.
+    """
+    if choice is None:
+        try:
+            from qgis.PyQt.QtCore import QSettings
+
+            choice = str(QSettings().value(SETTINGS_KEY, "en") or "en")
+        except Exception:  # noqa: BLE001
+            choice = "en"
+    locale = ""
+    if choice == "qgis":
+        try:
+            from qgis.core import QgsApplication
+
+            locale = QgsApplication.locale() or ""
+        except Exception:  # noqa: BLE001
+            locale = ""
+    return language_for(choice, locale)
+
+
+def language_for(choice: str, locale: str = "") -> str:
+    """The language of the documentation for the setting *choice* and the language *locale* of QGIS."""
+    if choice in TRANSLATED or choice == "en":
+        return choice
+    if choice != "qgis":
         return "en"
+    name = locale.lower()
     return next((lang for lang in TRANSLATED if name.startswith(lang)), "en")
 
 

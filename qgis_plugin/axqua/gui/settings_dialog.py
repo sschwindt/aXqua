@@ -9,10 +9,11 @@ that is genuinely this installation's: which executable to talk to.
 from __future__ import annotations
 
 from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog,
+from qgis.PyQt.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QFileDialog,
                                  QFormLayout, QHBoxLayout, QLabel, QLineEdit,
                                  QPushButton, QVBoxLayout, QWidget)
 
+from ..compat import english_buttons
 from ..core import runner_client
 from ..core.runner_client import RunnerClient, RunnerError
 
@@ -20,13 +21,19 @@ KEY_EXECUTABLE = runner_client.SETTINGS_KEY
 
 
 def read_settings() -> dict:
+    from . import help as help_pages
+
     settings = QSettings()
-    return {"executable": str(settings.value(KEY_EXECUTABLE, "") or "")}
+    return {"executable": str(settings.value(KEY_EXECUTABLE, "") or ""),
+            "docs_language": str(settings.value(help_pages.SETTINGS_KEY, "en") or "en")}
 
 
 def write_settings(values: dict) -> None:
+    from . import help as help_pages
+
     settings = QSettings()
     settings.setValue(KEY_EXECUTABLE, values.get("executable", ""))
+    settings.setValue(help_pages.SETTINGS_KEY, values.get("docs_language", "en"))
 
 
 class SettingsDialog(QDialog):
@@ -53,6 +60,16 @@ class SettingsDialog(QDialog):
         row.addWidget(test)
         form.addRow("axqua executable", _wrap(row))
 
+        from . import help as help_pages
+
+        # Help opens English pages by default: the plugin is in English (2026-11-06)
+        self.docs_language = QComboBox()
+        for value, text in help_pages.LANGUAGES:
+            self.docs_language.addItem(text, value)
+        index = self.docs_language.findData(values["docs_language"])
+        self.docs_language.setCurrentIndex(max(index, 0))
+        form.addRow("Documentation language", self.docs_language)
+
         self.result = QLabel("")
         self.result.setWordWrap(True)
         form.addRow("", self.result)
@@ -60,6 +77,7 @@ class SettingsDialog(QDialog):
         layout.addLayout(form)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
                                    | QDialogButtonBox.StandardButton.Cancel)
+        english_buttons(buttons)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -97,7 +115,8 @@ class SettingsDialog(QDialog):
         self.result.setText(info.describe())
 
     def values(self) -> dict:
-        return {"executable": self.executable.text().strip()}
+        return {"executable": self.executable.text().strip(),
+                "docs_language": str(self.docs_language.currentData() or "en")}
 
     def accept(self) -> None:      # noqa: D102 - Qt override
         write_settings(self.values())

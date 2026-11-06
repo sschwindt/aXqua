@@ -4,7 +4,14 @@ Simulation Software
 aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed additionally. The plugin has one *Setup Wizard* for TELEMAC and one for OpenFOAM, which either enters an existing installation in the profile of the computer or installs the program. Set up TELEMAC first. OpenFOAM (including postprocessors) is optional and builds on TELEMAC.
 
 .. note::
-   On Windows, TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2). The wizards of a QGIS that runs in Windows do not install into WSL. Install a distribution with ``wsl --install -d Ubuntu-24.04`` in a **PowerShell** (similar to Linux **terminal**) with administrator rights, install aXqua inside the distribution, and run ``axqua install start telemac`` in its terminal. Select an installation folder in the Linux file system: a build in a Windows folder (``/mnt/c/...``) is slower by an order of magnitude. This route has not yet been tested on a real Windows installation.
+   On Windows, QGIS, the plugin and the aXqua program run in Windows, and TELEMAC and OpenFOAM run inside the Windows Subsystem for Linux (WSL 2). An administrator of the computer sets up WSL once: ``wsl --install -d Ubuntu-24.04`` in a terminal with administrator rights, then a restart; then open *Ubuntu* from the Start menu and create a Linux user. Nothing after this step needs an administrator:
+
+   * The *Setup Wizard* installs TELEMAC and OpenFOAM into the default distribution, into a folder of the Linux file system (a build in a Windows folder such as ``/mnt/c/...`` is slower by an order of magnitude). Missing system packages are installed as the root of the distribution, which needs no password and no administrator of Windows. At its end, the wizard enters the installation in the profile of the computer as an installation in WSL.
+   * To use an existing installation, open *Linux* in the file dialog of *Select existing config file* (the folder ``\\wsl.localhost``), then the distribution, and select the environment script there.
+   * ParaView and VisIt are Windows programs on Windows: install them from their websites (the ZIP of ParaView needs no administrator) and enter them in the profile.
+   * The Bayesian calibration with HydroBayesCal is not yet available on Windows with TELEMAC inside WSL; building, running and validating a case are.
+
+   This route has been tested with a stand-in for WSL only, not yet on a real Windows installation with WSL.
 
 Installation wizards (short version)
 ------------------------------------

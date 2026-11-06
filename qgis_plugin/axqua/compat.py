@@ -274,3 +274,30 @@ def start_detached(program: str, arguments: list[str]) -> bool:
     process.setProcessEnvironment(environment)
     started = process.startDetached()
     return bool(started[0] if isinstance(started, tuple) else started)
+
+
+#: The text of the standard buttons. QGIS loads Qt's own translation, which turned them into Ja, Nein and Abbrechen under the English questions of the plugin on a German computer (a student's report of 2026-11-06); the plugin is in English, so its buttons are too.
+BUTTON_TEXTS = (("Yes", "Yes"), ("No", "No"), ("Ok", "OK"), ("Cancel", "Cancel"), ("Close", "Close"))
+
+
+def english_buttons(owner) -> None:
+    """Set the text of the standard buttons of a ``QMessageBox`` or ``QDialogButtonBox`` in English."""
+    for name, text in BUTTON_TEXTS:
+        member = enum_value(type(owner), f"StandardButton.{name}", name, default=None)
+        button = owner.button(member) if member is not None else None
+        if button is not None:
+            button.setText(text)
+
+
+def question(parent, title: str, text: str, buttons=None, default=None):
+    """``QMessageBox.question`` with English buttons; returns the standard button that was clicked."""
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    yes = enum_value(QMessageBox, "StandardButton.Yes", "Yes")
+    no = enum_value(QMessageBox, "StandardButton.No", "No")
+    box = QMessageBox(enum_value(QMessageBox, "Icon.Question", "Question"), title, text,
+                      buttons if buttons is not None else yes | no, parent)
+    box.setDefaultButton(default if default is not None else no)
+    english_buttons(box)
+    exec_dialog(box)
+    return box.standardButton(box.clickedButton())

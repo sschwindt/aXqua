@@ -27,19 +27,19 @@ msgstr "UML-Paketdiagramm von aXqua"
 msgid "Packages of aXqua in the notation of the Unified Modeling Language (UML). A dashed arrow points from a package to a package that it uses. The plugin is connected by a solid arrow, because it does not use the library as program code: it starts the program ``axqua`` and reads the files that the program writes."
 msgstr "Pakete von aXqua in der Notation der Unified Modeling Language (UML). Ein gestrichelter Pfeil zeigt von einem Paket zu einem Paket, das es verwendet. Das Plugin ist durch einen festen Pfeil verbunden, weil es die Bibliothek nicht als Programmcode verwendet: Es startet das Programm ``axqua`` und liest die Dateien, die das Programm schreibt."
 
-# machine translation: argos b05dc7658878
+# machine translation: argos 98e7b856930c
 msgid "The diagram shows the three design rules that are stated below: no arrow leads from the core to a backend, none connects the two backends, and the plugin reaches the library through the command line only. The diagrams of this section are generated from the source code with the script ``scripts/build_uml.py`` and therefore show the code as it is."
-msgstr "Das Diagramm zeigt die drei Designregeln, die unten angegeben sind: kein Pfeil führt vom Kern zu einem Backend, keiner verbindet die beiden Backends und das Plugin Flussabschnitte die Bibliothek nur über die Kommandozeile. Die Diagramme dieses Abschnitts werden aus dem Quellcode mit dem Skript ``scripts/build_uml.py`` generiert und zeigen daher den Code so, wie er ist."
+msgstr "Das Diagramm zeigt die drei Designregeln, die unten angegeben sind: Kein Pfeil führt vom Kern zu einem Backend, keiner verbindet die beiden Backends und das Plugin erreicht die Bibliothek nur über die Befehlszeile. Die Diagramme dieses Abschnitts werden aus dem Quellcode mit dem Skript ``scripts/build_uml.py`` generiert und zeigen daher den Code so, wie er ist."
 
 # machine translation: argos be2a0580e0c6
 msgid "Class diagrams of the central data structures are part of the pages that document them:"
 msgstr "Klassendiagramme der zentralen Datenstrukturen sind Teil der Seiten, die sie dokumentieren:"
 
-# machine translation: argos 93825f46734f
+# machine translation: argos 1b1b65d9a0a9
 msgid "the case description, with one class per block of a case file (:ref:`uml-case`);"
-msgstr "die Fallbeschreibung, mit einer Klasse pro Block einer Fall-Datei (:ref:`uml-case`);"
+msgstr "die Fallbeschreibung, mit einer Klasse pro Block einer Falldatei (:ref:`uml-case`);"
 
-# machine translation: argos 393f0930932e
+# machine translation: argos 3c149df2009a
 msgid "the profile of the computer and the messages of the checks (:ref:`uml-computer`);"
 msgstr "das Profil des Computers und die Nachrichten der Überprüfungen (:ref:`uml-computer`);"
 
@@ -67,13 +67,13 @@ msgstr "Drei Regeln bestimmen die Struktur. Jeder von ihnen wird durch einen aut
 msgid "**The core does not depend on a simulation code.** ``axqua.core`` describes the free-surface water body and the modeling task. The backends in ``axqua.solvers`` depend on the core, never the reverse. A further simulation code can therefore be added without changing the core."
 msgstr "**Der Kern hängt nicht von einem Simulationscode ab.** ``axqua.core`` beschreibt den Wasserkörper der freien Oberfläche und die Modellierungsaufgabe. Die Backends in ``axqua.solvers`` hängen vom Kern ab, niemals umgekehrt. Ein weiterer Simulationscode kann daher hinzugefügt werden, ohne den Kern zu ändern."
 
-# machine translation: argos 466d9c95f343
+# machine translation: argos 2a836f9d35b7
 msgid "**The backends do not depend on each other.** The TELEMAC backend and the OpenFOAM backend do not import each other. Steps that involve both codes, such as the TELEMAC warm-up of an OpenFOAM model, are coordinated one level above (``axqua.prerun``, ``axqua.workflow``)."
-msgstr "**Die Backends sind nicht voneinander abhängig.** Das TELEMAC Backend und das OpenFOAM Backend importieren sich nicht gegenseitig. Schritte, die beide Codes beinhalten, wie das TELEMAC-Warm-up eines OpenFOAM-Modells, werden eine Ebene oben koordiniert (``axqua.prerun``, ``axqua.workflow``)."
+msgstr "**Die Backends sind nicht voneinander abhängig.** Die TELEMAC Backend und die OpenFOAM Backend importieren sich nicht gegenseitig. Schritte, die beide Codes beinhalten, wie das TELEMAC-Warm-up eines OpenFOAM-Modells, werden eine Ebene oben koordiniert (``axqua.prerun``, ``axqua.workflow``)."
 
-# machine translation: argos 001ddb120e5d
+# machine translation: argos dd6fb62e5b42
 msgid "**The plugin does not import the library.** QGIS has its own Python installation, whereas the library requires several geospatial packages and the environment of a simulation code. The plugin therefore calls the program ``axqua`` as a separate process and exchanges only small pieces of information with it: a job ID, a state, a file path. Result data never passes through the plugin. QGIS opens the result files itself."
-msgstr "**Das Plugin importiert die Bibliothek nicht.** QGIS verfügt über eine eigene Python-Installation, während die Bibliothek mehrere Geodatenpakete und die Umgebung eines Simulationscodes benötigt. Das Plugin nennt daher das Programm ``axqua`` als separaten Prozess und tauscht nur kleine Informationen mit ihm aus: eine Job-ID, einen Zustand, einen Dateipfad. Ergebnisdaten gehen nie durch das Plugin. QGIS öffnet die Ergebnisdateien selbst."
+msgstr "**Das Plugin importiert die Bibliothek nicht.** QGIS hat ein eigenes Python Installation, während die Bibliothek mehrere Geodatenpakete und die Umgebung eines Simulationscodes benötigt. Das Plugin nennt daher das Programm ``axqua`` als separaten Prozess und tauscht nur kleine Informationen mit ihm aus: eine Job-ID, einen Zustand, einen Dateipfad. Ergebnisdaten gehen nie durch das Plugin. QGIS öffnet die Ergebnisdateien selbst."
 
 # machine translation: argos fce98a3a0448
 msgid "A consequence of the third rule is that a simulation does not depend on QGIS being open. The plugin submits a job and displays its state, but the job belongs to the operating system."
@@ -91,9 +91,9 @@ msgstr "Paket"
 msgid "Content"
 msgstr "Inhalt"
 
-# machine translation: argos 2ffcf204a2f9
+# machine translation: argos b5bd49052da6
 msgid "The case description as Python data classes, with reading and writing of the case file (:doc:`configuration`)."
-msgstr "Die Fallbeschreibung als Python-Datenklassen, mit Lesen und Schreiben der Fall-Datei (:doc:`configuration`)."
+msgstr "Die Fallbeschreibung als Python-Datenklassen, mit Lesen und Schreiben der Falldatei (:doc:`configuration`)."
 
 # machine translation: argos 281b6b864d63
 msgid "Geodata, rasters, boundaries, structures, the SELAFIN file format, capabilities, the registry of backends, error types and the environments of the simulation codes (:doc:`core`)."
@@ -135,23 +135,23 @@ msgstr "Die Backends werden über die Eingangspunktgruppe ``axqua.solvers`` des 
 msgid "Capabilities"
 msgstr "Kapazitäten"
 
-# machine translation: argos 7c405a9a6bfc
+# machine translation: argos 11beb20fca7f
 msgid "Each backend declares which types of simulation it supports, for example a steady 2D simulation or a mesh convergence study. For a given case, aXqua reports each capability on three independent levels:"
-msgstr "Jedes Backend gibt an, welche Simulationstypen es unterstützt, zum Beispiel eine stetige 2D-Simulation oder eine Netzkonvergenzstudie. Für einen gegebenen Fall meldet aXqua jede Fähigkeit auf drei unabhängigen Ebenen:"
+msgstr "Jeder Backend gibt an, welche Simulationstypen er unterstützt, zum Beispiel eine stetige 2D-Simulation oder eine Netzkonvergenzstudie. Für einen gegebenen Fall meldet aXqua jede Fähigkeit auf drei unabhängigen Ebenen:"
 
-# machine translation: argos 9ac8da87c6c1
+# machine translation: argos 7cf8a0b2cad0
 msgid "``implemented``: the backend supports the capability (``yes``, ``no``, or ``n/a`` when the capability does not exist for the code);"
-msgstr "``implemented``: das Backend unterstützt die Fähigkeit (``yes``, ``no`` oder ``n/a``, wenn die Fähigkeit für den Code nicht vorhanden ist);"
+msgstr "``implemented``: Backend unterstützt die Fähigkeit (``yes``, ``no`` oder ``n/a``, wenn die Fähigkeit für den Code nicht vorhanden ist);"
 
-# machine translation: argos 5ed7727b7f21
+# machine translation: argos b821ecb4b40a
 msgid "``configured``: the case file requests it;"
-msgstr "``configured``: die Fallakte fordert dies an;"
+msgstr "``configured``: der Falldatei es verlangt;"
 
 # machine translation: argos 1adb8ef6525e
 msgid "``built`` and ``run``: the input files and the result files exist."
 msgstr "``built`` und ``run``: die Eingabedateien und die Ergebnisdateien existieren."
 
-# machine translation: argos 3a4a05f4017d
+# machine translation: argos df4898d2f43d
 msgid "The command ``axqua case-status <case-file> --json`` returns this information. The plugin uses it to decide which functions it offers for a case."
 msgstr "Der Befehl ``axqua case-status <case-file> --json`` gibt diese Informationen zurück. Das Plugin verwendet es, um zu entscheiden, welche Funktionen es für einen Fall anbietet."
 

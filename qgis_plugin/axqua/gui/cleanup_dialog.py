@@ -13,7 +13,7 @@ from qgis.PyQt.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QHeaderView, Q
                                  QMessageBox, QPushButton, QTreeWidget, QTreeWidgetItem,
                                  QVBoxLayout)
 
-from ..compat import CHECKED, UNCHECKED, USER_ROLE, enum_value
+from ..compat import CHECKED, UNCHECKED, USER_ROLE, enum_value, question
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from . import help as help_pages
@@ -251,7 +251,7 @@ class CleanupDialog(QDialog):
         if not case or case != self.current_case():
             return
         name = Path(case).name
-        answer = QMessageBox.question(
+        answer = question(
             self, "aXqua - Clean Up",
             f"Remove {items(len(selected))} of the case {name} and free {human(frees)}?\n\n"
             "Removed files cannot be restored.")

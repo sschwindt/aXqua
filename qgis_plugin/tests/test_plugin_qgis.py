@@ -2164,7 +2164,7 @@ def test_clean_up_sits_left_of_help_and_removes_what_was_ticked(dock, monkeypatc
         assert "3.1 GB" in window.status.text()
         window.keep.setCurrentIndex(1)
         assert steps.text(1) == "2.7 GB"
-        monkeypatch.setattr(cleanup_dialog.QMessageBox, "question",
+        monkeypatch.setattr(cleanup_dialog, "question",
                             lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
         window.remove()
         apply = [a for a in asked if a[0] == "apply"]
@@ -2224,7 +2224,7 @@ def test_a_listing_that_arrives_for_a_case_no_longer_chosen_is_dropped(qgis_app,
         _now(*listing_a)                                   # A's answer comes last
         assert window.listed == str(second) and window.found["case"] == str(second)
         assert window.tree.topLevelItem(1).child(0).checkState(0) == cleanup_dialog.CHECKED
-        monkeypatch.setattr(cleanup_dialog.QMessageBox, "question",
+        monkeypatch.setattr(cleanup_dialog, "question",
                             lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
         window.remove()
         _now(*pending[-1])
@@ -2623,7 +2623,7 @@ def test_a_running_installation_is_shown_when_the_wizard_is_opened_again(
     assert "step 2 of 2" in wizard.state_label.text()
 
     yes = install_wizard.enum_value(QMessageBox, "StandardButton.Yes", "Yes")
-    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: yes)
+    monkeypatch.setattr(install_wizard, "question", lambda *a, **k: yes)
     wizard.cancel_installation()
     assert ("cancel", "20261008-120000-telemac") in client.calls
     assert "cancelled" in wizard.state_label.text() and not wizard.timer.isActive()
@@ -2774,12 +2774,12 @@ def test_an_installed_program_is_installed_again_only_after_a_question(dock,
     asked = []
     no = configuration_tab.enum_value(QMessageBox, "StandardButton.No", "No")
     yes = configuration_tab.enum_value(QMessageBox, "StandardButton.Yes", "Yes")
-    monkeypatch.setattr(QMessageBox, "question",
+    monkeypatch.setattr(configuration_tab, "question",
                         lambda *a, **k: asked.append(a[2]) or no)
     tab.open_wizard("openfoam")                                  # No: back to the tab
     assert asked == ["Software already installed. Continue with re-installation?"]
     assert opened == []
-    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: yes)
+    monkeypatch.setattr(configuration_tab, "question", lambda *a, **k: yes)
     tab.open_wizard("openfoam")
     assert opened[-1]["reinstall"] is True
     # the Setup Wizard came first, with the environment script that was found
@@ -3801,3 +3801,24 @@ def test_a_folder_inside_wsl_is_shown_to_the_windows_dialog_and_back_as_linux():
     assert install_wizard.linux(r"\\wsl.localhost\Ubuntu-24.04\srv\stud\opt") == "/srv/stud/opt"
     assert install_wizard.linux("//wsl$/Ubuntu/srv/x") == "/srv/x"
     assert install_wizard.linux(r"C:\Users\stud") == r"C:\Users\stud"
+
+
+def test_the_buttons_of_a_question_are_english_whatever_language_qt_has(monkeypatch):
+    """QGIS loads Qt's translation: Ja, Nein and Abbrechen stood under English questions (2026-11-06)."""
+    from qgis.PyQt.QtWidgets import QDialogButtonBox, QMessageBox
+
+    from axqua_plugin import compat
+    from axqua_plugin.gui import help as help_pages
+
+    box = QMessageBox()
+    box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+    box.button(QMessageBox.StandardButton.Yes).setText("Ja")
+    compat.english_buttons(box)
+    assert [box.button(b).text() for b in (QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)] == ["Yes", "No"]
+    buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+    compat.english_buttons(buttons)
+    assert buttons.button(QDialogButtonBox.StandardButton.Cancel).text() == "Cancel"
+    # and Help opens the pages in the language of the plugin unless the settings say otherwise
+    assert help_pages.language_for("en", "de_DE") == "en"            # the default, on a German QGIS
+    assert help_pages.language_for("de") == "de" and help_pages.language_for("unknown") == "en"
+    assert help_pages.language_for("qgis", "de_DE") == "de" and help_pages.language_for("qgis", "it_IT") == "en"

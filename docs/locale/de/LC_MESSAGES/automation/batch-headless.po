@@ -83,9 +83,9 @@ msgstr "Eine unbekannte Option wird abgelehnt, bevor der Job erstellt wird."
 msgid "Each job has its own folder in the job root. The default job root is ``~/.local/share/axqua/jobs``. Another folder is selected with ``--job-root`` or with the environment variable ``AXQUA_JOB_ROOT``."
 msgstr "Jeder Job hat seinen eigenen Ordner in der Job-Root. Der Standardjob ist ``~/.local/share/axqua/jobs``. Ein anderer Ordner wird mit ``--job-root`` oder mit der Umgebungsvariable ``AXQUA_JOB_ROOT`` ausgewählt."
 
-# machine translation: argos f5f0102ea63f
+# machine translation: argos e8a411754847
 msgid "The job stores the settings of the case at the time of submission. A later change of the case file does not affect a running job, and a completed job remains reproducible."
-msgstr "Der Job speichert die Einstellungen des Falls zum Zeitpunkt der Einreichung. Eine spätere Änderung der Fall-Datei hat keinen Einfluss auf einen laufenden Job und ein abgeschlossener Job bleibt reproduzierbar."
+msgstr "Der Job speichert die Einstellungen des Falls zum Zeitpunkt der Einreichung. Eine spätere Änderung der Falldatei hat keinen Einfluss auf einen laufenden Job, und ein abgeschlossener Job bleibt reproduzierbar."
 
 # machine translation: argos 40c32621ccf5
 msgid "Monitor and control jobs"
@@ -95,15 +95,15 @@ msgstr "Überwachungs- und Kontrollaufgaben"
 msgid "A job passes through the states ``QUEUED``, ``STARTING``, ``RUNNING`` and ``POSTPROCESSING`` and ends as ``COMPLETED``, ``FAILED`` or ``CANCELLED``. If the process of a job disappears, for example because the computer was restarted, the next status query marks the job as ``FAILED``. A job therefore never remains in the state ``RUNNING`` by mistake."
 msgstr "Ein Job läuft durch die Zustände ``QUEUED``, ``STARTING``, ``RUNNING`` und ``POSTPROCESSING`` und endet als ``COMPLETED``, ``FAILED`` oder ``CANCELLED``. Wenn der Prozess eines Jobs verschwindet, zum Beispiel weil der Computer neu gestartet wurde, kennzeichnet die nächste Statusabfrage den Job als ``FAILED``. Ein Job bleibt daher niemals aus Versehen im Zustand ``RUNNING``."
 
-# machine translation: argos 01fa215a2962
+# machine translation: argos 4938eec52801
 msgid "To examine a failed job, read ``runner.log`` first. It contains the error with a code and a suggested remedy (:doc:`../troubleshooting/index`). The command ``axqua execute <job-id>`` repeats the job in the foreground, so that all messages appear in the terminal."
-msgstr "Um einen gescheiterten Job zu untersuchen, lesen Sie zuerst ``runner.log``. Es enthält den Fehler mit einem Code und einem vorgeschlagenen Heilmittel (:doc:`../troubleshooting/index`). Der Befehl ``axqua execute <job-id>`` wiederholt den Job im Vordergrund, so dass alle Nachrichten im Terminal erscheinen."
+msgstr "Um einen gescheiterten Job zu untersuchen, lesen Sie zuerst ``runner.log``. Es enthält den Fehler mit einem Code und einer vorgeschlagenen Abhilfe (:doc:`../troubleshooting/index`). Der Befehl ``axqua execute <job-id>`` wiederholt den Job im Vordergrund, so dass alle Nachrichten im Terminal erscheinen."
 
 # machine translation: argos 9499a1ab5770
 msgid "Sequences of jobs"
 msgstr "Sequenzen von Arbeitsplätzen"
 
-# machine translation: argos aef01e984fba
+# machine translation: argos 41b6530e86d2
 msgid "TELEMAC jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits until that job has ended, so that the steps of a sequence can be submitted in direct succession. The builds of the OpenFOAM models and the fine sediment simulation wait in the same sequence, because they start from the steady 2D result. A run of the OpenFOAM model (``openfoam-run``) does not wait: submit it when its build has ended. A waiting job does not check whether the previous job succeeded. The following script for Linux therefore runs the preprocessing, the dry run and the mesh convergence study of a case in sequence and stops when a step fails:"
 msgstr "TELEMAC-Jobs von einem Fall laufen einen nach dem anderen. Ein Job, der eingereicht wird, während ein anderer Job des gleichen Falls läuft, wartet, bis dieser Job beendet ist, so dass die Schritte einer Sequenz in direkter Folge eingereicht werden können. Die Builds der OpenFOAM-Modelle und der Feinsediment-Simulation warten in der gleichen Reihenfolge, da sie vom stetigen 2D-Ergebnis ausgehen. Ein Lauf des OpenFOAM-Modells (``openfoam-run``) wartet nicht: Senden Sie es, wenn sein Build beendet ist. Ein Wartejob überprüft nicht, ob der vorherige Job erfolgreich war. Das folgende Skript für Linux führt daher den Preprocessing, den Trockenlauf und die Netzkonvergenzstudie eines Falls nacheinander aus und stoppt, wenn ein Schritt fehlschlägt:"
 
@@ -111,9 +111,9 @@ msgstr "TELEMAC-Jobs von einem Fall laufen einen nach dem anderen. Ein Job, der 
 msgid "Start such a script with ``nohup bash my-study.sh &`` so that it continues after the terminal is closed."
 msgstr "Starten Sie ein solches Skript mit ``nohup bash my-study.sh &``, damit es nach dem Schließen von Terminal fortgesetzt wird."
 
-# machine translation: argos d46ad891731e
+# machine translation: argos 2beb3e281d8a
 msgid "To repeat a step for several discharges, create one case file per discharge and call ``run_step`` in a loop over the case files."
-msgstr "Um einen Schritt für mehrere Abflüsse zu wiederholen, erstellen Sie eine Fall-Datei pro Abfluss und rufen Sie ``run_step`` in einer Schleife über die Fall-Dateien auf."
+msgstr "Um einen Schritt für mehrere Abflüsse zu wiederholen, erstellen Sie einen Falldatei pro Abfluss und rufen Sie ``run_step`` in einer Schleife über die Falldateien auf."
 
 # machine translation: argos fd04def5ed8e
 msgid "How jobs are detached"
@@ -131,11 +131,11 @@ msgstr "Trägerrakete"
 msgid "Method"
 msgstr "Methode"
 
-# machine translation: argos 3777ec7b331a
+# machine translation: argos 1f45c9e559c5
 msgid "A user service of the Linux system. Preferred on Linux."
 msgstr "Ein Benutzerdienst des Linux-Systems. Bevorzugt unter Linux."
 
-# machine translation: argos a4fb7416a021
+# machine translation: argos 0039e70412a7
 msgid "A separate process group. Used on Linux and macOS when no user services are available, for example in some remote sessions."
 msgstr "Eine separate Prozessgruppe. Wird unter Linux und macOS verwendet, wenn keine Benutzerdienste verfügbar sind, beispielsweise in einigen Remote-Sitzungen."
 
@@ -143,13 +143,13 @@ msgstr "Eine separate Prozessgruppe. Wird unter Linux und macOS verwendet, wenn 
 msgid "A Windows job object."
 msgstr "Ein Windows-Auftragsobjekt."
 
-# machine translation: argos 30586ab41142
+# machine translation: argos c4c8aaaf3ab1
 msgid "A process inside the Windows Subsystem for Linux."
 msgstr "Ein Prozess im Windows-Subsystem für Linux."
 
-# machine translation: argos e9ca6c13bc98
+# machine translation: argos 9c0ea7296352
 msgid "Another launcher is selected with ``--launcher``. The launchers ``windows`` and ``wsl`` have not yet been tested on a real Windows installation."
-msgstr "Ein weiterer Launcher wird mit ``--launcher`` ausgewählt. Die Launcher ``windows`` und ``wsl`` wurden noch nicht auf einer echten Windows-Installation getestet."
+msgstr "Ein weiterer Launcher wird mit ``--launcher`` ausgewählt. Die Launcher ``windows`` und ``wsl`` wurden noch nicht auf einem echten Windows Installation getestet."
 
 # machine translation: argos e9a01b0c57c1
 msgid "Cancelling a job first asks the job to end itself, so that it can close its files. If the job does not react within 20 seconds, aXqua stops all of its processes, including the parallel processes of the simulation code."

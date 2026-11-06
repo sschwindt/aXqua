@@ -194,6 +194,8 @@ Back in **QGIS**:
 
 *Test* reports the version that the path answers with, so a wrong path is caught here and not when a simulation is started.
 
+On Windows, select the file ``axqua.exe`` in the folder ``Scripts`` of the environment. Never install aXqua into the Python of QGIS itself: it lacks the programs for meshes and rasters, and installing them there can break QGIS; *Test* says so when the path points there. The plugin starts aXqua without the Python settings of QGIS, so the two Python installations do not interfere.
+
 .. figure:: ../img/gui-settings.png
    :alt: The settings of the plugin with the path of the aXqua program
 
@@ -233,7 +235,7 @@ Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 aXqua panel layout
 ------------------
 
-After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, *Morphodynamics*, and *Hydrology*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in a copy of the repository installed as in :ref:`install-from-source`, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.
+After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, *Morphodynamics*, and *Hydrology*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in a copy of the repository installed as in :ref:`install-from-source`, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the English pages, the language of the plugin. *Documentation language* in *aXqua > Settings* opens the German or French pages instead (machine-translated), or those of the language of QGIS. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.
 
 .. figure:: ../img/gui-qgis-window.png
    :alt: The aXqua panel in the QGIS window

@@ -18,7 +18,7 @@ from qgis.PyQt.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
                                  QMessageBox, QPushButton, QScrollArea, QVBoxLayout,
                                  QWidget)
 
-from ..compat import enum_value, exec_dialog
+from ..compat import enum_value, exec_dialog, question
 from ..core.runner_client import RunnerError, user_text
 from ..core.tasks import run_async
 from . import findings as fnd
@@ -384,7 +384,7 @@ class ConfigurationTab(QWidget):
         """Yes goes on to the wizard, No back to this tab."""
         yes = enum_value(QMessageBox, "StandardButton.Yes", "Yes")
         no = enum_value(QMessageBox, "StandardButton.No", "No")
-        answer = QMessageBox.question(self, "aXqua", ALREADY_INSTALLED, yes | no, no)
+        answer = question(self, "aXqua", ALREADY_INSTALLED, yes | no, no)
         return answer == yes
 
     def _installed(self) -> None:

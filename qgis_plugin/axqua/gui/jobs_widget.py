@@ -20,7 +20,7 @@ from qgis.PyQt.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QL
                                  QMessageBox, QPushButton, QTableWidget,
                                  QTableWidgetItem, QVBoxLayout, QWidget)
 
-from ..compat import USER_ROLE, color, open_in_file_manager
+from ..compat import USER_ROLE, color, open_in_file_manager, question
 from ..core.job_model import JobTable
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
@@ -243,7 +243,7 @@ class JobsWidget(QWidget):
         job = self._selected_or_warn()
         if job is None:
             return
-        confirm = QMessageBox.question(
+        confirm = question(
             self, "Cancel job",
             f"Stop {job.job_id} and everything it started?\n\n"
             "The solver and its MPI processes are terminated as a group. Work already "

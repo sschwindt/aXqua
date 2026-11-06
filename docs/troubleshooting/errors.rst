@@ -58,8 +58,8 @@ The *Check* tab of an installation wizard, the *Installation* tab of a failed in
 
 .. _axqua-install-windows-needs-wsl:
 
-``TELEMAC and OpenFOAM are installed in the Windows Subsystem for Linux``
-    The simulation programs do not run in Windows itself. Install a Linux distribution in the Windows Subsystem for Linux and start the installation there (:doc:`../installation/simulation-software`).
+``TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2), which is not set up on this computer``
+    The simulation programs do not run in Windows itself but inside WSL. An administrator sets up WSL once with ``wsl --install -d Ubuntu-24.04`` in a terminal with administrator rights, then restarts the computer; open *Ubuntu* from the Start menu and create a Linux user. The *Setup Wizard* then installs TELEMAC and OpenFOAM into it without an administrator (:doc:`../installation/simulation-software`).
 
 .. _axqua-install-as-root:
 

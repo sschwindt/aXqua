@@ -36,7 +36,7 @@ from qgis.PyQt.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
                                  QPushButton, QScrollArea, QSpinBox, QTabWidget,
                                  QVBoxLayout, QWidget)
 
-from ..compat import enum_value, exec_dialog
+from ..compat import enum_value, exec_dialog, question
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from . import findings as fnd
@@ -908,7 +908,7 @@ class InstallWizard(QDialog):
             self.cancel_installation()
 
     def cancel_installation(self) -> None:
-        answer = QMessageBox.question(
+        answer = question(
             self, self.windowTitle(),
             "Stop the installation? What is already downloaded and built stays, and "
             "a new installation into the same folder continues with it.")
