@@ -69,10 +69,10 @@ The reference of the Python code (the docstrings that `autodoc` collects) stays 
 Argos Translate knows no hydraulic engineering: it renders *reach* as *Reichweite* and *portée*, *rating curve* as *courbe de goudron*. The glossaries `glossary.de.tsv` and `glossary.fr.tsv` fix the terms:
 
 ```
-<english>[|<english plural>]  TAB  <target>[|<target plural>]  [TAB m|f]
+<english>[|<english plural>]  TAB  <target>[|<target plural>]  [TAB m|f]  [TAB noun]
 ```
 
-`translate.py` puts the target term into the English sentence before it goes to the engine, which then declines the term and chooses the article itself: *"The Wassertiefe at the Zuflussrand is computed from the Abfluss"* comes back as *"Die Wassertiefe am Zuflussrand wird aus dem Abfluss berechnet"*. French terms are sent in title case (*Courbe De Tarage*), because the engine copies a capitalized term like a name but translates rare French words a second time when they are in lower case; the case is restored afterwards, and the gender in the third column makes the article agree (*un tâche* becomes *une tâche*). A row whose target is the English term keeps the word in English (*Preprocessing*, *Layer*). An acronym matches in capitals only. A longer term wins over a shorter one inside it.
+`translate.py` puts the target term into the English sentence before it goes to the engine, which then declines the term and chooses the article itself: *"The Wassertiefe at the Zuflussrand is computed from the Abfluss"* comes back as *"Die Wassertiefe am Zuflussrand wird aus dem Abfluss berechnet"*. French terms are sent in title case (*Courbe De Tarage*), because the engine copies a capitalized term like a name but translates rare French words a second time when they are in lower case; the case is restored afterwards, and the gender in the third column makes the article agree (*un tâche* becomes *une tâche*). *noun* in a further column marks an English word that is also a verb (*reach*): it is replaced only where its neighbors do not make it a verb, because *"can reach tens of gigabytes"* had come back as *"können Flussabschnitt zig Gigabyte"*. A row whose target is the English term keeps the word in English (*Preprocessing*, *Layer*). An acronym matches in capitals only. A longer term wins over a shorter one inside it.
 
 `termfix.<lang>.tsv` repairs what the engine still gets wrong, as a regular expression over its answer that runs only on messages whose English text contains a given term:
 

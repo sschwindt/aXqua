@@ -1,6 +1,6 @@
 # English-German glossary of the aXqua documentation.
 #
-#     <english>[|<english plural>] TAB <german>[|<german plural>] [TAB f]
+#     <english>[|<english plural>] TAB <german>[|<german plural>] [TAB f] [TAB noun]
 #
 # docs/i18n/translate.py puts the German term into the English sentence before the sentence is
 # translated, so that the engine declines it and chooses the article itself ("The Wassertiefe at the
@@ -8,13 +8,16 @@
 # A row whose German term is the English one keeps the word in English (the names of the tabs of
 # the plugin, which is in English). An acronym (all capitals) matches in capitals only. An f marks
 # a feminine term, so that an article the engine declined as masculine is repaired ("des
-# Steuerdatei" -> "der Steuerdatei").
+# Steuerdatei" -> "der Steuerdatei"). noun marks an English word that is also a verb: it is replaced only
+# where its neighbors do not make it a verb ("can reach", "reaches the outflow" stay as they are).
 # Reference for terms: https://www.termdat.bk.admin.ch/
 
 # the computational domain and the mesh
-reach|reaches	Flussabschnitt|Flussabschnitte
+reach|reaches	Flussabschnitt|Flussabschnitte	noun
 region of interest	Untersuchungsgebiet
 case|cases	Fall|Fälle
+case settings	Falleinstellungen|Falleinstellungen	f
+case file|case files	Falldatei|Falldateien	f
 case description|case descriptions	Fallbeschreibung|Fallbeschreibungen	f
 upper or lower case	Groß- oder Kleinschreibung
 model outline	Modellgrenze	f
@@ -41,6 +44,8 @@ inflow hydrograph|inflow hydrographs	Zuflussganglinie|Zuflussganglinien	f
 inflow|inflows	Zufluss|Zuflüsse
 outflow|outflows	Ausfluss|Ausflüsse
 rating curve|rating curves	Abflusskurve|Abflusskurven	f
+stage-discharge outflow boundary|stage-discharge outflow boundaries	Ausflussrand mit Abflusskurve|Ausflussränder mit Abflusskurve
+stage-discharge outflow	Ausfluss mit Abflusskurve
 stage-discharge relation|stage-discharge relations	Wasserstand-Abfluss-Beziehung|Wasserstand-Abfluss-Beziehungen	f
 gauge|gauges	Pegel|Pegel
 # hydraulics
@@ -99,6 +104,17 @@ button|buttons	Schaltfläche|Schaltflächen	f
 installation wizard|installation wizards	Installationsassistent|Installationsassistenten
 wizard|wizards	Assistent|Assistenten
 terminal|terminals	Terminal|Terminals
+installer|installers	Installationsprogramm|Installationsprogramme
+installation folder|installation folders	Installationsordner|Installationsordner
+installation|installations	Installation|Installationen	f
+remedy|remedies	Abhilfe|Abhilfen	f
+outlet|outlets	Auslass|Auslässe
+sub-tab|sub-tabs	Unterregisterkarte|Unterregisterkarten	f
+tab|tabs	Registerkarte|Registerkarten	f
+home folder|home folders	Home-Ordner|Home-Ordner
+frontend	Frontend
+backend	Backend
+Linux distribution|Linux distributions	Linux-Distribution|Linux-Distributionen	f
 solver|solvers	Solver|Solver
 preprocessing	Preprocessing
 postprocessing	Postprocessing

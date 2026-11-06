@@ -118,6 +118,17 @@ def test_german_terms_go_into_the_sentence_in_singular_and_plural(tmp_path):
     assert tr.prepare("Both layers are loaded.", glossary, []).text == "Both Layer are loaded."
 
 
+def test_a_term_marked_noun_is_left_alone_where_it_is_a_verb(tmp_path):
+    # "can reach tens of gigabytes" had come back as "können Flussabschnitt zig Gigabyte"
+    glossary = _glossary(tmp_path, "de", ["reach|reaches\tFlussabschnitt|Flussabschnitte\tnoun"])
+    for verb in ("The results can reach tens of gigabytes.", "It tells aXqua how to reach a code.",
+                 "The water reaches the outflow.", "The file does not reach 5 GB."):
+        assert "Flussabschnitt" not in tr.prepare(verb, glossary, []).text, verb
+    for noun in ("On a reach with 47,000 nodes.", "The reach is filled.", "Both reaches drain."):
+        assert "Flussabschnitt" in tr.prepare(noun, glossary, []).text, noun
+    assert glossary.terms[0].noun_only and not glossary.terms[0].gender
+
+
 def test_french_terms_go_in_title_case_and_come_back_in_their_own(tmp_path):
     glossary = _glossary(tmp_path, "fr", [
         "rating curve\tcourbe de tarage\tf",

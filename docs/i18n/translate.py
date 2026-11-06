@@ -222,6 +222,7 @@ class Term:
     english: tuple[str, str]   # singular, plural
     target: tuple[str, str]
     gender: str = ""           # "m" or "f": the articles in front of a French term are made to agree
+    noun_only: bool = False    # "noun": an English word that is also a verb ("reach") is replaced only where it is a noun
 
 
 @dataclass
@@ -236,13 +237,14 @@ class Glossary:
         glossary = cls(lang)
         for where, *parts in _rows(folder / f"glossary.{lang}.tsv"):
             if len(parts) < 2 or not parts[0] or not parts[1]:
-                sys.exit(f"{where}: expected <english>[|<plural>] TAB <{lang}>[|<plural>] [TAB m|f]")
+                sys.exit(f"{where}: expected <english>[|<plural>] TAB <{lang}>[|<plural>] [TAB m|f] [TAB noun]")
             english = [form.strip() for form in parts[0].split("|")]
             target = [form.strip() for form in parts[1].split("|")]
             english_forms = (english[0], english[1] if len(english) > 1 else english[0])
             target_forms = (target[0], target[1] if len(target) > 1 else target[0])
-            gender = parts[2].lower() if len(parts) > 2 and parts[2].lower() in ("m", "f") else ""
-            glossary.terms.append(Term(english_forms, target_forms, gender))
+            marks = {part.strip().lower() for part in parts[2:]}
+            gender = next((mark for mark in ("m", "f") if mark in marks), "")
+            glossary.terms.append(Term(english_forms, target_forms, gender, noun_only="noun" in marks))
         alternatives = []
         for term in glossary.terms:
             for number, form in enumerate(term.english):
@@ -260,6 +262,24 @@ class Glossary:
 
     def find(self, matched: str) -> tuple[Term, int] | None:
         return self.lookup.get(_normal(matched))
+
+
+#: Words before an English word that make it a verb ("can reach", "to reach", "does not reach").
+VERB_BEFORE = {"to", "not", "never", "cannot", "can", "could", "will", "would", "may", "might", "must", "should",
+               "does", "do", "did", "it", "they", "which", "who", "often", "rarely", "only", "first", "finally"}
+#: Words after an English word that make it a verb ("reaches the outflow", "reach 5 GB", "reach tens of").
+VERB_AFTER = {"the", "a", "an", "its", "their", "his", "her", "this", "that", "these", "those", "every", "each",
+              "all", "some", "several", "tens", "hundreds", "thousands", "up", "about", "into", "beyond", "it",
+              "them", "steady", "zero", "one", "two"}
+
+
+def used_as_verb(text: str, start: int, end: int) -> bool:
+    """Whether the English word ``text[start:end]`` is a verb, told from its neighbors (a glossary term marked ``noun``)."""
+    before = re.findall(r"[A-Za-z']+", text[:start])
+    after = re.match(r"\s*([A-Za-z]+|\d)", text[end:])
+    if before and before[-1].lower() in VERB_BEFORE:
+        return True
+    return bool(after) and (after.group(1).isdigit() or after.group(1).lower() in VERB_AFTER)
 
 
 def _normal(text: str) -> str:
@@ -456,6 +476,8 @@ def prepare(source: str, glossary: Glossary, keep: list[str], *, bold_in_context
             if found is None:
                 return m.group(0)
             term, number = found
+            if term.noun_only and used_as_verb(m.string, m.start(), m.end()):
+                return m.group(0)
             target = term.target[number]
             if term.gender:
                 prepared.genders[target] = term.gender
