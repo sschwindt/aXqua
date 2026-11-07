@@ -129,12 +129,13 @@ def _alive(status: dict[str, Any]) -> bool | None:
                 if status.get("folder") else {}
         except (OSError, ValueError):
             held = {}
-        keeper = held.get("pid") or status.get("windows_pid")
+        keeper = held.get("pid") or status.get("windows_pid")       # windows_pid: an installation of an earlier build
         if not keeper:
             return None
         if not procs.pid_alive(int(keeper)):
             return False
-        began, now = held.get("started"), procs.process_start_time(int(keeper))
+        began = held.get("started") if held else status.get("windows_started")
+        now = procs.process_start_time(int(keeper))
         return not (began is not None and now is not None and abs(float(now) - float(began)) > 1e-6)
     if status.get("host") and status["host"] != procs.host_id():
         return None                             # another computer's installation
@@ -162,7 +163,7 @@ def read(ident: str | os.PathLike, *, lines: int = 0) -> dict[str, Any]:
     if status.get("state") in ACTIVE:
         alive = _alive(status)
         lost = alive is False or (
-            alive is None and not status.get("pid")
+            alive is None and (not status.get("pid") or status.get("distro"))
             and time.time() - float(status.get("created") or 0) > START_GRACE)
         if lost:
             cancelled = (folder / "cancel.request").exists()
@@ -234,12 +235,7 @@ def start_in_wsl(plan: dict[str, Any], distro: str, *, detach: bool = True, echo
         first = next((f for f in plan.get("findings") or [] if f.get("severity") == ERROR), {})
         raise ConfigError(first.get("message") or "this installation has nothing to run",
                           subject=f"install.{plan.get('target', '')}", remedy=first.get("remedy", ""))
-    running = latest(str(plan["target"]), active_only=True)
-    if running is not None:
-        from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
-        raise AxquaEnvironmentError(
-            f"an installation of {recipes.TITLES[plan['target']]} is already running ({running['id']})",
-            subject=running["id"], remedy=f"Wait for it, or cancel it with 'axqua install cancel {running['id']}'.")
+    _refuse_if_running(str(plan["target"]))
     folder = _new_folder(str(plan["target"]))
     (folder / "plan.json").write_text(json.dumps(plan, indent=2, default=str), encoding="utf-8")
     _write(folder, {
@@ -268,6 +264,18 @@ def start_in_wsl(plan: dict[str, Any], distro: str, *, detach: bool = True, echo
         if echo and log_path.exists():
             _echo(log_path, shown)
     return read(folder)
+
+
+def _refuse_if_running(target: str) -> None:
+    """One installation of a target at a time: two builds into one folder spoil each other."""
+    from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
+
+    running = latest(target, active_only=True)
+    if running is not None:
+        raise AxquaEnvironmentError(
+            f"an installation of {recipes.TITLES[target]} is already running ({running['id']})",
+            subject=running["id"],
+            remedy=f"Wait for it, or cancel it with 'axqua install cancel {running['id']}'.")
 
 
 def _new_folder(target: str) -> Path:
@@ -319,20 +327,13 @@ def start(plan: recipes.Plan, *, detach: bool = True, echo: bool = False
           ) -> dict[str, Any]:
     """Record *plan* and run it. Detached, this returns at once."""
     from axqua.core.errors import ConfigError
-    from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
 
     if not plan.ready:
         first = next((f for f in plan.findings if f.severity == ERROR), None)
         raise ConfigError(
             first.message if first else "this installation has nothing to run",
             subject=f"install.{plan.target}", remedy=first.remedy if first else "")
-    running = latest(plan.target, active_only=True)
-    if running is not None:
-        raise AxquaEnvironmentError(
-            f"an installation of {recipes.TITLES[plan.target]} is already running "
-            f"({running['id']})", subject=running["id"],
-            remedy="Wait for it, or cancel it with 'axqua install cancel "
-                   f"{running['id']}'.")
+    _refuse_if_running(plan.target)
 
     folder = _new_folder(plan.target)
     ident = folder.name
@@ -739,7 +740,7 @@ def _cancel_in_wsl(folder: Path, status: dict[str, Any], *, grace: float) -> dic
         try:
             keeper = json.loads((folder / KEEPER).read_text(encoding="utf-8")).get("pid")
         except (OSError, ValueError):
-            keeper = None
+            keeper = current.get("windows_pid")
         if keeper:
             subprocess.run(["taskkill", "/PID", str(int(keeper)), "/T", "/F"], capture_output=True,
                            timeout=30, check=False)

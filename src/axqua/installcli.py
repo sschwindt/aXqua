@@ -349,20 +349,20 @@ def _status_lines(status: dict) -> list[str]:
 WINDOWS_TO_WSL = ("overview", "plan", "packages", "start", "telemac-examples")
 
 
-#: Options of `axqua install` that take no value.
-FLAGS = ("--json", "--for-all-users", "--no-telemac-examples", "--no-visualization", "--no-visit", "--examples",
-         "--no-smoke-test", "--no-bind", "--foreground", "--elevate", "--verbose", "-v", "--quiet", "-q")
+def _flags() -> set[str]:
+    """The options of `axqua install` that take no value, as the parser defines them."""
+    return {name for action in _parser()._actions if action.nargs == 0 for name in action.option_strings}
 
 
 def _without(argv: list[str], *names: str) -> list[str]:
     """*argv* without the options *names* and, for an option that takes one, its value."""
-    out, skip = [], False
+    out, skip, flags = [], False, _flags()
     for arg in argv:
         if skip:
             skip = False
             continue
         if arg in names:
-            skip = arg not in FLAGS
+            skip = arg not in flags
             continue
         if any(arg.startswith(name + "=") for name in names):
             continue

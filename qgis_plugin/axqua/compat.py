@@ -277,7 +277,7 @@ def start_detached(program: str, arguments: list[str]) -> bool:
 
 
 #: The text of the standard buttons. QGIS loads Qt's own translation, which turned them into Ja, Nein and Abbrechen under the English questions of the plugin on a German computer (a student's report of 2026-11-06); the plugin is in English, so its buttons are too.
-BUTTON_TEXTS = (("Yes", "Yes"), ("No", "No"), ("Ok", "OK"), ("Cancel", "Cancel"), ("Close", "Close"))
+BUTTON_TEXTS = (("Yes", "&Yes"), ("No", "&No"), ("Ok", "OK"), ("Cancel", "Cancel"), ("Close", "&Close"))
 
 
 def english_buttons(owner) -> None:

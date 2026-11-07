@@ -766,7 +766,8 @@ def _wsl_exe() -> str:
 
 def wsl_root(argv: list[str]) -> list[str]:
     """*argv* as the root of this WSL distribution."""
-    return [_wsl_exe(), "-d", _wsl_distro(), "-u", "root", "--", *argv]
+    # --exec: after --, the default shell of the distribution would parse the joined command line again (a folder with a space or a $)
+    return [_wsl_exe(), "-d", _wsl_distro(), "-u", "root", "--exec", *argv]
 
 
 def install_packages(target: str, missing: list[str], log_dir: Path) -> dict[str, Any]:

@@ -3814,7 +3814,7 @@ def test_the_buttons_of_a_question_are_english_whatever_language_qt_has(monkeypa
     box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
     box.button(QMessageBox.StandardButton.Yes).setText("Ja")
     compat.english_buttons(box)
-    assert [box.button(b).text() for b in (QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)] == ["Yes", "No"]
+    assert [box.button(b).text() for b in (QMessageBox.StandardButton.Yes, QMessageBox.StandardButton.No)] == ["&Yes", "&No"]   # Alt+Y, Alt+N
     buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
     compat.english_buttons(buttons)
     assert buttons.button(QDialogButtonBox.StandardButton.Cancel).text() == "Cancel"

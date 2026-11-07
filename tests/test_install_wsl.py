@@ -141,7 +141,7 @@ def test_inside_wsl_administrator_steps_run_as_the_root_of_the_distribution(monk
     monkeypatch.setenv("DISPLAY", ":0")                   # WSLg: a display, but no polkit agent
     assert recipes.elevation() == "wsl"
     assert runner.elevated(["install", "-d", "/opt/telemac"], interactive=True) == \
-        [str(exe), "-d", "Ubuntu-24.04", "-u", "root", "--", "install", "-d", "/opt/telemac"]
+        [str(exe), "-d", "Ubuntu-24.04", "-u", "root", "--exec", "install", "-d", "/opt/telemac"]
     monkeypatch.delenv("WSL_DISTRO_NAME")
     assert recipes.elevation() != "wsl"
 
@@ -167,3 +167,18 @@ def test_a_script_of_windows_after_a_wsl_entry_is_no_wsl_entry():
         setup_script=r"\\wsl.localhost\Ubuntu\opt\telemac\configs\pysource.sh", environment="wsl", distro="Ubuntu")})
     new = profiles.rebound(old, "telemac", r"C:\telemac\configs\pysource.win.bat")
     assert new.environment is None and new.distro is None
+
+
+def test_inside_wsl_only_the_axqua_package_is_read_from_the_windows_folder(tmp_path):
+    """The Windows folder holds packages of another Python; they must not shadow a module of the distribution."""
+    import subprocess
+
+    root = tmp_path / "site-packages"
+    shutil.copytree(Path(wslproxy.package_root()) / "axqua", root / "axqua",
+                    ignore=shutil.ignore_patterns("__pycache__", "vendor"))
+    (root / "json.py").write_text("raise SystemExit('the Windows folder shadowed json')\n")
+    python = shutil.which("python3") or sys.executable
+    code = wslproxy.LAUNCH.format(root=str(root))
+    done = subprocess.run([python, "-I", "-c", code, "--version"], capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+    assert done.stdout.startswith("axqua ")

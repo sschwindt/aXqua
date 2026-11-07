@@ -19,7 +19,7 @@ from qgis.PyQt.QtGui import QIcon, QPainter, QPixmap, QPolygonF
 from qgis.PyQt.QtWidgets import (QHBoxLayout, QLabel, QMessageBox, QToolButton,
                                  QVBoxLayout, QWidget)
 
-from ..compat import color, enum_value, exec_dialog
+from ..compat import color, english_buttons, enum_value, exec_dialog
 from . import help as help_pages
 
 ORANGE = "#e67e00"
@@ -121,6 +121,7 @@ def show(finding: Finding, parent=None) -> None:
     docs = box.addButton("Open documentation",
                          enum_value(QMessageBox, "ButtonRole.HelpRole", "HelpRole"))
     box.addButton(enum_value(QMessageBox, "StandardButton.Close", "Close"))
+    english_buttons(box)          # Qt's translation would say Schließen under an English message
     exec_dialog(box)
     if box.clickedButton() is docs:
         help_pages.open_url(help_pages.url_for_code(finding.code, finding.severity))

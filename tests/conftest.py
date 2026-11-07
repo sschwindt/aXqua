@@ -161,3 +161,12 @@ def as_windows(monkeypatch):
         for module in modules:
             monkeypatch.setattr(module, "os", _OsOnWindows())
     return patch
+
+
+@pytest.fixture(autouse=True)
+def _fresh_wsl_discovery(monkeypatch):
+    """What discovery found in WSL is kept per process; a test must not see another test's (review of 2026-11-06)."""
+    from axqua.core import machine
+
+    monkeypatch.setattr(machine, "_WSL_FOUND", {})
+    monkeypatch.setattr(machine, "_WSL_DISTROS", None)

@@ -31,6 +31,7 @@ from qgis.PyQt.QtWidgets import (QDoubleSpinBox, QFileDialog, QFormLayout, QGrou
                                  QHBoxLayout, QInputDialog, QLabel, QLineEdit,
                                  QPushButton, QVBoxLayout, QWidget)
 
+from ..compat import exec_dialog
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from .case_editor import stored_path
@@ -264,8 +265,15 @@ class ValidationBox(QGroupBox):
             self.ctx.warn("No point layer from a file is open in QGIS.")
             return
         names = [name for name, _source in layers]
-        chosen, accepted = QInputDialog.getItem(
-            self, "Validation data", "Point layer", names, 0, False)
+        dialog = QInputDialog(self)
+        dialog.setWindowTitle("Validation data")
+        dialog.setLabelText("Point layer")
+        dialog.setComboBoxItems(names)
+        dialog.setComboBoxEditable(False)
+        dialog.setOkButtonText("OK")                 # English like the plugin, not Qt's translation
+        dialog.setCancelButtonText("Cancel")
+        accepted = bool(exec_dialog(dialog))
+        chosen = dialog.textValue()
         if accepted and chosen in names:
             self.layer.setText(dict(layers)[chosen])
 

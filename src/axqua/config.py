@@ -2639,13 +2639,22 @@ def _machine_environment(solver: str, environment: "Environment", script) -> "En
     from axqua.core import wsl as _wsl
     from axqua.core.profile import load_active
 
+    import re
+
+    text = str(script) if script is not None else ""
+    if re.match(r"^[A-Za-z]:[\\/]", text):
+        return environment          # a file of Windows (an environment variable or a case override chose it): no WSL
     binding = None
     try:
         active = load_active()
-        binding = active.solvers.get(solver) if active is not None else None
+        if active is not None and active.solvers.get(solver) is not None:
+            # the profile says how to enter ITS script; another script chosen above it is no concern of the profile
+            from axqua.core.profile import same_script
+            chosen = active.script(solver)
+            binding = active.solvers[solver] if chosen is not None and same_script(chosen, text) else None
     except Exception:  # noqa: BLE001 - an unreadable profile is reported by its own check
         binding = None
-    inside = _wsl.from_unc(str(script)) if script is not None else None
+    inside = _wsl.from_unc(text) if text else None
     kind = getattr(binding, "environment", None) or ("wsl" if inside else None)
     if kind not in ("wsl", "windows"):
         return environment          # posix is what an environment without a kind is on Linux anyway

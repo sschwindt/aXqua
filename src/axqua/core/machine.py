@@ -135,7 +135,8 @@ def _discover_in_wsl(key: str) -> Path | None:
                 break
         if found is not None:
             break
-    _WSL_FOUND[key] = found
+    if found is not None:
+        _WSL_FOUND[key] = found     # what is not there yet may be installed while this process runs
     return found
 
 

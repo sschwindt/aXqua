@@ -97,3 +97,14 @@ def test_a_case_on_windows_enters_telemac_the_way_the_profile_says(monkeypatch, 
     monkeypatch.setattr(profiles, "load_active", lambda: None)
     assert config_mod._machine_environment("telemac", config_mod.Environment(), UNC).kind == "wsl"   # the path says
     assert config_mod._machine_environment("telemac", config_mod.Environment(), "/opt/x.sh").kind is None
+
+
+def test_the_profile_decides_how_to_enter_only_its_own_script(monkeypatch):
+    """An environment variable or a case override may choose another script; a file of Windows is never entered in WSL."""
+    from axqua import config as config_mod
+
+    binding = profiles.SolverBinding(setup_script=UNC, environment="wsl", distro="Ubuntu-24.04")
+    monkeypatch.setattr(profiles, "load_active", lambda: profiles.AxquaProfile(solvers={"telemac": binding}))
+    assert config_mod._machine_environment("telemac", config_mod.Environment(),
+                                           r"C:\telemac\configs\pysource.win.bat").kind is None
+    assert config_mod._machine_environment("telemac", config_mod.Environment(), "/opt/other/pysource.sh").kind is None
