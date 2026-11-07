@@ -93,6 +93,8 @@ On Debian, Ubuntu and Linux Mint, ``venv`` requires the package ``python3-venv``
 
    Installing aXqua into the Python that ships with QGIS is possible but not recommended. ``pip`` may replace packages such as ``numpy`` that QGIS itself uses, and QGIS may then fail to start. The plugin runs the aXqua program as a separate process, so the program does not have to be in the Python of QGIS.
 
+   For the same reason, ``import axqua`` fails in the Python console of QGIS (``No module named 'axqua'``). A Python script that uses aXqua, such as the scripts of the example cases, runs in a terminal with the aXqua environment activated (on Windows the Anaconda or Miniforge Prompt): ``conda activate axqua-env``, then ``python <script>.py``.
+
 Upgrade the backend
 -------------------
 
@@ -188,7 +190,7 @@ Connect the plugin to the aXqua program
 Back in **QGIS**:
 
 * Open the aXqua panel from the toolbar and click *Check* on the *Configuration* tab.
-* The plugin looks in three places, in this order: the path in *aXqua > Settings*, the variable ``AXQUA_EXE``, the system search path.
+* The plugin looks in four places, in this order: the path in *aXqua > Settings*, the variable ``AXQUA_EXE``, the system search path, and the conda environments of this computer (Miniforge, Miniconda, Anaconda), an environment whose name contains *axqua* first. The last one matters on Windows, where QGIS never has an environment on its search path.
 * **Found**: the panel reports the version and where it came from. Nothing else to do.
 * **Not found**: enter the path from :ref:`find-the-axqua-path` in *Settings*, then click *Test*.
 

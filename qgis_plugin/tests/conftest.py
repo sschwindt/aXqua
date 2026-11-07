@@ -53,3 +53,13 @@ def _published_documentation(monkeypatch):
     monkeypatch.setattr(help_pages, "_location", {})
     monkeypatch.setattr(help_pages, "_asking", None, raising=False)
     monkeypatch.setattr(help_pages, "language", lambda: "en")
+
+
+@pytest.fixture(autouse=True)
+def _no_conda_environments_of_this_computer(monkeypatch):
+    """The search for axqua finds no conda environment in a test: it would find the aXqua of the computer the tests run on. A test of the search calls ``conda_prefixes`` with a home folder of its own."""
+    from axqua_plugin.core import runner_client
+
+    real = runner_client.conda_programs
+    monkeypatch.setattr(runner_client, "conda_programs",
+                        lambda home=None, environ=None: real(home, environ) if home is not None else [])

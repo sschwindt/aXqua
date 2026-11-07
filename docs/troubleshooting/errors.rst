@@ -44,7 +44,7 @@ Installation
     A system library that the geospatial packages require does not match their version. This occurs when packages of different origin are mixed in one environment. Create a new environment that holds Python alone and install aXqua into it with ``pip install axqua`` (:doc:`../installation/qgis-plugin`), so that all geospatial packages come from PyPI. In a copy of the repository, ``environment.yml`` serves the same purpose with packages from conda-forge.
 
 ``axqua could not be found`` (plugin)
-    The plugin did not find the program ``axqua``. The message lists the three places that were searched. Enter the full path of the program in *aXqua > Settings* and click *Test* (:doc:`../installation/qgis-plugin`).
+    The plugin did not find the program ``axqua``. The message lists the four places that were searched (the plugin setting, ``AXQUA_EXE``, the search path, the conda environments). Enter the full path of the program in *aXqua > Settings* and click *Test* (:doc:`../installation/qgis-plugin`).
 
 Installation of the simulation software
 ---------------------------------------

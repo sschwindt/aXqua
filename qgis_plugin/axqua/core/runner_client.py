@@ -16,7 +16,8 @@ to something that might be a different axqua:
 1. the path configured in the plugin's settings;
 2. ``$AXQUA_EXE``;
 3. ``shutil.which("axqua")``;
-4. otherwise an error naming all three.
+4. the conda environments of this computer (:func:`conda_programs`), one named for aXqua first: QGIS has none of them on its ``PATH``;
+5. otherwise an error naming all four.
 
 The find is validated by running ``axqua --version`` **when it is configured**, not
 when a job is submitted. A wrong or half-installed executable discovered at submit time
@@ -116,7 +117,7 @@ class RunnerInfo:
 
     path: str
     version: str
-    source: str          # settings | environment | PATH
+    source: str          # settings | environment | PATH | conda environment
 
     def describe(self) -> str:
         text = f"axqua {self.version} at {self.path} (found via {self.source})"
@@ -147,6 +148,8 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
     on_path = shutil.which("axqua")
     if on_path:
         candidates.append((on_path, "PATH"))
+    in_conda = conda_programs()
+    candidates += [(path, "conda environment") for path in in_conda]
 
     problems: list[str] = []
     for path, source in candidates:
@@ -162,7 +165,8 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
     lines = ["axqua could not be found.", "", "Looked in:",
              f"  1. the plugin setting ({configured or 'not set'})",
              f"  2. ${ENV_VAR} ({from_env or 'not set'})",
-             f"  3. PATH ({on_path or 'not found'})"]
+             f"  3. PATH ({on_path or 'not found'})",
+             f"  4. conda and Miniforge environments ({len(in_conda) or 'none'} with axqua)"]
     if problems:
         lines += ["", "What was tried:"] + problems
     lines += ["", "Install it with",
@@ -170,6 +174,57 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
               "in the Python environment of your choice, then set the path in "
               "aXqua > Settings."]
     raise RunnerNotFound("\n".join(lines))
+
+
+#: The folders conda, Miniforge, Mambaforge, Miniconda and Anaconda are installed in, below the home folder (installed for one user) or below ``%LOCALAPPDATA%``, ``%ProgramData%`` and ``/opt`` (for all users).
+CONDA_FOLDERS = ("miniforge3", "mambaforge", "miniconda3", "anaconda3", "micromamba", "Miniforge3",
+                 "Miniconda3", "Anaconda3", os.path.join(".local", "share", "mamba"))
+
+
+def conda_prefixes(home: Path | None = None, environ: dict | None = None) -> list[Path]:
+    """The folders of the conda environments of this computer, base environments included.
+
+    QGIS never has an environment on its ``PATH`` (on Windows the Anaconda Prompt sets it, QGIS's start menu entry does not), so ``pip install axqua`` in an environment left the plugin without a program until its path was typed in (the student's report of 2026-11-07). conda writes every environment it creates into ``~/.conda/environments.txt``, wherever its folder is; the usual folders are looked in as well, for an environment made by mamba or an older conda.
+    """
+    home = Path(home) if home is not None else Path.home()
+    environ = os.environ if environ is None else environ
+    prefixes: list[Path] = []
+    try:
+        listed = (home / ".conda" / "environments.txt").read_text("utf-8", errors="replace").splitlines()
+    except OSError:
+        listed = []
+    prefixes += [Path(line.strip()) for line in listed if line.strip() and not line.startswith("#")]
+    roots = [home / name for name in CONDA_FOLDERS]
+    for key in ("LOCALAPPDATA", "ProgramData", "PROGRAMDATA"):
+        if environ.get(key):
+            roots += [Path(environ[key]) / name for name in CONDA_FOLDERS]
+    if os.name != "nt":
+        roots += [Path("/opt") / name for name in CONDA_FOLDERS]
+    roots.append(home / ".conda")              # environments conda made there, with no write access to its own folder
+    for root in roots:
+        prefixes.append(root)
+        try:
+            prefixes += sorted(p for p in (root / "envs").iterdir() if p.is_dir())
+        except OSError:
+            pass
+    seen: set[str] = set()
+    unique = []
+    for prefix in prefixes:
+        key = os.path.normcase(str(prefix))
+        if key not in seen:
+            seen.add(key)
+            unique.append(prefix)
+    return unique
+
+
+def conda_programs(home: Path | None = None, environ: dict | None = None) -> list[str]:
+    """Every axqua of a conda environment, an environment whose name contains "axqua" first; never one inside QGIS's Python."""
+    found = []
+    for prefix in conda_prefixes(home, environ):
+        program = prefix / "Scripts" / "axqua.exe" if os.name == "nt" else prefix / "bin" / "axqua"
+        if program.is_file() and not in_qgis_python(str(program)):
+            found.append(str(program))
+    return sorted(found, key=lambda path: "axqua" not in Path(path).parents[1].name.lower())
 
 
 def _probe(path: str) -> str:

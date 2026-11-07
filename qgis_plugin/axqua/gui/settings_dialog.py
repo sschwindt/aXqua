@@ -49,7 +49,7 @@ class SettingsDialog(QDialog):
         row = QHBoxLayout()
         self.executable = QLineEdit(values["executable"])
         self.executable.setPlaceholderText(
-            "leave empty to use $AXQUA_EXE, then PATH")
+            "leave empty to use $AXQUA_EXE, then PATH, then the conda environments")
         row.addWidget(self.executable, 1)
         browse = QPushButton("...")
         browse.setMaximumWidth(36)

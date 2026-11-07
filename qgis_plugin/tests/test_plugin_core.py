@@ -161,6 +161,43 @@ def test_discovery_falls_back_to_the_environment_then_path(tmp_path, monkeypatch
     assert runner_client.find_executable(None).source == "PATH"
 
 
+def _conda_axqua(prefix: Path, version: str = "axqua 1.3.1") -> Path:
+    folder = prefix / ("Scripts" if os.name == "nt" else "bin")
+    script = _fake_axqua(folder, version=version)
+    return script.rename(folder / "axqua.exe") if os.name == "nt" else script
+
+
+def test_the_environments_conda_made_are_found_where_they_are(tmp_path):
+    """QGIS has no conda environment on its PATH, so pip install axqua in one left the plugin without a program (the student's report of 2026-11-07)."""
+    home = tmp_path / "home"
+    elsewhere = tmp_path / "D" / "envs" / "work"
+    (home / ".conda").mkdir(parents=True)
+    (home / ".conda" / "environments.txt").write_text(f"{home / 'miniforge3'}\n{elsewhere}\n", "utf-8")
+    other = _conda_axqua(home / "miniforge3" / "envs" / "geo")
+    wanted = _conda_axqua(home / "miniforge3" / "envs" / "axqua-env")
+    listed = _conda_axqua(elsewhere)
+    (home / "miniforge3" / "envs" / "empty").mkdir()
+    local = tmp_path / "AppData" / "Local"
+    in_appdata = _conda_axqua(local / "anaconda3")
+    found = runner_client.conda_programs(home, {"LOCALAPPDATA": str(local)})
+    assert found[0] == str(wanted)                          # the environment named for aXqua first
+    assert sorted(found) == sorted(map(str, [wanted, other, listed, in_appdata]))
+    assert runner_client.conda_programs(tmp_path / "nobody", {}) == []
+
+
+@pytest.mark.skipif(os.name == "nt", reason="shell script stub")
+def test_discovery_ends_in_the_conda_environments(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    _conda_axqua(home / "miniforge3" / "envs" / "axqua-env")
+    monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    monkeypatch.setattr(runner_client, "conda_programs",
+                        lambda home_=None, environ=None, real=runner_client.conda_programs: real(home, {}))
+    info = runner_client.find_executable(None)
+    assert info.source == "conda environment" and info.version == "1.3.1"
+    assert info.path.endswith(os.path.join("axqua-env", "bin", "axqua"))
+
+
 def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
     """Never a silent fallback to a different interpreter (plan §28)."""
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
@@ -171,6 +208,7 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
     assert "plugin setting" in message
     assert runner_client.ENV_VAR in message
     assert "PATH" in message
+    assert "conda" in message
     # The instruction has to be one that actually works: since 1.0.1 the program is on
     # PyPI, and the install command names it there rather than a checkout of main.
     assert "pip install axqua" in message
