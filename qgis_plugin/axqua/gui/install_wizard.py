@@ -654,6 +654,7 @@ class InstallWizard(QDialog):
         self.commands.setPlainText("\n".join(
             f"{number}. {step.get('name', '')}\n   $ {step.get('command', '')}"
             for number, step in enumerate(plan.get("steps") or [], start=1)))
+        self.commands.setVisible(bool(plan.get("steps")))     # Windows without WSL: no steps, no empty box
 
         packages = plan.get("packages") or {}
         missing = self.missing()
