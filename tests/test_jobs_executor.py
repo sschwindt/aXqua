@@ -241,6 +241,19 @@ def test_the_options_reach_the_backend(fake_case, fake_backend):
     assert fake_backend.calls[0][2]["ncsize"] == 6
 
 
+def test_the_process_count_of_the_job_reaches_the_backend(fake_case, fake_backend):
+    """--np 1 was frozen in resources.mpi_processes and never read: TELEMAC got the case's 8 and a build without MPI refused them (the Windows test computer, 2026-11-09)."""
+    jd = _create(fake_case, JobKind.STEADY_RUN, np=1)
+    executor.execute(jd)
+    assert fake_backend.calls[0][2]["ncsize"] == 1
+    fake_backend.calls.clear()
+    executor.execute(_create(fake_case, JobKind.STEADY_RUN, np=3, options={"ncsize": 6}))
+    assert fake_backend.calls[0][2]["ncsize"] == 6                       # an option of the job wins
+    fake_backend.calls.clear()
+    executor.execute(_create(fake_case, JobKind.PREPROCESSING, np=3))
+    assert "ncsize" not in fake_backend.calls[0][2]                      # a kind without a count gets none
+
+
 # --------------------------------------------------------------------------- failure
 
 

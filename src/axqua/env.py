@@ -161,10 +161,14 @@ def _terminate_tree(proc: subprocess.Popen, *, grace: float = 20.0) -> None:
     the solver ranks are grandchildren, and killing only the parent orphans them
     (plan §9).
     """
-    if os.name == "nt":  # pragma: no cover - Windows path
-        # No process groups in the POSIX sense; the launcher's Job Object is the
-        # equivalent, so here the best available action is the documented one.
-        proc.terminate()
+    if os.name == "nt":
+        # No process groups in the POSIX sense. proc is the cmd that called the batch file; ending only it left TELEMAC's launcher, its cmd and telemac2d.exe running while the job said CANCELLED (the Windows test computer, 2026-11-09), and the launcher's Job Object did not help: the runner ends cooperatively, so `axqua cancel` never reaches it. taskkill /T ends the tree by its parent links while proc still holds it together, and needs no administrator for one's own processes.
+        try:
+            subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                           capture_output=True, timeout=grace,
+                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except (OSError, subprocess.SubprocessError):
+            pass
         try:
             proc.wait(timeout=grace)
         except subprocess.TimeoutExpired:

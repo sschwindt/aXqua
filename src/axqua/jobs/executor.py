@@ -286,7 +286,7 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
                     component=spec.solver,
                 )
             log.info("running %s.%s for %s", spec.solver, meta.verb, spec.kind.value)
-            kwargs = dict(spec.options.as_kwargs())
+            kwargs = _with_processes(spec, spec.options.as_kwargs())
             kwargs.update(_pre_step(spec, cfg, ctx))
             with _surfaced(manifest):
                 artifacts = verb(cfg, meta.capability, ctx=ctx, **kwargs)
@@ -362,6 +362,18 @@ def _surfaced(manifest: results.ResultManifest):
     finally:
         for one in loggers:
             one.removeHandler(collector)
+
+
+def _with_processes(spec: JobSpec, options: dict[str, Any]) -> dict[str, Any]:
+    """The options of the job, with its process count where they leave it open.
+
+    ``submit`` resolves the count (``--np``, then the profile, then the case) and freezes it in ``resources.mpi_processes``, but nothing read it: a job submitted with ``--np 1`` ran on the case's 8 processes, which a TELEMAC built without MPI refuses ("Parallel inconsistency", the Windows test computer, 2026-11-09). A count given as an option of the job still wins.
+    """
+    kwargs = dict(options)
+    for key in ("ncsize", "n_processors"):
+        if key in kwargs and kwargs[key] is None:
+            kwargs[key] = spec.resources.mpi_processes
+    return kwargs
 
 
 def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:

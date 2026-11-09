@@ -167,3 +167,30 @@ def test_a_windows_telemac_without_its_launcher_says_so(tmp_path, monkeypatch):
     assert lines and "telemac2d.py is not on the PATH" in lines[0]
     with pytest.raises(RuntimeError, match="telemac2d.py is not on the PATH"):
         runtime.run_solver("case.cas", cwd=tmp_path)
+
+
+def test_a_cancel_on_windows_ends_the_whole_tree_of_the_run(monkeypatch, as_windows):
+    """Ending only the cmd of the batch file left TELEMAC's launcher and telemac2d.exe running after CANCELLED (the Windows test computer, 2026-11-09)."""
+    from axqua import env as env_mod
+
+    as_windows(env_mod)
+    seen = []
+    monkeypatch.setattr(env_mod.subprocess, "run", lambda argv, **kw: seen.append(argv))
+
+    class Proc:
+        pid = 4242
+        waited = killed = False
+
+        def wait(self, timeout=None):
+            self.waited = True
+
+        def kill(self):
+            self.killed = True
+
+        def terminate(self):
+            pytest.fail("terminate ends only the cmd, not what it started")
+
+    proc = Proc()
+    env_mod._terminate_tree(proc, grace=1)
+    assert seen == [["taskkill", "/PID", "4242", "/T", "/F"]]
+    assert proc.waited and not proc.killed
