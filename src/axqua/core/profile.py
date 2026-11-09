@@ -105,7 +105,9 @@ PROGRAMS = SOLVERS + POSTPROCESSORS
 #: postprocessor. For OpenFOAM the script of aXqua's own installation comes first,
 #: because it also sets up the sediment solvers.
 LAYOUT = {
-    "telemac": ("configs/pysource.*.sh",),
+    # a .bat is what TELEMAC built natively on Windows is entered by (cmd cannot source a .sh)
+    "telemac": ("configs/pysource.*.bat", "configs/pysource.*.sh") if os.name == "nt"
+               else ("configs/pysource.*.sh",),
     "openfoam": ("shell-rc.sh", "etc/bashrc"),
     "paraview": ("bin/paraview",),
     "visit": ("bin/visit",),

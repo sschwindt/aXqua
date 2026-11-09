@@ -72,13 +72,18 @@ WINDOWS_NOTE = ("<p>On Windows, the installation is inside the WSL distribution:
                 "open <b>Linux</b> (or type <code>\\\\wsl.localhost</code>), then the distribution, for "
                 "example <code>Ubuntu-24.04</code>, then the folders above. aXqua enters the script "
                 "with its distribution.</p>")
+#: TELEMAC built on Windows itself (no WSL; the Windows test computer, 2026-11-09) is entered by a batch file.
+WINDOWS_TELEMAC_NOTE = ("<p>A TELEMAC built on Windows itself, without WSL, is entered by its batch file "
+                        "<code>configs\\pysource.&lt;configuration&gt;.bat</code>.</p>")
 if os.name == "nt":
-    PATTERNS = {key: text + WINDOWS_NOTE for key, text in PATTERNS.items()}
+    PATTERNS = {key: text + WINDOWS_NOTE + (WINDOWS_TELEMAC_NOTE if key == "telemac" else "")
+                for key, text in PATTERNS.items()}
 
 #: The filters of the file dialog, per program.
 FILTERS = {
-    "telemac": "TELEMAC environment scripts (pysource.*.sh);;Shell scripts (*.sh);;"
-               "All files (*)",
+    "telemac": ("TELEMAC environment scripts (pysource.*.sh pysource.*.bat);;Shell scripts (*.sh);;"
+                "Batch files (*.bat);;All files (*)") if os.name == "nt" else
+               "TELEMAC environment scripts (pysource.*.sh);;Shell scripts (*.sh);;All files (*)",
     "openfoam": "OpenFOAM environment scripts (shell-rc.sh bashrc);;All files (*)",
 }
 

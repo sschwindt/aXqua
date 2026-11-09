@@ -19,6 +19,7 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Callable
 
@@ -147,6 +148,11 @@ class ShellRuntime:
         return result
 
 
+def cmd_line(parts: list[str]) -> str:
+    """*parts* as one command line of ``cmd.exe``: each in double quotes, which is how cmd keeps a path with spaces together (a Windows path holds no double quote)."""
+    return " ".join(f'"{part}"' for part in parts)
+
+
 def _terminate_tree(proc: subprocess.Popen, *, grace: float = 20.0) -> None:
     """Stop *proc* and everything it started.
 
@@ -201,9 +207,22 @@ class TelemacRuntime(ShellRuntime):
             return "python3"
         return sys.executable
 
+    def _solver_python(self) -> str:
+        """The interpreter TELEMAC's launchers run with: the case's ``telemac.solver_python``, then ``$AXQUA_TELEMAC_PYTHON``, then :meth:`_default_python`."""
+        return str(getattr(self.env, "solver_python", None)
+                   or os.environ.get("AXQUA_TELEMAC_PYTHON")
+                   or self._default_python())
+
     def python(self, code: str, cwd: str | Path | None = None,
                check: bool = True) -> subprocess.CompletedProcess:
         """Execute a Python snippet using TELEMAC's interpreter (has data_manip)."""
+        if self.environment.uses_cmd:
+            # cmd knows no here-document ("<< was unexpected at this time", the Windows test computer, 2026-11-09), so the snippet goes in a file; and the batch file of a Windows TELEMAC puts no Python on the PATH, so it runs with the launchers' interpreter
+            with tempfile.TemporaryDirectory(prefix="axqua-") as folder:
+                snippet = Path(folder) / "snippet.py"
+                snippet.write_text(code, encoding="utf-8")
+                return self.run(cmd_line([self._solver_python(), str(snippet)]),
+                                cwd=cwd, check=check)
         interpreter = "python3" if self.environment.kind is EnvironmentKind.WSL else "python"
         wrapped = f"{interpreter} - <<'__TMSETUP_PY__'\n" + code + "\n__TMSETUP_PY__"
         return self.run(wrapped, cwd=cwd, check=check)
@@ -252,14 +271,33 @@ class TelemacRuntime(ShellRuntime):
         # MAMBA_ROOT_PREFIX points somewhere else. An interpreter path needs none of
         # that, and pointing `telemac.solver_python` at another env's python covers
         # the case where a *different* interpreter is genuinely wanted.
-        python = (getattr(self.env, "solver_python", None)
-                  or os.environ.get("AXQUA_TELEMAC_PYTHON")
-                  or self._default_python())
+        python = self._solver_python()
         cas = self.environment.translate(cas_file)
-        cmd = (f'{shlex.quote(str(python))} "$(command -v {launcher}.py)" '
-               f"{shlex.quote(cas)}{parallel}{sortie_flags}")
+        if self.environment.uses_cmd:
+            # cmd has no `command -v` and no single quotes, and %PATH% on the line would be read before the batch file sets it: the launcher is looked up in the environment the batch file sets, and every part is quoted as cmd quotes
+            script = self._launcher_on_windows(f"{launcher}.py")
+            if script is None:
+                message = (f"{launcher}.py is not on the PATH that {self.pysource} sets; "
+                           "check the batch file of the TELEMAC installation")
+                if on_line is not None:
+                    on_line(message)
+                if check:
+                    raise RuntimeError(message)
+                return subprocess.CompletedProcess(launcher, 1, stdout=message, stderr="")
+            cmd = cmd_line([python, script, cas]) + f"{parallel}{sortie_flags}"
+        else:
+            cmd = (f'{shlex.quote(python)} "$(command -v {launcher}.py)" '
+                   f"{shlex.quote(cas)}{parallel}{sortie_flags}")
         return self.run(cmd, cwd=cwd, check=check, on_line=on_line,
                         should_stop=should_stop)
+
+    def _launcher_on_windows(self, name: str) -> str | None:
+        """The full path of TELEMAC's launcher *name* on the PATH the batch file sets (this process's own where the environment was entered before, as in a job)."""
+        from axqua.core.installation import which_file
+
+        variables = (dict(os.environ) if self.environment.assume_entered
+                     else self.environment.capture())
+        return which_file(name, variables.get("PATH", ""))
 
     def check_available(self) -> str:
         """Return the TELEMAC python version string, raising if the env is broken."""

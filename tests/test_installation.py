@@ -273,3 +273,15 @@ def test_a_job_with_the_script_of_another_installation_leaves_out_its_shell(
     found = job_profiles.implicit(SimpleNamespace(config_dir=tmp_path), "telemac")
     assert found.setup_script == other
     assert found.config_name is None and found.shell is None
+
+
+def test_on_windows_a_launcher_is_found_without_py_in_pathext(tmp_path, monkeypatch, as_windows):
+    """shutil.which on Windows takes only the extensions of PATHEXT, and .py was not one of them on the Windows test computer (2026-11-09): profile use refused a working TELEMAC."""
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    (scripts / "telemac2d.py").write_text("")             # not executable either
+    variables = {"PATH": rf"C:\Windows\system32;{scripts}"}
+    assert installation._which("telemac2d.py", variables) is None       # Linux: an executable only
+    as_windows(installation)
+    assert installation._which("telemac2d.py", variables) == str(scripts / "telemac2d.py")
+    assert installation._which("telemac3d.py", variables) is None

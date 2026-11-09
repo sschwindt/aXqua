@@ -244,6 +244,11 @@ class SolverEnvironment:
         return [shell, "-c", command]
 
     @property
+    def uses_cmd(self) -> bool:
+        """True where commands run in ``cmd.exe`` (a native Windows installation without a bash of its own), which knows no here-document, no ``$(...)`` and no single quotes."""
+        return self.kind is EnvironmentKind.WINDOWS and not self._uses_bash
+
+    @property
     def _uses_bash(self) -> bool:
         """A Windows install may ship its own bash (blueCFD, ESI, MSYS TELEMAC)."""
         return bool(self.shell) and "bash" in Path(str(self.shell)).name.lower()

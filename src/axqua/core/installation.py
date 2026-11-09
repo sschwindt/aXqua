@@ -26,7 +26,7 @@ from typing import Any
 from axqua.core.diagnostics import ERROR, WARNING, Finding
 
 __all__ = ["BAW_LIBRARY", "FINE_SEDIMENT_SOLVER", "Inspection", "Module", "SCRIPT_PATTERNS",
-           "inspect"]
+           "inspect", "which_file"]
 
 #: The OpenFOAM release aXqua writes dictionaries for (also in :mod:`axqua.core.profile`).
 OPENFOAM_RELEASE = "2406"
@@ -41,7 +41,9 @@ BAW_LIBRARY = "lib_BAW_public_BCs_v2412_20260813.so"
 #: What the environment script of each code is called, relative to its installation,
 #: for the text of the wizard and for the hint about a file of another name.
 SCRIPT_PATTERNS = {
-    "telemac": ("configs/pysource.*.sh",),
+    # a .bat is what TELEMAC built natively on Windows is entered by (cmd cannot source a .sh)
+    "telemac": ("configs/pysource.*.bat", "configs/pysource.*.sh") if os.name == "nt"
+               else ("configs/pysource.*.sh",),
     "openfoam": ("shell-rc.sh", "etc/bashrc"),
 }
 
@@ -263,14 +265,19 @@ SEEN_FROM_WINDOWS = "AXQUA_SEEN_FROM_WINDOWS"
 
 def _which(name: str, variables: dict[str, str]) -> str | None:
     # on the PATH the script set, not on the one of this process
-    if variables.get(SEEN_FROM_WINDOWS):
-        # Linux programs have no extension Windows would accept, so shutil.which cannot find them
-        for folder in variables.get("PATH", "").split(";"):
-            candidate = Path(folder) / name if folder else None
-            if candidate is not None and candidate.is_file():
-                return str(candidate)
-        return None
+    if variables.get(SEEN_FROM_WINDOWS) or (os.name == "nt" and name.lower().endswith(".py")):
+        # shutil.which on Windows accepts only the extensions of PATHEXT: Linux programs have none, and .py is not among them on most computers (the Windows test computer, 2026-11-09), although aXqua hands TELEMAC's launchers to Python and never runs them by their extension
+        return which_file(name, variables.get("PATH", ""))
     return _find(name, path=variables.get("PATH", ""))
+
+
+def which_file(name: str, path: str) -> str | None:
+    """The first file called *name* in the folders of the Windows *path* (separated by ``;``), whatever its extension."""
+    for folder in path.split(";"):
+        candidate = Path(folder.strip('"')) / name if folder else None
+        if candidate is not None and candidate.is_file():
+            return str(candidate)
+    return None
 
 
 def seen_from_windows(variables: dict[str, str], distro: str) -> dict[str, str]:

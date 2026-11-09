@@ -13,6 +13,7 @@ Run via: mamba run -n axqua-env pytest tests/test_env.py
 
 from __future__ import annotations
 
+import subprocess
 import sys
 
 import pytest
@@ -108,3 +109,61 @@ def test_solver_can_be_switched_to_3d(tmp_path, monkeypatch):
     rt = _runtime(tmp_path)
     cmd = _captured_command(rt, tmp_path, monkeypatch, ncsize=1, solver="telemac3d")
     assert '"$(command -v telemac3d.py)"' in cmd
+
+
+# --------------------------------------------------------------------------- #
+# TELEMAC built natively on Windows, entered by a .bat through cmd (the Windows
+# test computer, 2026-11-09: a here-document and $(command -v ...) stopped both jobs)
+# --------------------------------------------------------------------------- #
+
+
+def _windows_runtime(tmp_path, monkeypatch, path):
+    from axqua.config import TelemacEnv
+    from axqua.core.environment import SolverEnvironment
+    from axqua.env import TelemacRuntime
+
+    runtime = TelemacRuntime(TelemacEnv(pysource=tmp_path / "pysource.win.bat"))
+    runtime.environment = SolverEnvironment(kind="windows",
+                                            setup_script=r"C:\Users\stud\opt\telemac\configs\pysource.win.bat")
+    runtime.environment.assume_entered = False
+    monkeypatch.setattr(runtime.environment, "capture", lambda **kw: {"PATH": path})
+    monkeypatch.delenv("AXQUA_TELEMAC_PYTHON", raising=False)
+    return runtime
+
+
+def test_the_check_of_a_windows_telemac_runs_its_snippet_from_a_file(tmp_path, monkeypatch):
+    runtime = _windows_runtime(tmp_path, monkeypatch, "")
+    seen = {}
+
+    def fake_run(command, cwd=None, check=True, **kwargs):
+        seen["command"] = command
+        snippet = command.split('" "')[1].rstrip('"')
+        seen["code"] = open(snippet, encoding="utf-8").read()
+        return subprocess.CompletedProcess(command, 0, "3.12.15\n", "")
+
+    monkeypatch.setattr(runtime, "run", fake_run)
+    assert runtime.check_available() == "3.12.15"
+    assert "<<" not in seen["command"]
+    assert seen["command"].startswith(f'"{sys.executable}" "')       # the batch file sets no Python
+    assert "from data_manip.formats.selafin import Selafin" in seen["code"]
+
+
+def test_a_windows_telemac_is_started_by_the_full_path_of_its_launcher(tmp_path, monkeypatch):
+    scripts = tmp_path / "telemac" / "scripts" / "python3"
+    scripts.mkdir(parents=True)
+    (scripts / "telemac2d.py").write_text("")             # not executable, no .PY in PATHEXT
+    runtime = _windows_runtime(tmp_path, monkeypatch, rf"C:\Windows\system32;{scripts};C:\Windows")
+    command = _captured_command(runtime, tmp_path, monkeypatch, ncsize=1)
+    assert command == f'"{sys.executable}" "{scripts / "telemac2d.py"}" "case.cas" -s --nozip'
+    assert "$(" not in command and "'" not in command
+
+
+def test_a_windows_telemac_without_its_launcher_says_so(tmp_path, monkeypatch):
+    runtime = _windows_runtime(tmp_path, monkeypatch, r"C:\Windows\system32")
+    monkeypatch.setattr(runtime, "run", lambda *a, **k: pytest.fail("nothing to run"))
+    lines = []
+    proc = runtime.run_solver("case.cas", cwd=tmp_path, check=False, on_line=lines.append)
+    assert proc.returncode == 1
+    assert lines and "telemac2d.py is not on the PATH" in lines[0]
+    with pytest.raises(RuntimeError, match="telemac2d.py is not on the PATH"):
+        runtime.run_solver("case.cas", cwd=tmp_path)
