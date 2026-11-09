@@ -299,8 +299,7 @@ def _overview_lines(data: dict) -> list[str]:
 
 def _plan_lines(plan) -> list[str]:
     data = plan if isinstance(plan, dict) else plan.as_dict()
-    lines = [f"{data['title']} on {data['host']['description']}",
-             f"folder: {data['folder']}"]
+    lines = [f"{data['title']} on {data['host']['description']}"] + ([f"folder: {data['folder']}"] if data["folder"] else [])
     lines += [f"  {note}" for note in data["notes"]]
     if data["estimate"]:
         lines.append(f"time: {data['estimate']}")
@@ -417,6 +416,8 @@ def _on_windows(args, argv: list[str], command: str) -> int:
     if args.action == "overview":
         if distro is None:
             data = _overview()
+            for entry in data.get("targets") or []:
+                entry["default_folder"], entry["default_folders"] = "", {}   # a folder of Windows would never be used
         else:
             here = _installed_here()
             linux = {key: wsl.to_linux(value) for key, value in here.items() if wsl.is_unc(value)}
@@ -436,6 +437,7 @@ def _on_windows(args, argv: list[str], command: str) -> int:
                               subject="install.distro", remedy=recipes.WINDOWS_REMEDY)
         from axqua.install import host as hosts
         data = recipes.plan(target or "telemac", _options(args), host=hosts.detect(system="win32")).as_dict()
+        data["folder"] = ""        # no distribution, so no folder to name (Windows showed C:\\Users\\<name>\\opt)
         _windows_host(data, None, status)
         if args.action == "packages":
             data = {**data["packages"], "wsl": data["wsl"]}

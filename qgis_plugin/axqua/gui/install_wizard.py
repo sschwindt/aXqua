@@ -645,8 +645,8 @@ class InstallWizard(QDialog):
         if host.get("description"):
             self.host_label.setText("This computer: " + str(host["description"]))
         inside = f" of the WSL distribution {plan['distro']}" if plan.get("distro") else ""
-        lines = [f"<b>{plan.get('title', '')}</b> is installed in the folder "
-                 f"{plan.get('folder', '')}{inside}."]
+        lines = ([f"<b>{plan.get('title', '')}</b> is installed in the folder {plan['folder']}{inside}."]
+                 if plan.get("folder") else [])          # Windows without WSL: no folder yet, the finding says why
         lines += [str(note) for note in plan.get("notes") or []]
         if plan.get("estimate"):
             lines.append("Time: " + str(plan["estimate"]) + ".")

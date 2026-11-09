@@ -63,7 +63,7 @@ def decode(raw: bytes | str | None) -> str:
         text = raw.decode("utf-16-le", "replace")
     else:
         text = raw.decode("utf-8", "replace")
-    return text.replace("\x00", "").replace("\r\n", "\n")
+    return re.sub(r"\r+\n", "\n", text.replace("\x00", ""))      # wsl.exe ends its lines with \r\r\n
 
 
 def environment(base: dict | None = None) -> dict:

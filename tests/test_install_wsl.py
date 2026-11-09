@@ -182,3 +182,32 @@ def test_inside_wsl_only_the_axqua_package_is_read_from_the_windows_folder(tmp_p
     done = subprocess.run([python, "-I", "-c", code, "--version"], capture_output=True, text=True)
     assert done.returncode == 0, done.stderr
     assert done.stdout.startswith("axqua ")
+
+
+#: What wsl.exe of Windows 11 24H2 wrote on the test computer of 2026-11-09, where WSL is not installed: UTF-16LE also with WSL_UTF8=1, lines ending in \r\r\n, exit code 50 for --status and 1 for -l.
+NOT_INSTALLED = ("The Windows Subsystem for Linux is not installed. You can install by running 'wsl.exe --install'.\r\r\n"
+                 "For more information please visit https://aka.ms/wslinstall\r\r\n").encode("utf-16-le")
+
+
+def test_windows_with_the_wsl_stub_but_no_wsl_gets_the_finding_for_its_administrator(
+        monkeypatch, tmp_path, capsys, as_windows):
+    (tmp_path / "said.bin").write_bytes(NOT_INSTALLED)
+    exe = tmp_path / "wsl.exe"
+    exe.write_text(f'#!/bin/sh\ncat "{tmp_path}/said.bin"\ncase "$1" in --status) exit 50 ;; *) exit 1 ;; esac\n')
+    exe.chmod(0o755)
+    monkeypatch.setattr(wsl, "executable", lambda: str(exe))
+    status = wsl.status()
+    assert status.distros == [] and not status.usable
+    assert status.message.splitlines() == [
+        "The Windows Subsystem for Linux is not installed. You can install by running 'wsl.exe --install'.",
+        "For more information please visit https://aka.ms/wslinstall"]
+    as_windows(installcli)
+    assert installcli.run_install(["plan", "telemac", "--json"]) == 0
+    data = json.loads(capsys.readouterr().out)["data"]
+    assert [f["code"] for f in data["findings"]] == ["axqua.install.windows_needs_wsl"]
+    assert "administrator" in data["findings"][0]["remedy"] and not data["ready"]
+    assert "C:\\" not in json.dumps(data["findings"]) and "/opt" not in json.dumps(data["findings"])
+    assert data["folder"] == ""                               # not C:\Users\<name>\opt, where nothing is installed
+    assert installcli.run_install(["overview", "--json"]) == 0
+    targets = json.loads(capsys.readouterr().out)["data"]["targets"]
+    assert all(t["default_folder"] == "" and t["default_folders"] == {} for t in targets)
