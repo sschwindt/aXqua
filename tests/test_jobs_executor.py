@@ -494,3 +494,38 @@ def test_a_build_that_names_its_hotstart_prepares_no_seed(monkeypatch):
                            options=OpenFoamBuildOptions(hotstart="coarse/depth-averaged.slf"))
     assert executor._pre_step(spec, object(), ctx) == {}
     assert steps == ["seed"]
+
+
+@pytest.mark.parametrize("parallel", [False, True, None])
+def test_a_telemac_without_mpi_runs_a_default_count_on_one_process(fake_case, monkeypatch,
+                                                                    parallel):
+    """The plugin's default (MPI processes 0) took the case's 8, which a TELEMAC built without MPI refused (the Windows test computer, 2026-11-09)."""
+    from axqua.core import installation
+
+    monkeypatch.setattr(installation, "_telemac_modules", lambda variables, checked: [
+        installation.Module("parallel", "parallel runs", parallel, detail="no partel")])
+    fake_case.telemac.n_processors = 8
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN)
+    submit_mod._fit_processes_to_installation(spec, {}, explicit_np=None)
+    assert spec.resources.mpi_processes == (1 if parallel is False else 8)
+
+
+def test_a_count_asked_for_with_the_job_is_refused_by_a_telemac_without_mpi(fake_case,
+                                                                            monkeypatch):
+    from axqua.core import errors, installation
+
+    monkeypatch.setattr(installation, "_telemac_modules", lambda variables, checked: [
+        installation.Module("parallel", "parallel runs", False, detail="no partel")])
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, np=4)
+    with pytest.raises(errors.ConfigError, match="4 processes were asked for") as caught:
+        submit_mod._fit_processes_to_installation(spec, {}, explicit_np=4)
+    assert caught.value.subject == "np"
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, options={"ncsize": 2})
+    with pytest.raises(errors.ConfigError, match="2 processes") as caught:
+        submit_mod._fit_processes_to_installation(spec, {}, explicit_np=None)
+    assert caught.value.subject == "ncsize"
+    one = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, np=1)
+    submit_mod._fit_processes_to_installation(one, {}, explicit_np=1)     # one is fine
+    assert one.resources.mpi_processes == 1
+    build = submit_mod.build_spec(fake_case, JobKind.PREPROCESSING, np=4)
+    submit_mod._fit_processes_to_installation(build, {}, explicit_np=4)   # a build runs no solver

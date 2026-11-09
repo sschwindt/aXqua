@@ -154,6 +154,7 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
     captured: dict[str, str] = {}
     if validate_env and spec.meta.needs_environment:
         captured = _validate_and_capture(resolved, env, spec)
+        _fit_processes_to_installation(spec, captured, explicit_np=np)
 
     jd = create_job(cfg, spec, job_root=job_root)
     if spec.workspace.mode == "case":
@@ -176,6 +177,36 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
         raise
     _index(jd)
     return jd
+
+
+def _fit_processes_to_installation(spec: JobSpec, variables: dict[str, str], *,
+                                   explicit_np: int | None) -> None:
+    """A TELEMAC built without MPI runs on one process: a count from the case or the profile becomes 1, a count asked for with the job is refused before anything starts.
+
+    TELEMAC itself stops such a run only after reading the case ("Parallel inconsistency"), and the plugin's default (MPI processes 0, as set for the case) took the case's 8 on the Windows test computer (2026-11-09), whose TELEMAC was built without MPI.
+    """
+    if spec.solver != "telemac" or not hasattr(spec.options, "ncsize"):
+        return
+    option = spec.options.ncsize
+    wanted = option or spec.resources.mpi_processes
+    if not wanted or wanted <= 1:
+        return
+    from axqua.core import installation
+
+    parallel = next((m for m in installation._telemac_modules(variables, checked=True)
+                     if m.name == "parallel"), None)
+    if parallel is None or parallel.available is not False:
+        return                                      # parallel, or nothing aXqua can tell
+    if option or (explicit_np and explicit_np > 1):
+        raise errors.ConfigError(
+            f"{wanted} processes were asked for, but this TELEMAC runs on one process only "
+            f"({parallel.detail})",
+            subject="ncsize" if option else "np",
+            remedy="Run on one process (MPI processes 1 in the plugin, --np 1), or build "
+                   "TELEMAC with MPI.")
+    log.warning("this TELEMAC runs on one process only (%s): the job runs on 1 instead of "
+                "the %d set for the case or the computer", parallel.detail, wanted)
+    spec.resources.mpi_processes = 1
 
 
 def _validate_and_capture(profile: profiles.Profile, env, spec: JobSpec
