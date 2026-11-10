@@ -1902,6 +1902,81 @@ def test_a_file_for_the_validation_switches_the_calibration_on(qgis_app, tmp_pat
     editor.deleteLater()
 
 
+def test_files_of_the_calibration_at_other_discharges_are_calibration_situations(
+        qgis_app, tmp_path, monkeypatch):
+    """A calibration file with a situation name was measured at a discharge of its
+    own: it is written to calibration.situations, grouped by name apart from a
+    validation situation of the same name, and switches the calibration on; one
+    without a name stays the case's own data (Inn KB15, 2026-11-08)."""
+    case = {"project": {"name": "reach"}, "boundaries": {"prescribed_flowrate": 54.3},
+            "calibration": {"situations": [{"name": "August 2026",
+                                            "prescribed_flowrate": 55.4,
+                                            "sources": [{"category": "hydraulics",
+                                                         "kind": "points",
+                                                         "values": "gt/aug.gpkg"}]}]}}
+    editor, _client = _paged(tmp_path, monkeypatch, case)
+    table = editor.measurements
+    entry = table._rows[0]
+    assert entry["use"].currentData() == "calibration"
+    assert entry["situation"].text() == "August 2026" and entry["discharge"].isEnabled()
+    assert editor.values() == case and not editor.dirty
+    table.add("gt/nov.gpkg")
+    assert not table._rows[1]["discharge"].isEnabled()           # the case's discharge
+    table.set_role(1, "calibration", "November 2025", "47.8")
+    assert table._rows[1]["discharge"].isEnabled()
+    table.add("gt/sep.gpkg")
+    table.set_role(2, "validation", "September 2025", "54.3")
+    table.add("gt/nov-b.gpkg")
+    table.set_role(3, "calibration", "November 2025")             # takes the discharge
+    assert table._rows[3]["discharge"].text() == "47.8"
+    data = editor.values()
+    assert "ground_truth" not in data
+    calibrated = {s["name"]: s for s in data["calibration"]["situations"]}
+    assert calibrated["August 2026"]["prescribed_flowrate"] == 55.4
+    assert [s["values"] for s in calibrated["November 2025"]["sources"]] == [
+        "gt/nov.gpkg", "gt/nov-b.gpkg"]
+    assert [s["name"] for s in data["calibration"]["validation"]] == ["September 2025"]
+    # the same name for a validation file is another situation
+    table.add("gt/aug-v.gpkg")
+    table.set_role(4, "validation", "August 2026")
+    assert table._rows[4]["discharge"].text() == ""
+    assert "August 2026" in table.missing_discharge()
+    # a named calibration file switches the calibration on
+    editor.switches["calibration"].setChecked(False)
+    table.add("gt/mar.gpkg")
+    entry = table._rows[5]
+    entry["situation"].setText("March 2026")
+    assert editor.switches["calibration"].isChecked()
+    editor.deleteLater()
+
+
+def test_a_named_file_switched_to_the_calibration_keeps_its_discharge(
+        qgis_app, tmp_path, monkeypatch):
+    """A file was measured at its discharge whatever it is used for: switched from the
+    validation to the calibration, a situation of its own keeps it, or the calibration
+    job fails on a situation without one (review of 2026-11-10)."""
+    case = {"project": {"name": "reach"}, "boundaries": {"prescribed_flowrate": 54.3},
+            "calibration": {"validation": [{"name": "August 2026",
+                                            "prescribed_flowrate": 4.8,
+                                            "sources": [{"category": "hydraulics",
+                                                         "kind": "points",
+                                                         "values": "gt/aug.gpkg"}]}]}}
+    editor, _client = _paged(tmp_path, monkeypatch, case)
+    entry = editor.measurements._rows[0]
+    entry["use"].setCurrentIndex(entry["use"].findData("calibration"))
+    assert entry["discharge"].text() == "4.8"
+    situations = editor.values()["calibration"]["situations"]
+    assert [(s["name"], s["prescribed_flowrate"]) for s in situations] == [
+        ("August 2026", 4.8)]
+    assert editor.measurements.missing_discharge() == []
+    # without a name it is a file of the case's discharge and keeps none
+    entry["situation"].setText("")
+    entry["use"].setCurrentIndex(entry["use"].findData("validation"))
+    entry["use"].setCurrentIndex(entry["use"].findData("calibration"))
+    assert entry["discharge"].text() == ""
+    editor.deleteLater()
+
+
 def test_a_multiple_choice_is_check_boxes_and_its_default_is_not_written(
         qgis_app, tmp_path, monkeypatch):
     editor, _client = _paged(tmp_path, monkeypatch)

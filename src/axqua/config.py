@@ -1750,10 +1750,13 @@ class Calibration:
     max_runs: int = 50
     parameter_sampling_method: str = "sobol"
     gp_library: str = "gpy"
-    # HydroBayesCal predicts the surrogate at prior_samples points by building a
-    # (prior_samples x prior_samples) dense covariance PER calibration location in
-    # gpytorch; 25000 OOM-kills a 16 GB box. A low-dimensional roughness posterior
-    # needs only a few thousand - 5000 is ample and memory-safe. Raise with RAM.
+    # HydroBayesCal predicts the surrogate at prior_samples points and keeps a prior
+    # sample with probability likelihood / largest likelihood. Since 1.12.2 it predicts
+    # in pieces, so memory grows in proportion to the number (before, one dense
+    # covariance of prior_samples squared entries per location: 25000 OOM-killed a
+    # 16 GB box). A sharp posterior keeps few of them: Inn KB15 with 120 targets kept
+    # 1006 of 60000 (1.7 %) after the model error, approximately 1 min per iteration
+    # on the main workstation.
     prior_samples: int = 5000
     # HydroBayesCal >= 1.5 grows the initial design in Sobol blocks and stops as
     # soon as it is measurably sufficient (GP leave-one-out predictivity, error-bar
@@ -1775,20 +1778,53 @@ class Calibration:
     solver_name: str = "Telemac2d"        # 'Telemac2d' | 'Telemac3d'
     control_file: str | None = None       # .cas to calibrate (default: cfg.cas_file)
     results_base: str | None = None       # results basename (default: from the .cas)
+    # Start every run of the calibration from the converged result of the steady run
+    # (r2d.slf) instead of repeating that run from its dry or pre-wetted start: the
+    # flow then only settles to the roughness being tested. The steering file of
+    # these runs is calibration2d.cas (bayescal.write_calibration_hotstart).
+    hotstart: bool = False
+    # Simulated time of each of those runs [s]; None derives it from the reach
+    # (bayescal.calibration_hotstart_duration).
+    hotstart_duration: float | None = None
     #: Independent datasets from other flow situations (see ValidationSituation).
     validation: list[ValidationSituation] = field(default_factory=list)
+    #: Calibration data measured at discharges of their own, each described like a
+    #: validation situation (name, sources, discharge). With them, one set of
+    #: parameters is calibrated against all situations together (HydroBayesCal's
+    #: multi-flow driver); measurements under ``ground_truth`` join them at the
+    #: discharge of the case.
+    situations: list[ValidationSituation] = field(default_factory=list)
+    # How the Gaussian process emulator treats several outputs (HydroBayesCal's
+    # multitask_selection): 'variables' one multi-output GPE per location whose
+    # outputs are the calibration targets (correlated depth and velocity),
+    # 'locations', 'all', or 'SO_sequential' (independent single-output GPEs).
+    multitask_selection: str = "variables"
+    # What the calibration does with a measurement that no parameter set within the
+    # ranges reproduces (bayescal.STRUCTURAL_ERRORS). 'none': the point keeps its
+    # measurement error. 'unreachable': after the initial simulations, the distance
+    # from the measured value to the range of the simulated values is added to the
+    # error of that point and quantity (in quadrature); then, per situation and
+    # quantity, the variances are multiplied by the chi-square per point at the best
+    # initial run where it exceeds 1 (a group no single set fits), and the active
+    # learning runs with these errors. For a model that cannot reproduce part of the measurements,
+    # such as a water level held up by a riffle the terrain model does not resolve.
+    structural_error: str = "none"
 
     @classmethod
     def from_dict(cls, d: dict[str, Any], cfg_dir: Path | None = None) -> "Calibration":
         params = [CalibrationParameter(**_only_known(CalibrationParameter, p))
                   for p in d.get("parameters", [])]
-        given = d.get("validation") or []
-        if isinstance(given, dict):               # one situation, written without a list
-            given = [given]
-        situations = [ValidationSituation.from_dict(item, cfg_dir) for item in given]
-        rest = {k: v for k, v in d.items() if k not in ("parameters", "validation")}
-        return cls(parameters=params, validation=situations,
-                   **_only_known(cls, rest))
+
+        def situations_of(key: str) -> list[ValidationSituation]:
+            given = d.get(key) or []
+            if isinstance(given, dict):           # one situation, written without a list
+                given = [given]
+            return [ValidationSituation.from_dict(item, cfg_dir) for item in given]
+
+        rest = {k: v for k, v in d.items()
+                if k not in ("parameters", "validation", "situations")}
+        return cls(parameters=params, validation=situations_of("validation"),
+                   situations=situations_of("situations"), **_only_known(cls, rest))
 
 
 @dataclass

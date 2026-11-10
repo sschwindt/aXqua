@@ -106,13 +106,63 @@ def _hydrology(cfg) -> bool:
     return getattr(cfg, "hydrology_mode", False)
 
 
+def _table_calibrates_a_zone(path) -> bool:
+    """Whether a roughness table declares a zone the calibration varies.
+
+    The rule of :func:`axqua.calibration.roughness_zone_parameters` (``ks_min`` below
+    ``ks_max`` and not flagged ``calibration = False``), read with the standard library
+    because this module must stay light. A case whose zones come only from the table,
+    as the Inn KB15 case does, read as not configured for calibration before.
+    """
+    import csv
+
+    if not path:
+        return False
+    try:
+        with open(path, newline="", encoding="utf-8-sig") as f:
+            rows = list(csv.reader(f))
+    except OSError:
+        return False
+    if not rows:
+        return False
+    header = [c.strip().lower() for c in rows[0]]
+
+    def column(*names):
+        return next((header.index(n) for n in names if n in header), None)
+
+    low, high = column("ks_min", "ksmin"), column("ks_max", "ksmax")
+    flag = column("calibration", "calibrate", "calibrated")
+    zone = column("zone_id", "zoneid", "id") or 0
+    if low is None or high is None:
+        return False
+    for row in rows[1:]:
+        try:
+            float(row[zone])
+            lo, hi = float(row[low]), float(row[high])
+        except (IndexError, ValueError):
+            continue
+        off = flag is not None and flag < len(row) and \
+            row[flag].strip().lower() in _OPT_OUT
+        if hi > lo and not off:
+            return True
+    return False
+
+
+#: What :func:`axqua.core.geodata._as_bool` reads as false: a zone so flagged is not
+#: calibrated. Kept equal to ``geodata._FALSEY`` by a test (this module must not
+#: import numpy).
+_OPT_OUT = frozenset({"false", "f", "no", "n", "0"})
+
+
 def _calibration_configured(cfg) -> bool:
     """Calibration needs parameters to perturb and ground truth to fit against, and a steady run to perturb: a hydrology case has none, so HydroBayesCal is not available in the mode yet."""
     if _hydrology(cfg):
         return False
-    has_params = bool(cfg.calibration.parameters)
+    has_params = (bool(cfg.calibration.parameters)
+                  or _table_calibrates_a_zone(cfg.geodata.roughness_table))
     gt = cfg.ground_truth
-    has_truth = bool(gt.measurements or gt.sources or gt.targets)
+    has_truth = bool(gt.measurements or gt.sources or gt.targets
+                     or getattr(cfg.calibration, "situations", None))
     return has_params and has_truth
 
 

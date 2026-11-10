@@ -36,9 +36,9 @@ Lessons baked in (see the module functions):
 * the built ``.cas`` must output ``SCALAR VELOCITY`` (graphic printout ``M``);
 * the staged driver extracts the **last** (converged) SELAFIN frame, not the
   ``mean_last`` window that would average a dry-start transient;
-* HydroBayesCal's prior-sample count drives a per-location dense covariance in
-  gpytorch, so it is kept modest (``calibration.prior_samples``, default 5000) -
-  ample for a low-dimensional roughness posterior and safe on a 16 GB box;
+* HydroBayesCal keeps a prior sample with probability likelihood / largest
+  likelihood, so a sharp posterior needs more of them (``calibration.prior_samples``,
+  default 5000); since 1.12.2 the memory grows in proportion to their number;
 * per-flow steering files differ only in Q, the outflow stage (from the
   synthesized rating at that Q), ``DURATION`` and the results name.
 """
@@ -136,14 +136,20 @@ def launch(cfg: Config, driver: Path, config_path: Path, *, env: str | None = No
 # single-flow calibration
 # --------------------------------------------------------------------------- #
 def build_velocity_csv(cfg: Config, *, vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
-                       depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR
-                       ) -> tuple[Path, pd.DataFrame]:
+                       depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
+                       positional: bool = True) -> tuple[Path, pd.DataFrame]:
     """Compile the configured ground truth and write the calibration-points CSV.
 
     The velocity target is the horizontal FlowTracker speed (0.6-depth proxy for
     the depth-averaged velocity) with propagated, floored error; water depth is
     carried alongside. Reads ``ground_truth.sources`` via
     :func:`axqua.ground_truth.compile_ground_truth`.
+
+    With *positional*, a declared ``ground_truth.position_quality`` (or
+    ``position_sigma``) adds the spread of the steady result within that radius to
+    each error, in quadrature (:mod:`axqua.positional_error`), as the build's
+    calibration table does. Until 2026-11-08 this table, which the calibration job
+    writes last and HydroBayesCal reads, left that term out without a word.
     """
     compile_ground_truth(cfg)
     tables = read_tidy(cfg.ground_truth_path)
@@ -163,10 +169,28 @@ def build_velocity_csv(cfg: Config, *, vel_err_floor: float = campaigns.VELOCITY
         vel_err_floor, depth_err_floor).drop(columns="label")
     out = _inside_the_model(cfg, out)
     out = _away_from_liquid_boundaries(cfg, out)
+    if positional:
+        out = _with_positional_error(cfg, out)
     path = cfg.calibration_path(cfg.calibration_csv)
     path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(path, index=False)
     return path, out
+
+
+def _with_positional_error(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
+    """*points* with the positional error of :func:`axqua.calibration._positional_errors` added in quadrature to each ``<QTY>_ERROR``."""
+    from axqua.calibration import _positional_errors
+
+    quantities = [c[:-len("_ERROR")] for c in points.columns if c.endswith("_ERROR")]
+    if points.empty or not quantities:
+        return points
+    extra = _positional_errors(cfg, points, quantities)
+    points = points.copy()
+    for qty, spread in extra.items():
+        column = f"{qty}_ERROR"
+        points[column] = np.round(np.sqrt(points[column].astype(float) ** 2
+                                          + np.asarray(spread, dtype=float) ** 2), 6)
+    return points
 
 
 def _inside_the_model(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
@@ -280,23 +304,149 @@ def _away_from_liquid_boundaries(cfg: Config, points: pd.DataFrame) -> pd.DataFr
     return points
 
 
-def run_single_flow_calibration(
-        cfg: Config, *, calibration_quantities=None,
-        extraction_quantities=None,
-        vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
-        depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
-        prepare_only: bool = False, checkout: Path | None = None,
-        env: str | None = None) -> int:
-    """End-to-end single-discharge calibration of the built case.
+#: The steering file of calibration runs that start from the steady result.
+CALIBRATION_HOTSTART_CAS = "calibration2d.cas"
+#: Simulated time of such a run, in residence times of the reach (wetted volume over
+#: discharge). Measured on the finest Inn KB15 mesh (2026-11-08; 133,500 m3 at
+#: 54.3 m3/s, a residence time of 2,460 s), continuing from the steady result with
+#: the four calibrated zones at their prior bounds: at the upper bounds the stored
+#: volume rose 5 % and the inflow-outflow imbalance stayed below 0.1 % from 2,949 s
+#: on (1.2 residence times), the depth and velocity at the 30 verticals then within
+#: 0.06 % and 0.3 % of their final values on average; at the lower bounds the volume
+#: fell 10 % and was flat from about 2,000 s, while the flow kept shedding eddies
+#: (outflow +/- 1 %), which no run length removes.
+HOTSTART_RESIDENCE_TIMES = 1.2
+#: The shortest such run [s], for a reach whose water is replaced within minutes.
+HOTSTART_MIN_DURATION = 600.0
 
-    Compiles the calibration CSV, ensures the ``.cas`` prints the target,
-    emits the HydroBayesCal config, stages the driver and (unless
-    ``prepare_only``) launches it. Returns the driver exit code (0 when
-    ``prepare_only``).
+
+def _steady_result(cfg: Config) -> Path:
+    """The converged result of the steady run that calibration runs start from.
+
+    Refused when it is missing, older than the mesh, or computed on another mesh: a
+    run that continues from a result of an earlier build stops at once on the node
+    count, or, worse, runs from the flow of another roughness map.
     """
-    from axqua.calibration import emit_hbc_config
+    from axqua.core import errors
+    from axqua.core.selafin import SelafinFile
 
-    cfg.ensure_dirs()
+    result = cfg.model_path(cfg.results_slf)
+    geometry = cfg.model_path(cfg.geometry_slf)
+    remedy = "Run the steady simulation of the case first (Baseline (Telemac) > Run)."
+    if not result.is_file():
+        raise errors.ConfigError(
+            f"calibration.hotstart needs the result of the steady run, {result}, "
+            "which does not exist", subject="calibration.hotstart", remedy=remedy)
+    if geometry.is_file() and result.stat().st_mtime < geometry.stat().st_mtime:
+        raise errors.ConfigError(
+            f"{result.name} is older than {geometry.name}: it belongs to an earlier "
+            "build of the case", subject="calibration.hotstart", remedy=remedy)
+    if geometry.is_file() and SelafinFile(result).npoin != SelafinFile(geometry).npoin:
+        raise errors.ConfigError(
+            f"{result.name} and {geometry.name} have different meshes",
+            subject="calibration.hotstart", remedy=remedy)
+    return result
+
+
+def case_inflows(cfg: Config) -> dict[int, float]:
+    """The discharge of each inflow line of the built case, where every line names one.
+
+    Empty when the build left the split to the total ``prescribed_flowrate`` or has not
+    written its ``liquid-boundaries.json`` yet.
+    """
+    from axqua.solvers.telemac import boundary
+
+    meta = cfg.model_path(cfg.liquid_boundaries_json)
+    if not meta.is_file():
+        return {}
+    inflows = [lb for lb in boundary.load_liquid_boundaries(meta) if lb.kind == "inflow"]
+    if not inflows or any(lb.discharge is None for lb in inflows):
+        return {}
+    return {lb.index: float(lb.discharge) for lb in inflows}
+
+
+def case_discharge(cfg: Config) -> float | None:
+    """The total inflow of the case: ``prescribed_flowrate``, else the sum of the discharges of its inflow lines."""
+    if cfg.boundaries.prescribed_flowrate is not None:
+        return float(cfg.boundaries.prescribed_flowrate)
+    inflows = case_inflows(cfg)
+    return float(sum(inflows.values())) if inflows else None
+
+
+def calibration_hotstart_duration(cfg: Config) -> float:
+    """Simulated time [s] of a calibration run that starts from the steady result.
+
+    ``calibration.hotstart_duration`` when given. Otherwise the run lasts
+    :data:`HOTSTART_RESIDENCE_TIMES` residence times of the reach, rounded up to
+    100 s: the residence time is the volume of water in the converged result over the
+    discharge, the time in which the reach exchanges its water once. A changed
+    roughness changes the stored volume, and the flow has settled once that change
+    has passed the outflow.
+    """
+    import numpy as np
+
+    from axqua.core.selafin import SelafinFile
+
+    given = cfg.calibration.hotstart_duration
+    if given:
+        return float(given)
+    discharge = case_discharge(cfg) or 0.0
+    if discharge <= 0.0:
+        if cfg.hydrodynamics.duration:
+            return float(cfg.hydrodynamics.duration)
+        from axqua.core.errors import ConfigError
+        raise ConfigError(
+            "a calibration run that starts from the steady result needs its duration, "
+            "and the case names neither a discharge to derive it from nor a duration",
+            subject="calibration.hotstart_duration",
+            remedy="Enter calibration.hotstart_duration in seconds, or the discharge "
+                   "of the case (boundaries.prescribed_flowrate).")
+    # the coordinates of the geometry, in double precision (a result stores them in
+    # single precision, which at a UTM northing is a spacing of 0.5 m)
+    mesh = SelafinFile(cfg.model_path(cfg.geometry_slf))
+    x, y, ikle = mesh.x, mesh.y, mesh.ikle
+    h = SelafinFile(cfg.model_path(cfg.results_slf)).frame(
+        -1, ["WATER DEPTH"])["WATER DEPTH"].astype(float)
+    area = 0.5 * np.abs((x[ikle[:, 1]] - x[ikle[:, 0]]) * (y[ikle[:, 2]] - y[ikle[:, 0]])
+                        - (x[ikle[:, 2]] - x[ikle[:, 0]]) * (y[ikle[:, 1]] - y[ikle[:, 0]]))
+    volume = float((area * h[ikle].mean(axis=1)).sum())
+    residence = volume / discharge
+    return float(max(HOTSTART_MIN_DURATION,
+                     np.ceil(HOTSTART_RESIDENCE_TIMES * residence / 100.0) * 100.0))
+
+
+def write_calibration_hotstart(cfg: Config) -> str:
+    """Write the steering file of calibration runs that start from the steady result.
+
+    ``calibration2d.cas`` is the built ``steady2d.cas`` continuing from ``r2d.slf``
+    (:func:`axqua.solvers.telemac.steering.write_hotstart_cas`) for
+    :func:`calibration_hotstart_duration`. HydroBayesCal names the result of each run
+    ``r2d_<n>.slf``, so the seed is never overwritten. Returns the file name.
+    """
+    from axqua.solvers.telemac.steering import write_hotstart_cas
+
+    # a calibration that was killed set aside the steering file of its time; put it
+    # back now, or case_as_built() would restore it over the one written here
+    restore_as_built(cfg)
+    _steady_result(cfg)
+    if not cfg.model_path("hotstart2d.cas").is_file():
+        log.warning("the steady run had not balanced its inflow and outflow (no "
+                    "hotstart2d.cas), so every calibration run starts from a flow "
+                    "that is not steady; run the steady simulation longer first")
+    duration = calibration_hotstart_duration(cfg)
+    path = write_hotstart_cas(cfg, duration, out_name=CALIBRATION_HOTSTART_CAS)
+    print(f"calibration runs start from {cfg.results_slf} and last {duration:g} s "
+          f"-> {path.name}")
+    return path.name
+
+
+def _set_quantities(cfg: Config, calibration_quantities=None,
+                    extraction_quantities=None) -> list[str]:
+    """Settle the calibration targets and the extracted quantities on *cfg*; returns the targets.
+
+    The caller's lists win over the case file's. Every calibration target is also
+    extracted, or HydroBayesCal never reads it from the results.
+    """
     # The case file decides what is calibrated against. Until 2026-10-17 a built-in
     # ("SCALAR VELOCITY",) replaced it whenever the caller named nothing, which is
     # what every job did: a case asking for depth and velocity was calibrated
@@ -311,8 +461,40 @@ def run_single_flow_calibration(
                                                 *calibration_quantities]))
     cfg.calibration.calibration_quantities = list(calibration_quantities)
     cfg.calibration.extraction_quantities = list(extraction_quantities)
-    print(f"calibration target(s): {list(calibration_quantities)}  "
-          f"parameters: {[p.name for p in cfg.calibration.parameters]}")
+    return list(calibration_quantities)
+
+
+def run_single_flow_calibration(
+        cfg: Config, *, calibration_quantities=None,
+        extraction_quantities=None,
+        vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
+        depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
+        prepare_only: bool = False, resume: bool = False,
+        checkout: Path | None = None, env: str | None = None) -> int:
+    """End-to-end single-discharge calibration of the built case.
+
+    Compiles the calibration CSV, ensures the ``.cas`` prints the target,
+    emits the HydroBayesCal config, stages the driver and (unless
+    ``prepare_only``) launches it, in two passes with ``calibration.structural_error:
+    unreachable`` (:func:`_launch_in_passes`); *resume* starts from the initial
+    simulations an earlier calibration saved. Returns the driver exit code (0 when
+    ``prepare_only``).
+    """
+    from axqua.calibration import emit_hbc_config
+
+    mode = structural_error_mode(cfg)
+    cfg.ensure_dirs()
+    calibration_quantities = _set_quantities(cfg, calibration_quantities,
+                                             extraction_quantities)
+    from axqua.calibration import telemac_parameters
+
+    # the zones of the roughness table and the rows of the target workbook too, not
+    # only the list of the case file (the Inn KB15 case printed "parameters: []")
+    try:
+        names = [p.name for p in telemac_parameters(cfg)]
+    except Exception:                        # noqa: BLE001 - a log line, never a stop
+        names = [p.name for p in cfg.calibration.parameters]
+    print(f"calibration target(s): {list(calibration_quantities)}  parameters: {names}")
 
     csv, table = build_velocity_csv(cfg, vel_err_floor=vel_err_floor,
                                     depth_err_floor=depth_err_floor)
@@ -322,18 +504,24 @@ def run_single_flow_calibration(
               f"{table['SCALAR VELOCITY_DATA'].max():.3f}")
 
     ensure_graphic_output(cfg.model_path(cfg.cas_file))
-    config_path = emit_hbc_config(cfg, csv)
-    print(f"HydroBayesCal config -> {config_path}")
+    if cfg.calibration.hotstart:
+        if cfg.calibration.control_file:
+            log.warning("calibration.hotstart is ignored: calibration.control_file "
+                        "names the steering file (%s)", cfg.calibration.control_file)
+        else:
+            cfg.calibration.control_file = write_calibration_hotstart(cfg)
+
+    def emit(complete: bool, only_bal: bool) -> Path:
+        return emit_hbc_config(cfg, csv, complete_bal_mode=complete,
+                               only_bal_mode=only_bal)
 
     driver = stage_driver(cfg.calibration_dir, "bal_telemac.py", checkout=checkout)
-    if prepare_only:
-        print("\n--prepare-only: not launched. Run it with:")
-        print(f"  cd {driver.parent} && {sys.executable} {driver.name} "
-              f"--config {config_path}")
-        return 0
-    with case_as_built(cfg):
-        return launch(cfg, driver, config_path, env=env,
-                      note="HydroBayesCal calibration")
+    folder = Path(cfg.calibration_dir)
+    return _launch_in_passes(
+        cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
+        driver=driver, restarts={"calibration": folder / RESTART_OUTPUTS},
+        csvs={"calibration": Path(csv)}, folder=folder, env=env,
+        note="HydroBayesCal calibration")
 
 
 #: Folder in the calibration directory that holds the files of the built case while a
@@ -540,12 +728,13 @@ def emit_multiflow_config(cfg: Config, out_dir: Path, model_dir: Path,
                           adaptive_init_runs: bool | None = None) -> Path:
     """Write ``config_Telemac_multiflow.py`` (standard blocks + a ``multiflow``
     block of per-flow steering/CSV entries)."""
-    from axqua.calibration import merged_parameters
+    from axqua.calibration import telemac_parameters
 
     c = cfg.calibration
-    # merged_parameters, not c.parameters: the roughness table's calibrated zones
-    # and the target template's rows must reach the multiflow config too
-    parameters = merged_parameters(cfg)
+    # the merged parameters, not c.parameters: the roughness table's calibrated zones
+    # and the target template's rows must reach the multiflow config too; and only
+    # TELEMAC's, so an OpenFOAM ks or Cmu of the same list is not emitted
+    parameters = telemac_parameters(cfg)
     params = [p.name for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
     prior = prior_samples if prior_samples is not None else getattr(
@@ -617,12 +806,15 @@ sampling = {{
     'bal_exploration_tradeoff': {getattr(c, "bal_exploration_tradeoff", "auto")!r},
     'tp_selection_criteria': 'dkl',
     'eval_steps': 1,
-    # prior_samples drives a (prior_samples x prior_samples) dense covariance PER
-    # location in gpytorch; keep modest (a low-dim roughness posterior needs few).
+    # prior samples the surrogate is predicted at (calibration.prior_samples); a sharp
+    # posterior keeps few of them, so raise it when few are accepted.
     'prior_samples': {prior},
     'mc_samples_al': 2000,
     'mc_exploration': 1000,
     'gp_library': {c.gp_library!r},
+    # 'variables': one multi-output GPE per location, its outputs the calibration
+    # quantities (calibration.multitask_selection)
+    'multitask_selection': {getattr(c, "multitask_selection", "variables")!r},
 }}
 
 execution = {{
@@ -648,6 +840,214 @@ extraction = {{
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text)
     return path
+
+
+# --------------------------------------------------------------------------- #
+# model error at points the model cannot reach (calibration.structural_error)
+# --------------------------------------------------------------------------- #
+#: What a calibration does with a measured value that no parameter set within the
+#: ranges reproduces: keep the measurement error (``none``), or add the misfit that
+#: remains to the error of the point (``unreachable``).
+STRUCTURAL_ERRORS = ("none", "unreachable")
+#: HydroBayesCal's record of the simulated values of the initial design, per point.
+RESTART_OUTPUTS = Path("auto-saved-results-HydroBayesCal") / "restart_data" / \
+    "initial-model-outputs.json"
+
+
+def structural_error_mode(cfg: Config) -> str:
+    """``calibration.structural_error``, checked."""
+    from axqua.core.errors import ConfigError
+
+    mode = (getattr(cfg.calibration, "structural_error", None) or "none").strip().lower()
+    if mode not in STRUCTURAL_ERRORS:
+        raise ConfigError(f"calibration.structural_error must be one of "
+                          f"{list(STRUCTURAL_ERRORS)}, not {mode!r}",
+                          subject="calibration.structural_error")
+    return mode
+
+
+def _point_runs(outputs: dict, point_id) -> list | None:
+    """The runs of one point in the per-point layout; the id as HydroBayesCal wrote it (the first column of the points file, as text)."""
+    runs = outputs.get(str(point_id))
+    if runs is None and isinstance(point_id, (int, float, np.number)) \
+            and float(point_id).is_integer():
+        runs = outputs.get(str(int(point_id)))
+    return runs
+
+
+def per_point_outputs(stored: dict, points: pd.DataFrame) -> dict:
+    """HydroBayesCal's ``initial-model-outputs.json`` in the per-point layout.
+
+    From 1.12 on, HydroBayesCal writes ``{point_id: [{quantity: value} per run]}``; where
+    its detailed table does not hold one row per point for every run, it writes the
+    flat layout of earlier releases instead: ``model_evaluations``, one row per run
+    with the columns point by point and, within a point, one per
+    ``calibration_quantities``. That layout is converted here, with the ids of
+    *points* (the order HydroBayesCal read them in).
+    """
+    if "model_evaluations" not in stored:
+        return stored
+    matrix = np.atleast_2d(np.asarray(stored["model_evaluations"], dtype=float))
+    quantities = list(stored.get("calibration_quantities") or [])
+    if not quantities or matrix.shape[1] != len(points) * len(quantities):
+        raise ValueError(
+            f"the initial simulations hold {matrix.shape[1]} values per run, not one "
+            f"per point ({len(points)}) and calibration target ({quantities})")
+    width = len(quantities)
+    return {str(point_id): [{q: float(row[i * width + j])
+                             for j, q in enumerate(quantities)} for row in matrix]
+            for i, point_id in enumerate(points["id"])}
+
+
+def unreachable_misfit(points: pd.DataFrame, outputs: dict,
+                       quantities) -> pd.DataFrame:
+    """Per point and quantity, the part of the misfit that no simulated set removes.
+
+    *points* is a calibration points table (``id``, ``x``, ``y``, ``<Q>_DATA``,
+    ``<Q>_ERROR``), *outputs* HydroBayesCal's ``initial-model-outputs.json``: per point
+    id, one ``{quantity: value}`` per simulation of the initial design. The misfit that
+    remains is the distance from the measured value to the range of the simulated
+    values, zero where the range contains it. It is added in quadrature to the
+    measurement error, so a point the model reaches keeps its error, and a point it
+    cannot reach with any roughness in the ranges (a water level the terrain model
+    does not hold up, Inn KB15 2026-11-09: 17 to 38 cm too low in all 16 simulations)
+    no longer decides the calibration on its own. Returns one row per point with, per
+    quantity, the measured value, the measurement error, the smallest and largest
+    simulated value, the misfit that remains and the combined error.
+    """
+    rows = []
+    # iterrows turns every value of a row into a float; the id keeps its own type
+    for point_id, (_, point) in zip(points["id"], points.iterrows()):
+        runs = _point_runs(outputs, point_id)
+        if not runs:
+            raise ValueError(f"the initial simulations hold no values for point "
+                             f"{point_id}")
+        row = {"id": point_id, "x": point["x"], "y": point["y"]}
+        for quantity in quantities:
+            values = np.array([run.get(quantity, np.nan) for run in runs], dtype=float)
+            values = values[np.isfinite(values)]
+            data = float(point[f"{quantity}_DATA"])
+            error = float(point[f"{quantity}_ERROR"])
+            if values.size:
+                low, high = float(values.min()), float(values.max())
+                gap = max(low - data, data - high, 0.0)
+            else:                            # dry in every simulation: nothing to add
+                low = high = np.nan
+                gap = 0.0
+            row.update({f"{quantity}_DATA": data,
+                        f"{quantity}_MEASUREMENT_ERROR": error,
+                        f"{quantity}_MODEL_MIN": low, f"{quantity}_MODEL_MAX": high,
+                        f"{quantity}_UNREACHABLE": gap,
+                        f"{quantity}_ERROR": float(np.hypot(error, gap))})
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+#: HydroBayesCal adds this share of the measured value to every error of the points
+#: file itself (its ``measurement_error``, which aXqua leaves at the default).
+HBC_MEASUREMENT_SHARE = 0.10
+
+
+def _run_values(points: pd.DataFrame, outputs: dict, quantity: str) -> np.ndarray:
+    """Simulated values of *quantity*, one row per run of the initial design."""
+    columns = []
+    for point_id in points["id"]:
+        runs = _point_runs(outputs, point_id)
+        columns.append([run.get(quantity, np.nan) for run in runs or []])
+    if len({len(column) for column in columns}) > 1:
+        raise ValueError("the initial simulations hold different numbers of runs per point")
+    return np.array(columns, dtype=float).T
+
+
+def joint_misfit(tables: dict[str, pd.DataFrame], points: dict[str, pd.DataFrame],
+                 outputs: dict[str, dict], quantities,
+                 share: float = HBC_MEASUREMENT_SHARE) -> int:
+    """Widen the errors of a group of points that no single simulated set fits jointly.
+
+    The second step of the model error: :func:`unreachable_misfit` covers a point the
+    model misses with every set, but a group of points can each lie inside the
+    simulated range and still not be reached together by any one set (Inn KB15
+    2026-11-10: August and March velocities, chi-square per point approximately 10 at
+    the best set, depth and November velocity approximately 1). The best run of the
+    initial design is the one with the smallest chi-square over all situations and
+    quantities, with the variance HydroBayesCal uses: the error of the points file
+    plus *share* of the measured value, in quadrature. For each situation and calibration target
+    whose chi-square per point exceeds 1 at that run, the variance of its points is
+    multiplied by that value, so the group counts as much as its fit allows. *tables*
+    (situation -> the table of :func:`unreachable_misfit`) are completed in place with
+    ``<Q>_BEST_FIT``, ``<Q>_VARIANCE_FACTOR`` and the final ``<Q>_ERROR``. A run of the
+    same number is the same parameter set in every situation. Returns the number of
+    the best run, counted from 1.
+    """
+    terms, runs = {}, set()
+    for tag, table in tables.items():
+        for quantity in quantities:
+            values = _run_values(points[tag], outputs[tag], quantity)
+            data = table[f"{quantity}_DATA"].to_numpy(dtype=float)
+            variance = (share * np.abs(data)) ** 2 + \
+                table[f"{quantity}_ERROR"].to_numpy(dtype=float) ** 2
+            terms[tag, quantity] = (values, data, variance)
+            runs.add(values.shape[0])
+    if len(runs) != 1 or not runs.pop():
+        raise ValueError("the situations hold different numbers of initial simulations")
+
+    def chi2(values, data, variance):
+        return np.nansum((values - data) ** 2 / variance, axis=-1)
+
+    best = int(np.argmin(sum(chi2(*term) for term in terms.values())))
+    for (tag, quantity), (values, data, variance) in terms.items():
+        fitted = np.isfinite(values[best])
+        per_point = chi2(values[best], data, variance) / max(int(fitted.sum()), 1)
+        factor = max(1.0, float(per_point))
+        measured = (share * np.abs(data)) ** 2
+        table = tables[tag]
+        table[f"{quantity}_BEST_FIT"] = values[best]
+        table[f"{quantity}_VARIANCE_FACTOR"] = factor
+        table[f"{quantity}_ERROR"] = np.sqrt(factor * variance - measured)
+        log.info("%s, %s: chi-square per point %.3g at the best initial run %d%s",
+                 tag, quantity, per_point, best + 1,
+                 f" -> variance x{factor:.3g}" if factor > 1 else "")
+    return best + 1
+
+
+def apply_unreachable_misfit(csvs: dict[str, Path], restarts: dict[str, Path],
+                             quantities, records: dict[str, Path]
+                             ) -> dict[str, pd.DataFrame]:
+    """Write the model error into the points file of every situation.
+
+    Per situation, :func:`unreachable_misfit` adds what no simulated set reaches at a
+    point; then :func:`joint_misfit` widens, across all situations together, the
+    errors of the groups that no single set fits. Each *csvs* file holds the
+    measurement errors when this is called (it is compiled again before every
+    launch), so applying it twice does not add the model error twice. The table with
+    every term is written to *records* (situation -> path).
+    """
+    import json
+
+    points = {tag: pd.read_csv(csv) for tag, csv in csvs.items()}
+    outputs = {tag: per_point_outputs(json.loads(Path(restarts[tag]).read_text()),
+                                      points[tag]) for tag in csvs}
+    tables = {tag: unreachable_misfit(points[tag], outputs[tag], quantities)
+              for tag in csvs}
+    for tag, table in tables.items():
+        for quantity in quantities:
+            gap = table[f"{quantity}_UNREACHABLE"]
+            reached = int((gap > 0).sum())
+            log.info("%s, %s: %d of %d points lie outside the simulated range%s",
+                     Path(csvs[tag]).name, quantity, reached, len(table),
+                     f" (misfit {gap[gap > 0].median():.3g} median, "
+                     f"{gap.max():.3g} at most)" if reached else "")
+    joint_misfit(tables, points, outputs, quantities)
+    columns = ["id", "x", "y"] + [f"{quantity}_{part}" for quantity in quantities
+                                  for part in ("DATA", "MEASUREMENT_ERROR", "MODEL_MIN",
+                                               "MODEL_MAX", "UNREACHABLE", "BEST_FIT",
+                                               "VARIANCE_FACTOR", "ERROR")]
+    for tag, table in tables.items():
+        for quantity in quantities:
+            points[tag][f"{quantity}_ERROR"] = table[f"{quantity}_ERROR"].to_numpy()
+        points[tag].to_csv(csvs[tag], index=False)
+        table[columns].to_csv(records[tag], index=False)
+    return tables
 
 
 def _restart_ready(multiflow_dir: Path, flows: list[FlowSpec]) -> list[str]:
@@ -793,4 +1193,269 @@ def run_multiflow_calibration(
                          "(shared friction.tbl); wait or pass force=True")
     note = ("multi-discharge calibration - BAL only (reusing initial designs)"
             if resume else "multi-discharge calibration")
-    return launch(cfg, driver, config_path, env=env, note=note)
+    # the driver writes every tested set into the case's friction table, as in the
+    # single-flow calibration: hand the built case back when it returns
+    with case_as_built(cfg):
+        return launch(cfg, driver, config_path, env=env, note=note)
+
+
+# --------------------------------------------------------------------------- #
+# calibration at several discharges, from the situations of the case file
+# --------------------------------------------------------------------------- #
+#: Folder of a calibration at several discharges, inside the calibration directory.
+MULTIFLOW = "multiflow"
+
+
+def calibration_situations(cfg: Config) -> list:
+    """The flow situations a calibration fits, when it fits more than the case's own.
+
+    ``calibration.situations`` (each measured at a discharge of its own), preceded by
+    one at the discharge of the case when ``ground_truth`` holds measurements too.
+    Empty when the case names no situation: the calibration is then the single-flow
+    one of the case's discharge.
+    """
+    from axqua.config import ValidationSituation
+
+    given = list(cfg.calibration.situations)
+    if not given:
+        return []
+    gt = cfg.ground_truth
+    if gt.sources or gt.measurements or gt.targets:
+        # no sources of its own: its measurements are those of ground_truth, and its
+        # boundary values are those of the case (the outflow level too, which
+        # outflow_condition: elevation requires of every situation)
+        from axqua.core.boundaries import outlet_level
+
+        inflows = {} if cfg.boundaries.prescribed_flowrate is not None \
+            else case_inflows(cfg)
+        fixed = outlet_level(cfg.outflow_condition) == "fixed"
+        given.insert(0, ValidationSituation(
+            name="case discharge", prescribed_flowrate=cfg.boundaries.prescribed_flowrate,
+            inflows=inflows,
+            prescribed_elevation=cfg.boundaries.prescribed_elevation if fixed else None))
+    return given
+
+
+def situation_points(cfg: Config, situation, folder: Path, *,
+                     vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
+                     depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR
+                     ) -> tuple[Path, pd.DataFrame]:
+    """The calibration-points CSV of one situation, by the rules of the single-flow table.
+
+    Points outside the model or near a liquid boundary are left out
+    (:func:`build_velocity_csv`), so a situation is held to the same rules as the
+    measurements of the case's own discharge. A declared position quality adds its
+    error only at the case's discharge: the error is the spread of the steady result
+    around a point, and the steady result is that of the case's discharge, whose
+    velocity gradients are not those of another (as in :func:`axqua.validation.measurements`).
+    """
+    import copy
+    import math
+
+    from axqua.validation import slug
+
+    tag = slug(situation.name)
+    there = copy.deepcopy(cfg)
+    if situation.sources:                 # else the measurements of ground_truth
+        there.ground_truth.sources = list(situation.sources)
+        there.ground_truth.targets = None
+        there.ground_truth.measurements = Path(folder) / f"ground-truth-{tag}.xlsx"
+    there.calibration_csv = f"{MULTIFLOW}/measurements-calibration-{tag}.csv"
+    q, own = situation.total_flowrate, case_discharge(cfg)
+    positional = not situation.sources or (
+        q is not None and own is not None and math.isclose(q, own, rel_tol=1e-3))
+    gt = cfg.ground_truth
+    if not positional and (gt.position_quality or gt.position_sigma):
+        log.warning("%s: the positional error is left out, because the steady result "
+                    "it is read from is at %s m3/s and the situation at %s m3/s",
+                    situation.name, own, q)
+    return build_velocity_csv(there, vel_err_floor=vel_err_floor,
+                              depth_err_floor=depth_err_floor, positional=positional)
+
+
+def write_situation_cas(cfg: Config, situation, folder: Path) -> tuple[str, float]:
+    """Write ``steady2d-<situation>.cas`` into the model folder; returns its name and Q.
+
+    The built steady case with the boundary values of the situation
+    (:func:`axqua.validation.with_boundaries_of`, the validation's own rules) and its
+    own results file. With ``calibration.hotstart`` it continues from the steady result
+    of the case for 1.2 residence times at the situation's discharge
+    (:func:`calibration_hotstart_duration`).
+    """
+    import copy
+
+    from axqua.solvers.telemac.steering import fit_columns, write_hotstart_cas
+    from axqua.validation import slug, with_boundaries_of
+
+    tag = slug(situation.name)
+    name = f"steady2d-{tag}.cas"
+    q = situation.total_flowrate or cfg.boundaries.prescribed_flowrate
+    results = f"{Path(cfg.results_slf).stem}-{tag}.slf"
+    if cfg.calibration.hotstart:
+        _steady_result(cfg)
+        at_q = copy.deepcopy(cfg)
+        at_q.boundaries.prescribed_flowrate = q
+        duration = (float(situation.duration) if situation.duration
+                    else calibration_hotstart_duration(at_q))
+        text = write_hotstart_cas(cfg, duration, out_name=name,
+                                  results_name=results).read_text()
+    else:
+        text = cfg.model_path(cfg.cas_file).read_text()
+        if situation.duration:
+            text = _patch_cas(text, "DURATION", f"{float(situation.duration)}")
+    text, total, notes, _flow, _elev = with_boundaries_of(
+        cfg, situation, text, folder, role="calibration")
+    for note in notes:
+        log.warning(note)
+    text = _patch_cas(text, "TITLE", f"'{cfg.name} calibration {tag}'")
+    text = _patch_cas(text, "RESULTS FILE", results)
+    path = cfg.model_path(name)
+    path.write_text("\n".join(fit_columns(text.splitlines())) + "\n")
+    return name, float(total)
+
+
+def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
+                              extraction_quantities=None,
+                              vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
+                              depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
+                              prepare_only: bool = False, resume: bool = False,
+                              force: bool = False,
+                              checkout: Path | None = None) -> int:
+    """Calibrate one set of parameters against the measurements of several situations.
+
+    Each situation of :func:`calibration_situations` gets its calibration points and
+    its own steering file; HydroBayesCal's multi-flow driver runs every tested
+    parameter set at every discharge and fits them jointly. The files go to
+    ``calibration-validation/multiflow/``. The quantities and error floors are those
+    of :func:`run_single_flow_calibration`. With ``calibration.structural_error:
+    unreachable`` the driver runs twice (:func:`_launch_in_passes`); *resume* starts
+    from the initial simulations an earlier calibration saved. Refused while a TELEMAC
+    run of the case is active, unless *force*. Returns the driver exit code (0 when
+    ``prepare_only``).
+    """
+    from axqua.validation import slug
+
+    from axqua.core.errors import ConfigError
+
+    empty = [s.name for s in cfg.calibration.situations if not s.sources]
+    if empty:
+        raise ConfigError(f"calibration situations without measurements: {empty}",
+                          subject="calibration.situations",
+                          remedy="Enter the measurement file of each situation.")
+    unknown = [s.name for s in cfg.calibration.situations if s.total_flowrate is None]
+    if unknown:
+        raise ConfigError(f"calibration situations without a discharge: {unknown}",
+                          subject="calibration.situations.prescribed_flowrate",
+                          remedy="Enter the discharge at which each situation was "
+                                 "measured.")
+    if not prepare_only and not force and other_calibration_running(cfg.model_dir):
+        raise ConfigError("a TELEMAC run of this case is active, and the calibration "
+                          "would write into the same friction table",
+                          subject=str(cfg.model_dir),
+                          remedy="Wait until it has finished.")
+    calibration_quantities = _set_quantities(cfg, calibration_quantities,
+                                             extraction_quantities)
+    print(f"calibration target(s): {calibration_quantities}")
+    restore_as_built(cfg)                 # what a killed calibration left behind
+    situations = calibration_situations(cfg)
+    if not situations:
+        raise ValueError("the case names no calibration situations")
+    mode = structural_error_mode(cfg)
+    tags = [slug(s.name) for s in situations]
+    if len(set(tags)) != len(tags):
+        raise ConfigError("two calibration situations have the same name",
+                          subject="calibration.situations",
+                          remedy="Give every situation a name of its own.")
+    cfg.ensure_dirs()
+    folder = cfg.calibration_path(MULTIFLOW)
+    folder.mkdir(parents=True, exist_ok=True)
+    ensure_graphic_output(cfg.model_path(cfg.cas_file))
+    flows, csvs = [], {}
+    print("calibration situations:")
+    for situation, tag in zip(situations, tags):
+        csv, table = situation_points(cfg, situation, folder,
+                                      vel_err_floor=vel_err_floor,
+                                      depth_err_floor=depth_err_floor)
+        cas, q = write_situation_cas(cfg, situation, folder)
+        flows.append(FlowSpec(name=tag, discharge=q, kind="csv", values=csv))
+        csvs[tag] = csv
+        print(f"  {situation.name}: Q = {q:g} m3/s, {len(table)} points -> {cas}")
+    def emit(complete: bool, only_bal: bool) -> Path:
+        return emit_multiflow_config(
+            cfg, folder, cfg.model_dir, flows, csvs, n_cpus=cfg.telemac.n_processors,
+            init_runs=cfg.calibration.init_runs, max_runs=cfg.calibration.max_runs,
+            complete_bal_mode=complete, only_bal_mode=only_bal)
+
+    driver = stage_driver(folder, "bal_telemac_multiflow.py", checkout=checkout,
+                          also=("bal_telemac.py",))
+    restarts = {tag: folder / f"flow-{tag}" / RESTART_OUTPUTS for tag in tags}
+    return _launch_in_passes(
+        cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
+        driver=driver, restarts=restarts, csvs=csvs, folder=folder,
+        note=f"HydroBayesCal calibration at {len(flows)} discharges")
+
+
+def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: bool,
+                      emit, driver: Path, restarts: dict[str, Path],
+                      csvs: dict[str, Path], folder: Path, note: str,
+                      env: str | None = None) -> int:
+    """Launch a HydroBayesCal driver once, or in two passes for the model error.
+
+    One pass (``structural_error: none``): initial simulations and active learning in
+    one run of the driver. Two passes (``unreachable``): the driver first runs the
+    initial simulations only; then :func:`apply_unreachable_misfit` adds to the error
+    of each point and quantity what no simulated set reaches, widens the errors of
+    groups of points that no single set fits together, and the driver runs
+    again with the active learning only, on the saved simulations. With *resume*, the
+    first pass is skipped: the initial simulations of an earlier calibration of the
+    case are used, which have to exist for every situation (*restarts*: situation ->
+    HydroBayesCal's ``initial-model-outputs.json``). *emit(complete, only_bal)* writes
+    the driver configuration for HydroBayesCal's two execution switches.
+    """
+    from axqua.core.errors import ConfigError
+
+    passes = mode == "unreachable"
+    if prepare_only:
+        config_path = emit(not passes, False)
+        print(f"HydroBayesCal config -> {config_path}")
+        if passes:
+            print("structural_error: unreachable - the driver runs the initial "
+                  "simulations first; the errors are then completed and the active "
+                  "learning runs in a second pass.")
+        print("\n--prepare-only: not launched. Run it with:")
+        print(f"  cd {driver.parent} && {sys.executable} {driver.name} "
+              f"--config {config_path}")
+        return 0
+    with case_as_built(cfg):
+        if not resume:
+            config_path = emit(not passes, False)
+            print(f"HydroBayesCal config -> {config_path}")
+            code = launch(cfg, driver, config_path, env=env,
+                          note=note + (", initial simulations" if passes else ""))
+            if code != 0 or not passes:
+                return code
+        missing = [tag for tag, path in restarts.items() if not path.is_file()]
+        if missing:
+            raise ConfigError(
+                f"no saved initial simulations for {missing}",
+                subject=str(folder),
+                remedy="Run the calibration without 'resume' first.")
+        if passes:
+            records = {tag: Path(csv).with_name(f"model-error-{tag}.csv")
+                       for tag, csv in csvs.items()}
+            try:
+                apply_unreachable_misfit(csvs, restarts,
+                                         list(cfg.calibration.calibration_quantities),
+                                         records)
+            except (ValueError, KeyError) as exc:
+                raise ConfigError(
+                    f"the model error could not be computed from the initial "
+                    f"simulations: {exc}", subject=str(folder),
+                    remedy="The initial simulations are kept. Correct the cause and "
+                           "start the calibration again with 'resume'.") from exc
+            for record in records.values():
+                print(f"model error at points the model cannot reach -> {record}")
+        config_path = emit(True, True)
+        print(f"HydroBayesCal config -> {config_path}")
+        return launch(cfg, driver, config_path, env=env,
+                      note=note + ", active learning on the saved simulations")

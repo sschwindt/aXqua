@@ -112,3 +112,21 @@ def test_without_a_job_there_is_nothing_to_follow(tmp_path):
                           calibration=SimpleNamespace(max_runs=12))
     with _calibration_progress(cfg, None) as counter:
         assert counter is None
+
+
+def test_the_log_in_the_results_folder_of_hydrobayescal_1_12_is_followed(tmp_path):
+    """HydroBayesCal 1.12.0 moved ``logfile.log`` into auto-saved-results-HydroBayesCal.
+
+    The multi-flow calibration of Inn KB15 (2026-11-08, HydroBayesCal 1.12.1) stood at
+    no iteration for 18 hours, because the counter read the working folder only.
+    """
+    reported = []
+    cfg = SimpleNamespace(calibration_dir=tmp_path,
+                          calibration=SimpleNamespace(max_runs=50))
+    ctx = SimpleNamespace(progress=lambda **fields: reported.append(fields))
+    results = tmp_path / "multiflow" / hbc.DRIVER_RESULTS
+    with _calibration_progress(cfg, ctx, folder="multiflow") as counter:
+        results.mkdir(parents=True)
+        (results / hbc.DRIVER_LOG).write_text(RUN.format(n=3))
+        counter.poll()
+    assert reported == [{"iteration": 3, "max_iterations": 50}]

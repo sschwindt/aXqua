@@ -106,7 +106,7 @@ class CalibratedSet:
 def calibrated_parameters(cfg) -> CalibratedSet:
     """The joint posterior maximum of the newest calibration of this case.
 
-    HydroBayesCal saves one dictionary per calibration quantity; the newest is read.
+    HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.
     An older HydroBayesCal that did not save the joint maximum gives the mean of the
     posterior sample instead, and :attr:`CalibratedSet.estimate` says so.
     """
@@ -114,8 +114,14 @@ def calibrated_parameters(cfg) -> CalibratedSet:
 
     from axqua.core.errors import ConfigError
 
-    root = Path(cfg.calibration_dir) / RESULTS / "calibration-data"
-    found = sorted(root.glob("*/BAL_dictionary.pkl"), key=lambda p: p.stat().st_mtime)
+    # the single-flow calibration writes into the calibration folder, a calibration at
+    # several discharges into its multiflow folder; the newer result counts
+    from axqua.bayescal import MULTIFLOW
+
+    roots = (Path(cfg.calibration_dir), Path(cfg.calibration_dir) / MULTIFLOW)
+    found = sorted((path for root in roots
+                    for path in (root / RESULTS / "calibration-data").glob(
+                        "*/BAL_dictionary.pkl")), key=lambda p: p.stat().st_mtime)
     if not found:
         raise ConfigError(
             f"no finished calibration in {Path(cfg.calibration_dir)}",
@@ -171,8 +177,8 @@ def boundaries_of(cfg) -> list[dict[str, Any]]:
             for lb in sorted(boundary.load_liquid_boundaries(meta), key=lambda b: b.index)]
 
 
-def _liquids_for(cfg, situation) -> tuple[list, float]:
-    """The liquid boundaries with the discharges of *situation*, and their total."""
+def _liquids_for(cfg, situation, role: str = "validation") -> tuple[list, float]:
+    """The liquid boundaries with the discharges of *situation* (of the *role* validation or calibration), and their total."""
     from axqua.core.errors import ConfigError
     from axqua.solvers.telemac import boundary
 
@@ -183,14 +189,14 @@ def _liquids_for(cfg, situation) -> tuple[list, float]:
                           remedy="Build the case first (tab Preprocessing).")
     liquids = boundary.load_liquid_boundaries(meta)
     inflows = [lb for lb in liquids if lb.kind == "inflow"]
-    subject = "calibration.validation"
+    subject = "calibration.validation" if role == "validation" else "calibration.situations"
     if situation.inflows:
         known = {lb.index for lb in inflows}
         wrong = sorted(set(situation.inflows) - known)
         missing = sorted(known - set(situation.inflows))
         if wrong or missing:
             raise ConfigError(
-                "the discharges of the validation situation do not match the inflows "
+                f"the discharges of the {role} situation do not match the inflows "
                 "of the model, which are the liquid boundaries "
                 + ", ".join(str(i) for i in sorted(known))
                 + (f"; not an inflow: {wrong}" if wrong else "")
@@ -201,9 +207,9 @@ def _liquids_for(cfg, situation) -> tuple[list, float]:
         return liquids, float(sum(situation.inflows.values()))
     if situation.prescribed_flowrate is None:
         raise ConfigError(
-            f"the validation situation {situation.name!r} names no discharge",
+            f"the {role} situation {situation.name!r} names no discharge",
             subject=f"{subject}.prescribed_flowrate",
-            remedy="Enter the discharge at which the validation data were measured.")
+            remedy=f"Enter the discharge at which the {role} data were measured.")
     total = float(situation.prescribed_flowrate)
     if inflows and all(lb.discharge is not None for lb in inflows):
         before = sum(float(lb.discharge) for lb in inflows)
@@ -258,13 +264,68 @@ class ValidationSetup:
                 "notes": list(self.notes)}
 
 
-def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
-    """Write the steering file of the validation run into the model folder."""
-    from axqua import bayescal
+def with_boundaries_of(cfg, situation, text: str, folder: Path,
+                       role: str = "validation") -> tuple[str, float, list[str], str, str]:
+    """*text* of a steering file with the boundary values of *situation*.
+
+    ``PRESCRIBED FLOWRATES`` per inflow (a total keeps the split of the case, ``inflows``
+    gives each boundary its own) and ``PRESCRIBED ELEVATIONS`` at the outflow: the
+    situation's level where the case prescribes one, else the level of the case's
+    rating for the discharge of the situation, synthesized into *folder* by the case's
+    own ``rating_method`` when the case has no measured curve. Shared by the
+    validation and by a calibration at several discharges. Returns the text, the
+    total discharge, notes for the report and the two keyword values.
+    """
     from axqua.core.boundaries import outlet_level
     from axqua.core.errors import ConfigError
     from axqua.hydraulics import resolve_outflow_wse
     from axqua.solvers.telemac import steering
+
+    tag = slug(situation.name)
+    notes: list[str] = []
+    liquids, total = _liquids_for(cfg, situation, role)
+    there = copy.deepcopy(cfg)
+    there.boundaries.prescribed_flowrate = total
+    condition = cfg.outflow_condition
+    level = outlet_level(condition)
+    if situation.prescribed_elevation is not None:
+        there.boundaries.prescribed_elevation = float(situation.prescribed_elevation)
+        if level != "fixed":
+            notes.append(f"The outflow water level of the {role} situation is not "
+                         f"used: the case computes it ({condition}).")
+    elif level == "fixed":
+        raise ConfigError(
+            f"the case prescribes the water level at the outflow, and the {role} "
+            f"situation {situation.name!r} names none",
+            subject=f"calibration.{'validation' if role == 'validation' else 'situations'}"
+                    ".prescribed_elevation",
+            remedy=f"Enter the outflow water level at which the {role} data were "
+                   "measured. The level of the case belongs to its discharge.")
+    given = cfg.boundaries.stage_discharge
+    if level == "rating" and (given is None or not Path(given).exists()):
+        # The case has no measured rating curve: its outflow level was derived from
+        # the channel geometry for the case's discharge. The level of this
+        # situation is derived the same way, for its own discharge.
+        from axqua.workflow import synthesize_rating_if_missing
+
+        own = Path(folder) / f"rating-{tag}.csv"
+        own.parent.mkdir(parents=True, exist_ok=True)
+        own.unlink(missing_ok=True)
+        there.boundaries.stage_discharge = own
+        synthesize_rating_if_missing(there, total)
+    stage = None if level is None else float(resolve_outflow_wse(there, total))
+    flow, elev, _profiles = steering._prescribed_arrays(there, liquids, total, stage)
+    from axqua import bayescal
+
+    text = bayescal._patch_cas(text, "PRESCRIBED FLOWRATES", flow)
+    text = bayescal._patch_cas(text, "PRESCRIBED ELEVATIONS", elev)
+    return text, float(total), notes, flow, elev
+
+
+def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
+    """Write the steering file of the validation run into the model folder."""
+    from axqua import bayescal
+    from axqua.core.errors import ConfigError
 
     bayescal.restore_as_built(cfg)              # a killed calibration restores nothing
     base = cfg.model_path(cfg.cas_file)
@@ -278,39 +339,8 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
     notes: list[str] = []
 
     # ---- the boundary values of the situation --------------------------------------
-    liquids, total = _liquids_for(cfg, situation)
-    there = copy.deepcopy(cfg)
-    there.boundaries.prescribed_flowrate = total
-    condition = cfg.outflow_condition
-    level = outlet_level(condition)
-    if situation.prescribed_elevation is not None:
-        there.boundaries.prescribed_elevation = float(situation.prescribed_elevation)
-        if level != "fixed":
-            notes.append("The outflow water level of the validation situation is not "
-                         f"used: the case computes it ({condition}).")
-    elif level == "fixed":
-        raise ConfigError(
-            "the case prescribes the water level at the outflow, and the validation "
-            f"situation {situation.name!r} names none",
-            subject="calibration.validation.prescribed_elevation",
-            remedy="Enter the outflow water level at which the validation data were "
-                   "measured. The level of the calibration belongs to its discharge.")
-    given = cfg.boundaries.stage_discharge
-    if level == "rating" and (given is None or not Path(given).exists()):
-        # The case has no measured rating curve: its outflow level was derived from
-        # the channel geometry for the calibrated discharge. The level of this
-        # situation is derived the same way, for its own discharge.
-        from axqua.workflow import synthesize_rating_if_missing
-
-        own = Path(cfg.calibration_dir) / FOLDER / f"rating-{tag}.csv"
-        own.parent.mkdir(parents=True, exist_ok=True)
-        own.unlink(missing_ok=True)
-        there.boundaries.stage_discharge = own
-        synthesize_rating_if_missing(there, total)
-    stage = None if level is None else float(resolve_outflow_wse(there, total))
-    flow, elev, _profiles = steering._prescribed_arrays(there, liquids, total, stage)
-    text = bayescal._patch_cas(text, "PRESCRIBED FLOWRATES", flow)
-    text = bayescal._patch_cas(text, "PRESCRIBED ELEVATIONS", elev)
+    text, total, notes, flow, elev = with_boundaries_of(
+        cfg, situation, text, Path(cfg.calibration_dir) / FOLDER)
     text = bayescal._patch_cas(text, "TITLE", f"'{cfg.name} validation {tag}'")
     results = f"{Path(cfg.results_slf).stem}-validation-{tag}.slf"
     text = bayescal._patch_cas(text, "RESULTS FILE", results)
@@ -407,7 +437,9 @@ def measurements(cfg, situation):
     there.ground_truth.targets = None
     there.ground_truth.measurements = folder / f"ground-truth-{tag}.xlsx"
     there.calibration_csv = f"{FOLDER}/measurements-{tag}.csv"
-    return bayescal.build_velocity_csv(there)
+    # the errors of the validation stay those of the instrument: the positional term
+    # is measured on the steady result of the calibration discharge
+    return bayescal.build_velocity_csv(there, positional=False)
 
 
 def inside_model(cfg, x, y) -> np.ndarray:

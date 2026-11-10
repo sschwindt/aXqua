@@ -21,6 +21,7 @@ axqua needs, and running that driver inside the right solver environment.
 
 from __future__ import annotations
 
+import os
 import re
 import shlex
 import shutil
@@ -36,6 +37,29 @@ from axqua.core.environment import SolverEnvironment
 # --------------------------------------------------------------------------- #
 # install location
 # --------------------------------------------------------------------------- #
+#: Oldest HydroBayesCal that aXqua runs a calibration with; the same floor as the
+#: ``calibration`` extra in ``pyproject.toml`` (a test keeps the two equal). 1.12.1
+#: starts the Sobol design at the first point of the sequence, so that a design of
+#: 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the
+#: scikit-learn emulator (``gp_library: skl``) run with TELEMAC.
+HBC_MINIMUM = "1.12.2"
+
+
+def _release(text: str) -> tuple[int, ...]:
+    """The leading release numbers of a version string (``1.12.1.dev3`` -> (1, 12, 1))."""
+    match = re.match(r"\s*v?(\d+(?:\.\d+)*)", text)
+    return tuple(int(n) for n in match.group(1).split(".")) if match else ()
+
+
+def hbc_too_old(installed: str, minimum: str = HBC_MINIMUM) -> bool:
+    """Whether *installed* is below *minimum*; an unreadable version passes."""
+    have, need = _release(installed), _release(minimum)
+    if not have:
+        return False
+    width = max(len(have), len(need))
+    return have + (0,) * (width - len(have)) < need + (0,) * (width - len(need))
+
+
 def require_hbc():
     """Import HydroBayesCal, or explain how to install it.
 
@@ -60,6 +84,16 @@ def require_hbc():
             "drivers with the package (hydroBayesCal.copy_driver is missing).\n"
             "Upgrade to the LATEST release - HydroBayesCal is bugfix-and-additive, so "
             "newest is always the one to want and axqua never pins an upper bound:\n"
+            "    pip install -U hydrobayescal"
+        )
+    installed = hbc_version()
+    if hbc_too_old(installed):
+        raise SystemExit(
+            f"The installed HydroBayesCal {installed} is too old: aXqua needs "
+            f"{HBC_MINIMUM} or newer. Before 1.12.1, a Sobol initial design never "
+            "tried the lowest part of each parameter range, and before 1.12.2 the "
+            "scikit-learn emulator failed with TELEMAC. Upgrade it in the "
+            "environment of aXqua:\n"
             "    pip install -U hydrobayescal"
         )
     return hydroBayesCal
@@ -189,7 +223,21 @@ def solver_running(pattern: str, model_dir: Path, *, extra: Sequence[str] = ()) 
     probe = subprocess.run(["pgrep", "-fa", pattern], capture_output=True, text=True)
     if str(model_dir) in probe.stdout:
         return True
-    return any(token in probe.stdout for token in extra)
+    # a solver started with a relative steering file (``steady2d.cas``) names no
+    # folder: it counts where it works in *model_dir* (TELEMAC works in a folder of its
+    # own inside it), not because a case elsewhere on this computer runs one too
+    folder = Path(model_dir).resolve()
+    for line in probe.stdout.splitlines():
+        pid, _, command = line.partition(" ")
+        if not any(token in command for token in extra):
+            continue
+        try:
+            cwd = Path(os.readlink(f"/proc/{pid}/cwd"))
+        except OSError:
+            continue
+        if cwd == folder or folder in cwd.parents:
+            return True
+    return False
 
 
 def launch_driver(environment: SolverEnvironment, driver: Path, config_path: Path, *,
@@ -241,6 +289,9 @@ def launch_driver(environment: SolverEnvironment, driver: Path, config_path: Pat
 #: ``... model after BAL # 1`` within the active learning, so both start again at 1;
 #: ``Running full complexity model 9`` counts through both, and is the one read here.
 DRIVER_LOG = "logfile.log"
+#: The results folder of a HydroBayesCal driver. Since HydroBayesCal 1.12.0 the driver
+#: writes ``logfile.log`` there; before, it wrote it into its working folder.
+DRIVER_RESULTS = "auto-saved-results-HydroBayesCal"
 _MODEL_RUN = re.compile(r"Running\s+full\s+complexity\s+model\s+(\d+)\b")
 
 
@@ -259,23 +310,30 @@ class RunCounter:
     earlier calibration in the same folder is not replayed. Nothing here can fail a
     calibration: an unreadable log and a failing *report* are both ignored, and a
     driver that words the line differently simply reports no progress.
+
+    *logfile* may be a list of paths: all of them are followed, because the driver
+    writes its log into its results folder since HydroBayesCal 1.12.0 and into its
+    working folder before (:func:`driver_logs`).
     """
 
-    def __init__(self, logfile: Path | str, report: Callable[[int], None], *,
-                 interval: float = 5.0) -> None:
-        self.logfile = Path(logfile)
+    def __init__(self, logfile: Path | str | Sequence[Path | str],
+                 report: Callable[[int], None], *, interval: float = 5.0) -> None:
+        paths = [logfile] if isinstance(logfile, (str, Path)) else list(logfile)
+        self.logfiles = [Path(path) for path in paths]
+        self.logfile = self.logfiles[0]
         self.report = report
         self.interval = interval
         self.run = 0
-        self._offset = 0
+        self._offsets = {path: 0 for path in self.logfiles}
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
 
     def __enter__(self) -> "RunCounter":
-        try:
-            self._offset = self.logfile.stat().st_size
-        except OSError:
-            self._offset = 0
+        for path in self.logfiles:
+            try:
+                self._offsets[path] = path.stat().st_size
+            except OSError:
+                self._offsets[path] = 0
         self._thread = threading.Thread(target=self._follow, name="hbc-run-counter",
                                         daemon=True)
         self._thread.start()
@@ -292,19 +350,8 @@ class RunCounter:
             self.poll()
 
     def poll(self) -> None:
-        """Read what the log has gained and report a new run number, if there is one."""
-        try:
-            size = self.logfile.stat().st_size
-            if size < self._offset:      # the driver started the file afresh
-                self._offset = 0
-            if size == self._offset:
-                return
-            with self.logfile.open("rb") as handle:
-                handle.seek(self._offset)
-                text = handle.read().decode("utf-8", errors="replace")
-            self._offset = size
-        except OSError:
-            return
+        """Read what the logs have gained and report a new run number, if there is one."""
+        text = "".join(self._gained(path) for path in self.logfiles)
         runs = [int(number) for number in _MODEL_RUN.findall(text)]
         if not runs or max(runs) <= self.run:
             return
@@ -313,6 +360,34 @@ class RunCounter:
             self.report(self.run)
         except Exception:                # noqa: BLE001 - reporting must not stop a run
             pass
+
+    def _gained(self, path: Path) -> str:
+        """What *path* has gained since the last look; empty if it cannot be read."""
+        try:
+            size = path.stat().st_size
+            offset = self._offsets.get(path, 0)
+            if size < offset:            # the driver started the file afresh
+                offset = 0
+            if size == offset:
+                return ""
+            with path.open("rb") as handle:
+                handle.seek(offset)
+                text = handle.read().decode("utf-8", errors="replace")
+            self._offsets[path] = size
+            return text
+        except OSError:
+            return ""
+
+
+def driver_logs(folder: Path | str) -> list[Path]:
+    """Where a HydroBayesCal driver run in *folder* writes ``logfile.log``.
+
+    Into its results folder since HydroBayesCal 1.12.0, into *folder* itself before.
+    A driver from a checkout (``checkout=``) can be older than the floor of the
+    package, so both are followed.
+    """
+    folder = Path(folder)
+    return [folder / DRIVER_RESULTS / DRIVER_LOG, folder / DRIVER_LOG]
 
 
 def solver_environment(block, legacy_script) -> SolverEnvironment:

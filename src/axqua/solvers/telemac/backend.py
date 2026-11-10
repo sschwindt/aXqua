@@ -342,7 +342,7 @@ class TelemacBackend(BaseBackend):
 
     def _calibration(self, cfg, *, ctx: Any = None, flows: list | None = None,
                      launch_mode: str = "run", force: bool = False,
-                     prepare_only: bool = False,
+                     prepare_only: bool = False, resume: bool = False,
                      calibration_quantities: list | None = None,
                      extraction_quantities: list | None = None,
                      vel_err_floor: float | None = None,
@@ -361,7 +361,7 @@ class TelemacBackend(BaseBackend):
                                                       launch_mode=launch_mode,
                                                       force=force)
         else:
-            kwargs: dict[str, Any] = {"prepare_only": prepare_only}
+            kwargs: dict[str, Any] = {"prepare_only": prepare_only, "resume": resume}
             if calibration_quantities:
                 kwargs["calibration_quantities"] = tuple(calibration_quantities)
             if extraction_quantities:
@@ -370,8 +370,14 @@ class TelemacBackend(BaseBackend):
                 kwargs["vel_err_floor"] = vel_err_floor
             if depth_err_floor is not None:
                 kwargs["depth_err_floor"] = depth_err_floor
-            with _calibration_progress(cfg, ctx):
-                code = bayescal.run_single_flow_calibration(cfg, **kwargs)
+            if bayescal.calibration_situations(cfg):
+                # measurements at several discharges (calibration.situations): one set
+                # of parameters against all of them, HydroBayesCal's multi-flow driver
+                with _calibration_progress(cfg, ctx, folder=bayescal.MULTIFLOW):
+                    code = bayescal.run_situation_calibration(cfg, force=force, **kwargs)
+            else:
+                with _calibration_progress(cfg, ctx):
+                    code = bayescal.run_single_flow_calibration(cfg, **kwargs)
         if code != 0:
             raise errors.SolverError(
                 f"the calibration driver exited with code {code}",
@@ -643,11 +649,14 @@ def _write_study_report(report, folder: Path, stem: str, ctx: Any, *,
     write_study_report(report, folder, stem, ctx, readme=readme)
 
 
-def _calibration_progress(cfg, ctx: Any):
+def _calibration_progress(cfg, ctx: Any, *, folder: str = ""):
     """Follow the HydroBayesCal log of a calibration and report its model runs.
 
     Without a job context there is nobody to report to, and the driver's own output
-    is on the terminal anyway.
+    is on the terminal anyway. The multi-flow driver works in its own *folder* (its
+    log is in the results folder below it, :func:`axqua.hbc.driver_logs`) and runs
+    each parameter set once per flow; its stock models count their
+    runs per flow, so the counter reports the parameter set of the flow at work.
     """
     from contextlib import nullcontext
 
@@ -657,7 +666,7 @@ def _calibration_progress(cfg, ctx: Any):
 
     total = int(cfg.calibration.max_runs or 0) or None
     return hbc.RunCounter(
-        Path(cfg.calibration_dir) / hbc.DRIVER_LOG,
+        hbc.driver_logs(Path(cfg.calibration_dir) / folder),
         lambda run: ctx.progress(iteration=run, max_iterations=total))
 
 

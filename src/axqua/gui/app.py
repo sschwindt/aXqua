@@ -700,7 +700,7 @@ with tabs[8]:
 with tabs[9]:
     cal = cfg.setdefault("calibration", {})
     cal["calibration_quantities"] = st.multiselect(
-        "Calibration quantities (measured)", QUANTITIES,
+        "Calibration targets (measured)", QUANTITIES,
         default=_get(cfg, "calibration", "calibration_quantities", default=["WATER DEPTH"]))
     cal["extraction_quantities"] = st.multiselect(
         "Extraction quantities (from results)", QUANTITIES,

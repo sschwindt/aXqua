@@ -206,11 +206,13 @@ REQUIRED_UNLESS: dict[str, list[dict[str, Any]]] = {
 }
 
 #: Entries that have no effect while a condition holds, which a form grays out:
-#: ``key -> conditions`` as in :data:`REQUIRED_WHEN`. A catchment mesh has no channel.
+#: ``key -> conditions`` as in :data:`REQUIRED_WHEN`. A catchment mesh has no channel,
+#: and calibration runs that do not start from the steady result take the case's time.
 DISABLED_WHEN: dict[str, list[dict[str, Any]]] = {
-    key: [{"block": "hydrology"}] for key in (
+    **{key: [{"block": "hydrology"}] for key in (
         "geodata.channel_centerline", "mesh.channel_anisotropy",
-        "initialization.prewet_depth")
+        "initialization.prewet_depth")},
+    "calibration.hotstart_duration": [{"key": "calibration.hotstart", "in": [False]}],
 }
 
 #: Entries an option makes necessary: ``key -> conditions``, of which one suffices. A
@@ -379,9 +381,35 @@ CURATED: dict[str, dict[str, Any]] = {
     "ground_truth.targets": _c("Calibration target workbook", "table"),
     "calibration.parameters": _c("Calibration parameters", "yaml",
                                  help="One entry per parameter: name, min and max."),
-    "calibration.calibration_quantities": _c("Quantities to calibrate against", "yaml"),
+    "calibration.calibration_quantities": _c("Calibration targets", "yaml"),
     "calibration.init_runs": _c("Simulations before the surrogate model", "int"),
     "calibration.max_runs": _c("Simulations in total", "int"),
+    "calibration.hotstart": _c(
+        "Start each simulation from the steady result", "bool",
+        help="Each simulation of the calibration continues from the converged steady "
+             "simulation of the case instead of starting dry again, so the flow only "
+             "settles to the roughness being tested."),
+    "calibration.hotstart_duration": _c(
+        "Simulated time of each simulation", "number", "s",
+        help="Leave empty to use 1.2 times the residence time of the reach: the "
+             "volume of water in the steady result divided by the discharge."),
+    "calibration.prior_samples": _c(
+        "Prior samples for the posterior", "int",
+        help="Parameter sets drawn from the ranges at which the surrogate model is "
+             "evaluated; HydroBayesCal keeps each with a probability equal to its "
+             "likelihood divided by the largest one. A calibration against many "
+             "measurements keeps few of them, so raise it when the log reports few "
+             "accepted samples (Inn KB15: 60,000). Default 5,000."),
+    "calibration.structural_error": _c(
+        "Model error at points the model cannot reach", "choice",
+        choices=("none", "unreachable"),
+        help="unreachable: after the initial simulations, a point whose measured value "
+             "lies outside the range of all simulated values gets that distance added "
+             "to its error, for depth and velocity separately. The model cannot "
+             "reproduce such a point with any roughness in the ranges, so it should not "
+             "decide the calibration. The errors of a survey and calibration target that the best "
+             "initial simulation misses by more than their errors are then widened to "
+             "that misfit. none: every point keeps its measurement error."),
     "openfoam.mode": _c("Free surface", "choice", choices=("vof", "rigid-lid")),
     "openfoam.outflow_boundary": _c(
         "Outflow boundary", "choice", choices=("level", "rating-curve"),

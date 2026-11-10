@@ -152,3 +152,29 @@ def test_a_missing_result_warns_rather_than_failing(tmp_path, caplog):
         out = build_calibration_csv(cfg, path=tmp_path / "m.csv")
     assert out is not None and pd.read_csv(out).shape[0] == 3
     assert "no converged 2D result" in caplog.text
+
+
+def test_the_calibration_job_table_carries_the_positional_error(monkeypatch):
+    """The single-flow calibration writes its table with bayescal.build_velocity_csv,
+    which left the declared position quality out until 2026-11-08 (the Inn KB15 case
+    declares rtk-float): the term is added in quadrature to each error."""
+    import pandas as pd
+
+    from axqua import bayescal, calibration
+
+    points = pd.DataFrame({"x": [0.0, 1.0], "y": [0.0, 1.0],
+                           "WATER DEPTH_DATA": [0.5, 0.6], "WATER DEPTH_ERROR": [0.03, 0.04],
+                           "SCALAR VELOCITY_DATA": [0.3, 0.4],
+                           "SCALAR VELOCITY_ERROR": [0.01, 0.02]})
+    seen = {}
+
+    def spread(cfg, df, quantities):
+        seen["quantities"] = sorted(quantities)
+        return {"WATER DEPTH": np.array([0.04, 0.03])}
+
+    monkeypatch.setattr(calibration, "_positional_errors", spread)
+    out = bayescal._with_positional_error(object(), points)
+    assert seen["quantities"] == ["SCALAR VELOCITY", "WATER DEPTH"]
+    assert out["WATER DEPTH_ERROR"].tolist() == pytest.approx([0.05, 0.05])
+    assert out["SCALAR VELOCITY_ERROR"].tolist() == [0.01, 0.02]
+    assert points["WATER DEPTH_ERROR"].tolist() == [0.03, 0.04]     # input untouched

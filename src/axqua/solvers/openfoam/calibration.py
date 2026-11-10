@@ -590,9 +590,9 @@ sampling = {{
     'init_runs_min':      {c.init_runs_min!r},
     'tp_selection_criteria': 'dkl',
     'eval_steps':     1,
-    # prior_samples drives a (prior_samples x prior_samples) dense covariance PER
-    # calibration location in gpytorch. With {len(names)} parameter(s) a few thousand
-    # is ample, and 25000 will OOM a 16 GB box.
+    # prior samples the surrogate is predicted at ({len(names)} parameter(s)); a sharp
+    # posterior keeps few of them, so raise calibration.prior_samples when few are
+    # accepted.
     'prior_samples':  {c.prior_samples},
     'mc_samples_al':  2000,
     'mc_exploration': 1000,

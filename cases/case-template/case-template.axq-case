@@ -763,6 +763,17 @@ calibration:
   measurement_error: 0.10      # fraction of the measured value
   init_runs: 30                # initial design samples
   max_runs: 50                 # total runs (initial + active-learning iterations)
+  # Start each run from the converged steady result (r2d.slf) instead of repeating
+  # the steady run from its dry or pre-wetted start; needs a completed steady run.
+  # hotstart: true
+  # hotstart_duration: 3000    # simulated time of each run [s]; empty: 1.2 times the
+  #                            # residence time of the reach (volume of water / discharge)
+  # A measured value that no parameter set within the ranges reproduces: none keeps
+  # its measurement error; unreachable adds the distance to the range of the initial
+  # simulations to its error, per point and calibration target, and widens the errors of a
+  # survey and target that no single initial simulation fits, before the active
+  # learning.
+  # structural_error: unreachable
   gp_library: gpy
   # calibration parameters forwarded to HydroBayesCal. Names follow its prefix
   # convention: zone<N> (friction zone N in the .tbl), gaiaCLASSES SHIELDS

@@ -150,7 +150,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
     # model setup intact so it can still be run/converged and calibrated later.
     # Two failure modes: missing inputs (reported by cfg.ground_truth.problems()
     # before we touch them) and data that do not match (e.g. FlowTracker verticals
-    # with no DGPS position, or no category supplying the calibration quantities),
+    # with no DGPS position, or no category supplying the calibration targets),
     # which surface as exceptions while compiling.
     with log_step("stage 5/5: compile ground truth, calibration CSV and HydroBayesCal config"):
         gt_problems = cfg.ground_truth.problems()

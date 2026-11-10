@@ -83,14 +83,14 @@ def _resolve_quantity(df: pd.DataFrame, qty: str) -> tuple[pd.Series, pd.Series 
 
 
 def _pick_table(tables: dict[str, pd.DataFrame], quantities: list[str]) -> pd.DataFrame:
-    """Choose the tidy category whose columns satisfy all calibration quantities."""
+    """Choose the tidy category whose columns satisfy all calibration targets."""
     for df in (*([tables["hydraulics"]] if "hydraulics" in tables else []), *tables.values()):
         if all(_resolve_quantity(df, q) is not None for q in quantities):
             return df
     available = {cat: [c for c in df.columns if c not in ("x", "y", "z")]
                  for cat, df in tables.items()}
     raise ValueError(
-        f"no ground-truth category provides all calibration quantities {quantities}. "
+        f"no ground-truth category provides all calibration targets {quantities}. "
         f"Available columns per category: {available}"
     )
 
@@ -142,7 +142,7 @@ def _positional_errors(cfg, df, quantities) -> dict:
     return out
 
 
-#: Calibration quantity -> the SELAFIN variable whose spatial variation carries
+#: Calibration target -> the SELAFIN variable whose spatial variation carries
 #: the positional uncertainty. A component velocity varies like the speed does.
 _SELAFIN_VARIABLE = {
     "U_x": "VELOCITY U", "U_y": "VELOCITY V", "U_z": "SCALAR VELOCITY",
@@ -362,8 +362,14 @@ def _refuse_continued_keywords(cfg: Config, names: list[str], control_file: str)
             "parameters")
 
 
-def emit_hbc_config(cfg: Config, calibration_csv: Path | None) -> Path:
-    """Emit a HydroBayesCal ``config_Telemac.py`` for the produced case."""
+def emit_hbc_config(cfg: Config, calibration_csv: Path | None, *,
+                    complete_bal_mode: bool = True, only_bal_mode: bool = False) -> Path:
+    """Emit a HydroBayesCal ``config_Telemac.py`` for the produced case.
+
+    *complete_bal_mode* False runs the initial simulations only; *only_bal_mode* True
+    (with *complete_bal_mode*) continues from the saved initial simulations with the
+    active learning (HydroBayesCal's two execution switches).
+    """
     c = cfg.calibration
     parameters = telemac_parameters(cfg)
     params = [p.name for p in parameters]
@@ -472,17 +478,20 @@ sampling = {{
     'bal_exploration_tradeoff': {c.bal_exploration_tradeoff!r},
     'tp_selection_criteria': 'dkl',
     'eval_steps': 1,
-    # prior_samples drives a (prior_samples x prior_samples) dense covariance PER
-    # location in gpytorch; kept modest (calibration.prior_samples) to stay in RAM.
+    # prior samples the surrogate is predicted at (calibration.prior_samples); a sharp
+    # posterior keeps few of them, so raise it when few are accepted.
     'prior_samples': {c.prior_samples},
     'mc_samples_al': 2000,
     'mc_exploration': 1000,
     'gp_library': {c.gp_library!r},
+    # 'variables': one multi-output GPE per location, its outputs the calibration
+    # quantities (calibration.multitask_selection)
+    'multitask_selection': {c.multitask_selection!r},
 }}
 
 execution = {{
-    'complete_bal_mode': True,
-    'only_bal_mode': False,
+    'complete_bal_mode': {complete_bal_mode},
+    'only_bal_mode': {only_bal_mode},
     'delete_complex_outputs': True,
     'validation': False,
     'user_param_values': False,

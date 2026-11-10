@@ -381,6 +381,9 @@ class CalibrationOptions(Options):
     """``run_Bayes_cal.py``."""
 
     prepare_only: bool = False
+    #: Continue from the initial simulations saved by an earlier calibration of the
+    #: case: only the active learning runs.
+    resume: bool = False
     calibration_quantities: list[str] | None = None
     extraction_quantities: list[str] | None = None
     vel_err_floor: float | None = None

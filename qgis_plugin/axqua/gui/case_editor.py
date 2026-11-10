@@ -63,7 +63,7 @@ FILTERS = {
 NOT_SET = "(not set)"
 
 #: The settings the measurement table edits instead of a text row of each.
-MEASUREMENTS = ("ground_truth.sources", "calibration.validation")
+MEASUREMENTS = ("ground_truth.sources", "calibration.validation", "calibration.situations")
 
 #: Where Help opens for a page, by the docs label of the page.
 HELP_PAGES = {"help-calibration": "usage/calibration-validation",
@@ -315,11 +315,15 @@ class Row:
 class MeasurementTable(QWidget):
     """The measurement files of a case, each for the calibration or the validation.
 
-    One row per file. A file used for the calibration is an entry of
-    ``ground_truth.sources``; a file used for the validation belongs to a validation
-    situation of ``calibration.validation``, which has a name and the discharge of
-    that situation. A validation needs data of another flow situation, so a whole file
-    is assigned, never a share of one (the user's rule of 2026-10-08).
+    One row per file. A file used for the calibration without a situation name is an
+    entry of ``ground_truth.sources``, measured at the discharge of the case; with a
+    name it belongs to a calibration situation of ``calibration.situations``, measured
+    at a discharge of its own, and the calibration fits all situations together. A
+    file used for the validation belongs to a validation situation of
+    ``calibration.validation``. A situation has a name and a discharge; rows are
+    grouped by their use and the name. A validation needs data of another flow
+    situation, so a whole file is assigned, never a share of one (the user's rule of
+    2026-10-08).
     """
 
     COLUMNS = ("File", "Positions", "Kind", "Use for", "Situation", "Discharge [m3/s]")
@@ -328,15 +332,20 @@ class MeasurementTable(QWidget):
     #: The kind of a source that names none (``GroundTruthSource.kind`` of aXqua).
     DEFAULT_KIND = "flowtracker"
 
-    def __init__(self, editor: "CaseEditor", sources: list, situations: list) -> None:
+    def __init__(self, editor: "CaseEditor", sources: list, situations: list,
+                 calibration_situations: list | None = None) -> None:
         super().__init__()
         self.editor = editor
-        self.original = (copy.deepcopy(sources or []), copy.deepcopy(situations or []))
+        self.original = (copy.deepcopy(sources or []), copy.deepcopy(situations or []),
+                         copy.deepcopy(calibration_situations or []))
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         note = QLabel("Each file of measurements is used for the calibration or for the "
                       "validation. A validation needs measurements of another flow "
-                      "situation: name the situation and give its discharge.")
+                      "situation: name the situation and give its discharge. A file of "
+                      "the calibration measured at another discharge than that of the "
+                      "case gets a situation and its discharge too; the calibration then "
+                      "fits all situations together.")
         note.setWordWrap(True)
         layout.addWidget(note)
         self.table = QTableWidget(0, len(self.COLUMNS))
@@ -360,6 +369,10 @@ class MeasurementTable(QWidget):
         self._rows: list[dict] = []
         for source in sources or []:
             self._append(source, "calibration", "", None)
+        for situation in calibration_situations or []:
+            for source in situation.get("sources") or []:
+                self._append(source, "calibration", str(situation.get("name") or ""),
+                             situation)
         for situation in situations or []:
             for source in situation.get("sources") or []:
                 self._append(source, "validation", str(situation.get("name") or ""),
@@ -398,36 +411,51 @@ class MeasurementTable(QWidget):
         self.table.setCellWidget(index, 5, discharge)
         entry.update(kind=kind, use=use, situation=situation_edit, discharge=discharge)
         use.currentIndexChanged.connect(lambda _=0, e=entry: self._role_changed(e))
-        situation_edit.textChanged.connect(lambda _="": self.editor.changed())
+        situation_edit.textChanged.connect(lambda _="", e=entry: self._named(e))
         # when the name is complete, not at every letter of it
         situation_edit.editingFinished.connect(lambda e=entry: self._joined(e))
         discharge.textChanged.connect(lambda text, e=entry: self._discharge_changed(e, text))
         self._role_changed(entry, quiet=True)
         entry["joined"] = self._situation_of(entry)       # the situation its discharge is of
 
+    def _enable(self, entry: dict) -> None:
+        """A row of the calibration without a situation name is measured at the discharge of the case."""
+        own = self._situation_of(entry) is None
+        entry["discharge"].setEnabled(not own)
+        entry["discharge"].setToolTip(
+            "Measured at the discharge of the case. Name a situation for measurements "
+            "at another discharge." if own else "")
+
+    def _named(self, entry: dict) -> None:
+        self._enable(entry)
+        self._calibration_on(entry)
+        self.editor.changed()
+
+    def _calibration_on(self, entry: dict) -> None:
+        """A situation is part of the calibration block: with its switch off, saving would leave the situation out."""
+        switch = getattr(self.editor, "switches", {}).get("calibration")
+        if self._situation_of(entry) is not None and switch is not None \
+                and not switch.isChecked():
+            switch.setChecked(True)
+
     def _role_changed(self, entry: dict, *, quiet: bool = False) -> None:
-        validation = entry["use"].currentData() == "validation"
-        entry["situation"].setEnabled(validation)
-        entry["discharge"].setEnabled(validation)
-        entry["discharge"].setToolTip("" if validation else
-                                      "The calibration uses the discharge of the case.")
+        self._enable(entry)
         if quiet:
             return
-        # a validation situation is part of the calibration block: with its switch
-        # off, saving would leave the situation out
-        switch = getattr(self.editor, "switches", {}).get("calibration")
-        if validation and switch is not None and not switch.isChecked():
-            switch.setChecked(True)
-        if not validation:
-            self._show(entry, "")     # a file of the calibration keeps no discharge to take along
+        self._calibration_on(entry)
+        if self._situation_of(entry) is None:
+            # a file of the case's own discharge keeps none to take along; a named
+            # file was measured at its discharge whatever it is used for
+            self._show(entry, "")
         self._joined(entry)
 
     @staticmethod
-    def _situation_of(entry: dict) -> str | None:
-        """The situation a row belongs to, None for a file of the calibration."""
+    def _situation_of(entry: dict) -> tuple[str, str] | None:
+        """``(use, name)`` of the situation a row belongs to; None for a file measured at the discharge of the case."""
+        name = entry["situation"].text().strip()
         if entry["use"].currentData() != "validation":
-            return None
-        return entry["situation"].text().strip() or "validation"
+            return ("calibration", name) if name else None
+        return ("validation", name or "validation")
 
     def _others(self, entry: dict) -> list[dict]:
         """The other rows of the situation of *entry*."""
@@ -450,7 +478,7 @@ class MeasurementTable(QWidget):
         self.editor.changed()
 
     def _joined(self, entry: dict) -> None:
-        """A file that joins a validation situation, by its name or by its role, shows the discharge of the situation; a situation without one takes the file's.
+        """A file that joins a situation, by its name or by its role, shows the discharge of the situation; a situation without one takes the file's.
 
         A file that leaves a situation other files stay in leaves the discharge with them. A file alone in its situation renames it, and the discharge goes along: a first name typed over the default, or a misspelled name corrected row by row, where the last row corrected carries the discharge to the others.
         """
@@ -496,21 +524,24 @@ class MeasurementTable(QWidget):
         entry["situation"].setText(situation)
         if entry["use"].currentData() == role:
             self._joined(entry)
-        else:   # clears the discharge of a file of the calibration, joins a validation situation
+        else:   # a file of the case's discharge keeps no discharge, a situation's shows its
             entry["use"].setCurrentIndex(entry["use"].findData(role))
-        if discharge and role == "validation":
+        if discharge and self._situation_of(entry) is not None:
             entry["discharge"].setText(discharge)
 
     # -- values ---------------------------------------------------------------------
-    def values(self) -> tuple[list, list]:
-        """``(ground_truth.sources, calibration.validation)`` as the table states them.
+    def values(self) -> tuple[list, list, list]:
+        """``(ground_truth.sources, calibration.validation, calibration.situations)`` as the table states them.
 
         A situation keeps what the table does not show (its discharges per inflow, its
         outflow level, its duration). An untouched table returns what it was given.
         """
-        sources, situations, by_name = [], [], {}
-        old_situations = {str(s.get("name") or ""): s for s in self.original[1]}
-        flows: dict[str, float | None] = {}
+        sources: list = []
+        groups = {"validation": [], "calibration": []}
+        by_key: dict[tuple[str, str], dict] = {}
+        old = {"validation": {str(s.get("name") or ""): s for s in self.original[1]},
+               "calibration": {str(s.get("name") or ""): s for s in self.original[2]}}
+        flows: dict[tuple[str, str], float | None] = {}
         for index, entry in enumerate(self._rows):
             source = dict(entry["source"])
             for column, key in ((0, "values"), (1, "positions")):
@@ -524,48 +555,51 @@ class MeasurementTable(QWidget):
             kind = entry["kind"].currentData()
             if kind and kind != (source.get("kind") or self.DEFAULT_KIND):
                 source["kind"] = kind
-            if entry["use"].currentData() == "calibration":
+            key = self._situation_of(entry)
+            if key is None:                       # measured at the discharge of the case
                 sources.append(source)
                 continue
-            name = entry["situation"].text().strip() or "validation"
-            if name not in by_name:
-                old = old_situations.get(name) or old_situations.get(
+            use, name = key
+            if key not in by_key:
+                before = old[use].get(name) or old[use].get(
                     "" if name == "validation" else name) or {"name": name}
-                situation = {k: copy.deepcopy(v) for k, v in old.items() if k != "sources"}
-                if "name" in old or name != "validation":
+                situation = {k: copy.deepcopy(v) for k, v in before.items()
+                             if k != "sources"}
+                if "name" in before or name != "validation":
                     situation["name"] = name
                 situation["sources"] = []
-                by_name[name] = situation
-                situations.append(situation)
-            by_name[name]["sources"].append(source)
+                by_key[key] = situation
+                groups[use].append(situation)
+            by_key[key]["sources"].append(source)
             # one file of the situation with a discharge is enough
             flow = parse("number", entry["discharge"].text())
-            if flow is not None or name not in flows:
-                flows[name] = flow if flow is not None else flows.get(name)
-        for name, flow in flows.items():
-            situation = by_name[name]
+            if flow is not None or key not in flows:
+                flows[key] = flow if flow is not None else flows.get(key)
+        for key, flow in flows.items():
+            situation = by_key[key]
             if flow is not None:
                 situation["prescribed_flowrate"] = flow
             elif not situation.get("inflows"):
                 situation.pop("prescribed_flowrate", None)
-        if (sources, situations) == (self.original[0], self.original[1]):
-            return copy.deepcopy(self.original[0]), copy.deepcopy(self.original[1])
-        return sources, situations
+        found = (sources, groups["validation"], groups["calibration"])
+        if found == self.original:
+            return tuple(copy.deepcopy(part) for part in self.original)
+        return found
 
     def discharge_conflicts(self) -> list[str]:
-        """Validation situations whose files show different discharges. The table keeps them equal; this is the guard for what it could not."""
-        seen: dict[str, set[float]] = {}
+        """Situations whose files show different discharges. The table keeps them equal; this is the guard for what it could not."""
+        seen: dict[tuple[str, str], set[float]] = {}
         for entry in self._rows:
-            name = self._situation_of(entry)
+            key = self._situation_of(entry)
             flow = parse("number", entry["discharge"].text())
-            if name is not None and flow is not None:
-                seen.setdefault(name, set()).add(flow)
-        return [name for name, flows in seen.items() if len(flows) > 1]
+            if key is not None and flow is not None:
+                seen.setdefault(key, set()).add(flow)
+        return [key[1] for key, flows in seen.items() if len(flows) > 1]
 
     def missing_discharge(self) -> list[str]:
-        """Validation situations without a discharge: required for a validation."""
-        _sources, situations = self.values()
-        return [str(s.get("name") or "validation") for s in situations
+        """Situations without a discharge: a validation and a calibration situation need one."""
+        _sources, validation, calibration = self.values()
+        return [str(s.get("name") or "validation") for s in [*validation, *calibration]
                 if s.get("prescribed_flowrate") is None and not s.get("inflows")]
 
 
@@ -754,7 +788,11 @@ class CaseEditor(EditorDialog):
         validation = calibration.get("validation") or []
         if isinstance(validation, dict):
             validation = [validation]
-        self.measurements = MeasurementTable(self, ground.get("sources") or [], validation)
+        situations = calibration.get("situations") or []
+        if isinstance(situations, dict):
+            situations = [situations]
+        self.measurements = MeasurementTable(self, ground.get("sources") or [], validation,
+                                             situations)
         self.measurement_label = QLabel("Measurement files")
         form.addRow(self.measurement_label, self.measurements)
 
@@ -890,8 +928,8 @@ class CaseEditor(EditorDialog):
         missing = [key for key in self.rows
                    if required.get(key) and is_unset(self.value_of(key))]
         if self.measurements is not None and self.is_required("ground_truth.sources"):
-            sources, _ = self.measurements.values()
-            if not sources:
+            sources, _validation, situations = self.measurements.values()
+            if not sources and not situations:
                 missing.append("ground_truth.sources")
         return missing
 
@@ -941,9 +979,10 @@ class CaseEditor(EditorDialog):
                 section = data[block] = {}
             section[name] = value
         if self.measurements is not None:
-            sources, situations = self.measurements.values()
+            sources, situations, calibrated = self.measurements.values()
             for block, name, value in (("ground_truth", "sources", sources),
-                                       ("calibration", "validation", situations)):
+                                       ("calibration", "validation", situations),
+                                       ("calibration", "situations", calibrated)):
                 section = data.get(block)
                 if value:
                     if not isinstance(section, dict):
@@ -990,16 +1029,18 @@ class CaseEditor(EditorDialog):
             "warning", "axqua.config.incomplete",
             f"{(self._meta(key) or {}).get('label', key)}: required for this case and "
             "not set yet.", subject=key) for key in self.missing_required()]
-        # what is said of the validation situations is said of situations that are saved
-        if self.measurements is not None and (data.get("calibration") or {}).get("validation"):
+        # what is said of the situations is said of situations that are saved
+        saved = data.get("calibration") or {}
+        if self.measurements is not None and (saved.get("validation")
+                                              or saved.get("situations")):
             unreadable += [fnd.Finding(
                 "warning", "axqua.config.incomplete",
-                f"The validation situation {name!r} has no discharge.",
+                f"The situation {name!r} has no discharge.",
                 subject="calibration.validation")
                 for name in self.measurements.missing_discharge()]
             unreadable += [fnd.Finding(
                 "warning", "axqua.config.discharge_conflict",
-                f"The files of the validation situation {name!r} show different "
+                f"The files of the situation {name!r} show different "
                 "discharges; the last one in the table was saved.",
                 subject="calibration.validation")
                 for name in self.measurements.discharge_conflicts()]

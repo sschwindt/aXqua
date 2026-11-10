@@ -475,3 +475,35 @@ def test_the_display_block_reaches_the_json_the_plugin_reads():
                         display={"wet_depth": 0.02, "velocity_scale_max": 8.0})
     assert status.as_dict()["display"] == {"wet_depth": 0.02,
                                            "velocity_scale_max": 8.0}
+
+
+def test_zones_of_the_roughness_table_make_a_calibration_configured(tmp_path):
+    """The Inn KB15 case declares its calibrated zones in the roughness table alone
+    (no ``calibration.parameters``); its calibration read as not configured. The
+    light check of the spec must agree with the reader the calibration uses."""
+    from types import SimpleNamespace
+
+    from axqua.calibration import roughness_zone_parameters
+    from axqua.solvers.telemac.spec import _table_calibrates_a_zone
+
+    tables = {
+        "inn": "zone_id,ks_min, ks_max, calibration\n1,0.01,0.3, True\n2,0.5,0.5, False\n",
+        "all-off": "zone_id,ks_min,ks_max,calibration\n1,0.01,0.3,False\n2,0.5,0.5,True\n",
+        "no-flag": "zone_id,ks_min,ks_max\n1,0.05,0.2\n",
+        "legacy": "zone_id,ks\n1,0.1\n",
+        # the opt-out spellings of geodata._as_bool (review of 2026-11-10)
+        "n": "zone_id,ks_min,ks_max,calibration\n1,0.01,0.3,n\n2,0.01,0.3, F\n",
+        "headerless": "1,0.01,0.3\n2,0.05,0.5\n",
+        "spaces": " Zone_ID , KS_MIN , KS_MAX \n1, 0.01, 0.3\n",
+        "text-id": "zone_id,ks_min,ks_max\nchannel,0.01,0.3\n",
+    }
+    for name, text in tables.items():
+        path = tmp_path / f"{name}.csv"
+        path.write_text(text)
+        cfg = SimpleNamespace(geodata=SimpleNamespace(roughness_table=path))
+        assert _table_calibrates_a_zone(path) == bool(roughness_zone_parameters(cfg)), name
+    assert not _table_calibrates_a_zone(None)
+    assert not _table_calibrates_a_zone(tmp_path / "missing.csv")
+    from axqua.core.geodata import _FALSEY
+    from axqua.solvers.telemac.spec import _OPT_OUT
+    assert _OPT_OUT == _FALSEY

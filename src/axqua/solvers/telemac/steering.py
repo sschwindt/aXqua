@@ -1572,7 +1572,8 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
 
 
 def write_hotstart_cas(cfg: Config, duration: float,
-                       out_name: str = "hotstart2d.cas") -> Path:
+                       out_name: str = "hotstart2d.cas",
+                       results_name: str | None = None) -> Path:
     """Derive a hotstart steering file from the *built* steady case.
 
     Rewrites ``cfg.cas_file`` (``steady2d.cas``) as a continuation run: the initial
@@ -1583,12 +1584,13 @@ def write_hotstart_cas(cfg: Config, duration: float,
     to reach a sustained boundary-flux balance (``flux_convergence.find_steady_window``).
     Everything else - notably the constant ``PRESCRIBED FLOWRATES`` /
     ``PRESCRIBED ELEVATIONS`` - is carried over unchanged, so the hotstart drives the
-    same steady Q and downstream H as the initial run.
+    same steady Q and downstream H as the initial run. *results_name* names the
+    results file (default ``<results stem>-hotstart.slf``).
     """
     steady_cas = cfg.model_path(cfg.cas_file)
     duration_s = float(math.ceil(duration)) if duration > 0 else float(duration)
     results = Path(cfg.results_slf)
-    hot_results = f"{results.stem}-hotstart{results.suffix}"
+    hot_results = results_name or f"{results.stem}-hotstart{results.suffix}"
 
     out_lines: list[str] = []
     have_previous = have_duration = False

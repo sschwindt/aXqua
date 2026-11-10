@@ -90,12 +90,19 @@ gui = ["streamlit>=1.30"]
 #          a vertical that is dry in every run of the initial design divided by a
 #          zero spread, and the calibration stopped with NaN after its initial runs
 #          (Isar example with k-epsilon, 2026-11-04: 7 of 33 verticals dry).
+#   1.12.1 starts the Sobol design at the first point of the sequence. Before it, a
+#          design of 16, 32, ... runs never tried the lowest 1/n of any parameter
+#          range (16 runs for a ks between 0.01 and 0.30 m: none below 0.028 m), and
+#          1.12.0 starts the multi-output emulators without noise.
+#   1.12.2 sets parameter_ranges for every binding: with TELEMAC, the scikit-learn
+#          emulator (calibration.gp_library: skl, offered by aXqua) stopped at the
+#          first BAL iteration with an AttributeError.
 #
-# Beyond the floor, axqua does NOT check versions: `hbc.require_hbc` tests for the
-# capability it needs (hasattr(hydroBayesCal, "copy_driver")). On an additive-only
-# upstream that is the right test - a version comparison would need editing on every
-# release, and would reject a valid newer one the moment the scheme changed.
-calibration = ["hydrobayescal>=1.11.0"]
+# pip checks the floor only when it installs; an environment that had HydroBayesCal
+# before keeps its old version. So `hbc.require_hbc` refuses a version below
+# `hbc.HBC_MINIMUM` at run time as well (a test keeps the two equal). It is a floor
+# only: a newer release always passes.
+calibration = ["hydrobayescal>=1.12.2"]
 
 [project.scripts]
 axqua = "axqua.cli:main"
