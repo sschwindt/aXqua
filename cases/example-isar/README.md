@@ -39,10 +39,10 @@ Measured run times with 8 processor cores on a workstation with 16 cores:
 
 1. **The folder of the example.** It contains the case file, this guide, and the input data in `user-sources/` (about 6 MB): the terrain model, cut to the outline of the model, the layers and tables that describe the reach, and the velocity measurements. To get the folder, click *Example case...* on the *Case Setup* tab of the plugin, or run `axqua example get example-isar --folder <folder>` in a terminal. Everything the example produces is written to `axqua-case/` in the same folder.
 2. **aXqua with a TELEMAC installation.** aXqua has to know where TELEMAC is installed. Step 1 below sets this up in the plugin. In a terminal, `axqua profile init` writes the profile of this computer with the TELEMAC installation it finds, and `axqua profile check` starts TELEMAC once and reports every problem with its remedy.
-3. **HydroBayesCal 1.11.0 or newer** in the Python environment of aXqua. Older versions stop the calibration of this example after its first eight simulations, because some verticals are dry in all of them:
+3. **HydroBayesCal 1.12.2 or newer** in the Python environment of aXqua. aXqua refuses older versions: before 1.11.0, the calibration of this example stops after its first eight simulations, because some verticals are dry in all of them; before 1.12.1, the initial design never tries the lowest values of the roughness ranges; and before 1.12.2, the scikit-learn surrogate stops at the first iteration with TELEMAC:
 
    ```bash
-   pip install "hydrobayescal>=1.11.0"
+   pip install "hydrobayescal>=1.12.2"
    ```
 
 4. **QGIS 3.44 or newer with the aXqua plugin** (documentation, section *QGIS plugin*).

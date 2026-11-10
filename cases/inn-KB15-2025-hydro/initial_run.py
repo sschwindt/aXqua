@@ -16,7 +16,7 @@ boundary fluxes reach mass balance to the hotstart tolerance (1e-4; 0.01% imbala
 See ``axqua.flux_convergence``.
 
 Needs a TELEMAC binding in the profile of this computer (``axqua profile``).
-Run: mamba run -n axqua-env python cases/example-Inn/initial_run.py
+Run: mamba run -n axqua-env python cases/inn-KB15-2025-hydro/initial_run.py
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ def main() -> None:
     cas = cfg.model_path(cfg.cas_file)
     if not cas.exists():
         print(f"no built case at {cas}.")
-        print("run  python cases/example-Inn/preprocessing.py  first.")
+        print("run  python cases/inn-KB15-2025-hydro/preprocessing.py  first.")
         return
 
     setup_logging(cfg.model_path(cfg.log_file))   # append to the simulation log
@@ -95,7 +95,7 @@ def main() -> None:
     for line in report_sections(cfg):
         print(line)
 
-    print("next: python cases/example-Inn/mesh_convergence_study.py")
+    print("next: python cases/inn-KB15-2025-hydro/mesh_convergence_study.py")
 
 
 if __name__ == "__main__":

@@ -31,5 +31,5 @@ user-sources/
     sediment/                  #   e.g. grain-size distributions
 ```
 
-See `../USAGE.info` for the work steps and `../../example-Inn/` for a complete,
+See `../USAGE.info` for the work steps and `../../example-isar/` for a complete,
 filled-in example.

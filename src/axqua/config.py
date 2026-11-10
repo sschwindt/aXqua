@@ -676,7 +676,7 @@ class GainLose:
     zero as a cell approaches ``min_depth``, so a sink can never dry a cell) and
     reinjects exactly what it took. ``region`` uses TELEMAC SOURCE REGIONS instead -
     simpler, no compiler needed, but a fixed-rate sink diverges as the local depth
-    approaches zero (see cases/isar-2025/test-approaches.md, rungs T2/T3).
+    approaches zero (rungs T2/T3 of the test ladder on the isar-2025 research case).
 
     The zone layer may carry a porous-depth attribute (``depth_field``) and a name
     (``name_field``).
@@ -705,7 +705,7 @@ class GainLose:
     # that carries int-* lines but no gain_lose block behaves exactly as before.
     mode: str = "off"              # off | region | fortran
     # WHERE the surface water is withdrawn from. This is a PHYSICAL choice, not a
-    # numerical one - see cases/isar-2025/test-approaches.md.
+    # numerical one, tested on the isar-2025 research case.
     #   "line"  - a strip of boundaries.internal_source_region_width around the
     #             losing LINE. Correct when the water percolates BENEATH a patch
     #             that is dry on top: the surface loses water where it infiltrates

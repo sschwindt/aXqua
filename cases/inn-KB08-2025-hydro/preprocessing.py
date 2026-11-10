@@ -16,7 +16,7 @@ It does NOT launch the solver: run ``initial_run.py`` next to test-run the built
 case (that confirms it does not crash, ending the preprocessing step). Then run
 ``mesh_convergence_study.py``, and finally HydroBayesCal.
 
-Run: mamba run -n axqua-env python cases/example-Inn/preprocessing.py
+Run: mamba run -n axqua-env python cases/inn-KB08-2025-hydro/preprocessing.py
 """
 
 from __future__ import annotations
@@ -63,7 +63,7 @@ def main() -> None:
     print(f"  steering  : {art.cas_file.name}")
     print(f"  HBC config: {art.hbc_config}")
     print(f"  convergence dir ready: {cfg.postprocessing_path('mesh-convergence')}")
-    print("next: test-run it with  python cases/example-Inn/initial_run.py")
+    print("next: test-run it with  python cases/inn-KB08-2025-hydro/initial_run.py")
 
 
 if __name__ == "__main__":
