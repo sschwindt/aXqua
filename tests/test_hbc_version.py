@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import re
 import sys
-import tomllib
 import types
 from pathlib import Path
 
@@ -20,8 +19,9 @@ from axqua import hbc
 
 
 def test_the_floor_is_the_one_of_the_calibration_extra():
-    project = tomllib.loads((Path(__file__).parents[1] / "pyproject.toml").read_text())
-    (spec,) = project["project"]["optional-dependencies"]["calibration"]
+    # a regex, not tomllib, which is Python 3.11+ while aXqua supports 3.10 (as tests/test_backends.py)
+    pyproject = (Path(__file__).parents[1] / "pyproject.toml").read_text("utf-8")
+    (spec,) = re.findall(r'^calibration\s*=\s*\["([^"]+)"\]', pyproject, re.M)
     assert re.fullmatch(r"hydrobayescal>=([\d.]+)", spec).group(1) == hbc.HBC_MINIMUM
 
 
