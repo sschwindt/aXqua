@@ -863,6 +863,8 @@ def test_an_installation_ends_in_the_profile_of_this_computer(installers, debian
     # each step says when it started and how long it took
     assert re.search(r"=== 1/\d+: .* \(started \d{4}-\d\d-\d\d \d\d:\d\d:\d\d\) ===", log)
     assert len(re.findall(r"^--- \d+/\d+: .*: done after \d+ s ---$", log, re.M)) == len(plan.steps)
+    assert all(runner.FOOTER.match(line) for line in log.splitlines() if line.startswith("--- "))
+    assert not runner.FOOTER.match("--- a/sources/telemac2d.f")       # a line of a tool stays in the message
 
 
 def test_an_installation_can_leave_the_profile_alone(installers, debian, tmp_path):
@@ -1174,6 +1176,9 @@ def test_a_detached_installation_can_be_followed_and_cancelled(installers, debia
         assert done["state"] == "cancelled"
         assert _wait(lambda: not procs.pid_alive(child))
         assert runner.latest("telemac", active_only=True) is None
+        # the cancelled step says so in the log, with its duration
+        log = Path(runner.read(ident)["log"])
+        assert _wait(lambda: re.search(r"^--- \d+/\d+: .*: cancelled after \d+ s ---$", log.read_text(), re.M))
     finally:
         runner.cancel(ident)
 

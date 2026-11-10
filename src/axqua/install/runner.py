@@ -30,6 +30,7 @@ import glob
 import json
 import logging
 import os
+import re
 import shlex
 import shutil
 import signal
@@ -481,18 +482,19 @@ def execute(folder: str | os.PathLike, *, echo: bool = False,
                         return finish("failed", f"'{step.name}' needs an administrator", 1)
                     step = recipes.Step(step.name, argv, step.cwd, step.env,
                                         step.optional, admin=True)
-                code = _run_step(step, folder, out, status, stop, echo=echo,
-                                 log_path=log_path,
-                                 ask_here=step.admin and argv[0] == "sudo")
-                # the time of each step, which a test on Windows had to piece together
-                # from the status file (2026-11-10)
-                footer = (f"--- {number}/{len(steps)}: {step.name}: "
-                          f"{'done' if code == 0 else f'exit code {code}'} after "
-                          f"{time.time() - began:.0f} s ---\n")
-                out.write(footer.encode("utf-8"))
-                out.flush()
-                if echo:
-                    print(footer, end="", flush=True)
+                # the time of each step, also of a cancelled one: a test on Windows had to piece it together from the status file (2026-11-10)
+                try:
+                    code = _run_step(step, folder, out, status, stop, echo=echo,
+                                     log_path=log_path,
+                                     ask_here=step.admin and argv[0] == "sudo")
+                except _Stop:
+                    _footer(out, number, len(steps), step.name, "cancelled", began, echo)
+                    raise
+                except OSError:
+                    _footer(out, number, len(steps), step.name, "not started", began, echo)
+                    raise
+                _footer(out, number, len(steps), step.name,
+                        "done" if code == 0 else f"exit code {code}", began, echo)
                 if code and step.optional:
                     # the program is installed; what this step adds is not complete
                     add(Finding(
@@ -648,10 +650,22 @@ def _kill_group(pid: int, *, hard: bool = False) -> None:
         pass
 
 
+#: the line the runner writes below each step; output of a tool that starts with "--- " is not one
+FOOTER = re.compile(r"^--- \d+/\d+: .*: (done|cancelled|not started|exit code -?\d+) after \d+ s ---$")
+
+
+def _footer(out, number: int, count: int, name: str, outcome: str, began: float, echo: bool) -> None:
+    line = f"--- {number}/{count}: {name}: {outcome} after {time.time() - began:.0f} s ---\n"
+    out.write(line.encode("utf-8"))
+    out.flush()
+    if echo:
+        print(line, end="", flush=True)
+
+
 def _last_words(log_path: Path, lines: int = 3) -> str:
-    # without the two lines the runner itself writes above each command
+    # without the lines the runner itself writes above and below each command
     rows = [row.strip() for row in tail(log_path, 30).splitlines()
-            if row.strip() and not row.startswith(("=== ", "--- ", "$ "))]
+            if row.strip() and not row.startswith(("=== ", "$ ")) and not FOOTER.match(row.strip())]
     return " | ".join(rows[-lines:])[:600] or "(the log is empty)"
 
 

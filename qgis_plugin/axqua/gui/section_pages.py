@@ -25,6 +25,13 @@ from .capability_tab_widget import CapabilityTab
 from .profile_editor import get
 
 NO_CASE = "Add a case on the tab Case Setup first."
+#: a case is active, but what it can do is asked of axqua, which has not answered (yet)
+NOT_READ = "The active case is read when the axqua program answers (tab Configuration)."
+
+
+def no_case_text(context) -> str:
+    """What a page without the capabilities of a case says: a case of the last session is in the list before axqua has answered, or when it cannot."""
+    return NOT_READ if context.project.active_case else NO_CASE
 
 
 def _label(text: str) -> QLabel:
@@ -57,7 +64,7 @@ class SectionPage(QWidget):
         outer.setContentsMargins(0, 0, 0, 0)
         body = QWidget()
         self._layout = QVBoxLayout(body)
-        self.note = _label(NO_CASE)
+        self.note = _label(no_case_text(context))
         self._layout.addWidget(self.note)
         self._layout.addStretch(1)
         outer.addWidget(_scrolling(body))
@@ -109,7 +116,7 @@ class SectionPage(QWidget):
             # seeing, and the box says why
             tab.setEnabled(capability.enabled or bool(capability.reason))
         if case_view is None:
-            self.note.setText(NO_CASE)
+            self.note.setText(no_case_text(self.ctx))
         else:
             self.note.setText("" if wanted else self.empty_text)
         self.note.setVisible(bool(self.note.text()))
@@ -237,7 +244,7 @@ class PreprocessingPage(QWidget):
         self.table.resizeColumnsToContents()
         self.build_button.setEnabled(steady is not None and bool(steady.configured))
         if case_view is None:
-            self.state.setText(NO_CASE)
+            self.state.setText(no_case_text(self.ctx))
         elif steady is None:
             self.state.setText("This case does not use TELEMAC.")
         else:

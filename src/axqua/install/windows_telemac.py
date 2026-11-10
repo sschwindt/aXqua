@@ -75,12 +75,15 @@ def _run(argv: list[str], env: Path) -> int:
     What ``conda activate`` does, without conda's ``activate.bat``: the folders of the environment go first on ``PATH`` (:func:`compiler_env`), and the activation scripts of its packages are called before the command. ``activate.bat`` asks PowerShell for a name of a temporary file, and on the Windows test computer without PowerShell (2026-11-10) every configure and compile printed "'powershell' is not recognized" although the build succeeded.
     """
     print("$ " + " ".join(argv), flush=True)
-    hooks = activation_hooks(env) if os.name == "nt" else []
-    if hooks:
-        # "&", not "&&": a hook's exit code is not the command's, and it must not stop the command
-        line = " & ".join([*(f'call "{hook}"' for hook in hooks), cmd_line(argv)])
+    if _windows():
+        # always through cmd, which finds a bare program name on the PATH of the compiler environment (a program started directly is looked up on the PATH of the runner); "&", not "&&": a hook's exit code is not the command's
+        line = " & ".join([*(f'call "{hook}"' for hook in activation_hooks(env)), cmd_line(argv)])
         return subprocess.run(f'cmd /d /s /c "{line}"', env=compiler_env(env)).returncode
     return subprocess.run(argv, env=compiler_env(env)).returncode
+
+
+def _windows() -> bool:
+    return os.name == "nt"
 
 
 # ----------------------------------------------------------------------------- the steps

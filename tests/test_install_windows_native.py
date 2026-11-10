@@ -273,7 +273,7 @@ def test_the_build_runs_without_conda_activate_and_powershell(tmp_path, monkeypa
     for name in ("openssl_activate-win.bat", "libxml2_activate.bat", "notes.txt"):
         (hooks / name).write_text("")
     ran = []
-    monkeypatch.setattr(wt.os, "name", "nt")
+    monkeypatch.setattr(wt, "_windows", lambda: True)
     monkeypatch.setattr(wt.subprocess, "run",
                         lambda line, env=None: ran.append((line, env)) or subprocess.CompletedProcess(line, 0))
     assert wt._run(["cmake.exe", "--build", "b"], env) == 0
@@ -282,5 +282,9 @@ def test_the_build_runs_without_conda_activate_and_powershell(tmp_path, monkeypa
     assert line == (f'cmd /d /s /c "call "{hooks / "libxml2_activate.bat"}" & '
                     f'call "{hooks / "openssl_activate-win.bat"}" & "cmake.exe" "--build" "b""')
     assert environment["CONDA_PREFIX"] == str(env) and environment["PATH"].startswith(str(env))
-    monkeypatch.setattr(wt.os, "name", "posix")
-    assert wt._run(["cmake", "--version"], env) == 0 and ran[1][0] == ["cmake", "--version"]
+    # without hooks still through cmd, which looks the program up on the PATH of the environment
+    for hook in hooks.iterdir():
+        hook.unlink()
+    assert wt._run(["cmake", "--version"], env) == 0 and ran[1][0] == 'cmd /d /s /c ""cmake" "--version""'
+    monkeypatch.setattr(wt, "_windows", lambda: False)
+    assert wt._run(["cmake", "--version"], env) == 0 and ran[2][0] == ["cmake", "--version"]

@@ -266,9 +266,8 @@ class AxquaDock(QDockWidget):
         self.configuration_tab = ConfigurationTab(self.ctx)
         self.configuration_tab.on_findings = lambda level: self.mark("configuration",
                                                                      level)
-        # the case of the last session is in the list, and its tabs are filled when axqua
-        # answers: they said "Add a case" after every start until Refresh was clicked
-        self.configuration_tab.on_runner_ready = self.refresh_case
+        # the case of the last session is in the list, and its tabs are filled when axqua answers: they said "Add a case" after every start until Refresh was clicked
+        self.configuration_tab.on_runner_ready = self._read_case_once
         self.case_tab = CaseTab(self.ctx)
         self.case_tab.on_findings = lambda level: self.mark("case", level)
         special = {
@@ -419,7 +418,14 @@ class AxquaDock(QDockWidget):
                       case, CaseView.from_payload(payload or {})),
                   on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
 
+    def _read_case_once(self) -> None:
+        """After a check of the axqua program: read the active case unless it is read already (the Check button probes again)."""
+        if self.ctx.case_view is None:
+            self.refresh_case()
+
     def _case_status_arrived(self, case: Path, view: CaseView) -> None:
+        if case != self.ctx.project.active_case_path():
+            return                  # the answer of a case that is no longer the active one
         self._apply_case_view(view)
         self._check_environments(case)
 
@@ -436,14 +442,16 @@ class AxquaDock(QDockWidget):
         run_async("aXqua: checking the solver environments",
                   lambda: client.case_status(case, check_env=True),
                   on_success=lambda payload: self._env_checked(
-                      CaseView.from_payload(payload or {})),
+                      case, CaseView.from_payload(payload or {})),
                   # A failed environment probe is not worth a banner: the tabs are
                   # already filled and everything except the one status line works.
                   on_error=lambda exc: log_message(
                       f"environment check failed: {user_text(exc)}", WARNING),
                   owner=self)
 
-    def _env_checked(self, view: CaseView) -> None:
+    def _env_checked(self, case: Path, view: CaseView) -> None:
+        if case != self.ctx.project.active_case_path():
+            return
         if self.ctx.case_view is not None:
             self.ctx.case_view = view
             self.ctx.apply_display(view)
