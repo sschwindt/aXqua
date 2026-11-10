@@ -21,7 +21,7 @@ mamba activate axqua-env
 pip install -e .
 ```
 
-The QGIS plugin (QGIS 3.44 or newer) is `qgis_plugin/axqua/`; for development link it into a QGIS profile, or start `scripts/qgis_dev.sh`, which uses a QGIS of its own. The installation of the plugin and of the simulation software is described in the [documentation](https://axqua.eu/installation/index.html).
+The QGIS plugin (QGIS 3.44 or newer) is in the official [QGIS plugin repository](https://plugins.qgis.org/plugins/axqua/): *Plugins > Manage and Install Plugins*, search for aXqua. Its source is `qgis_plugin/axqua/`; for development link it into a QGIS profile, or start `scripts/qgis_dev.sh`, which uses a QGIS of its own. The installation of the plugin and of the simulation software is described in the [documentation](https://axqua.eu/installation/index.html).
 
 ## Quick start
 
