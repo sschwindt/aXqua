@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.3.1
+version=1.3.2
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,26 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.3.1
+changelog=1.3.2
+    - Windows: QGIS, the plugin and aXqua run in Windows. Without WSL, the
+      Setup Wizard builds TELEMAC as a Windows program in the user folder,
+      with no administrator rights; it runs on one processor core. With WSL
+      set up by an administrator, the Setup Wizard installs TELEMAC and
+      OpenFOAM inside WSL (tested with a stand-in for WSL only).
+    - Windows: the variables of QGIS's own Python no longer reach aXqua, and
+      user folders with umlauts, spaces or another code page work. Help opens
+      the English pages by default (aXqua > Settings), and questions have
+      English buttons.
+    - A job runs with the number of processes set for it. On a TELEMAC
+      without MPI a job runs on one process, with a warning in the message
+      bar; a larger number asked for with the job is refused before it
+      starts. Cancel ends TELEMAC and every process it started, also on
+      Windows.
+    - Report issue names the error of a failed check and hides the home
+      folder however it is written.
+    - After a restart of QGIS, the tabs show the active case without Refresh.
+    - Upgrade the program with 'pip install --upgrade "axqua[calibration]"'.
+    1.3.1
     - Measurement points less than 15 mesh nodes from an inflow or outflow
       line are left out of the calibration, the validation and the mesh
       convergence study. A warning names them and the boundary, with the
