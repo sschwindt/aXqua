@@ -157,7 +157,7 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
     with collect_warnings() as warned:
         if validate_env and spec.meta.needs_environment:
             captured = _validate_and_capture(resolved, env, spec)
-            _fit_processes_to_installation(spec, captured, explicit_np=np)
+            _fit_processes_to_installation(spec, captured, explicit_np=np, env=env)
 
     jd = create_job(cfg, spec, job_root=job_root)
     _note_in_runner_log(jd, warned)
@@ -226,7 +226,7 @@ def _note_in_runner_log(jd: JobDir, warned: list[str]) -> None:
 
 
 def _fit_processes_to_installation(spec: JobSpec, variables: dict[str, str], *,
-                                   explicit_np: int | None) -> None:
+                                   explicit_np: int | None, env=None) -> None:
     """A TELEMAC built without MPI runs on one process: a count from the case or the profile becomes 1, a count asked for with the job is refused before anything starts.
 
     TELEMAC itself stops such a run only after reading the case ("Parallel inconsistency"), and the plugin's default (MPI processes 0, as set for the case) took the case's 8 on the Windows test computer (2026-11-09), whose TELEMAC was built without MPI.
@@ -239,10 +239,21 @@ def _fit_processes_to_installation(spec: JobSpec, variables: dict[str, str], *,
         return
     from axqua.core import installation
 
+    kind = getattr(env, "kind", None)
+    if str(getattr(kind, "value", kind) or "") == "wsl" and os.name == "nt":
+        # a TELEMAC inside WSL: its Linux paths as Windows reaches them, as `axqua profile check` looks at it (review of 2026-11-10: the raw Linux PATH found neither partel nor mpirun from Windows and cut every WSL job to one process)
+        from axqua.core import wsl
+        distro = getattr(env, "distro", None) or wsl.cached_default_distro()
+        if not distro:
+            return
+        variables = installation.seen_from_windows(variables, distro)
     parallel = next((m for m in installation._telemac_modules(variables, checked=True)
                      if m.name == "parallel"), None)
     if parallel is None or parallel.available is not False:
         return                                      # parallel, or nothing aXqua can tell
+    launcher = str(getattr(env, "mpi_launcher", None) or "").split()
+    if _partel_only(parallel) and launcher and installation._which(launcher[0], variables):
+        return                                      # the launcher the profile names (srun, ...) is there
     if option or (explicit_np and explicit_np > 1):
         raise errors.ConfigError(
             f"{wanted} processes were asked for, but this TELEMAC runs on one process only "
@@ -253,6 +264,11 @@ def _fit_processes_to_installation(spec: JobSpec, variables: dict[str, str], *,
     log.warning("this TELEMAC runs on one process only (%s): the job runs on 1 instead of "
                 "the %d set for the case or the computer", parallel.detail, wanted)
     spec.resources.mpi_processes = 1
+
+
+def _partel_only(parallel) -> bool:
+    """Whether the parallel module lacks only an MPI launcher of the usual names, with partel there."""
+    return str(parallel.detail or "") == "no MPI launcher on the PATH"
 
 
 def _validate_and_capture(profile: profiles.Profile, env, spec: JobSpec

@@ -528,6 +528,64 @@ def test_the_fitted_count_is_written_into_the_runner_log_of_the_job(fake_case, m
     assert json.loads(jd.spec.read_text(encoding="utf-8"))["resources"]["mpi_processes"] == 1
 
 
+def test_a_telemac_in_wsl_is_looked_at_as_windows_reaches_it(fake_case, monkeypatch, tmp_path, as_windows):
+    """Review of 2026-11-10: from Windows, the raw Linux PATH of a TELEMAC inside WSL found neither partel nor mpirun, so every WSL job was cut to one process."""
+    from types import SimpleNamespace
+
+    from axqua.core import installation
+
+    bin_ = tmp_path / "bin"
+    bin_.mkdir()
+    for name in ("partel", "mpirun"):
+        (bin_ / name).write_text("")
+    seen = {}
+
+    def translated(variables, distro):
+        seen["distro"] = distro
+        return {"PATH": str(bin_), installation.SEEN_FROM_WINDOWS: "1"}
+
+    as_windows(submit_mod)
+    monkeypatch.setattr(installation, "seen_from_windows", translated)
+    fake_case.telemac.n_processors = 8
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN)
+    env = SimpleNamespace(kind=SimpleNamespace(value="wsl"), distro="Ubuntu", mpi_launcher="mpirun")
+    submit_mod._fit_processes_to_installation(spec, {"PATH": "/usr/bin:/opt/telemac/bin"}, explicit_np=None, env=env)
+    assert seen == {"distro": "Ubuntu"} and spec.resources.mpi_processes == 8
+
+
+def test_the_mpi_launcher_of_the_profile_counts(fake_case, tmp_path):
+    """A cluster's srun is no mpirun, and its TELEMAC runs in parallel all the same."""
+    from types import SimpleNamespace
+
+    bin_ = tmp_path / "bin"
+    bin_.mkdir()
+    for name in ("partel", "srun"):
+        (bin_ / name).write_text("")
+        (bin_ / name).chmod(0o755)
+    fake_case.telemac.n_processors = 16
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN)
+    env = SimpleNamespace(kind=SimpleNamespace(value="posix"), distro=None, mpi_launcher="srun --mpi=pmix")
+    submit_mod._fit_processes_to_installation(spec, {"PATH": str(bin_)}, explicit_np=None, env=env)
+    assert spec.resources.mpi_processes == 16
+    plain = SimpleNamespace(kind=SimpleNamespace(value="posix"), distro=None, mpi_launcher="mpirun")
+    submit_mod._fit_processes_to_installation(spec, {"PATH": str(bin_)}, explicit_np=None, env=plain)
+    assert spec.resources.mpi_processes == 1                 # without it: no MPI launcher, one process
+
+
+def test_a_named_profile_without_a_count_leaves_it_to_the_case(fake_case):
+    """Review of 2026-11-10: an entry of profiles.yml without mpi_processes read as 1, which won over the case's 16 once the executor ran the job's count."""
+    from axqua.jobs.profiles import Profile
+
+    fake_case.telemac.n_processors = 16
+    profile = Profile.from_dict("cluster", {"solver": "telemac", "setup_script": "/opt/t/pysource.sh"})
+    assert profile.mpi_processes == 0 and "mpi_processes" not in profile.as_dict()
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, profile=profile)
+    assert spec.resources.mpi_processes == 16
+    named = Profile.from_dict("cluster", {"solver": "telemac", "setup_script": "/opt/t/pysource.sh",
+                                          "mpi_processes": 4})
+    assert submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, profile=named).resources.mpi_processes == 4
+
+
 def test_a_count_asked_for_with_the_job_is_refused_by_a_telemac_without_mpi(fake_case,
                                                                             monkeypatch):
     from axqua.core import errors, installation

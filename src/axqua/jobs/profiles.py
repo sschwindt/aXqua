@@ -96,7 +96,8 @@ class Profile:
             distro=data.get("distro"),
             config_name=data.get("config_name"),
             mpi_launcher=data.get("mpi_launcher"),
-            mpi_processes=int(data.get("mpi_processes") or 1),
+            # 0: the entry names no count, so the case's n_processors decides (submit.build_spec); a 1 here used to win over the case's 16 once the executor ran the job's count (review of 2026-11-10)
+            mpi_processes=int(data.get("mpi_processes") or 0),
             working_root=_path(root, base, absolute=data.get("environment") == "wsl"),
             launcher=str(data.get("launcher") or "auto"),
             postprocess=list(data.get("postprocess") or []),
@@ -110,7 +111,8 @@ class Profile:
             value = getattr(self, key)
             if value is not None:
                 out[key] = str(value)
-        out["mpi_processes"] = self.mpi_processes
+        if self.mpi_processes:
+            out["mpi_processes"] = self.mpi_processes
         if self.launcher != "auto":
             out["launcher"] = self.launcher
         if self.postprocess:
