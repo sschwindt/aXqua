@@ -21,13 +21,14 @@ from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
 
 __all__ = ["choose_distro", "call", "package_root", "remote_command", "remote_env"]
 
-#: The program the distribution's python3 runs: this aXqua's command line, with the ``axqua`` package loaded from the Windows folder and nothing else of that folder on the path. The folder holds the packages of another Python and platform, which must not shadow a module of the distribution, and an older aXqua installed in the distribution (as the documentation once asked) must not answer in its place. The install code imports the standard library only.
-LAUNCH = ("import importlib.util, runpy, sys; "
+#: The program the distribution's python3 runs: ``axqua install ...`` of this aXqua, with the ``axqua`` package loaded from the Windows folder and nothing else of that folder on the path. The folder holds the packages of another Python and platform, which must not shadow a module of the distribution, and an older aXqua installed in the distribution (as the documentation once asked) must not answer in its place. The install code imports the standard library only, so it goes to :func:`axqua.installcli.run_install` directly: the whole command line (``axqua.__main__``) imports the pipeline and numpy, which the python3 of a fresh distribution does not have (the wheel test of release 1.3.2 on GitHub, 2026-11-10).
+LAUNCH = ("import importlib.util, sys; "
           "spec = importlib.util.spec_from_file_location('axqua', {root!r} + '/axqua/__init__.py', "
           "submodule_search_locations=[{root!r} + '/axqua']); "
           "package = importlib.util.module_from_spec(spec); sys.modules['axqua'] = package; "
-          "spec.loader.exec_module(package); sys.argv = ['axqua'] + sys.argv[1:]; "
-          "runpy.run_module('axqua.__main__', run_name='__main__', alter_sys=True)")
+          "spec.loader.exec_module(package); args = sys.argv[1:]; sys.argv = ['axqua'] + args; "
+          "args[:1] == ['install'] or sys.exit('inside WSL, aXqua runs axqua install only'); "
+          "from axqua import installcli; sys.exit(installcli.run_install(args[1:]))")
 
 
 def package_root() -> str:

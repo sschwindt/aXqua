@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import shutil
 import sys
@@ -16,11 +17,15 @@ from axqua.core import wsl
 from axqua.install import runner, wslproxy
 
 FAKE_WSL = """#!/bin/sh
-# wsl.exe [-d distro] [-u user] [--cd folder] -- program args: the program runs here
+# wsl.exe [-d distro] [-u user] [--cd folder] -- program args: the program runs here, with the python3 of a fresh distribution
 while [ $# -gt 0 ]; do
   case "$1" in -d|-u|--cd) shift 2 ;; --|--exec|-e) shift; break ;; *) break ;; esac
 done
-exec "$@"
+PATH="{distro_bin}:$PATH" exec "$@"
+"""
+#: python3 without site-packages: a fresh distribution has no numpy, which the conda test job's python3 has (the wheel test of 1.3.2 on GitHub, 2026-11-10)
+BARE_PYTHON = """#!/bin/sh
+exec "{python}" -S "$@"
 """
 
 
@@ -28,8 +33,12 @@ exec "$@"
 def fake_wsl(tmp_path, monkeypatch):
     if shutil.which("python3") is None:
         pytest.skip("no python3 to stand in for the distribution's")
+    distro_bin = tmp_path / "distro-bin"
+    distro_bin.mkdir()
+    (distro_bin / "python3").write_text(BARE_PYTHON.format(python=shutil.which("python3")))
+    (distro_bin / "python3").chmod(0o755)
     script = tmp_path / "wsl.exe"
-    script.write_text(FAKE_WSL)
+    script.write_text(FAKE_WSL.format(distro_bin=distro_bin))
     script.chmod(0o755)
     monkeypatch.setattr(wsl, "executable", lambda: str(script))
     monkeypatch.setattr(wsl, "distros", lambda timeout=30.0: [wsl.Distro("Ubuntu", True, 2)])
@@ -180,9 +189,11 @@ def test_inside_wsl_only_the_axqua_package_is_read_from_the_windows_folder(tmp_p
     (root / "json.py").write_text("raise SystemExit('the Windows folder shadowed json')\n")
     python = shutil.which("python3") or sys.executable
     code = wslproxy.LAUNCH.format(root=str(root))
-    done = subprocess.run([python, "-I", "-c", code, "--version"], capture_output=True, text=True)
+    # -S: without site-packages, as the python3 of a fresh distribution (no numpy; the wheel test of 1.3.2 on GitHub)
+    done = subprocess.run([python, "-I", "-S", "-c", code, "install", "list", "--json"], capture_output=True,
+                          text=True, env={**os.environ, "AXQUA_DATA_DIR": str(tmp_path / "data")})
     assert done.returncode == 0, done.stderr
-    assert done.stdout.startswith("axqua ")
+    assert json.loads(done.stdout)["ok"] is True
 
 
 #: What wsl.exe of Windows 11 24H2 wrote on the test computer of 2026-11-09, where WSL is not installed: UTF-16LE also with WSL_UTF8=1, lines ending in \r\r\n, exit code 50 for --status and 1 for -l.
