@@ -19,9 +19,13 @@ msgstr "Logiciel de simulation"
 msgid "aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed additionally. The plugin has one *Setup Wizard* for TELEMAC and one for OpenFOAM, which either enters an existing installation in the profile of the computer or installs the program. Set up TELEMAC first. OpenFOAM (including postprocessors) is optional and builds on TELEMAC."
 msgstr "aXqua prépare et démarre les simulations, mais les codes numériques sont des logiciels distincts qui doivent être installés en plus. L'extension a un *Setup Wizard* pour TELEMAC et un pour OpenFOAM, qui entre dans une installation existante dans le profil de l'ordinateur ou installe le programme. Préparez TELEMAC d'abord. OpenFOAM (y compris les postprocesseurs) est facultatif et s'appuie sur TELEMAC."
 
-# machine translation: argos d19191c99603
-msgid "On Windows, QGIS, the plugin and the aXqua program run in Windows, and TELEMAC and OpenFOAM run inside the Windows Subsystem for Linux (WSL 2). An administrator of the computer sets up WSL once: ``wsl --install -d Ubuntu-24.04`` in a terminal with administrator rights, then a restart; then open *Ubuntu* from the Start menu and create a Linux user. Nothing after this step needs an administrator:"
-msgstr "Sous Windows, QGIS, l'extension et le programme aXqua fonctionnent sous Windows, et TELEMAC et OpenFOAM fonctionnent dans le sous-système Windows pour Linux (WSL 2). Un administrateur de l'ordinateur met en place WSL une fois : ``wsl --install -d Ubuntu-24.04`` dans un terminal avec les droits de l'administrateur, puis un redémarrage ; puis ouvrir *Ubuntu* à partir du menu Démarrer et créer un utilisateur Linux. Rien après cette étape n'a besoin d'un administrateur :"
+# machine translation: argos 65d726e320e2
+msgid "On Windows, QGIS, the plugin and the aXqua program run in Windows. TELEMAC can run in one of two ways: inside the Windows Subsystem for Linux (WSL 2), described in this note, or as a Windows program built in your user folder, which needs no administrator and no WSL but runs on one processor core only (:ref:`TELEMAC built on Windows <setup-telemac-windows-native>`). OpenFOAM runs inside WSL only."
+msgstr "Sous Windows, QGIS, l'extension et le programme aXqua fonctionnent dans Windows. TELEMAC peut fonctionner de l'une des deux façons suivantes : à l'intérieur du sous-système Windows pour Linux (WSL 2), décrit dans cette note, ou comme un programme Windows construit dans votre utilisateur dossier, qui n'a pas besoin d'administrateur et pas de WSL mais fonctionne sur un seul cœur de processeur (:ref:`TELEMAC construit sur Windows <setup-telemac-windows-native>`). OpenFOAM fonctionne uniquement dans WSL."
+
+# machine translation: argos 4e60aa53f236
+msgid "An administrator of the computer sets up WSL once: ``wsl --install -d Ubuntu-24.04`` in a terminal with administrator rights, then a restart; then open *Ubuntu* from the Start menu and create a Linux user. Nothing after this step needs an administrator:"
+msgstr "Un administrateur de l'ordinateur met en place WSL une fois : ``wsl --install -d Ubuntu-24.04`` dans un terminal avec les droits de l'administrateur, puis un redémarrage ; puis ouvrir *Ubuntu* à partir du menu Démarrer et créer un utilisateur Linux. Rien après cette étape n'a besoin d'un administrateur :"
 
 # machine translation: argos dfc44535fbce
 msgid "The *Setup Wizard* installs TELEMAC and OpenFOAM into the default distribution, into a folder of the Linux file system (a build in a Windows folder such as ``/mnt/c/...`` is slower by an order of magnitude). Missing system packages are installed as the root of the distribution, which needs no password and no administrator of Windows. At its end, the wizard enters the installation in the profile of the computer as an installation in WSL."
@@ -195,9 +199,9 @@ msgstr "TELEMAC"
 msgid "`TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC). Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1."
 msgstr "`TELEMAC <http://www.opentelemac.org/>`_ résout les débits moyens (2D) et 3D, couplés à une grande variété de modules à des fins comme le transport des sédiments (Gaia), l'analyse de la qualité de l'eau (WAQTEL), la propagation des vagues (ARTEMIS et TOMAWAC). Son module de transport des sédiments GAIA fait partie de la même installation. aXqua est développé et testé avec TELEMAC v9.1.1."
 
-# machine translation: argos 9e0f1ab276ec
-msgid "Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. The installation wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its *Settings* tab has four settings besides *Install for*:"
-msgstr "Cliquez sur *Setup Wizard...* dans la rangée de TELEMAC sur l'onglet *Configuration*, et sélectionnez *Install TELEMAC*. L'assistant d'installation est disponible sur Debian 12, Ubuntu 24.04 et Linux Mint 22. Son onglet *Settings* a quatre paramètres en outre *Install for*:"
+# machine translation: argos 3ae180f4be93
+msgid "Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. The installation wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22, and on Windows (:ref:`TELEMAC built on Windows <setup-telemac-windows-native>`). On Linux, its *Settings* tab has four settings besides *Install for*:"
+msgstr "Cliquez sur *Setup Wizard...* dans la ligne de TELEMAC sur l'onglet *Configuration*, et sélectionnez *Install TELEMAC*. L'assistant d'installation est disponible sur Debian 12, Ubuntu 24.04 et Linux Mint 22, et sur Windows (:ref:`TELEMAC construit sur Windows <setup-telemac-windows-native>`). Sur Linux, son onglet *Settings* a quatre paramètres en plus *Install for*:"
 
 # machine translation: argos 73f6d33218d2
 msgid "Setting"
@@ -250,6 +254,70 @@ msgstr "**Utilisez une installation existante de TELEMAC.** Cliquez sur *Setup W
 # machine translation: argos 2f2a16745242
 msgid "for example ``/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh``. A TELEMAC installation has one such script per configuration of its build; select the one of the build you use. A file whose name contains ``template`` is an example and sets up nothing. The check looks for TELEMAC-2D, which every simulation needs, and for TELEMAC-3D (3D simulations and the vertical convergence study), GAIA (morphodynamics, also in the hydrology mode), parallel runs (``partel`` and an MPI launcher) and the Fortran compiler of the build (user Fortran, which the Green-Ampt infiltration of the hydrology mode and the gain-lose exchange compile). The same script can be entered by hand in the profile editor (:ref:`solver-bindings`)."
 msgstr "par exemple ``/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh``. Une installation TELEMAC a un tel script par configuration de sa construction ; sélectionnez celle de la construction que vous utilisez. Un fichier dont le nom contient ``template`` est un exemple et ne définit rien. La vérification vise TELEMAC-2D, dont chaque simulation a besoin, et pour TELEMAC-3D (3D simulations et l'étude de convergence verticale), GAI (morphodynamique, aussi en mode hydrologie), des circuits parallèles (``partel`` et un lanceur MPI) et le compilateur Fortran de la construction (utilisateur Fortran, que l'infiltration Green-Ampt du mode hydrologie et l'échange gain-perte compilent). Le même script peut être entré à la main dans l'éditeur de profil (:ref:`solver-bindings`)."
+
+# machine translation: argos 820d78b8a6a5
+msgid "**TELEMAC built on Windows, without WSL.** On a Windows computer where WSL cannot be set up, for example without administrator rights, the *Setup Wizard* compiles TELEMAC as a Windows program in your user folder. Nothing of this needs administrator rights. The resulting TELEMAC has no parallel computing (no MPI) and runs every simulation on one processor core. On Windows 11 without administrator rights, the wizard built TELEMAC v9.1.1 with TELEMAC-2D in 16 minutes, and a build with the same commands ran the steady simulation of the Isar example case to its end in 58 minutes on one core. Only TELEMAC-2D was tested. TELEMAC-3D, morphodynamics with GAIA, the hydrology mode and the calibration with HydroBayesCal have not been tested on Windows yet."
+msgstr "**TELEMAC construit sur Windows, sans WSL.** Sur un ordinateur Windows où WSL ne peut pas être configuré, par exemple sans droits d'administrateur, le *Setup Wizard* compile TELEMAC comme un programme Windows dans votre dossier utilisateur. Rien de tout cela n'a besoin de droits d'administrateur. Le TELEMAC résultant n'a pas de calcul parallèle (pas de MPI) et exécute chaque simulation sur un noyau de processeur. Sur Windows 11 sans droits d'administrateur, l'assistant a construit TELEMAC v9.1.1 avec TELEMAC-2D en 16 minutes, et une construction avec les mêmes commandes a exécuté la simulation en régime permanent de l'exemple d'Isar cas à sa fin en 58 minutes sur un seul noyau. Seul TELEMAC-2D a été testé. TELEMAC-3D, morphodynamique avec GAIA, le mode hydrologie et le calage avec HydroBayeCal n'ont pas encore été testés sur Windows."
+
+# machine translation: argos db4180d303bd
+msgid "Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. When aXqua already knows a TELEMAC on this computer, it asks whether to install it again: answer *Yes*, and keep *Install it again in a new folder* on the *Settings* tab to leave the existing TELEMAC as it is. On Windows, the *Settings* tab then has the setting *Build TELEMAC*:"
+msgstr "Cliquez sur *Setup Wizard...* dans la rangée de TELEMAC sur l'onglet *Configuration*, et sélectionnez *Install TELEMAC*. Quand aXqua connaît déjà un TELEMAC sur cet ordinateur, il demande s'il faut l'installer à nouveau : répondre à *Yes*, et garder *Install it again in a new folder* sur l'onglet *Settings* pour laisser le TELEMAC existant tel qu'il est. Sous Windows, l'onglet *Settings* a alors le réglage *Build TELEMAC*:"
+
+# machine translation: argos fdd128f2caa2
+msgid "*In Windows itself: one processor core, no administrator* is the only choice on a computer without WSL."
+msgstr "*In Windows itself: one processor core, no administrator* est le seul choix sur un ordinateur sans WSL."
+
+# machine translation: argos b2b5603ae01c
+msgid "*Inside WSL: parallel runs; WSL must be set up by an administrator* is offered when WSL is set up, and is then the default (see the note at the top of this page)."
+msgstr "*Inside WSL: parallel runs; WSL must be set up by an administrator* est offert lorsque WSL est configuré, et est alors la valeur par défaut (voir la note en haut de cette page)."
+
+# machine translation: argos 67e14c5c9998
+msgid "Built in Windows itself, TELEMAC has these settings:"
+msgstr "Construit dans Windows lui-même, TELEMAC a ces paramètres :"
+
+# machine translation: argos 536ec43522b2
+msgid "The default is ``opt\\telemac`` in your user folder, and a new folder next to the existing one when TELEMAC is installed again. The source code and the build go into its subfolder ``telemac-mascaret``, the compilers into its subfolder ``telemac-build``. The path must not contain spaces."
+msgstr "La valeur par défaut est ``opt\\telemac`` dans votre dossier utilisateur, et un nouveau dossier à côté de celui existant lorsque TELEMAC est installé à nouveau. Le code source et la construction entrent dans son sous-dossier ``telemac-mascaret``, les compilateurs dans son sous-dossier ``telemac-build``. Le chemin ne doit pas contenir d'espaces."
+
+# machine translation: argos ddeff978ab56
+msgid "*TELEMAC-2D with GAIA* (the default) is the build that was tested on Windows. *All modules, also TELEMAC-3D* takes longer to compile and has not been tested on Windows yet."
+msgstr "*TELEMAC-2D with GAIA* (par défaut) est la compilation qui a été testée sur Windows. *All modules, also TELEMAC-3D* prend plus de temps à compiler et n'a pas encore été testé sur Windows."
+
+# machine translation: argos af2613db12f6
+msgid "In a new folder, the *Check* tab lists five steps:"
+msgstr "Dans un nouveau dossier, l'onglet *Check* énumère cinq étapes :"
+
+# machine translation: argos 7a713f6671e9
+msgid "*Download the compilers (conda-forge)*: a conda environment with the GNU compilers for Windows (MinGW-w64), CMake, Make and Git, a download of several hundred MB. It is created with the conda of the installation that aXqua runs from, so for this route aXqua must be installed in a conda environment (Miniforge, Miniconda or Anaconda), as :doc:`qgis-plugin` describes."
+msgstr "*Download the compilers (conda-forge)*: un environnement conda avec les compilateurs GNU pour Windows (MinGW-w64), CMake, Make et Git, un téléchargement de plusieurs centaines de MB. Il est créé avec le conda de l'installation à partir de laquelle aXqua fonctionne, donc pour cette route aXqua doit être installé dans un environnement conda (Miniforge, Miniconde ou Anaconda), comme :doc:`qgis-plugin` décrit."
+
+# machine translation: argos f12747b553cf
+msgid "*Download the source code of TELEMAC* with Git, without the large files of TELEMAC's own example cases."
+msgstr "*Download the source code of TELEMAC* avec Git, sans les grands fichiers de l'exemple de TELEMAC cas."
+
+# machine translation: argos f5a526a5f8db
+msgid "*Configure the build* with CMake and MinGW Makefiles, without MPI, MED and MUMPS."
+msgstr "*Configure the build* avec CMake et MinGW Makefiles, sans MPI, MED et MUMPS."
+
+# machine translation: argos 5ba7cc995642
+msgid "*Compile TELEMAC*. TELEMAC-2D took 10 minutes with 8 processes on the test computer."
+msgstr "*Compile TELEMAC*. TELEMAC-2D a pris 10 minutes avec 8 processus sur l'ordinateur de test."
+
+# machine translation: argos eb8a156e8bdc
+msgid "*Write the environment script* ``telemac-mascaret\\configs\\pysource.win.bat``. It only sets variables and changes nothing on the computer. aXqua then enters it in the profile, as at the end of every installation, unless *Enter the installation in the profile of this computer* is cleared (``--no-bind`` in a terminal). The *Configuration* tab then shows it in the row of TELEMAC."
+msgstr "*Write the environment script* ``telemac-mascaret\\configs\\pysource.win.bat``. Il ne définit que des variables et ne change rien sur l'ordinateur. aXqua l'inscrit ensuite dans le profil, comme à la fin de chaque installation, à moins que *Enter the installation in the profile of this computer* ne soit autorisé (``--no-bind`` dans un terminal). L'onglet *Configuration* l'affiche alors dans la rangée de TELEMAC."
+
+# machine translation: argos 6cfce4047bf4
+msgid "The installation goes on when the wizard or QGIS is closed. After QGIS is opened again, the button in the row of TELEMAC reads *Show the installation...* and opens the wizard on its *Installation* tab. In a terminal, ``axqua install status telemac --tail 20`` shows the step and the last lines of the log. The log, ``install.log`` in ``%LOCALAPPDATA%\\axqua\\installs\\<installation>``, gives the start and the duration of each step."
+msgstr "L'installation se poursuit lorsque l'assistant ou QGIS est fermé. Après l'ouverture de QGIS, le bouton dans la rangée de TELEMAC lit *Show the installation...* et ouvre l'assistant sur son onglet *Installation*. Dans un terminal, ``axqua install status telemac --tail 20`` montre l'étape et les dernières lignes du journal. Le journal, ``install.log`` dans ``%LOCALAPPDATA%\\axqua\\installs\\<installation>``, donne le début et la durée de chaque étape."
+
+# machine translation: argos 19fdaa55793c
+msgid "When the server of TELEMAC does not answer (it returned the error HTTP 504 on 9 November 2026), the installation stops at the second step. Start it again later with the same *Installation folder*: the plan then has fewer steps, because the compilers are kept, and a source code that was downloaded completely is kept too. In a terminal (the *Anaconda Prompt* or *Miniforge Prompt*), ``axqua install start telemac --native`` does the same as the wizard; give it the folder of the first attempt with ``--folder``."
+msgstr "Lorsque le serveur de TELEMAC ne répond pas (il a renvoyé l'erreur HTTP 504 le 9 novembre 2026), l'installation s'arrête à la deuxième étape. Recommencer plus tard avec le même *Installation folder*: le plan a alors moins d'étapes, parce que les compilateurs sont conservés, et un code source qui a été téléchargé complètement est également conservé. Dans un terminal (le *Anaconda Prompt* ou *Miniforge Prompt*), ``axqua install start telemac --native`` fait la même chose que l'assistant ; donnez-lui le dossier de la première tentative avec ``--folder``."
+
+# machine translation: argos 000c04dee5b4
+msgid "aXqua runs the Python scripts of TELEMAC with the Python of the aXqua environment. The check of the profile reports that parallel runs are not available. A job then runs on one core: a number of processes that comes from the case or the computer profile becomes 1, with a warning in the message bar of QGIS and at the top of the log of the job. A number above 1 that is asked for with the job (*MPI processes* in the plugin, ``--np`` in a terminal) is refused before the job starts, because TELEMAC would stop with the error *Parallel inconsistency*. Cancelling a job ends TELEMAC and every process it started. A TELEMAC built on Windows by hand is entered with *Select existing config file* and its ``configs\\pysource.<configuration>.bat``."
+msgstr "aXqua exécute les scripts Python de TELEMAC avec le Python de l'environnement aXqua. La vérification des rapports de profil que les parcours parallèles ne sont pas disponibles. Une tâche fonctionne alors sur un noyau : un certain nombre de processus qui proviennent du cas ou du profil informatique devient 1, avec un avertissement dans la barre de messages de QGIS et en haut du journal de bord de la tâche. Un numéro supérieur à 1 demandé avec la tâche (*MPI processes* dans l'extension, ``--np`` dans un terminal) est refusé avant le début de la tâche, car TELEMAC s'arrêterait avec l'erreur *Parallel inconsistency*. L'annulation d'une tâche met fin à TELEMAC et à chaque processus qu'elle a commencé. Un TELEMAC construit sur Windows à la main est entré avec *Select existing config file* et son ``configs\\pysource.<configuration>.bat``."
 
 # machine translation: argos 6fb1de154d09
 msgid "OpenFOAM"
