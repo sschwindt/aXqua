@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/jobs/procs.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -379,7 +379,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"boot_id"</span><span class="p">,</span> <span class="s2">"host_id"</span><span class="p">,</span> <span class="s2">"pid_alive"</span><span class="p">,</span> <span class="s2">"process_start_time"</span><span class="p">,</span> <span class="s2">"self_start_time"</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"boot_id"</span><span class="p">,</span> <span class="s2">"host_id"</span><span class="p">,</span> <span class="s2">"pid_alive"</span><span class="p">,</span> <span class="s2">"process_start_time"</span><span class="p">,</span> <span class="s2">"same_boot"</span><span class="p">,</span> <span class="s2">"self_start_time"</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="host_id">
@@ -408,12 +408,59 @@
             <span class="k">return</span> <span class="n">linux</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
         <span class="k">pass</span>
+    <span class="n">counted</span> <span class="o">=</span> <span class="n">_windows_boot_count</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">counted</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"windows-boot-</span><span class="si">{</span><span class="n">counted</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">booted</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>   <span class="c1"># pragma: no cover</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"boot-</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">booted</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="mi">60</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>      <span class="c1"># minute resolution: coarse on purpose</span></div>
 
+
+
+<span class="c1">#: How far apart, in minutes, two derived boot ids (``boot-&lt;minute&gt;``) may be and still name one boot: the wall clock is corrected while the computer runs (time service, a manual change), which moves the derived boot instant, and a new boot is never a few minutes from the last.</span>
+<span class="n">DERIVED_TOLERANCE</span> <span class="o">=</span> <span class="mi">5</span>
+
+
+<div class="viewcode-block" id="same_boot">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.procs.same_boot">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">same_boot</span><span class="p">(</span><span class="n">recorded</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">current</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether two boot ids name the same boot; unknown counts as the same (nothing to judge by)."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">recorded</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">current</span> <span class="ow">or</span> <span class="n">recorded</span> <span class="o">==</span> <span class="n">current</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">recorded</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"boot-"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">current</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"boot-"</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">recorded</span><span class="p">[</span><span class="mi">5</span><span class="p">:])</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">current</span><span class="p">[</span><span class="mi">5</span><span class="p">:]))</span> <span class="o">&lt;=</span> <span class="n">DERIVED_TOLERANCE</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">_scheme</span><span class="p">(</span><span class="n">recorded</span><span class="p">)</span> <span class="o">!=</span> <span class="n">_scheme</span><span class="p">(</span><span class="n">current</span><span class="p">):</span>
+        <span class="c1"># recorded by another version of aXqua (an update while a job runs), or the boot counter could not be read once: nothing to judge by</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scheme</span><span class="p">(</span><span class="n">ident</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">ident</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"windows-boot-"</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">"windows"</span>
+    <span class="k">return</span> <span class="s2">"derived"</span> <span class="k">if</span> <span class="n">ident</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"boot-"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"linux"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_windows_boot_count</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The boot counter Windows keeps (``BootId`` of the prefetcher), which a clock correction does not move."""</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">"nt"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>   <span class="c1"># pragma: no cover - Windows only</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">winreg</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">OpenKey</span><span class="p">(</span><span class="n">winreg</span><span class="o">.</span><span class="n">HKEY_LOCAL_MACHINE</span><span class="p">,</span>
+                             <span class="sa">r</span><span class="s2">"SYSTEM\CurrentControlSet\Control\Session Manager"</span>
+                             <span class="sa">r</span><span class="s2">"\Memory Management\PrefetchParameters"</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">key</span><span class="p">:</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">winreg</span><span class="o">.</span><span class="n">QueryValueEx</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">"BootId"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
 
 <div class="viewcode-block" id="pid_alive">

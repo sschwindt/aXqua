@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/automation/batch-headless.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -417,7 +417,7 @@
   results/        a list of the result files
 </pre></div>
 </div>
-<p>Der Job speichert die Einstellungen des Falls zum Zeitpunkt der Einreichung. Eine spätere Änderung der Fall-Datei hat keinen Einfluss auf einen laufenden Job und ein abgeschlossener Job bleibt reproduzierbar.</p>
+<p>Der Job speichert die Einstellungen des Falls zum Zeitpunkt der Einreichung. Eine spätere Änderung der Falldatei hat keinen Einfluss auf einen laufenden Job, und ein abgeschlossener Job bleibt reproduzierbar.</p>
 </section>
 <section id="monitor-and-control-jobs">
 <h2>Überwachungs- und Kontrollaufgaben<a class="headerlink" href="#monitor-and-control-jobs" title="Link to this heading"></a></h2>
@@ -430,7 +430,7 @@ axqua cancel &lt;job-id&gt;               # stop the job
 </pre></div>
 </div>
 <p>Ein Job läuft durch die Zustände <code class="docutils literal notranslate"><span class="pre">QUEUED</span></code>, <code class="docutils literal notranslate"><span class="pre">STARTING</span></code>, <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code> und <code class="docutils literal notranslate"><span class="pre">POSTPROCESSING</span></code> und endet als <code class="docutils literal notranslate"><span class="pre">COMPLETED</span></code>, <code class="docutils literal notranslate"><span class="pre">FAILED</span></code> oder <code class="docutils literal notranslate"><span class="pre">CANCELLED</span></code>. Wenn der Prozess eines Jobs verschwindet, zum Beispiel weil der Computer neu gestartet wurde, kennzeichnet die nächste Statusabfrage den Job als <code class="docutils literal notranslate"><span class="pre">FAILED</span></code>. Ein Job bleibt daher niemals aus Versehen im Zustand <code class="docutils literal notranslate"><span class="pre">RUNNING</span></code>.</p>
-<p>Um einen gescheiterten Job zu untersuchen, lesen Sie zuerst <code class="docutils literal notranslate"><span class="pre">runner.log</span></code>. Es enthält den Fehler mit einem Code und einem vorgeschlagenen Heilmittel (<a class="reference internal" href="../troubleshooting/index.html"><span class="doc">Fehlerbehebung</span></a>). Der Befehl <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">execute</span> <span class="pre">&lt;job-id&gt;</span></code> wiederholt den Job im Vordergrund, so dass alle Nachrichten im Terminal erscheinen.</p>
+<p>Um einen gescheiterten Job zu untersuchen, lesen Sie zuerst <code class="docutils literal notranslate"><span class="pre">runner.log</span></code>. Es enthält den Fehler mit einem Code und einer vorgeschlagenen Abhilfe (<a class="reference internal" href="../troubleshooting/index.html"><span class="doc">Fehlerbehebung</span></a>). Der Befehl <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">execute</span> <span class="pre">&lt;job-id&gt;</span></code> wiederholt den Job im Vordergrund, so dass alle Nachrichten im Terminal erscheinen.</p>
 </section>
 <section id="sequences-of-jobs">
 <h2>Sequenzen von Arbeitsplätzen<a class="headerlink" href="#sequences-of-jobs" title="Link to this heading"></a></h2>
@@ -452,7 +452,7 @@ run_step<span class="w"> </span>mesh-convergence
 </pre></div>
 </div>
 <p>Starten Sie ein solches Skript mit <code class="docutils literal notranslate"><span class="pre">nohup</span> <span class="pre">bash</span> <span class="pre">my-study.sh</span> <span class="pre">&amp;</span></code>, damit es nach dem Schließen von Terminal fortgesetzt wird.</p>
-<p>Um einen Schritt für mehrere Abflüsse zu wiederholen, erstellen Sie eine Fall-Datei pro Abfluss und rufen Sie <code class="docutils literal notranslate"><span class="pre">run_step</span></code> in einer Schleife über die Fall-Dateien auf.</p>
+<p>Um einen Schritt für mehrere Abflüsse zu wiederholen, erstellen Sie einen Falldatei pro Abfluss und rufen Sie <code class="docutils literal notranslate"><span class="pre">run_step</span></code> in einer Schleife über die Falldateien auf.</p>
 </section>
 <section id="how-jobs-are-detached">
 <h2>Wie Jobs losgelöst werden<a class="headerlink" href="#how-jobs-are-detached" title="Link to this heading"></a></h2>
@@ -482,7 +482,7 @@ run_step<span class="w"> </span>mesh-convergence
 </tr>
 </tbody>
 </table>
-<p>Ein weiterer Launcher wird mit <code class="docutils literal notranslate"><span class="pre">--launcher</span></code> ausgewählt. Die Launcher <code class="docutils literal notranslate"><span class="pre">windows</span></code> und <code class="docutils literal notranslate"><span class="pre">wsl</span></code> wurden noch nicht auf einer echten Windows-Installation getestet.</p>
+<p>Ein weiterer Launcher wird mit <code class="docutils literal notranslate"><span class="pre">--launcher</span></code> ausgewählt. Die Launcher <code class="docutils literal notranslate"><span class="pre">windows</span></code> und <code class="docutils literal notranslate"><span class="pre">wsl</span></code> wurden noch nicht auf einem echten Windows Installation getestet.</p>
 <p>Wenn Sie einen Job stornieren, wird der Job zuerst aufgefordert, sich selbst zu beenden, damit er seine Dateien schließen kann. Wenn der Job nicht innerhalb von 20 Sekunden reagiert, stoppt aXqua alle seine Prozesse, einschließlich der parallelen Prozesse des Simulationscodes.</p>
 </section>
 </section>

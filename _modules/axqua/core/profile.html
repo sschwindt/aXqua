@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/core/profile.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -457,7 +457,9 @@
 <span class="c1">#: postprocessor. For OpenFOAM the script of aXqua's own installation comes first,</span>
 <span class="c1">#: because it also sets up the sediment solvers.</span>
 <span class="n">LAYOUT</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"telemac"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"configs/pysource.*.sh"</span><span class="p">,),</span>
+    <span class="c1"># a .bat is what TELEMAC built natively on Windows is entered by (cmd cannot source a .sh)</span>
+    <span class="s2">"telemac"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"configs/pysource.*.bat"</span><span class="p">,</span> <span class="s2">"configs/pysource.*.sh"</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span>
+               <span class="k">else</span> <span class="p">(</span><span class="s2">"configs/pysource.*.sh"</span><span class="p">,),</span>
     <span class="s2">"openfoam"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"shell-rc.sh"</span><span class="p">,</span> <span class="s2">"etc/bashrc"</span><span class="p">),</span>
     <span class="s2">"paraview"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"bin/paraview"</span><span class="p">,),</span>
     <span class="s2">"visit"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"bin/visit"</span><span class="p">,),</span>
@@ -676,7 +678,10 @@
 <span class="w">        </span><span class="sd">"""Only what is set: a written profile records decisions, not defaults."""</span>
         <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="s2">"setup_script"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="p">)</span>
+            <span class="c1"># a script inside WSL is a Linux path; on Windows its Path spells it \\opt\\..., which is no path a person reads as Linux</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"setup_script"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+                                   <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">"wsl"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_wsl_path</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">else</span> <span class="n">text</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"environment"</span><span class="p">,</span> <span class="s2">"shell"</span><span class="p">,</span> <span class="s2">"distro"</span><span class="p">,</span> <span class="s2">"config_name"</span><span class="p">,</span> <span class="s2">"mpi_launcher"</span><span class="p">,</span>
                     <span class="s2">"mpi_processes"</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -1046,7 +1051,10 @@
     <span class="k">for</span> <span class="n">solver</span> <span class="ow">in</span> <span class="n">SOLVERS</span><span class="p">:</span>
         <span class="n">found</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">use_profile</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
-            <span class="n">profile</span><span class="o">.</span><span class="n">solvers</span><span class="p">[</span><span class="n">solver</span><span class="p">]</span> <span class="o">=</span> <span class="n">SolverBinding</span><span class="p">(</span><span class="n">setup_script</span><span class="o">=</span><span class="n">found</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">inside</span> <span class="o">=</span> <span class="n">_wsl_location</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">solvers</span><span class="p">[</span><span class="n">solver</span><span class="p">]</span> <span class="o">=</span> <span class="n">SolverBinding</span><span class="p">(</span>
+                <span class="n">setup_script</span><span class="o">=</span><span class="n">found</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="s2">"wsl"</span> <span class="k">if</span> <span class="n">inside</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">distro</span><span class="o">=</span><span class="n">inside</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">inside</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">program_name</span> <span class="ow">in</span> <span class="n">POSTPROCESSORS</span><span class="p">:</span>
         <span class="n">found</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">program_name</span><span class="p">,</span> <span class="n">use_profile</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
@@ -1067,12 +1075,24 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">absolute_script</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""*script* as a full path (``~`` expanded, links followed where the file exists), so that one file named two ways is one file."""</span>
+<span class="w">    </span><span class="sd">"""*script* as a full path (``~`` expanded, links followed where the file exists), so that one file named two ways is one file.</span>
+
+<span class="sd">    On Windows, a Linux path (``/opt/...``) and a path into a WSL distribution (``\\\\wsl.localhost\\...``) stay as they are: made absolute against a Windows drive, ``/opt/x.sh`` became ``C:\\opt\\x.sh``, a file on neither side.</span>
+<span class="sd">    """</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_wsl_path</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">))</span>
+                           <span class="ow">and</span> <span class="ow">not</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"</span><span class="se">\\\\</span><span class="s2">"</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">script</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wsl_path</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.wsl</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_unc</span>
+    <span class="k">return</span> <span class="n">is_unc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">same_script</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1091,7 +1111,24 @@
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">empty</span> <span class="ow">in</span> <span class="n">INSTALLATION_FIELDS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">empty</span><span class="p">))</span>
     <span class="n">new</span><span class="o">.</span><span class="n">setup_script</span> <span class="o">=</span> <span class="n">absolute_script</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+    <span class="n">inside</span> <span class="o">=</span> <span class="n">_wsl_location</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">inside</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># \\wsl.localhost\&lt;distro&gt;\...: the file names its distribution, and is entered there</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">environment</span><span class="p">,</span> <span class="n">new</span><span class="o">.</span><span class="n">distro</span> <span class="o">=</span> <span class="s2">"wsl"</span><span class="p">,</span> <span class="n">inside</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">new</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">"wsl"</span> <span class="ow">and</span> <span class="n">_drive_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">script</span><span class="p">)):</span>
+        <span class="c1"># a file of Windows (C:\...) is no installation inside WSL, whatever the old entry was</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">environment</span><span class="p">,</span> <span class="n">new</span><span class="o">.</span><span class="n">distro</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="n">new</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_drive_path</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^[A-Za-z]:[</span><span class="se">\\</span><span class="s2">/]"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wsl_location</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"tuple[str, str] | None"</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.wsl</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_unc</span>
+    <span class="k">return</span> <span class="n">from_unc</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">script</span><span class="p">))</span> <span class="k">if</span> <span class="n">script</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
 
 <span class="c1"># ------------------------------------------------------------------------ checking</span>

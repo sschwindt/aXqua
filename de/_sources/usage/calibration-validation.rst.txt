@@ -185,6 +185,16 @@ In the plugin, click *Submit* on the *Calibration & validation* tab. The option 
 
 The computing time is approximately the number of runs (``max_runs``) times the duration of one steady simulation. The job list shows the number of the current run, for example ``iter 5/12``.
 
+**Starting each run from the steady result.** By default, each run repeats the steady simulation from its dry or pre-wetted start, so most of its computing time is spent on filling the reach. With ``hotstart: true``, each run instead continues from the converged result of the steady simulation (``r2d.slf``), and the flow only has to settle to the roughness values being tested:
+
+.. code-block:: yaml
+
+   calibration:
+     hotstart: true
+     hotstart_duration: 2500    # simulated time of each run [s]; optional
+
+The steering file of these runs is ``calibration2d.cas``, which aXqua derives from the built ``steady2d.cas``. Each run writes its own result file, so the steady result is not overwritten. Without ``hotstart_duration``, each run lasts 1.2 times the residence time of the reach. The residence time is the volume of water in the steady result divided by the discharge, which is the time in which the reach exchanges its water once. On the Inn reach KB15, with the roughness of all calibrated zones at the lower or at the upper limit of their ranges, the flow had settled after this time (3,000 s), and each run took 17 to 29 minutes on 16 cores instead of 56 minutes from the dry start. The same holds when the discharge of a run differs from that of the steady result: started from the result at 54.3 m³/s, runs at 45.8 and 55.4 m³/s with the roughness at the limits of the ranges held their water volume within 0.05 % after approximately 2,400 s, while 1.2 residence times are 3,500 and 2,900 s. The option requires a steady simulation that was run on the current mesh and reached a steady state; aXqua refuses a result of an earlier build. In the plugin, the options are *Start each simulation from the steady result* and *Simulated time of each simulation* in the case settings, page *Calibration and validation*.
+
 HydroBayesCal performs its runs in the folder of the built case (``axqua-case/simulation/``) and writes each tested set of parameter values into the friction table and the steering file there. aXqua restores both files when the calibration ends, so that a later simulation uses the case as it was built. For the same reason, jobs of one case run one after the other: a job that is submitted during a calibration waits until the calibration has ended. The folder ``cases/example-isar/`` of the repository contains a complete example with a run time of about half an hour, including a step-by-step guide for the plugin.
 
 .. _validation-run:
@@ -199,7 +209,41 @@ The validation runs the calibrated model with the boundary values of the validat
 
 aXqua then reads the model at the validation points and writes three files into ``axqua-case/calibration-validation/validation/``: a table with the measured and the modeled value at each point (``validation-<name>.csv``), a summary (``validation-<name>.json``), and a figure of the modeled against the measured values (``validation-<name>.png``). Measurement points outside the model are counted and excluded, and points less than 15 mesh nodes from an inflow or outflow line are left out with the same warning as in the calibration.
 
-**Several discharges.** Roughness values that were calibrated at one discharge are not necessarily valid at another one. The script ``run_Bayes_cal_multiflow.py`` in the case folder calibrates one common set of parameters against measurements at several discharges. Run it with ``--smoke`` first. This short test with three runs verifies the complete chain before days of computing time are spent.
+**Several discharges.** Roughness values that were calibrated at one discharge are not necessarily valid at another one. Measurements of several surveys at different discharges can therefore be calibrated together. Each survey is a **calibration situation**, described like a validation situation, with a name, its measurements and its discharge:
+
+.. code-block:: yaml
+
+   calibration:
+     situations:
+       - name: August 2026
+         prescribed_flowrate: 55.4    # [m3/s]
+         sources:
+           - category: hydraulics
+             kind: points
+             positions: user-sources/ground-truth/KB15_Aug26.gpkg
+       - name: November 2025
+         prescribed_flowrate: 47.8
+         sources:
+           - category: hydraulics
+             kind: points
+             positions: user-sources/ground-truth/KB15_Nov25.gpkg
+
+With situations, every tested set of parameter values is simulated at the discharge of each situation, and HydroBayesCal fits one common set to the measurements of all of them. Measurements under ``ground_truth`` join as one more situation at the discharge of the case. Each situation gets its own steering file ``steady2d-<name>.cas``, which differs from the built case only in the prescribed discharges, the outflow water level, the name of its results file and, with ``hotstart: true``, in the start from the steady result for 1.2 residence times at the discharge of the situation. The outflow water level and the distribution over several inflows follow the rules of a validation situation. The input and result files go to ``axqua-case/calibration-validation/multiflow/``. The computing time grows with the number of situations, because every run is repeated for each of them.
+
+In the plugin, add the files in the table *Measurement files* (case settings, page *Calibration and validation*), select *Calibration* in the column *Use for*, and enter the name of the situation and its discharge. A file of the calibration without a situation name was measured at the discharge of the case.
+
+The surrogate model of HydroBayesCal is a multi-output Gaussian process emulator by default: for each measurement location, one emulator predicts the water depth and the velocity together, including their correlation (``multitask_selection: variables``). ``SO_sequential`` trains independent single-output emulators instead.
+
+**Points the model cannot reproduce.** A measured value that no set of parameter values within the ranges reproduces cannot inform the calibration, but with its measurement error alone it decides the likelihood: every tested set misses it by the same large amount, and the posterior then rests on the few sets that miss it least. On the Inn reach KB15, the water depth at the November 2025 points was 17 to 38 cm too low in all 16 initial simulations, and the velocity there 0.11 to 0.54 m/s too high, because the terrain model does not hold the water level of the pool up; HydroBayesCal accepted 1 of 60,000 prior samples. With ``structural_error: unreachable``, aXqua runs HydroBayesCal in two passes. The first pass runs the initial simulations only. aXqua then compares, for each point and target, the measured value with the range of the simulated values; where the value lies outside the range, the distance to the range is added to the error of that point and target (as the root of the sum of the squares). A group of points can still each lie inside the simulated range without any one set reaching all of them. aXqua therefore takes the initial simulation that fits all situations and targets best and computes, for each situation and target, the chi-square per point at that simulation (the squared misfit divided by the variance HydroBayesCal uses, averaged over the points). Where it exceeds 1, the variances of these points are multiplied by it, so the group counts only as much as the model can fit. On KB15 this applied mainly to the velocities of August 2026 (factor 10.1) and March 2026 (factor 8.0); the other surveys and targets lay between 0.9 and 1.3. The second pass trains the emulator on the saved simulations and runs the active learning with these errors. A point that the model reaches, in a group that the model fits, keeps its measurement error, so it counts fully:
+
+.. code-block:: yaml
+
+   calibration:
+     structural_error: unreachable    # none (default): every point keeps its measurement error
+
+The errors and their parts are written to ``model-error-<name>.csv`` next to the calibration points, with the measured value, the measurement error, the smallest and largest simulated value, the misfit that remains, the value of the best initial simulation, the factor on the variance and the combined error. With these errors the posterior is wider, but it can still be narrow compared to the ranges: HydroBayesCal keeps a prior sample with a probability equal to its likelihood divided by the largest likelihood, and on KB15 it kept 1,006 of 60,000 prior samples (1.7 percent). Raise ``calibration.prior_samples`` (default 5,000) when the log reports few accepted samples; HydroBayesCal needs approximately 200. The sufficiency check of the initial design in the first pass still uses the measurement errors, so it may extend the initial design further than necessary. In the plugin, the setting is *Model error at points the model cannot reach* in the case settings, page *Calibration and validation*. The calibration option *Continue from the saved initial simulations* (``--option resume=true`` for ``axqua submit``) starts with the second pass and uses the initial simulations of an earlier calibration of the case.
+
+The script ``run_Bayes_cal_multiflow.py`` in the case folder is the older way to the same calibration, with the measurements of each discharge listed in the script. Run it with ``--smoke`` first. This short test with three runs verifies the complete chain before days of computing time are spent.
 
 **OpenFOAM.** An OpenFOAM model can be calibrated against measured velocity components with the script ``run_Bayes_cal_openfoam.py``. Because a calibration requires dozens of runs, they are performed with a coarse mesh in the mode ``rigid-lid``. The script ``openfoam_verify_posterior.py`` then repeats the calibrated case at full resolution in the mode ``vof``. The roughness of an OpenFOAM model is calibrated as one value for the entire bed. It is therefore not comparable with the roughness values per zone of a TELEMAC calibration.
 

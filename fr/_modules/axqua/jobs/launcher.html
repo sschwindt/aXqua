@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobs/launcher.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -531,6 +531,13 @@
 <span class="sd">    """</span>
     <span class="n">registry</span> <span class="o">=</span> <span class="n">_registry</span><span class="p">()</span>
     <span class="n">prefer</span> <span class="o">=</span> <span class="n">prefer</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENV_LAUNCHER</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">env</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span><span class="p">:</span>
+        <span class="c1"># aXqua runs in Windows and its solvers in WSL (the user's decision of 2026-11-06): the runner is this Windows aXqua, and every solver command crosses into the distribution through wsl.exe (SolverEnvironment never takes a WSL environment as entered). The wsl launcher started the Windows python.exe inside bash, where it does not exist (review of 2026-11-06).</span>
+        <span class="k">if</span> <span class="n">prefer</span> <span class="ow">and</span> <span class="n">prefer</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"auto"</span><span class="p">,</span> <span class="s2">"windows"</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"ignoring launcher </span><span class="si">%r</span><span class="s2">: the job runs in Windows and its solver in "</span>
+                        <span class="s2">"WSL"</span><span class="p">,</span> <span class="n">prefer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">registry</span><span class="p">[</span><span class="s2">"windows"</span><span class="p">]()</span>
 
     <span class="k">if</span> <span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">env</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">prefer</span> <span class="ow">and</span> <span class="n">prefer</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"auto"</span><span class="p">,</span> <span class="s2">"wsl"</span><span class="p">):</span>

@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/installation/simulation-software.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -359,18 +359,26 @@
 <p>aXqua prépare et démarre les simulations, mais les codes numériques sont des logiciels distincts qui doivent être installés en plus. L’extension a un <em>Setup Wizard</em> pour TELEMAC et un pour OpenFOAM, qui entre dans une installation existante dans le profil de l’ordinateur ou installe le programme. Préparez TELEMAC d’abord. OpenFOAM (y compris les postprocesseurs) est facultatif et s’appuie sur TELEMAC.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Sous Windows, TELEMAC et OpenFOAM fonctionnent dans le sous-système Windows pour Linux (WSL 2). Les assistants d’un QGIS qui fonctionne dans Windows ne s’installent pas dans WSL. Installez une distribution avec <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--install</span> <span class="pre">-d</span> <span class="pre">Ubuntu-24.04</span></code> dans un <strong>PowerShell</strong> (similaire à Linux <strong>terminal</strong>) avec les droits d’administrateur, installez aXqua dans la distribution et lancez <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">start</span> <span class="pre">telemac</span></code> dans son terminal. Sélectionnez une installation dossier dans le système de fichiers Linux : une construction dans un dossier Windows (<code class="docutils literal notranslate"><span class="pre">/mnt/c/...</span></code>) est plus lente par ordre de grandeur. Cette route n’a pas encore été testée sur une installation Windows réelle.</p>
+<p>Sous Windows, QGIS, l’extension et le programme aXqua fonctionnent dans Windows. TELEMAC peut fonctionner de l’une des deux façons suivantes : à l’intérieur du sous-système Windows pour Linux (WSL 2), décrit dans cette note, ou comme un programme Windows construit dans votre utilisateur dossier, qui n’a pas besoin d’administrateur et pas de WSL mais fonctionne sur un seul cœur de processeur (<a class="reference internal" href="#setup-telemac-windows-native"><span class="std std-ref">TELEMAC construit sur Windows</span></a>). OpenFOAM fonctionne uniquement dans WSL.</p>
+<p>Un administrateur de l’ordinateur met en place WSL une fois : <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--install</span> <span class="pre">-d</span> <span class="pre">Ubuntu-24.04</span></code> dans un terminal avec les droits de l’administrateur, puis un redémarrage ; puis ouvrir <em>Ubuntu</em> à partir du menu Démarrer et créer un utilisateur Linux. Rien après cette étape n’a besoin d’un administrateur :</p>
+<ul class="simple">
+<li><p>Le <em>Setup Wizard</em> installe TELEMAC et OpenFOAM dans la distribution par défaut, dans un dossier du système de fichiers Linux (une construction dans un dossier Windows tel que <code class="docutils literal notranslate"><span class="pre">/mnt/c/...</span></code> est plus lente par ordre de grandeur). Les paquets système manquants sont installés comme la racine de la distribution, qui ne nécessite aucun mot de passe et aucun administrateur de Windows. À sa fin, l’assistant entre dans l’installation dans le profil de l’ordinateur en tant qu’installation dans WSL.</p></li>
+<li><p>Pour utiliser une installation existante, ouvrez <em>Linux</em> dans la boîte de dialogue de fichier <em>Select existing config file</em> (le dossier <code class="docutils literal notranslate"><span class="pre">\\wsl.localhost</span></code>), puis la distribution, et sélectionnez le script d’environnement.</p></li>
+<li><p>ParaView et VisIt sont des programmes Windows sur Windows : les installer à partir de leurs sites Web (le ZIP de ParaView n’a pas besoin d’administrateur) et les entrer dans le profil.</p></li>
+<li><p>Le calage Bayesian avec HydroBayesCal n’est pas encore disponible sur Windows avec TELEMAC à l’intérieur de WSL ; construire, exécuter et valider un cas sont.</p></li>
+</ul>
+<p>Cette route a été testée avec un stand-in pour WSL seulement, pas encore sur une véritable installation Windows avec WSL.</p>
 </div>
 <section id="installation-wizards-short-version">
 <h2>Assistants d’installation (version courte)<a class="headerlink" href="#installation-wizards-short-version" title="Lien vers cette rubrique"></a></h2>
-<p>Les assistants sont ouverts sur l’onglet <strong>Configuration</strong>, dans la boîte <strong>Simulation &amp; post-traitement Software</strong> montrant le système d’exploitation détecté par aXqua <em>Check</em> bouton. TELEMAC et OpenFOAM ont chacun le bouton <strong>Setup assistant…</strong>, et ParaView et VisIt le bouton <strong>Installer ParaView et VisIt…</strong> (<a class="reference internal" href="postprocessors.html#help-postprocessors"><span class="std std-ref">Après traitement</span></a>).</p>
+<p>Les assistants sont ouverts sur l’onglet <em>Configuration</em>, dans la boîte <em>Simulation &amp; postprocessing software</em> montrant le système d’exploitation détecté par aXqua <em>Check</em> bouton. TELEMAC et OpenFOAM ont chacun le bouton <em>Setup Wizard…</em>, et ParaView et VisIt le bouton <em>Install ParaView and VisIt…</em> (<a class="reference internal" href="postprocessors.html#help-postprocessors"><span class="std std-ref">Après traitement</span></a>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Si le programme aXqua <em>Check</em> a identifié TELEMAC existant, OpenFOAM ou l’installation de logiciel postprocesseur, la case indique pour chaque programme où il est installé ou qu’il n’a pas été trouvé.</p>
 </div>
-<p>Le premier onglet du <em>Setup Wizard</em>, <strong>Setup</strong>, demande comment aXqua est de trouver le programme :</p>
+<p>Le premier onglet du <em>Setup Wizard</em>, <em>Setup</em>, demande comment aXqua est de trouver le programme :</p>
 <ul class="simple">
-<li><p><strong>Sélectionnez le fichier de configuration existant</strong> est le choix pour un programme qui est déjà installé sur cet ordinateur. <em>Next</em> ouvre l’onglet <strong>Installation existante</strong>, qui indique quel fichier choisir : le script <strong>environnement</strong> de l’installation, qui définit toutes les variables dont le programme a besoin (TELEMAC : <a class="reference internal" href="#setup-existing-telemac"><span class="std std-ref">TÉLEMAC existant</span></a>; OpenFOAM : <a class="reference internal" href="#setup-existing-openfoam"><span class="std std-ref">OpenFOAM existant</span></a>). Sélectionnez-le avec <em>Browse…</em>, et aXqua vérifie si l’installation est utilisable pour aXqua. <em>Use this installation</em> entre le script et l’installation dossier dans le profil (<a class="reference internal" href="plugin-setup.html#plugin-profile"><span class="std std-ref">Profil d’extension</span></a>).</p></li>
+<li><p><em>Select existing config file</em> est le choix pour un programme qui est déjà installé sur cet ordinateur. <em>Next</em> ouvre l’onglet <em>Existing installation</em>, qui indique quel fichier choisir : le script <strong>environnement</strong> de l’installation, qui définit toutes les variables dont le programme a besoin (TELEMAC : <a class="reference internal" href="#setup-existing-telemac"><span class="std std-ref">TÉLEMAC existant</span></a>; OpenFOAM : <a class="reference internal" href="#setup-existing-openfoam"><span class="std std-ref">OpenFOAM existant</span></a>). Sélectionnez-le avec <em>Browse…</em>, et aXqua vérifie si l’installation est utilisable pour aXqua. <em>Use this installation</em> entre le script et l’installation dossier dans le profil (<a class="reference internal" href="plugin-setup.html#plugin-profile"><span class="std std-ref">Profil d’extension</span></a>).</p></li>
 <li><p><strong>Installer &lt;software-name&gt;</strong> est le choix pour un ordinateur sans le programme. Le bouton <em>Next</em> lit <em>Install &lt;software-name&gt;…</em> et ouvre l’assistant d’installation.</p></li>
 </ul>
 <p>La vérification d’une installation existante charge le script d’environnement une fois et recherche chaque partie de l’installation utilisée par aXqua. Il répond par l’un des trois verdicts, et énumère chaque partie comme <em>found</em> (vert foncé) ou <em>missing</em> (violet foncé gras) avec ce qu’il faut pour :</p>
@@ -389,20 +397,20 @@
 </figure>
 <p>L’assistant d’installation dispose de trois onglets intuitifs dans lesquels les utilisateurs font des choix en fonction de leurs besoins :</p>
 <ol class="arabic simple">
-<li><p><strong>Paramètres:</strong> Installation dossier et choix d’installation. Chaque dossier et fichier est sélectionné dans une boîte de dialogue, donc rien ne doit être tapé. Des détails sur les paramètres spécifiques au logiciel sont fournis ci-dessous sur cette page.</p></li>
+<li><p><em>Settings</em>: Installation dossier et choix d’installation. Chaque dossier et fichier est sélectionné dans une boîte de dialogue, donc rien ne doit être tapé. Des détails sur les paramètres spécifiques au logiciel sont fournis ci-dessous sur cette page.</p></li>
 <li><dl class="simple">
-<dt><strong>Check:</strong> aXqua examine l’ordinateur et liste les commandes qu’il est sur le point d’exécuter, la durée prévue, et tout ce qui n’est pas en ordre. Un triangle orange marque un avertissement, avec lequel l’installation peut être lancée. Un triangle rouge foncé marque une erreur. Pour procéder à l’installation :</dt><dd><ul class="simple">
-<li><p>Remplissez les instructions dans <strong>le cadre de dialogue qui montre les actions requises de l’utilisateur à exécuter dans terminal.</strong></p></li>
-<li><p>Puis cliquez sur le <strong>INSTALL bouton en bas à gauche.</strong></p></li>
+<dt><em>Check</em>: aXqua examine l’ordinateur et liste les commandes qu’il est sur le point d’exécuter, la durée attendue, et tout ce qui n’est pas en ordre. Un triangle orange marque un avertissement, avec lequel l’installation peut être lancée. Un triangle rouge foncé marque une erreur. Pour procéder à l’installation :</dt><dd><ul class="simple">
+<li><p>Effectuez ce que la boîte sous <em>REQUIRED USER ACTIONS in TERMINAL:</em> demande.</p></li>
+<li><p>Puis cliquez sur <em>Install</em> en bas à gauche.</p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p><strong>Installation:</strong> Exécutez et affichez l’étape actuelle et la fin du journal d’installation. L’installation est un processus propre : l’assistant et QGIS peuvent être fermés pendant son fonctionnement. L’onglet <em>Configuration</em> indique qu’une installation est en cours d’exécution, et l’assistant le montre à nouveau lors de la réouverture.</p></li>
+<li><p><em>Installation</em>: Exécutez et affichez l’étape actuelle et la fin du journal d’installation. L’installation est un processus propre : l’assistant et QGIS peuvent être fermés pendant son fonctionnement. L’onglet <em>Configuration</em> indique qu’une installation est en cours d’exécution, et l’assistant l’affiche à nouveau lors de la réouverture.</p></li>
 </ol>
 <p>Les onglets peuvent être visités dans n’importe quel ordre, et <em>Back</em> et <em>Next</em> au bas de l’assistant marchent à travers eux. Les paramètres modifiés sont revérifiés lorsque l’onglet <em>Check</em> est ouvert.</p>
 <p>A la fin, aXqua vérifie que l’installateur a produit le programme, entre le programme et son installation dossier dans le profil de l’ordinateur (<a class="reference internal" href="plugin-setup.html#plugin-profile"><span class="std std-ref">Profil d’extension</span></a>), et le démarre une fois. Après une installation réussie, le bouton <em>Cancel the installation</em> devient gris foncé et lit <em>Installation complete</em>; un clic ferme l’assistant. Aucune autre configuration n’est requise.</p>
-<p>Dans la boîte <strong>Simulation &amp; post-traitement logiciel</strong>, le chemin d’un programme qui a été trouvé est écrit en vert foncé, et <em>Not found on this computer.</em> en violet foncé gras. Pour un programme trouvé, le <em>Setup Wizard</em> remplit son script d’environnement et choisit <em>Select existing config file</em>. Choisir <em>Install &lt;software-name&gt;</em> pour un programme qui est déjà installé demande d’abord <em>Software already installed. Continue with re-installation?</em> <em>No</em> retourne à l’onglet <em>Configuration</em>. <em>Yes</em> ouvre l’assistant, dont l’onglet <em>Settings</em> commence alors par le réglage <em>Existing installation</em>:</p>
+<p>Dans la boîte <em>Simulation &amp; postprocessing software</em>, le chemin d’un programme qui a été trouvé est écrit en vert foncé, et <em>Not found on this computer.</em> en violet foncé gras. Pour un programme qui a été trouvé, le <em>Setup Wizard</em> remplit son script d’environnement et choisit <em>Select existing config file</em>. Choisir <em>Install &lt;software-name&gt;</em> pour un programme qui est déjà installé demande d’abord <em>Software already installed. Continue with re-installation?</em> <em>No</em> retourne à l’onglet <em>Configuration</em>. <em>Yes</em> ouvre l’assistant, dont l’onglet <em>Settings</em> commence alors par le réglage <em>Existing installation</em>:</p>
 <ul class="simple">
 <li><p><em>Remove the existing installation and install it again in its folder</em> supprime l’installation antérieure avant que la nouvelle soit construite. aXqua ne supprime qu’une installation que l’un de ses installateurs a faite : le sous-dossier <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code> de TELEMAC, un dossier de l’installateur OpenFOAM, ou les dossiers VisIt des postprocesseurs.</p></li>
 <li><p><em>Continue in the existing folder</em> conserve ce qui est téléchargé et construit et répète les étapes restantes. L’installateur OpenFOAM refuse de poursuivre un dossier qu’une autre version de celui-ci a commencé ; l’onglet <em>Check</em> le dit avant que n’importe quoi ne tourne.</p></li>
@@ -415,7 +423,7 @@
 </section>
 <section id="user-rights">
 <h2>Droits des utilisateurs<a class="headerlink" href="#user-rights" title="Lien vers cette rubrique"></a></h2>
-<p><strong>Paquets système et droits d’administrateur:</strong> Les compilateurs et les bibliothèques numériques sont des paquets du système d’exploitation, et leur installation est la seule étape qui nécessite des droits d’administrateur. L’onglet <em>Check</em> indique combien de paquets sont manquants et montre la seule commande qui les installe dans une boîte en dessous de la rubrique <strong>ACTIONS UTILISÉES REQUISES dans TERMINAL:</strong>, tous deux en violet foncé. La commande peut être exécutée de deux façons :</p>
+<p><strong>Paquets système et droits d’administrateur:</strong> Les compilateurs et les bibliothèques numériques sont des paquets du système d’exploitation, et leur installation est la seule étape qui nécessite des droits d’administrateur. L’onglet <em>Check</em> indique combien de paquets sont manquants et montre la seule commande qui les installe dans une boîte sous le titre <em>REQUIRED USER ACTIONS in TERMINAL:</em>, tous deux en violet foncé. La commande peut être exécutée de deux façons :</p>
 <ul class="simple">
 <li><p><em>Run fixes</em> commande. Sur un bureau, la boîte de dialogue du mot de passe du bureau demande le mot de passe ; sinon, une fenêtre terminal s’ouvre et le demande. Le mot de passe ne passe pas par l’extension. aXqua vérifie ensuite à nouveau l’ordinateur et répète les corrections tant qu’elles progressent.</p></li>
 <li><p><em>Copy the command</em> place la commande dans le presse-papiers, à coller dans un terminal. Sur un ordinateur géré par une institution, envoyez la commande à l’administrateur.</p></li>
@@ -433,7 +441,7 @@
 <section id="telemac">
 <span id="install-telemac"></span><h2>TELEMAC<a class="headerlink" href="#telemac" title="Lien vers cette rubrique"></a></h2>
 <p><a class="reference external" href="http://www.opentelemac.org/">TELEMAC</a> résout les débits moyens (2D) et 3D, couplés à une grande variété de modules à des fins comme le transport des sédiments (Gaia), l’analyse de la qualité de l’eau (WAQTEL), la propagation des vagues (ARTEMIS et TOMAWAC). Son module de transport des sédiments GAIA fait partie de la même installation. aXqua est développé et testé avec TELEMAC v9.1.1.</p>
-<p>Cliquez sur <strong>Setup assistant…</strong> dans la ligne de TELEMAC sur l’onglet <strong>Configuration</strong> et sélectionnez <em>Install TELEMAC</em>. L’assistant d’installation est disponible sur Debian 12, Ubuntu 24.04 et Linux Mint 22. Son onglet <em>Settings</em> a quatre paramètres en outre <em>Install for</em>:</p>
+<p>Cliquez sur <em>Setup Wizard…</em> dans la ligne de TELEMAC sur l’onglet <em>Configuration</em>, et sélectionnez <em>Install TELEMAC</em>. L’assistant d’installation est disponible sur Debian 12, Ubuntu 24.04 et Linux Mint 22, et sur Windows (<a class="reference internal" href="#setup-telemac-windows-native"><span class="std std-ref">TELEMAC construit sur Windows</span></a>). Sur Linux, son onglet <em>Settings</em> a quatre paramètres en plus <em>Install for</em>:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 26.0%" />
@@ -445,16 +453,16 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Dossier d’installation</p></td>
+<tr class="row-even"><td><p><em>Installation folder</em></p></td>
 <td><p>TELEMAC est installé dans le sous-dossier <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code> de ce dossier. La valeur par défaut est le dossier <code class="docutils literal notranslate"><span class="pre">opt</span></code> dans le dossier d’accueil. Si le sous-dossier existe déjà, l’installateur conserve son code source et y construit à nouveau TELEMAC.</p></td>
 </tr>
-<tr class="row-odd"><td><p>Version TELEMAC</p></td>
+<tr class="row-odd"><td><p><em>TELEMAC version</em></p></td>
 <td><p>Laisser le champ vide pour v9.1.1.</p></td>
 </tr>
-<tr class="row-even"><td><p>Exemple cas de TELEMAC</p></td>
+<tr class="row-even"><td><p><em>Example cases of TELEMAC</em></p></td>
 <td><p>TELEMAC est distribué avec environ 830 exemples cas. Leurs fichiers de paramètres sont toujours installés avec le code source. Le paramètre sélectionne combien de leurs grands fichiers sont téléchargés en plus. <em>Input files of examples only</em> (par défaut) télécharge ce qu’un exemple lit, qui est principalement son maillage : environ 360 fichiers et 460 Mo. <em>Everything</em> télécharge également les résultats de référence, avec lesquels TELEMAC se valide, et les manuels : 1.500 fichiers et 1.65 Go, ce qui prend environ une heure. <em>Steering files only</em> ne télécharge aucun des grands fichiers d’exemple. aXqua ne nécessite aucun de ces fichiers.</p></td>
 </tr>
-<tr class="row-odd"><td><p>SALOME archive</p></td>
+<tr class="row-odd"><td><p><em>SALOME archive</em></p></td>
 <td><p>Facultatif. Une archive téléchargée de SALOME, qui est ensuite installée à côté de TELEMAC. aXqua utilise <a class="reference external" href="https://gmsh.info/">Gmsh</a> (Geuzaine et Remacle 2009) et n’a pas besoin de SALOME, car il génère le maillage et les fichiers d’entrée lui-même.</p></td>
 </tr>
 </tbody>
@@ -464,11 +472,51 @@
 <p>Le résultat est le fichier <code class="docutils literal notranslate"><span class="pre">telemac-mascaret/configs/pysource.&lt;system&gt;.sh</span></code> dans l’installation dossier. Ce fichier est le <strong>script environnement</strong> de TELEMAC : il définit toutes les variables dont TELEMAC a besoin. L’assistant l’inscrit dans le profil comme la liaison solveur de TELEMAC (<a class="reference internal" href="plugin-setup.html#solver-bindings"><span class="std std-ref">Définir les liaisons solveur</span></a>).</p>
 <p>Si l’installation échoue, l’assistant affiche les dernières lignes du journal d’installation et l’emplacement du journal complet. Une fois la cause corrigée, recommencez avec le même dossier. L’installateur continue avec ce qui est déjà téléchargé.</p>
 <p>Une installation manuelle est décrite dans le <a class="reference external" href="https://hydro-informatics.com/get-started/install-telemac-autoinstaller.html">Tutoriel d’installation TELEMAC</a>.</p>
-<p id="setup-existing-telemac"><strong>Utilisez une installation existante de TELEMAC.</strong> Cliquez sur <strong>Setup assistant…</strong> dans la ligne de TELEMAC, sélectionnez <em>Select existing config file</em> et cliquez sur <em>Next</em>. Sélectionnez le script d’environnement de l’installation, qui se trouve dans le dossier <code class="docutils literal notranslate"><span class="pre">configs</span></code> de TELEMAC et dont le nom commence par <code class="docutils literal notranslate"><span class="pre">pysource.</span></code> et se termine par <code class="docutils literal notranslate"><span class="pre">.sh</span></code>:</p>
+<p id="setup-existing-telemac"><strong>Utilisez une installation existante de TELEMAC.</strong> Cliquez sur <em>Setup Wizard…</em> dans la ligne de TELEMAC, sélectionnez <em>Select existing config file</em> et cliquez sur <em>Next</em>. Sélectionnez le script d’environnement de l’installation, qui se trouve dans le dossier <code class="docutils literal notranslate"><span class="pre">configs</span></code> de TELEMAC et dont le nom commence par <code class="docutils literal notranslate"><span class="pre">pysource.</span></code> et se termine par <code class="docutils literal notranslate"><span class="pre">.sh</span></code>:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&lt;installation folder&gt;/telemac-mascaret/configs/pysource.&lt;configuration&gt;.sh
 </pre></div>
 </div>
 <p>par exemple <code class="docutils literal notranslate"><span class="pre">/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh</span></code>. Une installation TELEMAC a un tel script par configuration de sa construction ; sélectionnez celle de la construction que vous utilisez. Un fichier dont le nom contient <code class="docutils literal notranslate"><span class="pre">template</span></code> est un exemple et ne définit rien. La vérification vise TELEMAC-2D, dont chaque simulation a besoin, et pour TELEMAC-3D (3D simulations et l’étude de convergence verticale), GAI (morphodynamique, aussi en mode hydrologie), des circuits parallèles (<code class="docutils literal notranslate"><span class="pre">partel</span></code> et un lanceur MPI) et le compilateur Fortran de la construction (utilisateur Fortran, que l’infiltration Green-Ampt du mode hydrologie et l’échange gain-perte compilent). Le même script peut être entré à la main dans l’éditeur de profil (<a class="reference internal" href="plugin-setup.html#solver-bindings"><span class="std std-ref">Définir les liaisons solveur</span></a>).</p>
+<p id="setup-telemac-windows-native"><strong>TELEMAC construit sur Windows, sans WSL.</strong> Sur un ordinateur Windows où WSL ne peut pas être configuré, par exemple sans droits d’administrateur, le <em>Setup Wizard</em> compile TELEMAC comme un programme Windows dans votre dossier utilisateur. Rien de tout cela n’a besoin de droits d’administrateur. Le TELEMAC résultant n’a pas de calcul parallèle (pas de MPI) et exécute chaque simulation sur un noyau de processeur. Sur Windows 11 sans droits d’administrateur, l’assistant a construit TELEMAC v9.1.1 avec TELEMAC-2D en 16 minutes, et une construction avec les mêmes commandes a exécuté la simulation en régime permanent de l’exemple d’Isar cas à sa fin en 58 minutes sur un seul noyau. Seul TELEMAC-2D a été testé. TELEMAC-3D, morphodynamique avec GAIA, le mode hydrologie et le calage avec HydroBayeCal n’ont pas encore été testés sur Windows.</p>
+<p>Cliquez sur <em>Setup Wizard…</em> dans la rangée de TELEMAC sur l’onglet <em>Configuration</em>, et sélectionnez <em>Install TELEMAC</em>. Quand aXqua connaît déjà un TELEMAC sur cet ordinateur, il demande s’il faut l’installer à nouveau : répondre à <em>Yes</em>, et garder <em>Install it again in a new folder</em> sur l’onglet <em>Settings</em> pour laisser le TELEMAC existant tel qu’il est. Sous Windows, l’onglet <em>Settings</em> a alors le réglage <em>Build TELEMAC</em>:</p>
+<ul class="simple">
+<li><p><em>In Windows itself: one processor core, no administrator</em> est le seul choix sur un ordinateur sans WSL.</p></li>
+<li><p><em>Inside WSL: parallel runs; WSL must be set up by an administrator</em> est offert lorsque WSL est configuré, et est alors la valeur par défaut (voir la note en haut de cette page).</p></li>
+</ul>
+<p>Construit dans Windows lui-même, TELEMAC a ces paramètres :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 74.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Réglage</p></th>
+<th class="head"><p>Signification</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>Installation folder</em></p></td>
+<td><p>La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">opt\telemac</span></code> dans votre dossier utilisateur, et un nouveau dossier à côté de celui existant lorsque TELEMAC est installé à nouveau. Le code source et la construction entrent dans son sous-dossier <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code>, les compilateurs dans son sous-dossier <code class="docutils literal notranslate"><span class="pre">telemac-build</span></code>. Le chemin ne doit pas contenir d’espaces.</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Modules</em></p></td>
+<td><p><em>TELEMAC-2D with GAIA</em> (par défaut) est la compilation qui a été testée sur Windows. <em>All modules, also TELEMAC-3D</em> prend plus de temps à compiler et n’a pas encore été testé sur Windows.</p></td>
+</tr>
+<tr class="row-even"><td><p><em>TELEMAC version</em></p></td>
+<td><p>Laisser le champ vide pour v9.1.1.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Dans un nouveau dossier, l’onglet <em>Check</em> énumère cinq étapes :</p>
+<ol class="arabic simple">
+<li><p><em>Download the compilers (conda-forge)</em>: un environnement conda avec les compilateurs GNU pour Windows (MinGW-w64), CMake, Make et Git, un téléchargement de plusieurs centaines de MB. Il est créé avec le conda de l’installation à partir de laquelle aXqua fonctionne, donc pour cette route aXqua doit être installé dans un environnement conda (Miniforge, Miniconde ou Anaconda), comme <a class="reference internal" href="qgis-plugin.html"><span class="doc">Extension de QGIS</span></a> décrit.</p></li>
+<li><p><em>Download the source code of TELEMAC</em> avec Git, sans les grands fichiers de l’exemple de TELEMAC cas.</p></li>
+<li><p><em>Configure the build</em> avec CMake et MinGW Makefiles, sans MPI, MED et MUMPS.</p></li>
+<li><p><em>Compile TELEMAC</em>. TELEMAC-2D a pris 10 minutes avec 8 processus sur l’ordinateur de test.</p></li>
+<li><p><em>Write the environment script</em> <code class="docutils literal notranslate"><span class="pre">telemac-mascaret\configs\pysource.win.bat</span></code>. Il ne définit que des variables et ne change rien sur l’ordinateur. aXqua l’inscrit ensuite dans le profil, comme à la fin de chaque installation, à moins que <em>Enter the installation in the profile of this computer</em> ne soit autorisé (<code class="docutils literal notranslate"><span class="pre">--no-bind</span></code> dans un terminal). L’onglet <em>Configuration</em> l’affiche alors dans la rangée de TELEMAC.</p></li>
+</ol>
+<p>L’installation se poursuit lorsque l’assistant ou QGIS est fermé. Après l’ouverture de QGIS, le bouton dans la rangée de TELEMAC lit <em>Show the installation…</em> et ouvre l’assistant sur son onglet <em>Installation</em>. Dans un terminal, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">status</span> <span class="pre">telemac</span> <span class="pre">--tail</span> <span class="pre">20</span></code> montre l’étape et les dernières lignes du journal. Le journal, <code class="docutils literal notranslate"><span class="pre">install.log</span></code> dans <code class="docutils literal notranslate"><span class="pre">%LOCALAPPDATA%\axqua\installs\&lt;installation&gt;</span></code>, donne le début et la durée de chaque étape.</p>
+<p>Lorsque le serveur de TELEMAC ne répond pas (il a renvoyé l’erreur HTTP 504 le 9 novembre 2026), l’installation s’arrête à la deuxième étape. Recommencer plus tard avec le même <em>Installation folder</em>: le plan a alors moins d’étapes, parce que les compilateurs sont conservés, et un code source qui a été téléchargé complètement est également conservé. Dans un terminal (le <em>Anaconda Prompt</em> ou <em>Miniforge Prompt</em>), <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">start</span> <span class="pre">telemac</span> <span class="pre">--native</span></code> fait la même chose que l’assistant ; donnez-lui le dossier de la première tentative avec <code class="docutils literal notranslate"><span class="pre">--folder</span></code>.</p>
+<p>aXqua exécute les scripts Python de TELEMAC avec le Python de l’environnement aXqua. La vérification des rapports de profil que les parcours parallèles ne sont pas disponibles. Une tâche fonctionne alors sur un noyau : un certain nombre de processus qui proviennent du cas ou du profil informatique devient 1, avec un avertissement dans la barre de messages de QGIS et en haut du journal de bord de la tâche. Un numéro supérieur à 1 demandé avec la tâche (<em>MPI processes</em> dans l’extension, <code class="docutils literal notranslate"><span class="pre">--np</span></code> dans un terminal) est refusé avant le début de la tâche, car TELEMAC s’arrêterait avec l’erreur <em>Parallel inconsistency</em>. L’annulation d’une tâche met fin à TELEMAC et à chaque processus qu’elle a commencé. Un TELEMAC construit sur Windows à la main est entré avec <em>Select existing config file</em> et son <code class="docutils literal notranslate"><span class="pre">configs\pysource.&lt;configuration&gt;.bat</span></code>.</p>
 </section>
 <section id="openfoam">
 <span id="install-openfoam"></span><h2>Ouvrir<a class="headerlink" href="#openfoam" title="Lien vers cette rubrique"></a></h2>
@@ -495,22 +543,22 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>Dossier d’installation</p></td>
+<tr class="row-even"><td><p><em>Installation folder</em></p></td>
 <td><p>Un dossier qui n’existe pas encore, ou un dossier vide. L’installateur installe dans un nouveau dossier ou poursuit une installation propre, et refuse tout autre dossier.</p></td>
 </tr>
-<tr class="row-odd"><td><p>OpenFOAM v2406</p></td>
+<tr class="row-odd"><td><p><em>OpenFOAM v2406</em></p></td>
 <td><p><em>Use the OpenFOAM v2406 that is installed on this computer</em> construit les solveurs sur une installation existante, ce qui prend quelques minutes. aXqua entre dans l’installation qu’il a trouvée. Sélectionnez le fichier <code class="docutils literal notranslate"><span class="pre">etc/bashrc</span></code> d’un autre avec <em>Browse…</em>. <em>Compile OpenFOAM v2406 from its source code</em> est le choix pour un ordinateur sans OpenFOAM. Cela prend plusieurs heures et nécessite environ 20 Go d’espace libre.</p></td>
 </tr>
-<tr class="row-even"><td><p>Processus de compilation</p></td>
+<tr class="row-even"><td><p><em>Processes for compiling</em></p></td>
 <td><p>Nombre de cœurs de processeur utilisés pour la compilation. Chaque processus nécessite environ 2 Go de mémoire.</p></td>
 </tr>
-<tr class="row-odd"><td><p>Après traitement</p></td>
+<tr class="row-odd"><td><p><em>Postprocessors</em></p></td>
 <td><p><em>ParaView and VisIt</em> est la valeur par défaut et le choix recommandé, car aXqua rend ses figures tridimensionnelles prédéfinies avec VisIt. <em>ParaView only</em> quitte VisIt, ce qui enregistre un téléchargement de 600 Mo. <em>None</em> n’installe aucun programme, pour un ordinateur sur lequel les deux sont déjà installés. Un programme qui a été omis peut être installé à tout moment après (<a class="reference internal" href="postprocessors.html#help-postprocessors"><span class="std std-ref">Après traitement</span></a>).</p></td>
 </tr>
-<tr class="row-even"><td><p>Télécharger l’exemple cas du sédiment solveur</p></td>
+<tr class="row-even"><td><p><em>Download the example case of the sediment solver</em></p></td>
 <td><p>Ajoute l’exemple cas qui est publié avec sediDriftFoam.</p></td>
 </tr>
-<tr class="row-odd"><td><p>Passez un court test à la fin</p></td>
+<tr class="row-odd"><td><p><em>Run a short test at the end</em></p></td>
 <td><p>Exécute <code class="docutils literal notranslate"><span class="pre">interFoam</span></code> pour quelques pas de temps avec la frontière de sortie de la BAW, qui vérifie que la bibliothèque compilée peut être chargée.</p></td>
 </tr>
 </tbody>
@@ -524,7 +572,7 @@
 </figure>
 <p>Un OpenFOAM v2406 emballé permet d’économiser les heures de compilation. OpenCFD fournit des paquets pour Debian et Ubuntu. Un administrateur les installe selon le <a class="reference external" href="https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian">instructions d’installation de OpenCFD</a>, qui crée le fichier <code class="docutils literal notranslate"><span class="pre">/usr/lib/openfoam/openfoam2406/etc/bashrc</span></code>. L’assistant trouve cette installation par lui-même.</p>
 <p>Le résultat est le fichier <code class="docutils literal notranslate"><span class="pre">shell-rc.sh</span></code> dans l’installation dossier. C’est le script <strong>environnement</strong> de cette installation : il charge OpenFOAM v2406 et ajoute les solveurs compilés et la bibliothèque frontière. L’assistant l’entre dans le profil comme la liaison solveur d’OpenFOAM, et entre les postprocesseurs sélectionnés. Aucune installation OpenFOAM existante et aucun fichier de démarrage du compte utilisateur n’est modifié.</p>
-<p id="setup-existing-openfoam"><strong>Utilisez une installation existante d’OpenFOAM.</strong> Cliquez sur <strong>Setup assistant…</strong> dans la ligne d’OpenFOAM, sélectionnez <em>Select existing config file</em> et cliquez sur <em>Next</em>. Sélectionnez l’un des deux scripts d’environnement :</p>
+<p id="setup-existing-openfoam"><strong>Utilisez une installation existante d’OpenFOAM.</strong> Cliquez sur <em>Setup Wizard…</em> dans la ligne d’OpenFOAM, sélectionnez <em>Select existing config file</em> et cliquez sur <em>Next</em>. Sélectionnez l’un des deux scripts d’environnement :</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;installation</span> <span class="pre">folder&gt;/shell-rc.sh</span></code> d’une installation OpenFOAM que l’assistant a faite, par exemple <code class="docutils literal notranslate"><span class="pre">~/.local/openfoam-sediment-v2406/shell-rc.sh</span></code>. C’est le choix recommandé, car il met également en place les solveurs de sédiments et la frontière de sortie de la BAW.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;OpenFOAM</span> <span class="pre">folder&gt;/etc/bashrc</span></code> d’un fichier OpenFOAM v2406 sans fin, par exemple <code class="docutils literal notranslate"><span class="pre">/usr/lib/openfoam/openfoam2406/etc/bashrc</span></code> du paquet d’OpenCFD.</p></li>

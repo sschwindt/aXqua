@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/code/install.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -356,7 +356,7 @@
              
   <section id="installation-of-the-simulation-software">
 <h1>Installation der Simulationssoftware<a class="headerlink" href="#installation-of-the-simulation-software" title="Link to this heading"></a></h1>
-<p>Das Paket <code class="docutils literal notranslate"><span class="pre">axqua.install</span></code> installiert TELEMAC, OpenFOAM, ParaView und VisIt, indem es die veröffentlichten Installationsskripte ausführt. Es erkennt das Betriebssystem, erstellt einen Plan, der gelesen werden kann, bevor etwas läuft, führt den Plan als losgelöster Prozess aus und gibt das Ergebnis in das Profil des Computers ein. Der Befehl <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span></code> und der Installationsassistenten des QGIS-Plugins sind zwei Frontends dieses Pakets.</p>
+<p>Das Paket <code class="docutils literal notranslate"><span class="pre">axqua.install</span></code> installiert TELEMAC, OpenFOAM, ParaView und VisIt, indem es die veröffentlichten Installationsprogramm-Skripte ausführt. Es erkennt das Betriebssystem, erstellt einen Plan, der gelesen werden kann, bevor etwas läuft, führt den Plan als losgelöster Prozess aus und gibt das Ergebnis in das Profil des Computers ein. Der Befehl <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span></code> und der Installationsassistenten des QGIS-Plugins sind zwei Frontends dieses Pakets.</p>
 <section id="module-axqua.install.host">
 <span id="operating-system"></span><h2>Betriebssystem<a class="headerlink" href="#module-axqua.install.host" title="Link to this heading"></a></h2>
 <p>What kind of computer this is, as far as an installation is concerned.</p>
@@ -525,7 +525,7 @@ what the system reports.</p>
 
 </section>
 <section id="module-axqua.install.recipes">
-<span id="installation-plans"></span><h2>Installationspläne<a class="headerlink" href="#module-axqua.install.recipes" title="Link to this heading"></a></h2>
+<span id="installation-plans"></span><h2>Installation Pläne<a class="headerlink" href="#module-axqua.install.recipes" title="Link to this heading"></a></h2>
 <p>From the installer scripts to a plan that can be read before anything runs.</p>
 <p>aXqua does not install TELEMAC or OpenFOAM by itself. It runs the installer scripts of
 the repository named in <a class="reference internal" href="#axqua.install.recipes.REPOSITORY" title="axqua.install.recipes.REPOSITORY"><code class="xref py py-data docutils literal notranslate"><span class="pre">REPOSITORY</span></code></a>, at the commit named in <code class="xref py py-data docutils literal notranslate"><span class="pre">PINNED</span></code>, which
@@ -598,7 +598,7 @@ would otherwise come first, and what it compiles cannot be linked with them.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.install.recipes.Options">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.install.recipes.</span></span><span class="sig-name descname"><span class="pre">Options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'user'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">salome</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">telemac_examples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inputs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_openfoam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">examples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoke_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">installers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reinstall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/install/recipes.html#Options"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.install.recipes.Options" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.install.recipes.</span></span><span class="sig-name descname"><span class="pre">Options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'user'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">salome</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">telemac_examples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'inputs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reuse_openfoam</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">examples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoke_test</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">installers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reinstall</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">native</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'2d'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/install/recipes.html#Options"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.install.recipes.Options" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>What a user can choose. Everything has a default that works.</p>
 <dl class="field-list simple">
@@ -620,6 +620,8 @@ would otherwise come first, and what it compiles cannot be linked with them.</p>
 <li><p><strong>base</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
 <li><p><strong>bind</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>reinstall</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>native</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>modules</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -712,6 +714,28 @@ without it, ParaView alone is entered in the profile.</p>
 <dt class="sig sig-object py" id="axqua.install.recipes.Options.reinstall">
 <span class="sig-name descname"><span class="pre">reinstall</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></span><a class="headerlink" href="#axqua.install.recipes.Options.reinstall" title="Link to this definition"></a></dt>
 <dd><p>What happens to an earlier installation in the folder (see <code class="xref py py-data docutils literal notranslate"><span class="pre">REINSTALL</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.install.recipes.Options.native">
+<span class="sig-name descname"><span class="pre">native</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#axqua.install.recipes.Options.native" title="Link to this definition"></a></dt>
+<dd><p>build TELEMAC as a Windows program in the user folder, without WSL and without an administrator (one processor core, no MPI).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Windows</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.install.recipes.Options.modules">
+<span class="sig-name descname"><span class="pre">modules</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'2d'</span></span><a class="headerlink" href="#axqua.install.recipes.Options.modules" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">2d</span></code> (TELEMAC-2D with GAIA, the tested build) or <code class="docutils literal notranslate"><span class="pre">all</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TELEMAC built on Windows</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -972,6 +996,7 @@ reported as missing, and the program itself is installed.</p>
 <p>The proxy and certificate variables are kept, because without them a download
 behind a proxy fails; the display variables are kept for the graphical installers
 of the postprocessors.</p>
+<p>The language is English (<code class="docutils literal notranslate"><span class="pre">C.UTF-8</span></code>) whatever the computer is set to: aXqua reads the answers of apt (<code class="docutils literal notranslate"><span class="pre">Unable</span> <span class="pre">to</span> <span class="pre">locate</span> <span class="pre">package</span></code>, <code class="docutils literal notranslate"><span class="pre">selecting</span> <span class="pre">...</span> <span class="pre">instead</span> <span class="pre">of</span></code>), which a German system writes in German, and an English installation log is one language with the English lines of aXqua (review of 2026-11-06).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
@@ -1019,10 +1044,8 @@ computer finds the installation without a profile entry.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.install.recipes.elevation">
 <span class="sig-prename descclassname"><span class="pre">axqua.install.recipes.</span></span><span class="sig-name descname"><span class="pre">elevation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/install/recipes.html#elevation"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.install.recipes.elevation" title="Link to this definition"></a></dt>
-<dd><p>How this session can ask for administrator rights: <code class="docutils literal notranslate"><span class="pre">pkexec</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">pkexec</span></code> shows the password dialog of the desktop, so aXqua never sees a
-password. It needs a graphical session; in a plain terminal session the command is
-shown instead and the administrator runs it.</p>
+<dd><p>How this session can get administrator rights: <code class="docutils literal notranslate"><span class="pre">wsl</span></code>, <code class="docutils literal notranslate"><span class="pre">pkexec</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p>
+<p>Inside WSL, <code class="docutils literal notranslate"><span class="pre">wsl.exe</span> <span class="pre">-u</span> <span class="pre">root</span></code> gives the root of the distribution without a password and without an administrator of Windows (that is how WSL works), so the student’s computer without administrator rights can still install the system packages. <code class="docutils literal notranslate"><span class="pre">pkexec</span></code> shows the password dialog of a Linux desktop, so aXqua never sees a password; WSLg sets <code class="docutils literal notranslate"><span class="pre">DISPLAY</span></code> but has no polkit agent, which is why <code class="docutils literal notranslate"><span class="pre">wsl</span></code> is asked first. Without either, the command is shown and an administrator runs it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
@@ -1287,7 +1310,7 @@ for one that is written.</p>
 
 </section>
 <section id="module-axqua.install.runner">
-<span id="running-an-installation"></span><h2>Betrieb einer Anlage<a class="headerlink" href="#module-axqua.install.runner" title="Link to this heading"></a></h2>
+<span id="running-an-installation"></span><h2>Ausführen eines Installation<a class="headerlink" href="#module-axqua.install.runner" title="Link to this heading"></a></h2>
 <p>Run an installation as a process of its own, and say how far it is.</p>
 <p>Building TELEMAC takes most of an hour and compiling OpenFOAM several, so an
 installation must not live inside the window that started it. It is a folder below

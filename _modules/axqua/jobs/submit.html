@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/jobs/submit.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -377,8 +377,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">contextmanager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">ENTERED_MARKER</span>
@@ -512,10 +514,13 @@
     <span class="n">resolved</span> <span class="o">=</span> <span class="n">profile</span> <span class="ow">or</span> <span class="n">profiles</span><span class="o">.</span><span class="n">implicit</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">resolved</span><span class="o">.</span><span class="n">solver_environment</span><span class="p">()</span>
     <span class="n">captured</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">validate_env</span> <span class="ow">and</span> <span class="n">spec</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">needs_environment</span><span class="p">:</span>
-        <span class="n">captured</span> <span class="o">=</span> <span class="n">_validate_and_capture</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">collect_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">warned</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">validate_env</span> <span class="ow">and</span> <span class="n">spec</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">needs_environment</span><span class="p">:</span>
+            <span class="n">captured</span> <span class="o">=</span> <span class="n">_validate_and_capture</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+            <span class="n">_fit_processes_to_installation</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">captured</span><span class="p">,</span> <span class="n">explicit_np</span><span class="o">=</span><span class="n">np</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">)</span>
 
     <span class="n">jd</span> <span class="o">=</span> <span class="n">create_job</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">job_root</span><span class="o">=</span><span class="n">job_root</span><span class="p">)</span>
+    <span class="n">_note_in_runner_log</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">warned</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"case"</span><span class="p">:</span>
         <span class="c1"># The ticket that fixes this job's place among the jobs of its case. Written</span>
         <span class="c1"># here and not by the runner, so that the order is the order of submission and</span>
@@ -537,6 +542,94 @@
     <span class="n">_index</span><span class="p">(</span><span class="n">jd</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">jd</span></div>
 
+
+
+<span class="nd">@contextmanager</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">collect_warnings</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The warnings the ``axqua`` logger gives while the block runs, as text.</span>
+
+<span class="sd">    A warning of the submit (a process count fitted to the installation, solver variables from the ambient shell) went only to the stderr of the submitting process, which the plugin does not show: on the Windows test computer (2026-11-09) the job ran on 1 process and nothing in QGIS said why.</span>
+<span class="sd">    """</span>
+    <span class="n">found</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">_Collect</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getMessage</span><span class="p">())</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                       <span class="c1"># noqa: BLE001</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">handleError</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">_Collect</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">found</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_note_in_runner_log</span><span class="p">(</span><span class="n">jd</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">,</span> <span class="n">warned</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The warnings of the submit at the top of the job's ``runner.log``, where ``axqua logs`` and the job list find them later.</span>
+
+<span class="sd">    The runner appends to the same file when it starts.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">warned</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">stamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">jd</span><span class="o">.</span><span class="n">runner_log</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">runner_log</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">warned</span><span class="p">:</span>
+                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">stamp</span><span class="si">}</span><span class="s2"> WARNING axqua.jobs.submit: </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"the warnings of the submit were not written to </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
+                  <span class="n">jd</span><span class="o">.</span><span class="n">runner_log</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fit_processes_to_installation</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span>
+                                   <span class="n">explicit_np</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A TELEMAC built without MPI runs on one process: a count from the case or the profile becomes 1, a count asked for with the job is refused before anything starts.</span>
+
+<span class="sd">    TELEMAC itself stops such a run only after reading the case ("Parallel inconsistency"), and the plugin's default (MPI processes 0, as set for the case) took the case's 8 on the Windows test computer (2026-11-09), whose TELEMAC was built without MPI.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span> <span class="o">!=</span> <span class="s2">"telemac"</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="s2">"ncsize"</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">option</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">ncsize</span>
+    <span class="n">wanted</span> <span class="o">=</span> <span class="n">option</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">mpi_processes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">wanted</span> <span class="ow">or</span> <span class="n">wanted</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">installation</span>
+
+    <span class="n">kind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"wsl"</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span><span class="p">:</span>
+        <span class="c1"># a TELEMAC inside WSL: its Linux paths as Windows reaches them, as `axqua profile check` looks at it (review of 2026-11-10: the raw Linux PATH found neither partel nor mpirun from Windows and cut every WSL job to one process)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">wsl</span>
+        <span class="n">distro</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">"distro"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">wsl</span><span class="o">.</span><span class="n">cached_default_distro</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">distro</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">installation</span><span class="o">.</span><span class="n">seen_from_windows</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">distro</span><span class="p">)</span>
+    <span class="n">parallel</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">installation</span><span class="o">.</span><span class="n">_telemac_modules</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"parallel"</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parallel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">parallel</span><span class="o">.</span><span class="n">available</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">return</span>                                      <span class="c1"># parallel, or nothing aXqua can tell</span>
+    <span class="n">launcher</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">"mpi_launcher"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">_partel_only</span><span class="p">(</span><span class="n">parallel</span><span class="p">)</span> <span class="ow">and</span> <span class="n">launcher</span> <span class="ow">and</span> <span class="n">installation</span><span class="o">.</span><span class="n">_which</span><span class="p">(</span><span class="n">launcher</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">variables</span><span class="p">):</span>
+        <span class="k">return</span>                                      <span class="c1"># the launcher the profile names (srun, ...) is there</span>
+    <span class="k">if</span> <span class="n">option</span> <span class="ow">or</span> <span class="p">(</span><span class="n">explicit_np</span> <span class="ow">and</span> <span class="n">explicit_np</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">wanted</span><span class="si">}</span><span class="s2"> processes were asked for, but this TELEMAC runs on one process only "</span>
+            <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">parallel</span><span class="o">.</span><span class="n">detail</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"ncsize"</span> <span class="k">if</span> <span class="n">option</span> <span class="k">else</span> <span class="s2">"np"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run on one process (MPI processes 1 in the plugin, --np 1), or build "</span>
+                   <span class="s2">"TELEMAC with MPI."</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"this TELEMAC runs on one process only (</span><span class="si">%s</span><span class="s2">): the job runs on 1 instead of "</span>
+                <span class="s2">"the </span><span class="si">%d</span><span class="s2"> set for the case or the computer"</span><span class="p">,</span> <span class="n">parallel</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span> <span class="n">wanted</span><span class="p">)</span>
+    <span class="n">spec</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">mpi_processes</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_partel_only</span><span class="p">(</span><span class="n">parallel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the parallel module lacks only an MPI launcher of the usual names, with partel there."""</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">parallel</span><span class="o">.</span><span class="n">detail</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"no MPI launcher on the PATH"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_validate_and_capture</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">profiles</span><span class="o">.</span><span class="n">Profile</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span>
@@ -562,7 +655,11 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_launch</span><span class="p">(</span><span class="n">jd</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">captured</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
             <span class="n">profile</span><span class="p">:</span> <span class="n">profiles</span><span class="o">.</span><span class="n">Profile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">captured</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"wsl"</span><span class="p">:</span>
+        <span class="c1"># The runner is a Windows process and enters WSL for every solver command; the captured Linux variables (a Linux PATH) would only break the Windows side.</span>
+        <span class="n">captured</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">captured</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">captured</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">captured</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                    <span class="c1"># noqa: BLE001</span>

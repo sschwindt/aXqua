@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/hbc.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -373,6 +373,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
@@ -388,6 +389,32 @@
 <span class="c1"># --------------------------------------------------------------------------- #</span>
 <span class="c1"># install location</span>
 <span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1">#: Oldest HydroBayesCal that aXqua runs a calibration with; the same floor as the</span>
+<span class="c1">#: ``calibration`` extra in ``pyproject.toml`` (a test keeps the two equal). 1.12.1</span>
+<span class="c1">#: starts the Sobol design at the first point of the sequence, so that a design of</span>
+<span class="c1">#: 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the</span>
+<span class="c1">#: scikit-learn emulator (``gp_library: skl``) run with TELEMAC.</span>
+<span class="n">HBC_MINIMUM</span> <span class="o">=</span> <span class="s2">"1.12.2"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The leading release numbers of a version string (``1.12.1.dev3`` -&gt; (1, 12, 1))."""</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*v?(\d+(?:\.\d+)*)"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">))</span> <span class="k">if</span> <span class="n">match</span> <span class="k">else</span> <span class="p">()</span>
+
+
+<div class="viewcode-block" id="hbc_too_old">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.hbc.hbc_too_old">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">hbc_too_old</span><span class="p">(</span><span class="n">installed</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">minimum</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">HBC_MINIMUM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether *installed* is below *minimum*; an unreadable version passes."""</span>
+    <span class="n">have</span><span class="p">,</span> <span class="n">need</span> <span class="o">=</span> <span class="n">_release</span><span class="p">(</span><span class="n">installed</span><span class="p">),</span> <span class="n">_release</span><span class="p">(</span><span class="n">minimum</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">have</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">have</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">need</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">have</span> <span class="o">+</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">have</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">need</span> <span class="o">+</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">need</span><span class="p">))</span></div>
+
+
+
 <div class="viewcode-block" id="require_hbc">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.hbc.require_hbc">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">require_hbc</span><span class="p">():</span>
@@ -414,6 +441,16 @@
             <span class="s2">"drivers with the package (hydroBayesCal.copy_driver is missing).</span><span class="se">\n</span><span class="s2">"</span>
             <span class="s2">"Upgrade to the LATEST release - HydroBayesCal is bugfix-and-additive, so "</span>
             <span class="s2">"newest is always the one to want and axqua never pins an upper bound:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"    pip install -U hydrobayescal"</span>
+        <span class="p">)</span>
+    <span class="n">installed</span> <span class="o">=</span> <span class="n">hbc_version</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">hbc_too_old</span><span class="p">(</span><span class="n">installed</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"The installed HydroBayesCal </span><span class="si">{</span><span class="n">installed</span><span class="si">}</span><span class="s2"> is too old: aXqua needs "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">HBC_MINIMUM</span><span class="si">}</span><span class="s2"> or newer. Before 1.12.1, a Sobol initial design never "</span>
+            <span class="s2">"tried the lowest part of each parameter range, and before 1.12.2 the "</span>
+            <span class="s2">"scikit-learn emulator failed with TELEMAC. Upgrade it in the "</span>
+            <span class="s2">"environment of aXqua:</span><span class="se">\n</span><span class="s2">"</span>
             <span class="s2">"    pip install -U hydrobayescal"</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">hydroBayesCal</span></div>
@@ -552,7 +589,21 @@
     <span class="n">probe</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">"pgrep"</span><span class="p">,</span> <span class="s2">"-fa"</span><span class="p">,</span> <span class="n">pattern</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span> <span class="ow">in</span> <span class="n">probe</span><span class="o">.</span><span class="n">stdout</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">token</span> <span class="ow">in</span> <span class="n">probe</span><span class="o">.</span><span class="n">stdout</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">extra</span><span class="p">)</span></div>
+    <span class="c1"># a solver started with a relative steering file (``steady2d.cas``) names no</span>
+    <span class="c1"># folder: it counts where it works in *model_dir* (TELEMAC works in a folder of its</span>
+    <span class="c1"># own inside it), not because a case elsewhere on this computer runs one too</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">probe</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">pid</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">command</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">" "</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">token</span> <span class="ow">in</span> <span class="n">command</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">extra</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="sa">f</span><span class="s2">"/proc/</span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s2">/cwd"</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">cwd</span> <span class="o">==</span> <span class="n">folder</span> <span class="ow">or</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">cwd</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 
@@ -577,6 +628,16 @@
 
 <span class="sd">    Returns the driver's exit code.</span>
 <span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"wsl"</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">AxquaEnvironmentError</span>
+        <span class="k">raise</span> <span class="n">AxquaEnvironmentError</span><span class="p">(</span>
+            <span class="s2">"the Bayesian calibration with HydroBayesCal is not yet available on Windows with TELEMAC inside WSL"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"HydroBayesCal starts TELEMAC itself and has to run where TELEMAC is. Run the calibration on a "</span>
+                   <span class="s2">"Linux computer (or inside the WSL distribution with an aXqua installed there); the build, the "</span>
+                   <span class="s2">"simulations and the validation work on Windows."</span><span class="p">)</span>
     <span class="n">inner</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"cd </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span><span class="si">}</span><span class="s2">; "</span>
              <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span><span class="si">}</span><span class="s2"> -u </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span>
              <span class="sa">f</span><span class="s2">"--config </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">config_path</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
@@ -585,9 +646,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">launching </span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">:</span><span class="se">\n</span><span class="s2">  </span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">argv</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">inner</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">merged</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">env</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
         <span class="n">merged</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">items</span><span class="p">()}}</span>
-    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">merged</span><span class="p">)</span><span class="o">.</span><span class="n">returncode</span></div>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">process_args</span>
+
+    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">process_args</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span> <span class="n">env</span><span class="o">=</span><span class="n">merged</span><span class="p">)</span><span class="o">.</span><span class="n">returncode</span></div>
 
 
 
@@ -597,6 +659,9 @@
 <span class="c1">#: ``... model after BAL # 1`` within the active learning, so both start again at 1;</span>
 <span class="c1">#: ``Running full complexity model 9`` counts through both, and is the one read here.</span>
 <span class="n">DRIVER_LOG</span> <span class="o">=</span> <span class="s2">"logfile.log"</span>
+<span class="c1">#: The results folder of a HydroBayesCal driver. Since HydroBayesCal 1.12.0 the driver</span>
+<span class="c1">#: writes ``logfile.log`` there; before, it wrote it into its working folder.</span>
+<span class="n">DRIVER_RESULTS</span> <span class="o">=</span> <span class="s2">"auto-saved-results-HydroBayesCal"</span>
 <span class="n">_MODEL_RUN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Running\s+full\s+complexity\s+model\s+(\d+)\b"</span><span class="p">)</span>
 
 
@@ -617,23 +682,30 @@
 <span class="sd">    earlier calibration in the same folder is not replayed. Nothing here can fail a</span>
 <span class="sd">    calibration: an unreadable log and a failing *report* are both ignored, and a</span>
 <span class="sd">    driver that words the line differently simply reports no progress.</span>
+
+<span class="sd">    *logfile* may be a list of paths: all of them are followed, because the driver</span>
+<span class="sd">    writes its log into its results folder since HydroBayesCal 1.12.0 and into its</span>
+<span class="sd">    working folder before (:func:`driver_logs`).</span>
 <span class="sd">    """</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="n">report</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span>
-                 <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">logfile</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span>
+                 <span class="n">report</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">logfile</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">logfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">report</span> <span class="o">=</span> <span class="n">report</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span> <span class="o">=</span> <span class="p">{</span><span class="n">path</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="p">:</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"RunCounter"</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
-        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_follow</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"hbc-run-counter"</span><span class="p">,</span>
                                         <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -652,19 +724,8 @@
 <div class="viewcode-block" id="RunCounter.poll">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.hbc.RunCounter.poll">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read what the log has gained and report a new run number, if there is one."""</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
-            <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">:</span>      <span class="c1"># the driver started the file afresh</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">:</span>
-                <span class="k">return</span>
-            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-                <span class="n">handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
-                <span class="n">text</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">size</span>
-        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-            <span class="k">return</span>
+<span class="w">        </span><span class="sd">"""Read what the logs have gained and report a new run number, if there is one."""</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gained</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">)</span>
         <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">number</span><span class="p">)</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">_MODEL_RUN</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">runs</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
             <span class="k">return</span>
@@ -673,7 +734,38 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                <span class="c1"># noqa: BLE001 - reporting must not stop a run</span>
             <span class="k">pass</span></div>
-</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_gained</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""What *path* has gained since the last look; empty if it cannot be read."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="n">offset</span><span class="p">:</span>            <span class="c1"># the driver started the file afresh</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="n">offset</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">""</span>
+            <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+                <span class="n">handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">[</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">size</span>
+            <span class="k">return</span> <span class="n">text</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">""</span></div>
+
+
+
+<div class="viewcode-block" id="driver_logs">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.hbc.driver_logs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">driver_logs</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Where a HydroBayesCal driver run in *folder* writes ``logfile.log``.</span>
+
+<span class="sd">    Into its results folder since HydroBayesCal 1.12.0, into *folder* itself before.</span>
+<span class="sd">    A driver from a checkout (``checkout=``) can be older than the floor of the</span>
+<span class="sd">    package, so both are followed.</span>
+<span class="sd">    """</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">folder</span> <span class="o">/</span> <span class="n">DRIVER_RESULTS</span> <span class="o">/</span> <span class="n">DRIVER_LOG</span><span class="p">,</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">DRIVER_LOG</span><span class="p">]</span></div>
 
 
 

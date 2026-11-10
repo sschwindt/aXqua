@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobs/launchers/wsl.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -422,7 +422,7 @@
         <span class="n">prefix</span> <span class="o">=</span> <span class="p">[</span><span class="n">exe</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">distro</span><span class="p">:</span>
             <span class="n">prefix</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"-d"</span><span class="p">,</span> <span class="n">distro</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">prefix</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"--"</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">prefix</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"--exec"</span><span class="p">]</span>          <span class="c1"># not --: the default shell would parse the payload first</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_bash</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distro</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prefix</span><span class="p">(</span><span class="n">distro</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"bash"</span><span class="p">,</span> <span class="s2">"-lc"</span><span class="p">,</span> <span class="n">payload</span><span class="p">]</span>

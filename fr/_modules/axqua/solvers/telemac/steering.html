@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/steering.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -1981,7 +1981,8 @@
 <div class="viewcode-block" id="write_hotstart_cas">
 <a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.steering.write_hotstart_cas">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">write_hotstart_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                       <span class="n">out_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"hotstart2d.cas"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+                       <span class="n">out_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"hotstart2d.cas"</span><span class="p">,</span>
+                       <span class="n">results_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Derive a hotstart steering file from the *built* steady case.</span>
 
 <span class="sd">    Rewrites ``cfg.cas_file`` (``steady2d.cas``) as a continuation run: the initial</span>
@@ -1992,12 +1993,13 @@
 <span class="sd">    to reach a sustained boundary-flux balance (``flux_convergence.find_steady_window``).</span>
 <span class="sd">    Everything else - notably the constant ``PRESCRIBED FLOWRATES`` /</span>
 <span class="sd">    ``PRESCRIBED ELEVATIONS`` - is carried over unchanged, so the hotstart drives the</span>
-<span class="sd">    same steady Q and downstream H as the initial run.</span>
+<span class="sd">    same steady Q and downstream H as the initial run. *results_name* names the</span>
+<span class="sd">    results file (default ``&lt;results stem&gt;-hotstart.slf``).</span>
 <span class="sd">    """</span>
     <span class="n">steady_cas</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
     <span class="n">duration_s</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">duration</span><span class="p">))</span> <span class="k">if</span> <span class="n">duration</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
     <span class="n">results</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
-    <span class="n">hot_results</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">results</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-hotstart</span><span class="si">{</span><span class="n">results</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">hot_results</span> <span class="o">=</span> <span class="n">results_name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">results</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-hotstart</span><span class="si">{</span><span class="n">results</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span>
 
     <span class="n">out_lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">have_previous</span> <span class="o">=</span> <span class="n">have_duration</span> <span class="o">=</span> <span class="kc">False</span>

@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/installation/plugin-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -468,7 +468,7 @@
 </section>
 <section id="define-solver-bindings">
 <span id="solver-bindings"></span><h2>Définir les liaisons solveur<a class="headerlink" href="#define-solver-bindings" title="Lien vers cette rubrique"></a></h2>
-<p>Une liaison solveur indique aXqua comment tronçon un code de simulation. Son entrée centrale est <code class="docutils literal notranslate"><span class="pre">setup_script</span></code>, le script environnement de l’installation (<a class="reference internal" href="simulation-software.html"><span class="doc">Logiciel de simulation</span></a>). Le dossier de l’installation est stocké séparément, sous <code class="docutils literal notranslate"><span class="pre">installations</span></code> (<a class="reference internal" href="#plugin-profile"><span class="std std-ref">Profil d’extension</span></a>). Si un profil désigne l’installation dossier d’un code et non <code class="docutils literal notranslate"><span class="pre">setup_script</span></code>, aXqua utilise le script d’environnement qu’il trouve dans le dossier, et les autres entrées de la liaison sont facultatives comme avant.</p>
+<p>Une liaison solveur indique à aXqua comment atteindre un code de simulation. Son entrée centrale est <code class="docutils literal notranslate"><span class="pre">setup_script</span></code>, le script environnement de l’installation (<a class="reference internal" href="simulation-software.html"><span class="doc">Logiciel de simulation</span></a>). Le dossier de l’installation est stocké séparément, sous <code class="docutils literal notranslate"><span class="pre">installations</span></code> (<a class="reference internal" href="#plugin-profile"><span class="std std-ref">Profil d’extension</span></a>). Si un profil désigne l’installation du dossier d’un code et non <code class="docutils literal notranslate"><span class="pre">setup_script</span></code>, aXqua utilise le script d’environnement qu’il trouve dans le dossier, et les autres entrées de la liaison sont facultatives comme auparavant.</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 24.0%" />
@@ -505,7 +505,7 @@
 <span id="plugin-job-execution"></span><h2>Exécution tâche<a class="headerlink" href="#job-execution" title="Lien vers cette rubrique"></a></h2>
 <p>Chaque simulation fonctionne comme un <strong>tâche</strong> : un processus indépendant avec son propre dossier, qui se poursuit lorsque QGIS est fermé. Deux entrées du contrôle du bloc <code class="docutils literal notranslate"><span class="pre">jobs</span></code> comment les tâches sont exécutées :</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">root</span></code> est le dossier dans lequel les dossiers tâche sont créés. Sélectionnez un lecteur avec suffisamment d’espace libre, car les résultats d’une seule simulation peuvent tronçon dizaines de gigaoctets. Sans cette entrée, les tâches sont écrites au dossier de données aXqua de l’utilisateur.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">root</span></code> est le dossier dans lequel les dossiers tâche sont créés. Sélectionnez un lecteur avec suffisamment d’espace libre, car les résultats d’une seule simulation peuvent atteindre des dizaines de gigaoctets. Sans cette entrée, les tâches sont écrites au dossier de données aXqua de l’utilisateur.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">launcher</span></code> est la méthode qui détache une tâche de QGIS. La méthode par défaut <code class="docutils literal notranslate"><span class="pre">auto</span></code> sélectionne une méthode appropriée pour le système d’exploitation et doit rarement être modifiée.</p></li>
 </ul>
 <p><a class="reference internal" href="../automation/batch-headless.html"><span class="doc">Batch-processing (sans tête)</span></a> décrit les tâches en détail.</p>

@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/bayescal.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -60,7 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -132,7 +132,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -188,7 +188,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -206,7 +206,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC Backend</a><ul>
@@ -255,9 +255,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
@@ -271,9 +271,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -294,7 +294,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -310,7 +310,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -389,9 +389,9 @@
 <span class="sd">* the built ``.cas`` must output ``SCALAR VELOCITY`` (graphic printout ``M``);</span>
 <span class="sd">* the staged driver extracts the **last** (converged) SELAFIN frame, not the</span>
 <span class="sd">  ``mean_last`` window that would average a dry-start transient;</span>
-<span class="sd">* HydroBayesCal's prior-sample count drives a per-location dense covariance in</span>
-<span class="sd">  gpytorch, so it is kept modest (``calibration.prior_samples``, default 5000) -</span>
-<span class="sd">  ample for a low-dimensional roughness posterior and safe on a 16 GB box;</span>
+<span class="sd">* HydroBayesCal keeps a prior sample with probability likelihood / largest</span>
+<span class="sd">  likelihood, so a sharp posterior needs more of them (``calibration.prior_samples``,</span>
+<span class="sd">  default 5000); since 1.12.2 the memory grows in proportion to their number;</span>
 <span class="sd">* per-flow steering files differ only in Q, the outflow stage (from the</span>
 <span class="sd">  synthesized rating at that Q), ``DURATION`` and the results name.</span>
 <span class="sd">"""</span>
@@ -500,14 +500,20 @@
 <div class="viewcode-block" id="build_velocity_csv">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.build_velocity_csv">[Doku]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">build_velocity_csv</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
-                       <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span>
-                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+                       <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span><span class="p">,</span>
+                       <span class="n">positional</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Compile the configured ground truth and write the calibration-points CSV.</span>
 
 <span class="sd">    The velocity target is the horizontal FlowTracker speed (0.6-depth proxy for</span>
 <span class="sd">    the depth-averaged velocity) with propagated, floored error; water depth is</span>
 <span class="sd">    carried alongside. Reads ``ground_truth.sources`` via</span>
 <span class="sd">    :func:`axqua.ground_truth.compile_ground_truth`.</span>
+
+<span class="sd">    With *positional*, a declared ``ground_truth.position_quality`` (or</span>
+<span class="sd">    ``position_sigma``) adds the spread of the steady result within that radius to</span>
+<span class="sd">    each error, in quadrature (:mod:`axqua.positional_error`), as the build's</span>
+<span class="sd">    calibration table does. Until 2026-11-08 this table, which the calibration job</span>
+<span class="sd">    writes last and HydroBayesCal reads, left that term out without a word.</span>
 <span class="sd">    """</span>
     <span class="n">compile_ground_truth</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
     <span class="n">tables</span> <span class="o">=</span> <span class="n">read_tidy</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth_path</span><span class="p">)</span>
@@ -527,11 +533,29 @@
         <span class="n">vel_err_floor</span><span class="p">,</span> <span class="n">depth_err_floor</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">"label"</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">_inside_the_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">_away_from_liquid_boundaries</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">positional</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">_with_positional_error</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_csv</span><span class="p">)</span>
     <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">out</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">out</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_with_positional_error</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""*points* with the positional error of :func:`axqua.calibration._positional_errors` added in quadrature to each ``&lt;QTY&gt;_ERROR``."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">_positional_errors</span>
+
+    <span class="n">quantities</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">"_ERROR"</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">points</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_ERROR"</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">points</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">quantities</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">points</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="n">_positional_errors</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">quantities</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">qty</span><span class="p">,</span> <span class="n">spread</span> <span class="ow">in</span> <span class="n">extra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">qty</span><span class="si">}</span><span class="s2">_ERROR"</span>
+        <span class="n">points</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                                          <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spread</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">points</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_inside_the_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -648,25 +672,161 @@
     <span class="k">return</span> <span class="n">points</span>
 
 
-<div class="viewcode-block" id="run_single_flow_calibration">
-<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.run_single_flow_calibration">[Doku]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">run_single_flow_calibration</span><span class="p">(</span>
-        <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">calibration_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">extraction_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
-        <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span><span class="p">,</span>
-        <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">env</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""End-to-end single-discharge calibration of the built case.</span>
+<span class="c1">#: The steering file of calibration runs that start from the steady result.</span>
+<span class="n">CALIBRATION_HOTSTART_CAS</span> <span class="o">=</span> <span class="s2">"calibration2d.cas"</span>
+<span class="c1">#: Simulated time of such a run, in residence times of the reach (wetted volume over</span>
+<span class="c1">#: discharge). Measured on the finest Inn KB15 mesh (2026-11-08; 133,500 m3 at</span>
+<span class="c1">#: 54.3 m3/s, a residence time of 2,460 s), continuing from the steady result with</span>
+<span class="c1">#: the four calibrated zones at their prior bounds: at the upper bounds the stored</span>
+<span class="c1">#: volume rose 5 % and the inflow-outflow imbalance stayed below 0.1 % from 2,949 s</span>
+<span class="c1">#: on (1.2 residence times), the depth and velocity at the 30 verticals then within</span>
+<span class="c1">#: 0.06 % and 0.3 % of their final values on average; at the lower bounds the volume</span>
+<span class="c1">#: fell 10 % and was flat from about 2,000 s, while the flow kept shedding eddies</span>
+<span class="c1">#: (outflow +/- 1 %), which no run length removes.</span>
+<span class="n">HOTSTART_RESIDENCE_TIMES</span> <span class="o">=</span> <span class="mf">1.2</span>
+<span class="c1">#: The shortest such run [s], for a reach whose water is replaced within minutes.</span>
+<span class="n">HOTSTART_MIN_DURATION</span> <span class="o">=</span> <span class="mf">600.0</span>
 
-<span class="sd">    Compiles the calibration CSV, ensures the ``.cas`` prints the target,</span>
-<span class="sd">    emits the HydroBayesCal config, stages the driver and (unless</span>
-<span class="sd">    ``prepare_only``) launches it. Returns the driver exit code (0 when</span>
-<span class="sd">    ``prepare_only``).</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_steady_result</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The converged result of the steady run that calibration runs start from.</span>
+
+<span class="sd">    Refused when it is missing, older than the mesh, or computed on another mesh: a</span>
+<span class="sd">    run that continues from a result of an earlier build stops at once on the node</span>
+<span class="sd">    count, or, worse, runs from the flow of another roughness map.</span>
 <span class="sd">    """</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">emit_hbc_config</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelafinFile</span>
 
-    <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">)</span>
+    <span class="n">remedy</span> <span class="o">=</span> <span class="s2">"Run the steady simulation of the case first (Baseline (Telemac) &gt; Run)."</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"calibration.hotstart needs the result of the steady run, </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="s2">"which does not exist"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.hotstart"</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">geometry</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">&lt;</span> <span class="n">geometry</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is older than </span><span class="si">{</span><span class="n">geometry</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: it belongs to an earlier "</span>
+            <span class="s2">"build of the case"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.hotstart"</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">geometry</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="n">npoin</span> <span class="o">!=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">npoin</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">geometry</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> have different meshes"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.hotstart"</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="case_inflows">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.case_inflows">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">case_inflows</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The discharge of each inflow line of the built case, where every line names one.</span>
+
+<span class="sd">    Empty when the build left the split to the total ``prescribed_flowrate`` or has not</span>
+<span class="sd">    written its ``liquid-boundaries.json`` yet.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">boundary</span>
+
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">liquid_boundaries_json</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">meta</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">inflows</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">boundary</span><span class="o">.</span><span class="n">load_liquid_boundaries</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inflows</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span><span class="p">)</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="case_discharge">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.case_discharge">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">case_discharge</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The total inflow of the case: ``prescribed_flowrate``, else the sum of the discharges of its inflow lines."""</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">)</span>
+    <span class="n">inflows</span> <span class="o">=</span> <span class="n">case_inflows</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">inflows</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="k">if</span> <span class="n">inflows</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="calibration_hotstart_duration">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.calibration_hotstart_duration">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calibration_hotstart_duration</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Simulated time [s] of a calibration run that starts from the steady result.</span>
+
+<span class="sd">    ``calibration.hotstart_duration`` when given. Otherwise the run lasts</span>
+<span class="sd">    :data:`HOTSTART_RESIDENCE_TIMES` residence times of the reach, rounded up to</span>
+<span class="sd">    100 s: the residence time is the volume of water in the converged result over the</span>
+<span class="sd">    discharge, the time in which the reach exchanges its water once. A changed</span>
+<span class="sd">    roughness changes the stored volume, and the flow has settled once that change</span>
+<span class="sd">    has passed the outflow.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelafinFile</span>
+
+    <span class="n">given</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">hotstart_duration</span>
+    <span class="k">if</span> <span class="n">given</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">given</span><span class="p">)</span>
+    <span class="n">discharge</span> <span class="o">=</span> <span class="n">case_discharge</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">discharge</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"a calibration run that starts from the steady result needs its duration, "</span>
+            <span class="s2">"and the case names neither a discharge to derive it from nor a duration"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.hotstart_duration"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter calibration.hotstart_duration in seconds, or the discharge "</span>
+                   <span class="s2">"of the case (boundaries.prescribed_flowrate)."</span><span class="p">)</span>
+    <span class="c1"># the coordinates of the geometry, in double precision (a result stores them in</span>
+    <span class="c1"># single precision, which at a UTM northing is a spacing of 0.5 m)</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">))</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ikle</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">ikle</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">))</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">])[</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span>
+                        <span class="o">-</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]))</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">area</span> <span class="o">*</span> <span class="n">h</span><span class="p">[</span><span class="n">ikle</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">residence</span> <span class="o">=</span> <span class="n">volume</span> <span class="o">/</span> <span class="n">discharge</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">HOTSTART_MIN_DURATION</span><span class="p">,</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">HOTSTART_RESIDENCE_TIMES</span> <span class="o">*</span> <span class="n">residence</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="write_calibration_hotstart">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.write_calibration_hotstart">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_calibration_hotstart</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write the steering file of calibration runs that start from the steady result.</span>
+
+<span class="sd">    ``calibration2d.cas`` is the built ``steady2d.cas`` continuing from ``r2d.slf``</span>
+<span class="sd">    (:func:`axqua.solvers.telemac.steering.write_hotstart_cas`) for</span>
+<span class="sd">    :func:`calibration_hotstart_duration`. HydroBayesCal names the result of each run</span>
+<span class="sd">    ``r2d_&lt;n&gt;.slf``, so the seed is never overwritten. Returns the file name.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.steering</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_hotstart_cas</span>
+
+    <span class="c1"># a calibration that was killed set aside the steering file of its time; put it</span>
+    <span class="c1"># back now, or case_as_built() would restore it over the one written here</span>
+    <span class="n">restore_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">_steady_result</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s2">"hotstart2d.cas"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the steady run had not balanced its inflow and outflow (no "</span>
+                    <span class="s2">"hotstart2d.cas), so every calibration run starts from a flow "</span>
+                    <span class="s2">"that is not steady; run the steady simulation longer first"</span><span class="p">)</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">calibration_hotstart_duration</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">write_hotstart_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">out_name</span><span class="o">=</span><span class="n">CALIBRATION_HOTSTART_CAS</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration runs start from </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="si">}</span><span class="s2"> and last </span><span class="si">{</span><span class="n">duration</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> s "</span>
+          <span class="sa">f</span><span class="s2">"-&gt; </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_set_quantities</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">calibration_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">extraction_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Settle the calibration targets and the extracted quantities on *cfg*; returns the targets.</span>
+
+<span class="sd">    The caller's lists win over the case file's. Every calibration target is also</span>
+<span class="sd">    extracted, or HydroBayesCal never reads it from the results.</span>
+<span class="sd">    """</span>
     <span class="c1"># The case file decides what is calibrated against. Until 2026-10-17 a built-in</span>
     <span class="c1"># ("SCALAR VELOCITY",) replaced it whenever the caller named nothing, which is</span>
     <span class="c1"># what every job did: a case asking for depth and velocity was calibrated</span>
@@ -681,8 +841,42 @@
                                                 <span class="o">*</span><span class="n">calibration_quantities</span><span class="p">]))</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">calibration_quantities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">calibration_quantities</span><span class="p">)</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">extraction_quantities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">extraction_quantities</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration target(s): </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">calibration_quantities</span><span class="p">)</span><span class="si">}</span><span class="s2">  "</span>
-          <span class="sa">f</span><span class="s2">"parameters: </span><span class="si">{</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">calibration_quantities</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="run_single_flow_calibration">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.run_single_flow_calibration">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_single_flow_calibration</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">calibration_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">extraction_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
+        <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span><span class="p">,</span>
+        <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""End-to-end single-discharge calibration of the built case.</span>
+
+<span class="sd">    Compiles the calibration CSV, ensures the ``.cas`` prints the target,</span>
+<span class="sd">    emits the HydroBayesCal config, stages the driver and (unless</span>
+<span class="sd">    ``prepare_only``) launches it, in two passes with ``calibration.structural_error:</span>
+<span class="sd">    unreachable`` (:func:`_launch_in_passes`); *resume* starts from the initial</span>
+<span class="sd">    simulations an earlier calibration saved. Returns the driver exit code (0 when</span>
+<span class="sd">    ``prepare_only``).</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">emit_hbc_config</span>
+
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">structural_error_mode</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+    <span class="n">calibration_quantities</span> <span class="o">=</span> <span class="n">_set_quantities</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">calibration_quantities</span><span class="p">,</span>
+                                             <span class="n">extraction_quantities</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">telemac_parameters</span>
+
+    <span class="c1"># the zones of the roughness table and the rows of the target workbook too, not</span>
+    <span class="c1"># only the list of the case file (the Inn KB15 case printed "parameters: []")</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                        <span class="c1"># noqa: BLE001 - a log line, never a stop</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration target(s): </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">calibration_quantities</span><span class="p">)</span><span class="si">}</span><span class="s2">  parameters: </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">csv</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="n">build_velocity_csv</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">vel_err_floor</span><span class="o">=</span><span class="n">vel_err_floor</span><span class="p">,</span>
                                     <span class="n">depth_err_floor</span><span class="o">=</span><span class="n">depth_err_floor</span><span class="p">)</span>
@@ -692,18 +886,24 @@
               <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table</span><span class="p">[</span><span class="s1">'SCALAR VELOCITY_DATA'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">ensure_graphic_output</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">))</span>
-    <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">csv</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">hotstart</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"calibration.hotstart is ignored: calibration.control_file "</span>
+                        <span class="s2">"names the steering file (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span> <span class="o">=</span> <span class="n">write_calibration_hotstart</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">only_bal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">csv</span><span class="p">,</span> <span class="n">complete_bal_mode</span><span class="o">=</span><span class="n">complete</span><span class="p">,</span>
+                               <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">only_bal</span><span class="p">)</span>
 
     <span class="n">driver</span> <span class="o">=</span> <span class="n">stage_driver</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">,</span> <span class="s2">"bal_telemac.py"</span><span class="p">,</span> <span class="n">checkout</span><span class="o">=</span><span class="n">checkout</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">prepare_only</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--prepare-only: not launched. Run it with:"</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  cd </span><span class="si">{</span><span class="n">driver</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">driver</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> "</span>
-              <span class="sa">f</span><span class="s2">"--config </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">0</span>
-    <span class="k">with</span> <span class="n">case_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
-                      <span class="n">note</span><span class="o">=</span><span class="s2">"HydroBayesCal calibration"</span><span class="p">)</span></div>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_launch_in_passes</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span> <span class="n">prepare_only</span><span class="o">=</span><span class="n">prepare_only</span><span class="p">,</span> <span class="n">emit</span><span class="o">=</span><span class="n">emit</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="n">restarts</span><span class="o">=</span><span class="p">{</span><span class="s2">"calibration"</span><span class="p">:</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">RESTART_OUTPUTS</span><span class="p">},</span>
+        <span class="n">csvs</span><span class="o">=</span><span class="p">{</span><span class="s2">"calibration"</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">csv</span><span class="p">)},</span> <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="s2">"HydroBayesCal calibration"</span><span class="p">)</span></div>
 
 
 
@@ -934,12 +1134,13 @@
                           <span class="n">adaptive_init_runs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Write ``config_Telemac_multiflow.py`` (standard blocks + a ``multiflow``</span>
 <span class="sd">    block of per-flow steering/CSV entries)."""</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">merged_parameters</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">telemac_parameters</span>
 
     <span class="n">c</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span>
-    <span class="c1"># merged_parameters, not c.parameters: the roughness table's calibrated zones</span>
-    <span class="c1"># and the target template's rows must reach the multiflow config too</span>
-    <span class="n">parameters</span> <span class="o">=</span> <span class="n">merged_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="c1"># the merged parameters, not c.parameters: the roughness table's calibrated zones</span>
+    <span class="c1"># and the target template's rows must reach the multiflow config too; and only</span>
+    <span class="c1"># TELEMAC's, so an OpenFOAM ks or Cmu of the same list is not emitted</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="n">ranges</span> <span class="o">=</span> <span class="p">[[</span><span class="n">p</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">max</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="n">prior</span> <span class="o">=</span> <span class="n">prior_samples</span> <span class="k">if</span> <span class="n">prior_samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span>
@@ -1011,12 +1212,15 @@
 <span class="s1">    'bal_exploration_tradeoff': </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="s2">"bal_exploration_tradeoff"</span><span class="p">,</span><span class="w"> </span><span class="s2">"auto"</span><span class="p">)</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    'tp_selection_criteria': 'dkl',</span>
 <span class="s1">    'eval_steps': 1,</span>
-<span class="s1">    # prior_samples drives a (prior_samples x prior_samples) dense covariance PER</span>
-<span class="s1">    # location in gpytorch; keep modest (a low-dim roughness posterior needs few).</span>
+<span class="s1">    # prior samples the surrogate is predicted at (calibration.prior_samples); a sharp</span>
+<span class="s1">    # posterior keeps few of them, so raise it when few are accepted.</span>
 <span class="s1">    'prior_samples': </span><span class="si">{</span><span class="n">prior</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    'mc_samples_al': 2000,</span>
 <span class="s1">    'mc_exploration': 1000,</span>
 <span class="s1">    'gp_library': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_library</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    # 'variables': one multi-output GPE per location, its outputs the calibration</span>
+<span class="s1">    # quantities (calibration.multitask_selection)</span>
+<span class="s1">    'multitask_selection': </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="s2">"multitask_selection"</span><span class="p">,</span><span class="w"> </span><span class="s2">"variables"</span><span class="p">)</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="se">}}</span>
 
 <span class="s1">execution = </span><span class="se">{{</span>
@@ -1042,6 +1246,229 @@
     <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># model error at points the model cannot reach (calibration.structural_error)</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1">#: What a calibration does with a measured value that no parameter set within the</span>
+<span class="c1">#: ranges reproduces: keep the measurement error (``none``), or add the misfit that</span>
+<span class="c1">#: remains to the error of the point (``unreachable``).</span>
+<span class="n">STRUCTURAL_ERRORS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"none"</span><span class="p">,</span> <span class="s2">"unreachable"</span><span class="p">)</span>
+<span class="c1">#: HydroBayesCal's record of the simulated values of the initial design, per point.</span>
+<span class="n">RESTART_OUTPUTS</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"auto-saved-results-HydroBayesCal"</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"restart_data"</span> <span class="o">/</span> \
+    <span class="s2">"initial-model-outputs.json"</span>
+
+
+<div class="viewcode-block" id="structural_error_mode">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.structural_error_mode">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">structural_error_mode</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``calibration.structural_error``, checked."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="n">mode</span> <span class="o">=</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="p">,</span> <span class="s2">"structural_error"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"none"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">STRUCTURAL_ERRORS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration.structural_error must be one of "</span>
+                          <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">STRUCTURAL_ERRORS</span><span class="p">)</span><span class="si">}</span><span class="s2">, not </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.structural_error"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mode</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_point_runs</span><span class="p">(</span><span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">point_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The runs of one point in the per-point layout; the id as HydroBayesCal wrote it (the first column of the points file, as text)."""</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">runs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">point_id</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">))</span> \
+            <span class="ow">and</span> <span class="nb">float</span><span class="p">(</span><span class="n">point_id</span><span class="p">)</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">point_id</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">runs</span>
+
+
+<div class="viewcode-block" id="per_point_outputs">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.per_point_outputs">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">per_point_outputs</span><span class="p">(</span><span class="n">stored</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""HydroBayesCal's ``initial-model-outputs.json`` in the per-point layout.</span>
+
+<span class="sd">    From 1.12 on, HydroBayesCal writes ``{point_id: [{quantity: value} per run]}``; where</span>
+<span class="sd">    its detailed table does not hold one row per point for every run, it writes the</span>
+<span class="sd">    flat layout of earlier releases instead: ``model_evaluations``, one row per run</span>
+<span class="sd">    with the columns point by point and, within a point, one per</span>
+<span class="sd">    ``calibration_quantities``. That layout is converted here, with the ids of</span>
+<span class="sd">    *points* (the order HydroBayesCal read them in).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="s2">"model_evaluations"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stored</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stored</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">stored</span><span class="p">[</span><span class="s2">"model_evaluations"</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+    <span class="n">quantities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">stored</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"calibration_quantities"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quantities</span> <span class="ow">or</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">quantities</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the initial simulations hold </span><span class="si">{</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> values per run, not one "</span>
+            <span class="sa">f</span><span class="s2">"per point (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span><span class="si">}</span><span class="s2">) and calibration target (</span><span class="si">{</span><span class="n">quantities</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">quantities</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">point_id</span><span class="p">):</span> <span class="p">[{</span><span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">width</span> <span class="o">+</span> <span class="n">j</span><span class="p">])</span>
+                             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">quantities</span><span class="p">)}</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">point_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="s2">"id"</span><span class="p">])}</span></div>
+
+
+
+<div class="viewcode-block" id="unreachable_misfit">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.unreachable_misfit">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">unreachable_misfit</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                       <span class="n">quantities</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Per point and quantity, the part of the misfit that no simulated set removes.</span>
+
+<span class="sd">    *points* is a calibration points table (``id``, ``x``, ``y``, ``&lt;Q&gt;_DATA``,</span>
+<span class="sd">    ``&lt;Q&gt;_ERROR``), *outputs* HydroBayesCal's ``initial-model-outputs.json``: per point</span>
+<span class="sd">    id, one ``{quantity: value}`` per simulation of the initial design. The misfit that</span>
+<span class="sd">    remains is the distance from the measured value to the range of the simulated</span>
+<span class="sd">    values, zero where the range contains it. It is added in quadrature to the</span>
+<span class="sd">    measurement error, so a point the model reaches keeps its error, and a point it</span>
+<span class="sd">    cannot reach with any roughness in the ranges (a water level the terrain model</span>
+<span class="sd">    does not hold up, Inn KB15 2026-11-09: 17 to 38 cm too low in all 16 simulations)</span>
+<span class="sd">    no longer decides the calibration on its own. Returns one row per point with, per</span>
+<span class="sd">    quantity, the measured value, the measurement error, the smallest and largest</span>
+<span class="sd">    simulated value, the misfit that remains and the combined error.</span>
+<span class="sd">    """</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># iterrows turns every value of a row into a float; the id keeps its own type</span>
+    <span class="k">for</span> <span class="n">point_id</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span> <span class="n">points</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()):</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="n">_point_runs</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">point_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">runs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the initial simulations hold no values for point "</span>
+                             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">point_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">point_id</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">:</span> <span class="n">point</span><span class="p">[</span><span class="s2">"x"</span><span class="p">],</span> <span class="s2">"y"</span><span class="p">:</span> <span class="n">point</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]}</span>
+        <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">run</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">values</span><span class="p">)]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_DATA"</span><span class="p">])</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+                <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+                <span class="n">gap</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">low</span> <span class="o">-</span> <span class="n">data</span><span class="p">,</span> <span class="n">data</span> <span class="o">-</span> <span class="n">high</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>                            <span class="c1"># dry in every simulation: nothing to add</span>
+                <span class="n">low</span> <span class="o">=</span> <span class="n">high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">gap</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_DATA"</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_MEASUREMENT_ERROR"</span><span class="p">:</span> <span class="n">error</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_MODEL_MIN"</span><span class="p">:</span> <span class="n">low</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_MODEL_MAX"</span><span class="p">:</span> <span class="n">high</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_UNREACHABLE"</span><span class="p">:</span> <span class="n">gap</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">gap</span><span class="p">))})</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#: HydroBayesCal adds this share of the measured value to every error of the points</span>
+<span class="c1">#: file itself (its ``measurement_error``, which aXqua leaves at the default).</span>
+<span class="n">HBC_MEASUREMENT_SHARE</span> <span class="o">=</span> <span class="mf">0.10</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_values</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Simulated values of *quantity*, one row per run of the initial design."""</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">point_id</span> <span class="ow">in</span> <span class="n">points</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]:</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="n">_point_runs</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">point_id</span><span class="p">)</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">run</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span> <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span> <span class="ow">or</span> <span class="p">[]])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">({</span><span class="nb">len</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">})</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"the initial simulations hold different numbers of runs per point"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+
+<div class="viewcode-block" id="joint_misfit">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.joint_misfit">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">joint_misfit</span><span class="p">(</span><span class="n">tables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">points</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
+                 <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span> <span class="n">quantities</span><span class="p">,</span>
+                 <span class="n">share</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">HBC_MEASUREMENT_SHARE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Widen the errors of a group of points that no single simulated set fits jointly.</span>
+
+<span class="sd">    The second step of the model error: :func:`unreachable_misfit` covers a point the</span>
+<span class="sd">    model misses with every set, but a group of points can each lie inside the</span>
+<span class="sd">    simulated range and still not be reached together by any one set (Inn KB15</span>
+<span class="sd">    2026-11-10: August and March velocities, chi-square per point approximately 10 at</span>
+<span class="sd">    the best set, depth and November velocity approximately 1). The best run of the</span>
+<span class="sd">    initial design is the one with the smallest chi-square over all situations and</span>
+<span class="sd">    quantities, with the variance HydroBayesCal uses: the error of the points file</span>
+<span class="sd">    plus *share* of the measured value, in quadrature. For each situation and calibration target</span>
+<span class="sd">    whose chi-square per point exceeds 1 at that run, the variance of its points is</span>
+<span class="sd">    multiplied by that value, so the group counts as much as its fit allows. *tables*</span>
+<span class="sd">    (situation -&gt; the table of :func:`unreachable_misfit`) are completed in place with</span>
+<span class="sd">    ``&lt;Q&gt;_BEST_FIT``, ``&lt;Q&gt;_VARIANCE_FACTOR`` and the final ``&lt;Q&gt;_ERROR``. A run of the</span>
+<span class="sd">    same number is the same parameter set in every situation. Returns the number of</span>
+<span class="sd">    the best run, counted from 1.</span>
+<span class="sd">    """</span>
+    <span class="n">terms</span><span class="p">,</span> <span class="n">runs</span> <span class="o">=</span> <span class="p">{},</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">_run_values</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span> <span class="n">outputs</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span> <span class="n">quantity</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_DATA"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">variance</span> <span class="o">=</span> <span class="p">(</span><span class="n">share</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> \
+                <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">terms</span><span class="p">[</span><span class="n">tag</span><span class="p">,</span> <span class="n">quantity</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span>
+            <span class="n">runs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">runs</span><span class="o">.</span><span class="n">pop</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"the situations hold different numbers of initial simulations"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">chi2</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">variance</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">values</span> <span class="o">-</span> <span class="n">data</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">variance</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">best</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">chi2</span><span class="p">(</span><span class="o">*</span><span class="n">term</span><span class="p">)</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">quantity</span><span class="p">),</span> <span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">fitted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">best</span><span class="p">])</span>
+        <span class="n">per_point</span> <span class="o">=</span> <span class="n">chi2</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">best</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">fitted</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">per_point</span><span class="p">))</span>
+        <span class="n">measured</span> <span class="o">=</span> <span class="p">(</span><span class="n">share</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+        <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_BEST_FIT"</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">best</span><span class="p">]</span>
+        <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_VARIANCE_FACTOR"</span><span class="p">]</span> <span class="o">=</span> <span class="n">factor</span>
+        <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">factor</span> <span class="o">*</span> <span class="n">variance</span> <span class="o">-</span> <span class="n">measured</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: chi-square per point </span><span class="si">%.3g</span><span class="s2"> at the best initial run </span><span class="si">%d%s</span><span class="s2">"</span><span class="p">,</span>
+                 <span class="n">tag</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">per_point</span><span class="p">,</span> <span class="n">best</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="sa">f</span><span class="s2">" -&gt; variance x</span><span class="si">{</span><span class="n">factor</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">factor</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">best</span> <span class="o">+</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="apply_unreachable_misfit">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.apply_unreachable_misfit">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_unreachable_misfit</span><span class="p">(</span><span class="n">csvs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">restarts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+                             <span class="n">quantities</span><span class="p">,</span> <span class="n">records</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
+                             <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Write the model error into the points file of every situation.</span>
+
+<span class="sd">    Per situation, :func:`unreachable_misfit` adds what no simulated set reaches at a</span>
+<span class="sd">    point; then :func:`joint_misfit` widens, across all situations together, the</span>
+<span class="sd">    errors of the groups that no single set fits. Each *csvs* file holds the</span>
+<span class="sd">    measurement errors when this is called (it is compiled again before every</span>
+<span class="sd">    launch), so applying it twice does not add the model error twice. The table with</span>
+<span class="sd">    every term is written to *records* (situation -&gt; path).</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">csvs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">per_point_outputs</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">restarts</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span><span class="o">.</span><span class="n">read_text</span><span class="p">()),</span>
+                                      <span class="n">points</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">csvs</span><span class="p">}</span>
+    <span class="n">tables</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">unreachable_misfit</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span> <span class="n">outputs</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span> <span class="n">quantities</span><span class="p">)</span>
+              <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">csvs</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">:</span>
+            <span class="n">gap</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_UNREACHABLE"</span><span class="p">]</span>
+            <span class="n">reached</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">gap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> of </span><span class="si">%d</span><span class="s2"> points lie outside the simulated range</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                     <span class="n">Path</span><span class="p">(</span><span class="n">csvs</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">reached</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">),</span>
+                     <span class="sa">f</span><span class="s2">" (misfit </span><span class="si">{</span><span class="n">gap</span><span class="p">[</span><span class="n">gap</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> median, "</span>
+                     <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">gap</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> at most)"</span> <span class="k">if</span> <span class="n">reached</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">joint_misfit</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">quantities</span><span class="p">)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">part</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">quantities</span>
+                                  <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"DATA"</span><span class="p">,</span> <span class="s2">"MEASUREMENT_ERROR"</span><span class="p">,</span> <span class="s2">"MODEL_MIN"</span><span class="p">,</span>
+                                               <span class="s2">"MODEL_MAX"</span><span class="p">,</span> <span class="s2">"UNREACHABLE"</span><span class="p">,</span> <span class="s2">"BEST_FIT"</span><span class="p">,</span>
+                                               <span class="s2">"VARIANCE_FACTOR"</span><span class="p">,</span> <span class="s2">"ERROR"</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">:</span>
+            <span class="n">points</span><span class="p">[</span><span class="n">tag</span><span class="p">][</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span><span class="p">]</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">points</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">csvs</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">table</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">records</span><span class="p">[</span><span class="n">tag</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tables</span></div>
 
 
 
@@ -1196,8 +1623,285 @@
                          <span class="s2">"(shared friction.tbl); wait or pass force=True"</span><span class="p">)</span>
     <span class="n">note</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"multi-discharge calibration - BAL only (reusing initial designs)"</span>
             <span class="k">if</span> <span class="n">resume</span> <span class="k">else</span> <span class="s2">"multi-discharge calibration"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">)</span></div>
+    <span class="c1"># the driver writes every tested set into the case's friction table, as in the</span>
+    <span class="c1"># single-flow calibration: hand the built case back when it returns</span>
+    <span class="k">with</span> <span class="n">case_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">)</span></div>
 
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># calibration at several discharges, from the situations of the case file</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1">#: Folder of a calibration at several discharges, inside the calibration directory.</span>
+<span class="n">MULTIFLOW</span> <span class="o">=</span> <span class="s2">"multiflow"</span>
+
+
+<div class="viewcode-block" id="calibration_situations">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.calibration_situations">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calibration_situations</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The flow situations a calibration fits, when it fits more than the case's own.</span>
+
+<span class="sd">    ``calibration.situations`` (each measured at a discharge of its own), preceded by</span>
+<span class="sd">    one at the discharge of the case when ``ground_truth`` holds measurements too.</span>
+<span class="sd">    Empty when the case names no situation: the calibration is then the single-flow</span>
+<span class="sd">    one of the case's discharge.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationSituation</span>
+
+    <span class="n">given</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">situations</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">given</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">gt</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth</span>
+    <span class="k">if</span> <span class="n">gt</span><span class="o">.</span><span class="n">sources</span> <span class="ow">or</span> <span class="n">gt</span><span class="o">.</span><span class="n">measurements</span> <span class="ow">or</span> <span class="n">gt</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+        <span class="c1"># no sources of its own: its measurements are those of ground_truth, and its</span>
+        <span class="c1"># boundary values are those of the case (the outflow level too, which</span>
+        <span class="c1"># outflow_condition: elevation requires of every situation)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
+
+        <span class="n">inflows</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="n">case_inflows</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">fixed</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"fixed"</span>
+        <span class="n">given</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ValidationSituation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">"case discharge"</span><span class="p">,</span> <span class="n">prescribed_flowrate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">,</span>
+            <span class="n">inflows</span><span class="o">=</span><span class="n">inflows</span><span class="p">,</span>
+            <span class="n">prescribed_elevation</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="k">if</span> <span class="n">fixed</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">given</span></div>
+
+
+
+<div class="viewcode-block" id="situation_points">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.situation_points">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">situation_points</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
+                     <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span>
+                     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The calibration-points CSV of one situation, by the rules of the single-flow table.</span>
+
+<span class="sd">    Points outside the model or near a liquid boundary are left out</span>
+<span class="sd">    (:func:`build_velocity_csv`), so a situation is held to the same rules as the</span>
+<span class="sd">    measurements of the case's own discharge. A declared position quality adds its</span>
+<span class="sd">    error only at the case's discharge: the error is the spread of the steady result</span>
+<span class="sd">    around a point, and the steady result is that of the case's discharge, whose</span>
+<span class="sd">    velocity gradients are not those of another (as in :func:`axqua.validation.measurements`).</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">slug</span>
+
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">there</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>                 <span class="c1"># else the measurements of ground_truth</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">sources</span><span class="p">)</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"ground-truth-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.xlsx"</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">calibration_csv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">MULTIFLOW</span><span class="si">}</span><span class="s2">/measurements-calibration-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span>
+    <span class="n">q</span><span class="p">,</span> <span class="n">own</span> <span class="o">=</span> <span class="n">situation</span><span class="o">.</span><span class="n">total_flowrate</span><span class="p">,</span> <span class="n">case_discharge</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">positional</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">situation</span><span class="o">.</span><span class="n">sources</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">own</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">own</span><span class="p">,</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">))</span>
+    <span class="n">gt</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">positional</span> <span class="ow">and</span> <span class="p">(</span><span class="n">gt</span><span class="o">.</span><span class="n">position_quality</span> <span class="ow">or</span> <span class="n">gt</span><span class="o">.</span><span class="n">position_sigma</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: the positional error is left out, because the steady result "</span>
+                    <span class="s2">"it is read from is at </span><span class="si">%s</span><span class="s2"> m3/s and the situation at </span><span class="si">%s</span><span class="s2"> m3/s"</span><span class="p">,</span>
+                    <span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">own</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">build_velocity_csv</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">vel_err_floor</span><span class="o">=</span><span class="n">vel_err_floor</span><span class="p">,</span>
+                              <span class="n">depth_err_floor</span><span class="o">=</span><span class="n">depth_err_floor</span><span class="p">,</span> <span class="n">positional</span><span class="o">=</span><span class="n">positional</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_situation_cas">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.write_situation_cas">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_situation_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Write ``steady2d-&lt;situation&gt;.cas`` into the model folder; returns its name and Q.</span>
+
+<span class="sd">    The built steady case with the boundary values of the situation</span>
+<span class="sd">    (:func:`axqua.validation.with_boundaries_of`, the validation's own rules) and its</span>
+<span class="sd">    own results file. With ``calibration.hotstart`` it continues from the steady result</span>
+<span class="sd">    of the case for 1.2 residence times at the situation's discharge</span>
+<span class="sd">    (:func:`calibration_hotstart_duration`).</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.steering</span><span class="w"> </span><span class="kn">import</span> <span class="n">fit_columns</span><span class="p">,</span> <span class="n">write_hotstart_cas</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">slug</span><span class="p">,</span> <span class="n">with_boundaries_of</span>
+
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"steady2d-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.cas"</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">situation</span><span class="o">.</span><span class="n">total_flowrate</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.slf"</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">hotstart</span><span class="p">:</span>
+        <span class="n">_steady_result</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">at_q</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">at_q</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="o">=</span> <span class="n">q</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span> <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">duration</span>
+                    <span class="k">else</span> <span class="n">calibration_hotstart_duration</span><span class="p">(</span><span class="n">at_q</span><span class="p">))</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">write_hotstart_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">out_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">results_name</span><span class="o">=</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"DURATION"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">text</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">notes</span><span class="p">,</span> <span class="n">_flow</span><span class="p">,</span> <span class="n">_elev</span> <span class="o">=</span> <span class="n">with_boundaries_of</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">"calibration"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">notes</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"TITLE"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> calibration </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"RESULTS FILE"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fit_columns</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()))</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">total</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run_situation_calibration">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.run_situation_calibration">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_situation_calibration</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">calibration_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">extraction_quantities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
+                              <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span><span class="p">,</span>
+                              <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                              <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                              <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calibrate one set of parameters against the measurements of several situations.</span>
+
+<span class="sd">    Each situation of :func:`calibration_situations` gets its calibration points and</span>
+<span class="sd">    its own steering file; HydroBayesCal's multi-flow driver runs every tested</span>
+<span class="sd">    parameter set at every discharge and fits them jointly. The files go to</span>
+<span class="sd">    ``calibration-validation/multiflow/``. The quantities and error floors are those</span>
+<span class="sd">    of :func:`run_single_flow_calibration`. With ``calibration.structural_error:</span>
+<span class="sd">    unreachable`` the driver runs twice (:func:`_launch_in_passes`); *resume* starts</span>
+<span class="sd">    from the initial simulations an earlier calibration saved. Refused while a TELEMAC</span>
+<span class="sd">    run of the case is active, unless *force*. Returns the driver exit code (0 when</span>
+<span class="sd">    ``prepare_only``).</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">slug</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="n">empty</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">situations</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">sources</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration situations without measurements: </span><span class="si">{</span><span class="n">empty</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.situations"</span><span class="p">,</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the measurement file of each situation."</span><span class="p">)</span>
+    <span class="n">unknown</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">situations</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">total_flowrate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration situations without a discharge: </span><span class="si">{</span><span class="n">unknown</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.situations.prescribed_flowrate"</span><span class="p">,</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the discharge at which each situation was "</span>
+                                 <span class="s2">"measured."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">prepare_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">other_calibration_running</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"a TELEMAC run of this case is active, and the calibration "</span>
+                          <span class="s2">"would write into the same friction table"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">),</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Wait until it has finished."</span><span class="p">)</span>
+    <span class="n">calibration_quantities</span> <span class="o">=</span> <span class="n">_set_quantities</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">calibration_quantities</span><span class="p">,</span>
+                                             <span class="n">extraction_quantities</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration target(s): </span><span class="si">{</span><span class="n">calibration_quantities</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">restore_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>                 <span class="c1"># what a killed calibration left behind</span>
+    <span class="n">situations</span> <span class="o">=</span> <span class="n">calibration_situations</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">situations</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"the case names no calibration situations"</span><span class="p">)</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">structural_error_mode</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">slug</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">situations</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"two calibration situations have the same name"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.situations"</span><span class="p">,</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Give every situation a name of its own."</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration_path</span><span class="p">(</span><span class="n">MULTIFLOW</span><span class="p">)</span>
+    <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ensure_graphic_output</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">))</span>
+    <span class="n">flows</span><span class="p">,</span> <span class="n">csvs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"calibration situations:"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">situation</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">situations</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="n">csv</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="n">situation_points</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span>
+                                      <span class="n">vel_err_floor</span><span class="o">=</span><span class="n">vel_err_floor</span><span class="p">,</span>
+                                      <span class="n">depth_err_floor</span><span class="o">=</span><span class="n">depth_err_floor</span><span class="p">)</span>
+        <span class="n">cas</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="n">write_situation_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+        <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">FlowSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">discharge</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"csv"</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">csv</span><span class="p">))</span>
+        <span class="n">csvs</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">csv</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: Q = </span><span class="si">{</span><span class="n">q</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m3/s, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="si">}</span><span class="s2"> points -&gt; </span><span class="si">{</span><span class="n">cas</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">only_bal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">emit_multiflow_config</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">flows</span><span class="p">,</span> <span class="n">csvs</span><span class="p">,</span> <span class="n">n_cpus</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span><span class="p">,</span>
+            <span class="n">init_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span><span class="p">,</span>
+            <span class="n">complete_bal_mode</span><span class="o">=</span><span class="n">complete</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">only_bal</span><span class="p">)</span>
+
+    <span class="n">driver</span> <span class="o">=</span> <span class="n">stage_driver</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">"bal_telemac_multiflow.py"</span><span class="p">,</span> <span class="n">checkout</span><span class="o">=</span><span class="n">checkout</span><span class="p">,</span>
+                          <span class="n">also</span><span class="o">=</span><span class="p">(</span><span class="s2">"bal_telemac.py"</span><span class="p">,))</span>
+    <span class="n">restarts</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"flow-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">"</span> <span class="o">/</span> <span class="n">RESTART_OUTPUTS</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">_launch_in_passes</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span> <span class="n">prepare_only</span><span class="o">=</span><span class="n">prepare_only</span><span class="p">,</span> <span class="n">emit</span><span class="o">=</span><span class="n">emit</span><span class="p">,</span>
+        <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="n">restarts</span><span class="o">=</span><span class="n">restarts</span><span class="p">,</span> <span class="n">csvs</span><span class="o">=</span><span class="n">csvs</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="sa">f</span><span class="s2">"HydroBayesCal calibration at </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">flows</span><span class="p">)</span><span class="si">}</span><span class="s2"> discharges"</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_launch_in_passes</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                      <span class="n">emit</span><span class="p">,</span> <span class="n">driver</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">restarts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+                      <span class="n">csvs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">note</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">env</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Launch a HydroBayesCal driver once, or in two passes for the model error.</span>
+
+<span class="sd">    One pass (``structural_error: none``): initial simulations and active learning in</span>
+<span class="sd">    one run of the driver. Two passes (``unreachable``): the driver first runs the</span>
+<span class="sd">    initial simulations only; then :func:`apply_unreachable_misfit` adds to the error</span>
+<span class="sd">    of each point and quantity what no simulated set reaches, widens the errors of</span>
+<span class="sd">    groups of points that no single set fits together, and the driver runs</span>
+<span class="sd">    again with the active learning only, on the saved simulations. With *resume*, the</span>
+<span class="sd">    first pass is skipped: the initial simulations of an earlier calibration of the</span>
+<span class="sd">    case are used, which have to exist for every situation (*restarts*: situation -&gt;</span>
+<span class="sd">    HydroBayesCal's ``initial-model-outputs.json``). *emit(complete, only_bal)* writes</span>
+<span class="sd">    the driver configuration for HydroBayesCal's two execution switches.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="n">passes</span> <span class="o">=</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"unreachable"</span>
+    <span class="k">if</span> <span class="n">prepare_only</span><span class="p">:</span>
+        <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="ow">not</span> <span class="n">passes</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">passes</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"structural_error: unreachable - the driver runs the initial "</span>
+                  <span class="s2">"simulations first; the errors are then completed and the active "</span>
+                  <span class="s2">"learning runs in a second pass."</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--prepare-only: not launched. Run it with:"</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  cd </span><span class="si">{</span><span class="n">driver</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">driver</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> "</span>
+              <span class="sa">f</span><span class="s2">"--config </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">with</span> <span class="n">case_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">resume</span><span class="p">:</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="ow">not</span> <span class="n">passes</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+                          <span class="n">note</span><span class="o">=</span><span class="n">note</span> <span class="o">+</span> <span class="p">(</span><span class="s2">", initial simulations"</span> <span class="k">if</span> <span class="n">passes</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">passes</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">code</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">restarts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"no saved initial simulations for </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the calibration without 'resume' first."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">passes</span><span class="p">:</span>
+            <span class="n">records</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">"model-error-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">csvs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">apply_unreachable_misfit</span><span class="p">(</span><span class="n">csvs</span><span class="p">,</span> <span class="n">restarts</span><span class="p">,</span>
+                                         <span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">calibration_quantities</span><span class="p">),</span>
+                                         <span class="n">records</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"the model error could not be computed from the initial "</span>
+                    <span class="sa">f</span><span class="s2">"simulations: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span>
+                    <span class="n">remedy</span><span class="o">=</span><span class="s2">"The initial simulations are kept. Correct the cause and "</span>
+                           <span class="s2">"start the calibration again with 'resume'."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"model error at points the model cannot reach -&gt; </span><span class="si">{</span><span class="n">record</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+                      <span class="n">note</span><span class="o">=</span><span class="n">note</span> <span class="o">+</span> <span class="s2">", active learning on the saved simulations"</span><span class="p">)</span>
 </pre></div>
 
            </div>

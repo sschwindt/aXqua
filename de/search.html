@@ -18,7 +18,7 @@
     
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="_static/documentation_options.js?v=f1d63caa"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="code/telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="code/postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#plugin">Plugin</a></li>

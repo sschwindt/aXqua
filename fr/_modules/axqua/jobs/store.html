@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobs/store.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -396,6 +396,32 @@
 <span class="n">STATUS_MIGRATIONS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">],</span> <span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
 
+<span class="c1">#: How long a replace waits for a reader on Windows, in seconds.</span>
+<span class="n">REPLACE_PATIENCE</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``os.replace``, which on Windows waits for a reader that holds *path* open.</span>
+
+<span class="sd">    Windows refuses to replace a file another process has open without delete sharing: the plugin polling ``status.json``, the reaper, a virus scanner looking at the new file, or a folder that OneDrive synchronizes. Raised once, the error ended a running job in the middle of a progress update (review of 2026-11-06); such a hold lasts milliseconds.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"WSL_DISTRO_NAME"</span><span class="p">):</span>
+        <span class="c1"># inside WSL the folder may be one of Windows (/mnt/c), held open by a reader there</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">deadline</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">REPLACE_PATIENCE</span>
+    <span class="n">pause</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">deadline</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">pause</span><span class="p">)</span>
+            <span class="n">pause</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">pause</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="write_json_atomic">
 <a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.store.write_json_atomic">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">write_json_atomic</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span>
@@ -411,7 +437,7 @@
             <span class="n">fh</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">fsync</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">fsync</span><span class="p">(</span><span class="n">fh</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">_replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">fsync</span><span class="p">:</span>
             <span class="n">_fsync_dir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>

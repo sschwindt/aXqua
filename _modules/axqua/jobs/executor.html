@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/jobs/executor.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -674,7 +674,7 @@
                     <span class="n">component</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"running </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">verb</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-            <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">as_kwargs</span><span class="p">())</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">_with_processes</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">as_kwargs</span><span class="p">())</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_pre_step</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">))</span>
             <span class="k">with</span> <span class="n">_surfaced</span><span class="p">(</span><span class="n">manifest</span><span class="p">):</span>
                 <span class="n">artifacts</span> <span class="o">=</span> <span class="n">verb</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">capability</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -750,6 +750,18 @@
     <span class="k">finally</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">one</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
             <span class="n">one</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">collector</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_with_processes</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The options of the job, with its process count where they leave it open.</span>
+
+<span class="sd">    ``submit`` resolves the count (``--np``, then the profile, then the case) and freezes it in ``resources.mpi_processes``, but nothing read it: a job submitted with ``--np 1`` ran on the case's 8 processes, which a TELEMAC built without MPI refuses ("Parallel inconsistency", the Windows test computer, 2026-11-09). A count given as an option of the job still wins.</span>
+<span class="sd">    """</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"ncsize"</span><span class="p">,</span> <span class="s2">"n_processors"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">mpi_processes</span>
+    <span class="k">return</span> <span class="n">kwargs</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_pre_step</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ExecutionContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>

@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/core/schema_meta.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -558,11 +558,13 @@
 <span class="p">}</span>
 
 <span class="c1">#: Entries that have no effect while a condition holds, which a form grays out:</span>
-<span class="c1">#: ``key -&gt; conditions`` as in :data:`REQUIRED_WHEN`. A catchment mesh has no channel.</span>
+<span class="c1">#: ``key -&gt; conditions`` as in :data:`REQUIRED_WHEN`. A catchment mesh has no channel,</span>
+<span class="c1">#: and calibration runs that do not start from the steady result take the case's time.</span>
 <span class="n">DISABLED_WHEN</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="n">key</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"block"</span><span class="p">:</span> <span class="s2">"hydrology"</span><span class="p">}]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
+    <span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"block"</span><span class="p">:</span> <span class="s2">"hydrology"</span><span class="p">}]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
         <span class="s2">"geodata.channel_centerline"</span><span class="p">,</span> <span class="s2">"mesh.channel_anisotropy"</span><span class="p">,</span>
-        <span class="s2">"initialization.prewet_depth"</span><span class="p">)</span>
+        <span class="s2">"initialization.prewet_depth"</span><span class="p">)},</span>
+    <span class="s2">"calibration.hotstart_duration"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"calibration.hotstart"</span><span class="p">,</span> <span class="s2">"in"</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">]}],</span>
 <span class="p">}</span>
 
 <span class="c1">#: Entries an option makes necessary: ``key -&gt; conditions``, of which one suffices. A</span>
@@ -731,9 +733,35 @@
     <span class="s2">"ground_truth.targets"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Calibration target workbook"</span><span class="p">,</span> <span class="s2">"table"</span><span class="p">),</span>
     <span class="s2">"calibration.parameters"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Calibration parameters"</span><span class="p">,</span> <span class="s2">"yaml"</span><span class="p">,</span>
                                  <span class="n">help</span><span class="o">=</span><span class="s2">"One entry per parameter: name, min and max."</span><span class="p">),</span>
-    <span class="s2">"calibration.calibration_quantities"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Quantities to calibrate against"</span><span class="p">,</span> <span class="s2">"yaml"</span><span class="p">),</span>
+    <span class="s2">"calibration.calibration_quantities"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Calibration targets"</span><span class="p">,</span> <span class="s2">"yaml"</span><span class="p">),</span>
     <span class="s2">"calibration.init_runs"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Simulations before the surrogate model"</span><span class="p">,</span> <span class="s2">"int"</span><span class="p">),</span>
     <span class="s2">"calibration.max_runs"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Simulations in total"</span><span class="p">,</span> <span class="s2">"int"</span><span class="p">),</span>
+    <span class="s2">"calibration.hotstart"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span>
+        <span class="s2">"Start each simulation from the steady result"</span><span class="p">,</span> <span class="s2">"bool"</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">"Each simulation of the calibration continues from the converged steady "</span>
+             <span class="s2">"simulation of the case instead of starting dry again, so the flow only "</span>
+             <span class="s2">"settles to the roughness being tested."</span><span class="p">),</span>
+    <span class="s2">"calibration.hotstart_duration"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span>
+        <span class="s2">"Simulated time of each simulation"</span><span class="p">,</span> <span class="s2">"number"</span><span class="p">,</span> <span class="s2">"s"</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">"Leave empty to use 1.2 times the residence time of the reach: the "</span>
+             <span class="s2">"volume of water in the steady result divided by the discharge."</span><span class="p">),</span>
+    <span class="s2">"calibration.prior_samples"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span>
+        <span class="s2">"Prior samples for the posterior"</span><span class="p">,</span> <span class="s2">"int"</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">"Parameter sets drawn from the ranges at which the surrogate model is "</span>
+             <span class="s2">"evaluated; HydroBayesCal keeps each with a probability equal to its "</span>
+             <span class="s2">"likelihood divided by the largest one. A calibration against many "</span>
+             <span class="s2">"measurements keeps few of them, so raise it when the log reports few "</span>
+             <span class="s2">"accepted samples (Inn KB15: 60,000). Default 5,000."</span><span class="p">),</span>
+    <span class="s2">"calibration.structural_error"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span>
+        <span class="s2">"Model error at points the model cannot reach"</span><span class="p">,</span> <span class="s2">"choice"</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"none"</span><span class="p">,</span> <span class="s2">"unreachable"</span><span class="p">),</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">"unreachable: after the initial simulations, a point whose measured value "</span>
+             <span class="s2">"lies outside the range of all simulated values gets that distance added "</span>
+             <span class="s2">"to its error, for depth and velocity separately. The model cannot "</span>
+             <span class="s2">"reproduce such a point with any roughness in the ranges, so it should not "</span>
+             <span class="s2">"decide the calibration. The errors of a survey and calibration target that the best "</span>
+             <span class="s2">"initial simulation misses by more than their errors are then widened to "</span>
+             <span class="s2">"that misfit. none: every point keeps its measurement error."</span><span class="p">),</span>
     <span class="s2">"openfoam.mode"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Free surface"</span><span class="p">,</span> <span class="s2">"choice"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"vof"</span><span class="p">,</span> <span class="s2">"rigid-lid"</span><span class="p">)),</span>
     <span class="s2">"openfoam.outflow_boundary"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span>
         <span class="s2">"Outflow boundary"</span><span class="p">,</span> <span class="s2">"choice"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"level"</span><span class="p">,</span> <span class="s2">"rating-curve"</span><span class="p">),</span>

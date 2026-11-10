@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/calibration.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -957,9 +957,9 @@
 <span class="s1">    'init_runs_min':      </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">init_runs_min</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    'tp_selection_criteria': 'dkl',</span>
 <span class="s1">    'eval_steps':     1,</span>
-<span class="s1">    # prior_samples drives a (prior_samples x prior_samples) dense covariance PER</span>
-<span class="s1">    # calibration location in gpytorch. With </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s1"> parameter(s) a few thousand</span>
-<span class="s1">    # is ample, and 25000 will OOM a 16 GB box.</span>
+<span class="s1">    # prior samples the surrogate is predicted at (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s1"> parameter(s)); a sharp</span>
+<span class="s1">    # posterior keeps few of them, so raise calibration.prior_samples when few are</span>
+<span class="s1">    # accepted.</span>
 <span class="s1">    'prior_samples':  </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">prior_samples</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    'mc_samples_al':  2000,</span>
 <span class="s1">    'mc_exploration': 1000,</span>

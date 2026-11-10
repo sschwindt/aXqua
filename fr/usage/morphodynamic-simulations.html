@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/usage/morphodynamic-simulations.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -454,7 +454,7 @@ axqua submit &lt;case-file&gt; --kind unsteady
 <p>Avec OpenFOAM, aXqua simule <strong>sédiments fins sur un lit de la rivière qui reste en place</strong>. La simulation montre où le sable ou le limon que transporte l’écoulement se dépose sur le lit, et où l’écoulement reprend. La cote du fond ne change pas. Utilisez cette simulation où les enquêtes ne montrent aucun changement mesurable de lit tandis que la part de sédiments fins dans le lit diffère d’une date d’échantillonnage à l’autre. Utilisez TELEMAC et GAIA où le lit se déplace.</p>
 <p>La simulation utilise le solveur <code class="docutils literal notranslate"><span class="pre">sediDriftFoam2</span></code> de Nils Reidar B. Olsen (<a class="reference external" href="https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/">Documentation</a>). Le solveur calcule un débit stable en trois dimensions au-dessous d’une surface libre fixe, et la concentration d’une taille des grains dans ce débit. Les grains voyagent avec l’eau, coulent avec leur vitesse de décantation et sont mélangés par la turbulence. Au lit, deux processus échangent des sédiments :</p>
 <ul class="simple">
-<li><p><strong>Réglement.</strong> Grains tronçon le lit au taux <em>settling velocity × concentration in the cell at the bed</em>.</p></li>
+<li><p><strong>Traitement.</strong> Les grains atteignent le lit au taux <em>settling velocity × concentration in the cell at the bed</em>.</p></li>
 <li><p><strong>Entraînement.</strong> Le débit élimine les grains à une vitesse qui suit celle de la contrainte de cisaillement au fond, avec les formules de van Rijn (1984a, 1984b). La contrainte critique de cisaillement, à laquelle les grains commencent à se déplacer, est corrigée pour la pente du lit (Dey, 2003).</p></li>
 </ul>
 <p>Le solveur ne fait pas partie d’OpenFOAM. Il est construit par l’installation OpenFOAM de aXqua (<a class="reference internal" href="../installation/simulation-software.html#install-openfoam"><span class="std std-ref">Ouvrir</span></a>), et il fonctionne en un seul processus.</p>

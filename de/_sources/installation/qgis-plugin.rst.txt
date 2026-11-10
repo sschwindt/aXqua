@@ -93,6 +93,8 @@ On Debian, Ubuntu and Linux Mint, ``venv`` requires the package ``python3-venv``
 
    Installing aXqua into the Python that ships with QGIS is possible but not recommended. ``pip`` may replace packages such as ``numpy`` that QGIS itself uses, and QGIS may then fail to start. The plugin runs the aXqua program as a separate process, so the program does not have to be in the Python of QGIS.
 
+   For the same reason, a script that uses the aXqua library does not run in the Python console of QGIS: ``import axqua`` there finds nothing (``No module named 'axqua'``) or the plugin, whose folder has the same name. A Python script that uses aXqua, such as the scripts of the example cases, runs in a terminal with the aXqua environment activated (on Windows the Anaconda or Miniforge Prompt): ``conda activate axqua-env``, then ``python <script>.py``.
+
 Upgrade the backend
 -------------------
 
@@ -188,11 +190,13 @@ Connect the plugin to the aXqua program
 Back in **QGIS**:
 
 * Open the aXqua panel from the toolbar and click *Check* on the *Configuration* tab.
-* The plugin looks in three places, in this order: the path in *aXqua > Settings*, the variable ``AXQUA_EXE``, the system search path.
+* The plugin looks in four places, in this order: the path in *aXqua > Settings*, the variable ``AXQUA_EXE``, the system search path, and the conda environments of this computer (Miniforge, Miniconda, Anaconda), an environment whose name contains *axqua* first. The last one matters on Windows, where QGIS never has an environment on its search path.
 * **Found**: the panel reports the version and where it came from. Nothing else to do.
 * **Not found**: enter the path from :ref:`find-the-axqua-path` in *Settings*, then click *Test*.
 
 *Test* reports the version that the path answers with, so a wrong path is caught here and not when a simulation is started.
+
+On Windows, select the file ``axqua.exe`` in the folder ``Scripts`` of the environment. Never install aXqua into the Python of QGIS itself: it lacks the programs for meshes and rasters, and installing them there can break QGIS; *Test* says so when the path points there. The plugin starts aXqua without the Python settings of QGIS, so the two Python installations do not interfere.
 
 .. figure:: ../img/gui-settings.png
    :alt: The settings of the plugin with the path of the aXqua program
@@ -233,7 +237,7 @@ Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 aXqua panel layout
 ------------------
 
-After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, *Morphodynamics*, and *Hydrology*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in a copy of the repository installed as in :ref:`install-from-source`, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.
+After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, *Morphodynamics*, and *Hydrology*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in a copy of the repository installed as in :ref:`install-from-source`, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the English pages, the language of the plugin. *Documentation language* in *aXqua > Settings* opens the German or French pages instead (machine-translated), or those of the language of QGIS. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.
 
 .. figure:: ../img/gui-qgis-window.png
    :alt: The aXqua panel in the QGIS window

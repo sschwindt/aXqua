@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/core/environment.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -416,7 +416,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span><span class="p">,</span> <span class="n">PurePosixPath</span><span class="p">,</span> <span class="n">PureWindowsPath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
 
@@ -553,10 +553,15 @@
 <div class="viewcode-block" id="SolverEnvironment.untranslate">
 <a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.untranslate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">untranslate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""A target-environment path as the host spells it (the WSL inverse)."""</span>
+<span class="w">        </span><span class="sd">"""A target-environment path as the host spells it (the WSL inverse).</span>
+
+<span class="sd">        A path below ``/mnt/&lt;drive&gt;`` is the Windows drive path; any other path inside the distribution is reached through ``\\\\wsl.localhost\\&lt;distro&gt;\\...`` (the default distribution where none is named, which is the one ``wsl.exe`` runs).</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">path</span>
-        <span class="k">return</span> <span class="n">wsl_to_windows</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">wsl</span>
+        <span class="n">distro</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distro</span> <span class="ow">or</span> <span class="p">(</span><span class="n">wsl</span><span class="o">.</span><span class="n">cached_default_distro</span><span class="p">()</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wsl_to_windows</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">distro</span><span class="p">)</span></div>
 
 
     <span class="c1"># --------------------------------------------------------------- launching</span>
@@ -615,6 +620,11 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">shell</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">command</span><span class="p">]</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uses_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""True where commands run in ``cmd.exe`` (a native Windows installation without a bash of its own), which knows no here-document, no ``$(...)`` and no single quotes."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WINDOWS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_bash</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_uses_bash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""A Windows install may ship its own bash (blueCFD, ESI, MSYS TELEMAC)."""</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"bash"</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">))</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -655,7 +665,8 @@
         <span class="n">prefix</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"wsl.exe"</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distro</span><span class="p">:</span>
             <span class="n">prefix</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"-d"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distro</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">prefix</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"--"</span><span class="p">]</span>
+        <span class="c1"># --exec: after --, the default shell of the distribution would expand $(command -v ...) before the sourced bash runs it</span>
+        <span class="k">return</span> <span class="n">prefix</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"--exec"</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SolverEnvironment.mpi_command">
 <a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.mpi_command">[docs]</a>
@@ -704,12 +715,20 @@
             <span class="c1"># variables do often enough that line-splitting silently truncates them</span>
             <span class="n">argv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bash_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">"printf '%s' </span><span class="si">{</span><span class="n">_MARKER</span><span class="si">}</span><span class="s2">; env -0"</span><span class="p">)</span>
             <span class="n">parse</span> <span class="o">=</span> <span class="n">_parse_env0</span>
-        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">process_args</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                              <span class="n">env</span><span class="o">=</span><span class="n">_wsl_env</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">encoding</span> <span class="o">=</span> <span class="n">output_encoding</span><span class="p">(</span><span class="n">cmd_builtin</span><span class="o">=</span><span class="n">parse</span> <span class="ow">is</span> <span class="n">_parse_set</span><span class="p">)</span>
+        <span class="n">stdout</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">"replace"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="s2">"replace"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.wsl</span><span class="w"> </span><span class="kn">import</span> <span class="n">decode</span>
+                <span class="c1"># wsl.exe's own messages can be UTF-16 on either stream (Windows 10 ignores WSL_UTF8)</span>
+                <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">decode</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="p">),</span> <span class="n">decode</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">EnvironmentCaptureError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"could not enter the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2"> environment via </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="si">}</span><span class="s2">: "</span>
-                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="mi">400</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="n">captured</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">_after_marker</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+                <span class="sa">f</span><span class="s2">"could not enter the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2"> environment via </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">stderr</span> <span class="ow">or</span> <span class="n">stdout</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="mi">400</span><span class="p">])</span>
+        <span class="n">captured</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">_after_marker</span><span class="p">(</span><span class="n">stdout</span><span class="p">))</span>
         <span class="n">captured</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overrides</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">captured</span></div>
 
@@ -814,8 +833,43 @@
 <div class="viewcode-block" id="EnvironmentCaptureError">
 <a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.EnvironmentCaptureError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EnvironmentCaptureError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Raised when a setup script cannot be entered."""</span></div>
+<span class="w">    </span><span class="sd">"""Raised when a setup script cannot be entered.</span>
 
+<span class="sd">    *output* is what the shell or ``wsl.exe`` wrote, in the language of the computer; it is kept apart from the English message and shown on a line of its own (``System output:``), never inside the English sentence.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="se">\n</span><span class="s2">System output: </span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">message</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="output_encoding">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.output_encoding">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">output_encoding</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">cmd_builtin</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The encoding to read a pipe with: OEM for what a built-in command of ``cmd.exe`` writes (``set``: code page 850 on a German Windows, where Python would assume the ANSI page 1252 and turn ``ü`` into an error), UTF-8 for everything else (Linux, WSL, bash, and the programs cmd starts, which aXqua runs in UTF-8 mode)."""</span>
+    <span class="k">return</span> <span class="s2">"oem"</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="n">cmd_builtin</span> <span class="k">else</span> <span class="s2">"utf-8"</span></div>
+
+
+
+<div class="viewcode-block" id="process_args">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.process_args">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_args</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">"list[str] | str"</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What to hand to :mod:`subprocess` for *argv* from :meth:`SolverEnvironment.command`.</span>
+
+<span class="sd">    On Windows, a list is joined by ``subprocess.list2cmdline``, which escapes the quotes inside ``call "C:\\Program Files\\x.bat" &amp;&amp; ...`` as ``\\"``; ``cmd.exe`` does not know that escape, so the batch file was never called. A ``cmd /c`` payload therefore goes as the one string ``cmd /s /c "&lt;payload&gt;"``, which cmd takes verbatim. Everything else stays a list.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"cmd"</span><span class="p">,</span> <span class="s2">"cmd.exe"</span><span class="p">)</span> \
+            <span class="ow">and</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"/c"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> /s /c "</span><span class="si">{</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">"'</span>
+    <span class="k">return</span> <span class="n">argv</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wsl_env</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.wsl</span><span class="w"> </span><span class="kn">import</span> <span class="n">environment</span>
+    <span class="k">return</span> <span class="n">environment</span><span class="p">()</span>
 
 
 <span class="c1"># --------------------------------------------------------------------------- #</span>
@@ -856,6 +910,8 @@
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"="</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">sep</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">" "</span><span class="p">):</span>
+            <span class="c1"># Windows names are case-insensitive and ``set`` writes ``Path``; upper case is how ``os.environ`` spells them on Windows, so a lookup of PATH finds it and a merge with os.environ gives one PATH, not PATH (the old one, found first) and Path</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
             <span class="n">last</span> <span class="o">=</span> <span class="n">name</span>
         <span class="k">elif</span> <span class="n">last</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -871,35 +927,21 @@
 <div class="viewcode-block" id="windows_to_wsl">
 <a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.windows_to_wsl">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">windows_to_wsl</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""``C:\\scratch\\case`` -&gt; ``/mnt/c/scratch/case``.</span>
+<span class="w">    </span><span class="sd">"""``C:\\scratch\\case`` -&gt; ``/mnt/c/scratch/case``; ``\\\\wsl.localhost\\&lt;distro&gt;\\home\\x`` -&gt; ``/home/x``.</span>
 
-<span class="sd">    Done arithmetically rather than by shelling out to ``wslpath``: this is called for</span>
-<span class="sd">    every path crossing the boundary, and a subprocess per path would dominate the cost</span>
-<span class="sd">    of building a case. A path that is already POSIX passes through unchanged, so the</span>
-<span class="sd">    function is idempotent.</span>
+<span class="sd">    Done arithmetically rather than by shelling out to ``wslpath`` (see :func:`axqua.core.wsl.to_linux`): this is called for every path crossing the boundary. A path that is already POSIX passes through unchanged, so the function is idempotent.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/"</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">path</span> <span class="k">else</span> <span class="n">path</span>
-    <span class="n">pure</span> <span class="o">=</span> <span class="n">PureWindowsPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">drive</span> <span class="o">=</span> <span class="n">pure</span><span class="o">.</span><span class="n">drive</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">drive</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)</span>
-    <span class="n">rest</span> <span class="o">=</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pure</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"/mnt/</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">rest</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">rest</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"/mnt/</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">"</span></div>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.wsl</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_linux</span>
+    <span class="k">return</span> <span class="n">to_linux</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="wsl_to_windows">
 <a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.wsl_to_windows">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">wsl_to_windows</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""``/mnt/c/scratch/case`` -&gt; ``C:\\scratch\\case`` (the inverse)."""</span>
-    <span class="n">pure</span> <span class="o">=</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">parts</span> <span class="o">=</span> <span class="n">pure</span><span class="o">.</span><span class="n">parts</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"/"</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"mnt"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">drive</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="n">rest</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">:</span><span class="se">\\</span><span class="si">{</span><span class="n">rest</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">rest</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">:</span><span class="se">\\</span><span class="s2">"</span>
-    <span class="k">return</span> <span class="n">path</span></div>
+<span class="k">def</span><span class="w"> </span><span class="nf">wsl_to_windows</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">distro</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``/mnt/c/scratch/case`` -&gt; ``C:\\scratch\\case``; with *distro*, ``/home/x`` -&gt; ``\\\\wsl.localhost\\&lt;distro&gt;\\home\\x``."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.wsl</span><span class="w"> </span><span class="kn">import</span> <span class="n">to_windows</span>
+    <span class="k">return</span> <span class="n">to_windows</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">distro</span><span class="p">)</span></div>
 
 
 

@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/config.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -2248,10 +2248,13 @@
     <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span>
     <span class="n">parameter_sampling_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"sobol"</span>
     <span class="n">gp_library</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"gpy"</span>
-    <span class="c1"># HydroBayesCal predicts the surrogate at prior_samples points by building a</span>
-    <span class="c1"># (prior_samples x prior_samples) dense covariance PER calibration location in</span>
-    <span class="c1"># gpytorch; 25000 OOM-kills a 16 GB box. A low-dimensional roughness posterior</span>
-    <span class="c1"># needs only a few thousand - 5000 is ample and memory-safe. Raise with RAM.</span>
+    <span class="c1"># HydroBayesCal predicts the surrogate at prior_samples points and keeps a prior</span>
+    <span class="c1"># sample with probability likelihood / largest likelihood. Since 1.12.2 it predicts</span>
+    <span class="c1"># in pieces, so memory grows in proportion to the number (before, one dense</span>
+    <span class="c1"># covariance of prior_samples squared entries per location: 25000 OOM-killed a</span>
+    <span class="c1"># 16 GB box). A sharp posterior keeps few of them: Inn KB15 with 120 targets kept</span>
+    <span class="c1"># 1006 of 60000 (1.7 %) after the model error, approximately 1 min per iteration</span>
+    <span class="c1"># on the main workstation.</span>
     <span class="n">prior_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5000</span>
     <span class="c1"># HydroBayesCal &gt;= 1.5 grows the initial design in Sobol blocks and stops as</span>
     <span class="c1"># soon as it is measurably sufficient (GP leave-one-out predictivity, error-bar</span>
@@ -2273,8 +2276,37 @@
     <span class="n">solver_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Telemac2d"</span>        <span class="c1"># 'Telemac2d' | 'Telemac3d'</span>
     <span class="n">control_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># .cas to calibrate (default: cfg.cas_file)</span>
     <span class="n">results_base</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># results basename (default: from the .cas)</span>
+    <span class="c1"># Start every run of the calibration from the converged result of the steady run</span>
+    <span class="c1"># (r2d.slf) instead of repeating that run from its dry or pre-wetted start: the</span>
+    <span class="c1"># flow then only settles to the roughness being tested. The steering file of</span>
+    <span class="c1"># these runs is calibration2d.cas (bayescal.write_calibration_hotstart).</span>
+    <span class="n">hotstart</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># Simulated time of each of those runs [s]; None derives it from the reach</span>
+    <span class="c1"># (bayescal.calibration_hotstart_duration).</span>
+    <span class="n">hotstart_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1">#: Independent datasets from other flow situations (see ValidationSituation).</span>
     <span class="n">validation</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ValidationSituation</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="c1">#: Calibration data measured at discharges of their own, each described like a</span>
+    <span class="c1">#: validation situation (name, sources, discharge). With them, one set of</span>
+    <span class="c1">#: parameters is calibrated against all situations together (HydroBayesCal's</span>
+    <span class="c1">#: multi-flow driver); measurements under ``ground_truth`` join them at the</span>
+    <span class="c1">#: discharge of the case.</span>
+    <span class="n">situations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ValidationSituation</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="c1"># How the Gaussian process emulator treats several outputs (HydroBayesCal's</span>
+    <span class="c1"># multitask_selection): 'variables' one multi-output GPE per location whose</span>
+    <span class="c1"># outputs are the calibration targets (correlated depth and velocity),</span>
+    <span class="c1"># 'locations', 'all', or 'SO_sequential' (independent single-output GPEs).</span>
+    <span class="n">multitask_selection</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"variables"</span>
+    <span class="c1"># What the calibration does with a measurement that no parameter set within the</span>
+    <span class="c1"># ranges reproduces (bayescal.STRUCTURAL_ERRORS). 'none': the point keeps its</span>
+    <span class="c1"># measurement error. 'unreachable': after the initial simulations, the distance</span>
+    <span class="c1"># from the measured value to the range of the simulated values is added to the</span>
+    <span class="c1"># error of that point and quantity (in quadrature); then, per situation and</span>
+    <span class="c1"># quantity, the variances are multiplied by the chi-square per point at the best</span>
+    <span class="c1"># initial run where it exceeds 1 (a group no single set fits), and the active</span>
+    <span class="c1"># learning runs with these errors. For a model that cannot reproduce part of the measurements,</span>
+    <span class="c1"># such as a water level held up by a riffle the terrain model does not resolve.</span>
+    <span class="n">structural_error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"none"</span>
 
 <div class="viewcode-block" id="Calibration.from_dict">
 <a class="viewcode-back" href="../../code/configuration.html#axqua.config.Calibration.from_dict">[docs]</a>
@@ -2282,13 +2314,17 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">cfg_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Calibration"</span><span class="p">:</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">CalibrationParameter</span><span class="p">(</span><span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="n">CalibrationParameter</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
                   <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"parameters"</span><span class="p">,</span> <span class="p">[])]</span>
-        <span class="n">given</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"validation"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">given</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>               <span class="c1"># one situation, written without a list</span>
-            <span class="n">given</span> <span class="o">=</span> <span class="p">[</span><span class="n">given</span><span class="p">]</span>
-        <span class="n">situations</span> <span class="o">=</span> <span class="p">[</span><span class="n">ValidationSituation</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">cfg_dir</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">given</span><span class="p">]</span>
-        <span class="n">rest</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"parameters"</span><span class="p">,</span> <span class="s2">"validation"</span><span class="p">)}</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="n">situations</span><span class="p">,</span>
-                   <span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">rest</span><span class="p">))</span></div>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">situations_of</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ValidationSituation</span><span class="p">]:</span>
+            <span class="n">given</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">given</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>           <span class="c1"># one situation, written without a list</span>
+                <span class="n">given</span> <span class="o">=</span> <span class="p">[</span><span class="n">given</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">ValidationSituation</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">cfg_dir</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">given</span><span class="p">]</span>
+
+        <span class="n">rest</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"parameters"</span><span class="p">,</span> <span class="s2">"validation"</span><span class="p">,</span> <span class="s2">"situations"</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="n">situations_of</span><span class="p">(</span><span class="s2">"validation"</span><span class="p">),</span>
+                   <span class="n">situations</span><span class="o">=</span><span class="n">situations_of</span><span class="p">(</span><span class="s2">"situations"</span><span class="p">),</span> <span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">rest</span><span class="p">))</span></div>
 </div>
 
 
@@ -3179,6 +3215,43 @@
     <span class="k">return</span> <span class="n">Environment</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_machine_environment</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">environment</span><span class="p">:</span> <span class="s2">"Environment"</span><span class="p">,</span> <span class="n">script</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Environment"</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""*environment* of the case, or where it names no kind, how the profile of this computer enters *solver*.</span>
+
+<span class="sd">    Where the program lives is the profile's, and so is how it is entered: on Windows, TELEMAC and OpenFOAM are entered in WSL (``environment: wsl`` and the distribution of the profile entry, or a script named by its \\\\wsl.localhost path). The case used to take the script from the profile and the kind from nowhere, so a job on Windows sourced a Linux script through cmd (review of 2026-11-06).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">environment</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">environment</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">wsl</span> <span class="k">as</span> <span class="n">_wsl</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.profile</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_active</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+    <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">script</span><span class="p">)</span> <span class="k">if</span> <span class="n">script</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^[A-Za-z]:[</span><span class="se">\\</span><span class="s2">/]"</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">environment</span>          <span class="c1"># a file of Windows (an environment variable or a case override chose it): no WSL</span>
+    <span class="n">binding</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="n">load_active</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">active</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">active</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">solver</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># the profile says how to enter ITS script; another script chosen above it is no concern of the profile</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.profile</span><span class="w"> </span><span class="kn">import</span> <span class="n">same_script</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="n">active</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">solver</span><span class="p">)</span>
+            <span class="n">binding</span> <span class="o">=</span> <span class="n">active</span><span class="o">.</span><span class="n">solvers</span><span class="p">[</span><span class="n">solver</span><span class="p">]</span> <span class="k">if</span> <span class="n">chosen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">same_script</span><span class="p">(</span><span class="n">chosen</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - an unreadable profile is reported by its own check</span>
+        <span class="n">binding</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">inside</span> <span class="o">=</span> <span class="n">_wsl</span><span class="o">.</span><span class="n">from_unc</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">text</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="s2">"environment"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"wsl"</span> <span class="k">if</span> <span class="n">inside</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"wsl"</span><span class="p">,</span> <span class="s2">"windows"</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">environment</span>          <span class="c1"># posix is what an environment without a kind is on Linux anyway</span>
+    <span class="n">distro</span> <span class="o">=</span> <span class="n">environment</span><span class="o">.</span><span class="n">distro</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="s2">"distro"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">inside</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">inside</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Environment</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span> <span class="n">setup_script</span><span class="o">=</span><span class="n">environment</span><span class="o">.</span><span class="n">setup_script</span><span class="p">,</span>
+                       <span class="n">shell</span><span class="o">=</span><span class="n">environment</span><span class="o">.</span><span class="n">shell</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="s2">"shell"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                       <span class="n">distro</span><span class="o">=</span><span class="n">distro</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"wsl"</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">mpi_launcher</span><span class="o">=</span><span class="n">environment</span><span class="o">.</span><span class="n">mpi_launcher</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">binding</span><span class="p">,</span> <span class="s2">"mpi_launcher"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                       <span class="n">overrides</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">environment</span><span class="o">.</span><span class="n">overrides</span><span class="p">))</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_load_gain_lose</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">cfg_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GainLose</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Build the :class:`GainLose` block from ``gain_lose:`` or the deprecated</span>
 <span class="sd">    ``percolation:``.</span>
@@ -3258,7 +3331,8 @@
 
     <span class="n">_t</span> <span class="o">=</span> <span class="n">_machine</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="s2">"telemac"</span><span class="p">,</span> <span class="n">configured</span><span class="o">=</span><span class="n">tdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pysource"</span><span class="p">),</span> <span class="n">case_dir</span><span class="o">=</span><span class="n">cfg_dir</span><span class="p">)</span>
     <span class="n">tdict</span><span class="p">[</span><span class="s2">"pysource"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_t</span><span class="o">.</span><span class="n">path</span> <span class="k">if</span> <span class="n">_t</span> <span class="k">else</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">cfg_dir</span><span class="p">,</span> <span class="n">tdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pysource"</span><span class="p">))</span>
-    <span class="n">tdict</span><span class="p">[</span><span class="s2">"environment"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_load_environment</span><span class="p">(</span><span class="n">tdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">),</span> <span class="n">cfg_dir</span><span class="p">)</span>
+    <span class="n">tdict</span><span class="p">[</span><span class="s2">"environment"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_machine_environment</span><span class="p">(</span>
+        <span class="s2">"telemac"</span><span class="p">,</span> <span class="n">_load_environment</span><span class="p">(</span><span class="n">tdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">),</span> <span class="n">cfg_dir</span><span class="p">),</span> <span class="n">tdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pysource"</span><span class="p">))</span>
     <span class="n">telemac</span> <span class="o">=</span> <span class="n">TelemacEnv</span><span class="p">(</span><span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="n">TelemacEnv</span><span class="p">,</span> <span class="n">tdict</span><span class="p">))</span>
 
     <span class="c1"># CAD surfaces: parsed before geodata because, when present, they *supply* the</span>
@@ -3368,7 +3442,8 @@
                            <span class="n">case_dir</span><span class="o">=</span><span class="n">cfg_dir</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">_of</span><span class="p">:</span>
         <span class="n">ofdict</span><span class="p">[</span><span class="s2">"bashrc"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_of</span><span class="o">.</span><span class="n">path</span>
-    <span class="n">ofdict</span><span class="p">[</span><span class="s2">"environment"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_load_environment</span><span class="p">(</span><span class="n">ofdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">),</span> <span class="n">cfg_dir</span><span class="p">)</span>
+    <span class="n">ofdict</span><span class="p">[</span><span class="s2">"environment"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_machine_environment</span><span class="p">(</span>
+        <span class="s2">"openfoam"</span><span class="p">,</span> <span class="n">_load_environment</span><span class="p">(</span><span class="n">ofdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">),</span> <span class="n">cfg_dir</span><span class="p">),</span> <span class="n">ofdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"bashrc"</span><span class="p">))</span>
     <span class="n">ofdict</span><span class="p">[</span><span class="s2">"pre_run"</span><span class="p">]</span> <span class="o">=</span> <span class="n">PreRun</span><span class="p">(</span><span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="n">PreRun</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ofdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pre_run"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})))</span>
     <span class="n">openfoam</span> <span class="o">=</span> <span class="n">OpenFoam</span><span class="p">(</span><span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="n">OpenFoam</span><span class="p">,</span> <span class="n">ofdict</span><span class="p">))</span>
     <span class="n">openfoam_dir</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">cfg_dir</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"openfoam_dir"</span><span class="p">))</span> <span class="k">if</span> \

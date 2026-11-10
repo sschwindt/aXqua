@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/calibration.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -436,14 +436,14 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_pick_table</span><span class="p">(</span><span class="n">tables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">quantities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Choose the tidy category whose columns satisfy all calibration quantities."""</span>
+<span class="w">    </span><span class="sd">"""Choose the tidy category whose columns satisfy all calibration targets."""</span>
     <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="p">([</span><span class="n">tables</span><span class="p">[</span><span class="s2">"hydraulics"</span><span class="p">]]</span> <span class="k">if</span> <span class="s2">"hydraulics"</span> <span class="ow">in</span> <span class="n">tables</span> <span class="k">else</span> <span class="p">[]),</span> <span class="o">*</span><span class="n">tables</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">_resolve_quantity</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">df</span>
     <span class="n">available</span> <span class="o">=</span> <span class="p">{</span><span class="n">cat</span><span class="p">:</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"z"</span><span class="p">)]</span>
                  <span class="k">for</span> <span class="n">cat</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">tables</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"no ground-truth category provides all calibration quantities </span><span class="si">{</span><span class="n">quantities</span><span class="si">}</span><span class="s2">. "</span>
+        <span class="sa">f</span><span class="s2">"no ground-truth category provides all calibration targets </span><span class="si">{</span><span class="n">quantities</span><span class="si">}</span><span class="s2">. "</span>
         <span class="sa">f</span><span class="s2">"Available columns per category: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
 
@@ -495,7 +495,7 @@
     <span class="k">return</span> <span class="n">out</span>
 
 
-<span class="c1">#: Calibration quantity -&gt; the SELAFIN variable whose spatial variation carries</span>
+<span class="c1">#: Calibration target -&gt; the SELAFIN variable whose spatial variation carries</span>
 <span class="c1">#: the positional uncertainty. A component velocity varies like the speed does.</span>
 <span class="n">_SELAFIN_VARIABLE</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">"U_x"</span><span class="p">:</span> <span class="s2">"VELOCITY U"</span><span class="p">,</span> <span class="s2">"U_y"</span><span class="p">:</span> <span class="s2">"VELOCITY V"</span><span class="p">,</span> <span class="s2">"U_z"</span><span class="p">:</span> <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span>
@@ -732,8 +732,14 @@
 
 <div class="viewcode-block" id="emit_hbc_config">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.emit_hbc_config">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">calibration_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Emit a HydroBayesCal ``config_Telemac.py`` for the produced case."""</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">calibration_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                    <span class="n">complete_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Emit a HydroBayesCal ``config_Telemac.py`` for the produced case.</span>
+
+<span class="sd">    *complete_bal_mode* False runs the initial simulations only; *only_bal_mode* True</span>
+<span class="sd">    (with *complete_bal_mode*) continues from the saved initial simulations with the</span>
+<span class="sd">    active learning (HydroBayesCal's two execution switches).</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
@@ -842,17 +848,20 @@
 <span class="s1">    'bal_exploration_tradeoff': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">bal_exploration_tradeoff</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    'tp_selection_criteria': 'dkl',</span>
 <span class="s1">    'eval_steps': 1,</span>
-<span class="s1">    # prior_samples drives a (prior_samples x prior_samples) dense covariance PER</span>
-<span class="s1">    # location in gpytorch; kept modest (calibration.prior_samples) to stay in RAM.</span>
+<span class="s1">    # prior samples the surrogate is predicted at (calibration.prior_samples); a sharp</span>
+<span class="s1">    # posterior keeps few of them, so raise it when few are accepted.</span>
 <span class="s1">    'prior_samples': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">prior_samples</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    'mc_samples_al': 2000,</span>
 <span class="s1">    'mc_exploration': 1000,</span>
 <span class="s1">    'gp_library': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_library</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    # 'variables': one multi-output GPE per location, its outputs the calibration</span>
+<span class="s1">    # quantities (calibration.multitask_selection)</span>
+<span class="s1">    'multitask_selection': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">multitask_selection</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="se">}}</span>
 
 <span class="s1">execution = </span><span class="se">{{</span>
-<span class="s1">    'complete_bal_mode': True,</span>
-<span class="s1">    'only_bal_mode': False,</span>
+<span class="s1">    'complete_bal_mode': </span><span class="si">{</span><span class="n">complete_bal_mode</span><span class="si">}</span><span class="s1">,</span>
+<span class="s1">    'only_bal_mode': </span><span class="si">{</span><span class="n">only_bal_mode</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    'delete_complex_outputs': True,</span>
 <span class="s1">    'validation': False,</span>
 <span class="s1">    'user_param_values': False,</span>

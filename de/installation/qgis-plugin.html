@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/installation/qgis-plugin.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -356,9 +356,9 @@
              
   <section id="qgis-plugin">
 <h1>QGIS Plugin<a class="headerlink" href="#qgis-plugin" title="Link to this heading"></a></h1>
-<p>Das QGIS-Plugin stellt die Benutzeroberfläche (<strong>Vorderteil</strong>) dar und erfordert das <strong>aXqua Programm**(**Backend</strong>), das Aufgaben als separate Prozesse neben QGIS ausführt. Daher sind sowohl Frontend als auch Backend erforderlich:</p>
+<p>Das QGIS-Plugin stellt die Benutzeroberfläche (<strong>Frontend</strong>) dar und erfordert das <strong>aXqua Programm**(**Backend</strong>), das Aufgaben als separate Prozesse neben QGIS ausführt. Daher sind sowohl Frontend als auch Backend erforderlich:</p>
 <ul class="simple">
-<li><p>Das Plugin-Frontend allein hat nichts zu übergeben Arbeit und erfordert das Backend.</p></li>
+<li><p>Das Plugin Frontend allein hat nichts zu übergeben Arbeit und erfordert die Backend.</p></li>
 <li><p>Installieren Sie in der Reihenfolge unten.</p></li>
 <li><p>Das Plugin sucht nur nach dem Programm, wenn eine Aufgabe gestartet wird, so dass es möglicherweise als zweites installiert wird.</p></li>
 </ul>
@@ -366,7 +366,7 @@
 <h2>Installieren Sie QGIS<a class="headerlink" href="#install-qgis" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Download von <a class="reference external" href="https://qgis.org/download/">qgis.org</a>. <strong>QGIS 3.44 oder neuer</strong> ist erforderlich, QGIS 4 inklusive.</p></li>
-<li><p>Befolgen Sie die Installationsanweisungen.</p></li>
+<li><p>Befolgen Sie die Anweisungen des Installationsprogramms.</p></li>
 </ul>
 </section>
 <section id="install-the-axqua-plugin-qgis">
@@ -404,7 +404,7 @@ pip<span class="w"> </span>install<span class="w"> </span>axqua
 axqua<span class="w"> </span>--version
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">--version</span></code> Drucken einer Version (zum Beispiel <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">1.0.1</span></code>) bestätigt die Installation. <code class="docutils literal notranslate"><span class="pre">pip</span></code> installiert auch die Pakete, die aXqua benötigt (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code>, <code class="docutils literal notranslate"><span class="pre">pyproj</span></code>, <code class="docutils literal notranslate"><span class="pre">shapely</span></code>, <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>, <code class="docutils literal notranslate"><span class="pre">gmsh</span></code>, <code class="docutils literal notranslate"><span class="pre">openpyxl</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>), alle von PyPI, was bei einer schnellen Internetverbindung weniger als eine Minute dauert.</p>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">--version</span></code> Das Drucken einer Version (z. B. <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">1.0.1</span></code>) bestätigt Installation. <code class="docutils literal notranslate"><span class="pre">pip</span></code> installiert auch die Pakete, die aXqua benötigt (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code>, <code class="docutils literal notranslate"><span class="pre">pyproj</span></code>, <code class="docutils literal notranslate"><span class="pre">shapely</span></code>, <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>, <code class="docutils literal notranslate"><span class="pre">gmsh</span></code>, <code class="docutils literal notranslate"><span class="pre">openpyxl</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>), alle von PyPI, was bei einer schnellen Internetverbindung weniger als eine Minute dauert.</p>
 <ul class="simple">
 <li><p><strong>Bayesianische Kalibrierung</strong> erfordert das optionale Paket HydroBayesCal: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;axqua[calibration]&quot;</span></code>.</p></li>
 </ul>
@@ -434,10 +434,11 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"axqu
 <div class="admonition warning">
 <p class="admonition-title">Warnung</p>
 <p>Die Installation von aXqua in das Python, das mit QGIS ausgeliefert wird, ist möglich, wird aber nicht empfohlen. <code class="docutils literal notranslate"><span class="pre">pip</span></code> kann Pakete wie <code class="docutils literal notranslate"><span class="pre">numpy</span></code> ersetzen, die QGIS selbst verwendet, und QGIS kann dann nicht starten. Das Plugin führt das aXqua-Programm als separaten Prozess aus, so dass das Programm nicht im Python von QGIS sein muss.</p>
+<p>Aus dem gleichen Grund läuft ein Skript, das die aXqua-Bibliothek verwendet, nicht in der Python-Konsole von QGIS: <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">axqua</span></code> findet dort nichts (<code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'axqua'</span></code>) oder das Plugin, dessen Ordner den gleichen Namen hat. Ein Python-Skript, das aXqua verwendet, wie die Skripte des Beispiels Fälle, läuft in einem Terminal mit aktivierter aXqua-Umgebung (unter Windows Anaconda oder Miniforge Prompt): <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">axqua-env</span></code>, dann <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">&lt;script&gt;.py</span></code>.</p>
 </div>
 </section>
 <section id="upgrade-the-backend">
-<h2>Upgrade des Backends<a class="headerlink" href="#upgrade-the-backend" title="Link to this heading"></a></h2>
+<h2>Upgrade der Backend<a class="headerlink" href="#upgrade-the-backend" title="Link to this heading"></a></h2>
 <p>Zu <strong>Upgrade</strong> aXqua und HydroBayesCal, wo Bayesian-Kalibrierung verwendet wird, zu den neuesten Versionen:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env<span class="w">               </span><span class="c1"># or: source ~/axqua-env/bin/activate</span>
 pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>axqua
@@ -445,7 +446,7 @@ pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="
 axqua<span class="w"> </span>--version
 </pre></div>
 </div>
-<p><em>Check</em> auf der Registerkarte <em>Configuration</em> des Plugins meldet dann die neue Version. Das Plugin und das Programm werden zusammen unter der gleichen Versionsnummer veröffentlicht, daher aktualisieren Sie das Programm auch nach einem Update des Plugins in QGIS. <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">axqua==&lt;version&gt;</span></code> installiert eine bestimmte Version, zum Beispiel die Version, mit der ein früheres Ergebnis berechnet wurde; Die <a class="reference external" href="https://pypi.org/project/axqua/#history">Release History auf PyPI</a> listet alle Versionen auf.</p>
+<p><em>Check</em> auf der <em>Configuration</em> Registerkarte des Plugins meldet dann die neue Version. Das Plugin und das Programm werden zusammen unter der gleichen Versionsnummer veröffentlicht, daher aktualisieren Sie das Programm auch nach einem Update des Plugins in QGIS. <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">axqua==&lt;version&gt;</span></code> installiert eine bestimmte Version, zum Beispiel die Version, mit der ein früheres Ergebnis berechnet wurde; Die <a class="reference external" href="https://pypi.org/project/axqua/#history">Release History auf PyPI</a> listet alle Versionen auf.</p>
 </section>
 <section id="install-from-the-source-code-development">
 <span id="install-from-source"></span><h2>Installieren aus dem Quellcode (Entwicklung)<a class="headerlink" href="#install-from-the-source-code-development" title="Link to this heading"></a></h2>
@@ -467,12 +468,12 @@ sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> <
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>dnf<span class="w"> </span>install<span class="w"> </span>git
 </pre></div>
 </div>
-<p>Für andere Distributionen siehe <a class="reference external" href="https://git-scm.com/install/linux">Git Installationsanweisungen für Linux</a>.</p>
+<p>Für andere Distributionen siehe <a class="reference external" href="https://git-scm.com/install/linux">Git Installation Anweisungen für Linux</a>.</p>
 </div>
 <input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-1">
 Windows</label><div class="sd-tab-content docutils">
-<p>Herunterladen und Ausführen von <a class="reference external" href="https://git-scm.com/install/windows">Git für Windows Installer</a>. Der Installer enthält Git Bash, ein Terminal zum Ausführen von Git-Befehlen. Öffnen Sie nach der Installation Git Bash aus dem Startmenü. PowerShell- oder Command Prompt-Benutzer öffnen die Benutzeroberfläche erneut, sodass sie die neu installierte Git-Ausführbarkeit erkennt.</p>
+<p>Herunterladen und Ausführen von <a class="reference external" href="https://git-scm.com/install/windows">Git für Windows Installationsprogramm</a>. Das Installationsprogramm enthält Git Bash, ein Terminal zum Ausführen von Git-Befehlen. Öffnen Sie nach Installation Git Bash aus dem Startmenü. PowerShell- oder Command Prompt-Benutzer öffnen die Benutzeroberfläche erneut, sodass sie die neu installierte Git-Ausführbarkeit erkennt.</p>
 </div>
 <input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" for="sd-tab-item-2">
@@ -481,7 +482,7 @@ macOS</label><div class="sd-tab-content docutils">
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>xcode-select<span class="w"> </span>--install
 </pre></div>
 </div>
-<p>Folgen Sie dem Installationsdialog, um das Setup abzuschließen. Alternativ verwenden Sie <a class="reference external" href="https://brew.sh/">Homebrew</a>, um Git zu installieren mit:</p>
+<p>Folgen Sie dem Installation Dialog, um das Setup abzuschließen. Alternativ verwenden Sie <a class="reference external" href="https://brew.sh/">Homebrew</a>, um Git zu installieren mit:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>git
 </pre></div>
 </div>
@@ -492,7 +493,7 @@ macOS</label><div class="sd-tab-content docutils">
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git --version</span>
 </pre></div>
 </div>
-<p>Eine Git-Versionsnummer bestätigt, dass die Installation verfügbar ist. Detaillierte Installationsanweisungen und Tutorials zum Klonen von Repositories, Aktualisieren von Dateien, Drücken von Änderungen und Zusammenarbeit mit Zweigen finden Sie unter <a class="reference external" href="https://hydro-informatics.com/git/">hydro-informatics.com Git Tutorials</a>.</p>
+<p>Eine Git-Versionsnummer bestätigt, dass Installation verfügbar ist. Detaillierte Installation Anweisungen und Tutorials zum Klonen von Repositories, Aktualisieren von Dateien, Schieben von Änderungen und Zusammenarbeit mit Zweigen finden Sie unter <a class="reference external" href="https://hydro-informatics.com/git/">hydro-informatics.com Git Tutorials</a> .</p>
 </div>
 <p>Mit Git verfügbar, öffnen Sie <strong>Terminal</strong> und geben Sie ein:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/sschwindt/aXqua.git
@@ -509,12 +510,13 @@ axqua<span class="w"> </span>--version
 <h2>Verbinden Sie das Plugin mit dem aXqua Programm<a class="headerlink" href="#connect-the-plugin-to-the-axqua-program" title="Link to this heading"></a></h2>
 <p>Zurück in <strong>QGIS</strong>:</p>
 <ul class="simple">
-<li><p>Öffnen Sie das aXqua Panel aus der Symbolleiste und klicken Sie auf <em>Check</em> auf der Registerkarte <em>Configuration</em>.</p></li>
-<li><p>Das Plugin sucht an drei Stellen in dieser Reihenfolge: den Pfad in <em>aXqua &gt; Settings</em>, die Variable <code class="docutils literal notranslate"><span class="pre">AXQUA_EXE</span></code>, den Systemsuchpfad.</p></li>
+<li><p>Öffnen Sie das aXqua-Panel aus der Symbolleiste und klicken Sie auf <em>Check</em> im <em>Configuration</em> Registerkarte.</p></li>
+<li><p>Das Plugin sucht an vier Stellen in dieser Reihenfolge: den Pfad in <em>aXqua &gt; Settings</em>, die Variable <code class="docutils literal notranslate"><span class="pre">AXQUA_EXE</span></code>, den Systemsuchpfad und die Conda-Umgebungen dieses Computers (Miniforge, Miniconda, Anaconda), eine Umgebung, deren Name <em>axqua</em> zuerst enthält. Der letzte ist unter Windows wichtig, wo QGIS nie eine Umgebung auf seinem Suchpfad hat.</p></li>
 <li><p><strong>Gefunden</strong>: Das Panel meldet die Version und woher sie kommt. Nichts anderes zu tun.</p></li>
 <li><p><strong>Nicht gefunden</strong>: Geben Sie den Pfad von <a class="reference internal" href="#find-the-axqua-path"><span class="std std-ref">Finden Sie den Pfad des installierten Programms</span></a> in <em>Settings</em> ein und klicken Sie dann auf <em>Test</em>.</p></li>
 </ul>
 <p><em>Test</em> meldet die Version, mit der der Pfad antwortet, so dass hier ein falscher Pfad abgefangen wird und nicht, wenn eine Simulation gestartet wird.</p>
+<p>Wählen Sie unter Windows die Datei <code class="docutils literal notranslate"><span class="pre">axqua.exe</span></code> im Ordner <code class="docutils literal notranslate"><span class="pre">Scripts</span></code> der Umgebung aus. Installieren Sie aXqua niemals in das Python von QGIS selbst: Es fehlen die Programme für Rechennetze und Raster, und wenn Sie sie dort installieren, kann QGIS unterbrochen werden; <em>Test</em> sagt das, wenn der Pfad dorthin zeigt. Das Plugin startet aXqua ohne die Python-Einstellungen von QGIS, so dass die beiden Python Installationen nicht stören.</p>
 <figure class="align-default" id="id1">
 <img alt="Die Einstellungen des Plugins mit dem Pfad des aXqua Programms" src="../_images/gui-settings.png" />
 <figcaption>
@@ -524,7 +526,7 @@ axqua<span class="w"> </span>--version
 </section>
 <section id="find-the-path-of-the-installed-program">
 <span id="find-the-axqua-path"></span><h2>Finden Sie den Pfad des installierten Programms<a class="headerlink" href="#find-the-path-of-the-installed-program" title="Link to this heading"></a></h2>
-<p>Wenn das Plugin den vollständigen Pfad des <code class="docutils literal notranslate"><span class="pre">axqua</span></code>-Programm-Backends nicht automatisch identifiziert, finden Sie ihn über <strong>Terminal</strong>; aktivieren Sie die Umgebung und fragen Sie das System, wo sich das Programm befindet:</p>
+<p>Wenn das Plugin nicht automatisch den vollständigen Pfad des <code class="docutils literal notranslate"><span class="pre">axqua</span></code>-Programms Backend identifiziert, finden Sie es über <strong>Terminal</strong>; aktivieren Sie die Umgebung und fragen Sie das System, wo sich das Programm befindet:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env
 which<span class="w"> </span>axqua<span class="w">          </span><span class="c1"># Linux, macOS</span>
 where<span class="w"> </span>axqua<span class="w">          </span><span class="c1"># Windows</span>
@@ -554,17 +556,17 @@ where<span class="w"> </span>axqua<span class="w">          </span><span class="
 </div>
 <div class="admonition important">
 <p class="admonition-title">Wichtig</p>
-<p>In diesem Abschnitt wird nur die sehr grundlegende Installation des aXqua QGIS-Plugins (auch bekannt als <strong>frontend</strong>) und des erforderlichen Codes hinter den Kulissen (auch bekannt als <strong>backend</strong>) erläutert. In den nächsten Abschnitten wird die Installation von <a class="reference internal" href="simulation-software.html"><span class="doc">Simulationssoftware</span></a> (TELEMAC und OpenFOAM), <a class="reference internal" href="plugin-setup.html"><span class="doc">Plugin Setup</span></a> und die Installation von <a class="reference internal" href="postprocessors.html"><span class="doc">Postprozessoren</span></a> (ParaView und Visit DAV) erläutert.</p>
+<p>In diesem Abschnitt wird nur das sehr grundlegende Installation des aXqua QGIS-Plugins (aka das <strong>Frontend</strong>) und der erforderliche Code hinter den Kulissen (aka das <strong>Backend</strong>) erläutert. In den nächsten Abschnitten werden Installation von <a class="reference internal" href="simulation-software.html"><span class="doc">Simulationssoftware</span></a> (TELEMAC und OpenFOAM), <a class="reference internal" href="plugin-setup.html"><span class="doc">Plugin Setup</span></a> und Installation von <a class="reference internal" href="postprocessors.html"><span class="doc">Postprozessoren</span></a> (ParaView und Visit DAV) erläutert.</p>
 </div>
 </section>
 <section id="axqua-panel-layout">
 <h2>aXqua Panel Layout<a class="headerlink" href="#axqua-panel-layout" title="Link to this heading"></a></h2>
-<p>Nach erfolgreicher Konfiguration zeigt das Panel Tabs an, die dem Workflow folgen: <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (mit den Sub-Tabs <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em>, <em>Morphodynamics</em> und <em>Hydrology</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> oben rechts öffnet die Dokumentation im Abschnitt des Tabs, der angezeigt wird, und <em>Clean Up</em> links davon gibt Speicherplatz frei (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Freigeben des Scheibenraums</span></a>). Help öffnet eine Kopie der auf diesem Computer erstellten Dokumentation, wenn eine vorhanden ist (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> in einer Kopie des installierten Repositorys wie in <a class="reference internal" href="#install-from-source"><span class="std std-ref">Installieren aus dem Quellcode (Entwicklung)</span></a>, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Aufbau der Dokumentation</span></a>), da sie die installierte Version und ansonsten die veröffentlichte Dokumentation unter <a class="reference external" href="https://axqua.eu">axqua.eu</a> beschreibt. Es öffnet die deutsche oder die französische Seite, wenn QGIS auf Deutsch oder Französisch eingestellt ist. Ein Browser, der als Snap- oder Flatpak-Paket installiert ist (z. B. Firefox auf Ubuntu), kann Dateien außerhalb des Home-Ordners nicht öffnen; für eine Kopie außerhalb öffnet Help die veröffentlichte Dokumentation. Die Jobliste unter den Tabs ist von jedem Tab aus sichtbar.</p>
+<p>Nach erfolgreicher Konfiguration zeigt das Panel Registerkarten, die dem Workflow folgen: <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (mit den Unterregisterkarten <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em>, <em>Morphodynamics</em> und <em>Hydrology</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> oben rechts öffnet die Dokumentation im Bereich der Registerkarte, der angezeigt wird, und <em>Clean Up</em> links davon gibt Speicherplatz frei (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Freigeben des Scheibenraums</span></a>). Help öffnet eine Kopie der auf diesem Computer erstellten Dokumentation, wenn eine vorhanden ist (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> in einer Kopie des installierten Repositorys wie in <a class="reference internal" href="#install-from-source"><span class="std std-ref">Installieren aus dem Quellcode (Entwicklung)</span></a>, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Aufbau der Dokumentation</span></a>), da sie die installierte Version und ansonsten die veröffentlichte Dokumentation unter <a class="reference external" href="https://axqua.eu">axqua.eu</a> beschreibt. Es öffnet die englischen Seiten, die Sprache des Plugins. <em>Documentation language</em> in <em>aXqua &gt; Settings</em> öffnet stattdessen die deutschen oder französischen Seiten (maschinell übersetzt) oder die der Sprache von QGIS. Ein Browser, der als Snap- oder Flatpak-Paket installiert ist (z. B. Firefox auf Ubuntu), kann Dateien außerhalb des Home-Ordners nicht öffnen; für eine Kopie außerhalb öffnet Help die veröffentlichte Dokumentation. Die Stellenliste unterhalb der Registerkarten ist von jeder Registerkarte sichtbar.</p>
 <figure class="align-default" id="id2">
 <a class="reference internal image-reference" href="../_images/gui-qgis-window.png"><img alt="Das aXqua Panel im QGIS Fenster" src="../_images/gui-qgis-window.png" style="width: 100%;" />
 </a>
 <figcaption>
-<p><span class="caption-text">Das aXqua-Panel in QGIS. (1) Das Panel mit seinen Registerkarten, der Schaltfläche <em>Help</em> und der Jobliste. (2) Die Karte von QGIS, hier mit dem Ergebnis einer stationären Simulation im Kartenstil <em>Water depth with streamlines</em> (<a class="reference internal" href="../usage/postprocessing.html#help-postprocessing-qgis"><span class="std std-ref">QGIS-Kartenerzeugung</span></a>). (3) Jede Funktion von aXqua ist eine Schaltfläche auf einem der Tabs.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+<p><span class="caption-text">Das aXqua-Panel in QGIS. (1) Das Panel mit seinen Registerkarten, der Schaltfläche <em>Help</em> und der Jobliste. (2) Die Karte von QGIS, hier mit dem Ergebnis einer stationären Simulation im Kartenstil <em>Water depth with streamlines</em> (<a class="reference internal" href="../usage/postprocessing.html#help-postprocessing-qgis"><span class="std std-ref">QGIS-Kartenerzeugung</span></a>). (3) Jede Funktion von aXqua ist eine Schaltfläche auf einem der Registerkarten.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 </section>

@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/jobs/profiles.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bb516dca"></script>
+      <script src="../../../_static/documentation_options.js?v=8ca9e7a0"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -452,7 +452,8 @@
             <span class="n">distro</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"distro"</span><span class="p">),</span>
             <span class="n">config_name</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"config_name"</span><span class="p">),</span>
             <span class="n">mpi_launcher</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mpi_launcher"</span><span class="p">),</span>
-            <span class="n">mpi_processes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mpi_processes"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="c1"># 0: the entry names no count, so the case's n_processors decides (submit.build_spec); a 1 here used to win over the case's 16 once the executor ran the job's count (review of 2026-11-10)</span>
+            <span class="n">mpi_processes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mpi_processes"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">working_root</span><span class="o">=</span><span class="n">_path</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"wsl"</span><span class="p">),</span>
             <span class="n">launcher</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"launcher"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"auto"</span><span class="p">),</span>
             <span class="n">postprocess</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"postprocess"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]),</span>
@@ -469,7 +470,8 @@
             <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="n">out</span><span class="p">[</span><span class="s2">"mpi_processes"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_processes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_processes</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"mpi_processes"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_processes</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span> <span class="o">!=</span> <span class="s2">"auto"</span><span class="p">:</span>
             <span class="n">out</span><span class="p">[</span><span class="s2">"launcher"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">postprocess</span><span class="p">:</span>

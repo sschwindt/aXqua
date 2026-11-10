@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobs/launchers/windows.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -371,6 +371,8 @@
 <span class="sd">    exactly the failure the Job Object was introduced to prevent. Hence</span>
 <span class="sd">    ``Local\\axqua-&lt;job_id&gt;`` plus ``OpenJobObjectW`` at cancel time.</span>
 
+<span class="sd">The name lives as long as a handle does, so the handle is duplicated into the runner (:meth:`WindowsJobObjectLauncher._hand_over`): the object and its name then last as long as the job.</span>
+
 <span class="sd">**Never executed against a real Windows install.** The argv and flag construction are</span>
 <span class="sd">unit-tested because they are host-independent; the ``kernel32`` calls are not, and this</span>
 <span class="sd">module says so rather than implying a coverage it does not have.</span>
@@ -439,18 +441,27 @@
         <span class="n">handle_out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">stdout_path</span><span class="p">,</span> <span class="s2">"ab"</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">creationflags</span><span class="p">,</span> <span class="n">handle_out</span><span class="p">)</span>
-            <span class="n">assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assign</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">assigned</span><span class="p">:</span>
+            <span class="n">assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assign</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span> <span class="k">if</span> <span class="n">job</span> <span class="k">else</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">job</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">assigned</span><span class="p">:</span>
                 <span class="c1"># The submitter is itself inside a job that forbids nesting (some CI</span>
                 <span class="c1"># runners and terminals do this). Retry breaking away, and if that also</span>
                 <span class="c1"># fails, run detached without a job object and say so - a job that runs</span>
                 <span class="c1"># and is awkward to cancel beats a job that will not start.</span>
                 <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
-                <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span>
-                                   <span class="n">creationflags</span> <span class="o">|</span> <span class="n">CREATE_BREAKAWAY_FROM_JOB</span><span class="p">,</span> <span class="n">handle_out</span><span class="p">)</span>
-                <span class="n">assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assign</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span>
+                                       <span class="n">creationflags</span> <span class="o">|</span> <span class="n">CREATE_BREAKAWAY_FROM_JOB</span><span class="p">,</span> <span class="n">handle_out</span><span class="p">)</span>
+                    <span class="n">assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assign</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">AxquaEnvironmentError</span><span class="p">:</span>
+                    <span class="c1"># breaking away is refused too: without a job object, as promised</span>
+                    <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">creationflags</span><span class="p">,</span> <span class="n">handle_out</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">assigned</span><span class="p">:</span>
+                <span class="c1"># The name of a kernel object goes with its last handle, and the handle of this process closes when `axqua submit` exits: a later `axqua cancel` found no object of that name and always fell back to taskkill (review of 2026-11-06). A handle duplicated into the runner keeps the name as long as the runner lives.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hand_over</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">handle_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">job</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_close</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">assigned</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"could not assign the job to a Job Object; cancellation will "</span>
@@ -542,6 +553,43 @@
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">kernel32</span><span class="o">.</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_hand_over</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># pragma: no cover - Windows only</span>
+<span class="w">        </span><span class="sd">"""Duplicate the handle of *job* into the process *proc*, which then keeps the object and its name."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">wintypes</span>
+            <span class="n">kernel32</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel32</span><span class="p">()</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">OpenProcess</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">GetCurrentProcess</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span>
+            <span class="c1"># declared: the pseudo-handle -1 of GetCurrentProcess does not fit the default C int</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">DuplicateHandle</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span><span class="p">),</span>
+                <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">BOOL</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">]</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">DuplicateHandle</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">BOOL</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">CloseHandle</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span><span class="p">]</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">kernel32</span><span class="o">.</span><span class="n">OpenProcess</span><span class="p">(</span><span class="mh">0x0040</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>      <span class="c1"># PROCESS_DUP_HANDLE</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">copied</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span><span class="p">()</span>
+                <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">kernel32</span><span class="o">.</span><span class="n">DuplicateHandle</span><span class="p">(</span>
+                    <span class="n">kernel32</span><span class="o">.</span><span class="n">GetCurrentProcess</span><span class="p">(),</span> <span class="n">job</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">copied</span><span class="p">),</span>
+                    <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mh">0x00000002</span><span class="p">))</span>                               <span class="c1"># DUPLICATE_SAME_ACCESS</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">kernel32</span><span class="o">.</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - cancel then falls back to taskkill</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"could not hand the job object to pid </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pragma: no cover - Windows only</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">wintypes</span>
+            <span class="n">kernel32</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel32</span><span class="p">()</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">CloseHandle</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span><span class="p">]</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+            <span class="k">pass</span>
+
     <span class="c1"># -- inspection ---------------------------------------------------------------</span>
 <div class="viewcode-block" id="WindowsJobObjectLauncher.status">
 <a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.WindowsJobObjectLauncher.status">[docs]</a>
@@ -570,7 +618,8 @@
             <span class="c1"># /T is the tree, /F is force. Weaker than a Job Object because it walks</span>
             <span class="c1"># parent-child links, which a re-parented rank has already lost.</span>
             <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">"taskkill"</span><span class="p">,</span> <span class="s2">"/PID"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">pid</span><span class="p">),</span> <span class="s2">"/T"</span><span class="p">,</span> <span class="s2">"/F"</span><span class="p">],</span>
-                           <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">grace</span><span class="p">))</span>
+                           <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"oem"</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="k">else</span> <span class="s2">"utf-8"</span><span class="p">,</span>
+                           <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">grace</span><span class="p">))</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">SubprocessError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"taskkill failed: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>

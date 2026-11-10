@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/code/plugin.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -396,22 +396,22 @@
 <td><p>Die Schritte eines Batches und das Shell-Skript, das sie ohne QGIS ausführt.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gui/sections.py</span></code></p></td>
-<td><p>Die Tabelle der Registerkarten und Unterregisterkarten: ihre Reihenfolge, die Fähigkeiten, die jeder zeigt, und die Dokumentationsseite und das Label, das <em>Help</em> dafür öffnet.</p></td>
+<td><p>Die Tabelle der Registerkarten und Unterregisterkarten: ihre Reihenfolge, die jeweils angezeigten Fähigkeiten und die Dokumentationsseite und das Label, das <em>Help</em> dafür öffnet.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gui/dock.py</span></code></p></td>
 <td><p>Das Panel: die festen Registerkarten, die Jobliste darunter, <em>Clean Up</em> und <em>Help</em>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gui/configuration_tab.py</span></code>, <code class="docutils literal notranslate"><span class="pre">gui/profile_editor.py</span></code></p></td>
-<td><p>Die Registerkarte <em>Configuration</em> und der Editor des Profils dieses Computers.</p></td>
+<td><p>Die <em>Configuration</em> Registerkarte und der Editor des Profils dieses Computers.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gui/install_wizard.py</span></code>, <code class="docutils literal notranslate"><span class="pre">gui/report_issue.py</span></code></p></td>
-<td><p>Die Installationsassistenten für TELEMAC, OpenFOAM und die Postprozessoren: die Registerkarteneinstellungen, die Überprüfung und die laufende Installation, ein Fenster um <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span></code> und der Bericht über ein Problem, das die Überprüfungen und Korrekturen nicht gelöst haben.</p></td>
+<td><p>Die Installationsassistenten für TELEMAC, OpenFOAM und die Postprozessoren: die Registerkarteneinstellungen, check und das laufende Installation, ein Fenster um <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span></code>; und der Bericht über ein Problem, das die Prüfungen und Korrekturen nicht gelöst haben.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gui/case_editor.py</span></code>, <code class="docutils literal notranslate"><span class="pre">gui/editor_base.py</span></code></p></td>
-<td><p>Die Fall-Einstellungen: die Seiten und Frames einer Fall-Datei, die aus <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">schema</span></code> mit den Einstellungen generiert werden, die in fettem Dunkellila erforderlich sind, und was beide Editoren teilen: <em>Save</em>, <em>Cancel</em> und <em>Exit</em>.</p></td>
+<td><p>Die Falleinstellungen: die Seiten und Frames einer Falldatei, generiert aus <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">schema</span></code> mit den Einstellungen, die in fettem Dunkellila erforderlich sind, und was beide Editoren teilen: <em>Save</em>, <em>Cancel</em> und <em>Exit</em>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gui/case_tab.py</span></code>, <code class="docutils literal notranslate"><span class="pre">gui/section_pages.py</span></code></p></td>
-<td><p>Die Registerkarte <em>Case Setup</em> und die Seiten der Workflow-Tabs.</p></td>
+<td><p>Die <em>Case Setup</em> Registerkarte und die Seiten des Workflows Registerkarten.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gui/findings.py</span></code>, <code class="docutils literal notranslate"><span class="pre">gui/help.py</span></code></p></td>
 <td><p>Die Warndreiecke und die Adressen der Dokumentation, die das Plugin öffnet (eine lokale Kopie oder die veröffentlichte in der Sprache von QGIS). <code class="docutils literal notranslate"><span class="pre">gui/style.py</span></code> hält die Farben: das dunkle Lila des aXqua-Symbols für das, was benötigt wird, dunkelgrün für das, was gefunden wurde.</p></td>
@@ -437,7 +437,7 @@ scripts/qgis_dev.sh
 </pre></div>
 </div>
 <p>QGIS listet ein Plugin nur dann auf, wenn es <code class="docutils literal notranslate"><span class="pre">metadata.txt</span></code> lesen kann. Der Befehl <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">scripts/build_plugin_zip.py</span> <span class="pre">--check</span></code> liest die Datei auf die gleiche Weise wie QGIS.</p>
-<p><em>Help</em> Im Plugin öffnet sich die Dokumentation im Abschnitt des Tabs, der angezeigt wird. Das Plugin-Archiv trägt keine Kopie der Dokumentation: <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">docs</span></code> benennt eine Kopie, die auf diesem Computer aufgebaut ist (<code class="docutils literal notranslate"><span class="pre">$AXQUA_DOCS</span></code>, sonst <code class="docutils literal notranslate"><span class="pre">docs/_build/site</span></code> oder <code class="docutils literal notranslate"><span class="pre">docs/_build/html</span></code> der Quellauscheckung) und ob der Standardbrowser sie lesen kann, und das Plugin öffnet die veröffentlichte Dokumentation ansonsten. Eine lokale Seite wird durch eine kleine Weiterleitungsseite (<code class="docutils literal notranslate"><span class="pre">_help/open.html</span></code> neben der Kopie) geöffnet, da <code class="docutils literal notranslate"><span class="pre">xdg-open</span></code> und Chrom den Abschnittsteil (<code class="docutils literal notranslate"><span class="pre">#...</span></code>) einer Dateiadresse ablegen.</p>
+<p><em>Help</em> im Plugin öffnet sich die Dokumentation im Bereich der Registerkarte, der angezeigt wird. Das Plugin-Archiv trägt keine Kopie der Dokumentation: <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">docs</span></code> benennt eine Kopie, die auf diesem Computer aufgebaut ist (<code class="docutils literal notranslate"><span class="pre">$AXQUA_DOCS</span></code>, sonst <code class="docutils literal notranslate"><span class="pre">docs/_build/site</span></code> oder <code class="docutils literal notranslate"><span class="pre">docs/_build/html</span></code> der Quellauscheckung) und ob der Standardbrowser sie lesen kann, und das Plugin öffnet die veröffentlichte Dokumentation ansonsten. Eine lokale Seite wird durch eine kleine Weiterleitungsseite (<code class="docutils literal notranslate"><span class="pre">_help/open.html</span></code> neben der Kopie) geöffnet, da <code class="docutils literal notranslate"><span class="pre">xdg-open</span></code> und Chrom den Abschnittsteil (<code class="docutils literal notranslate"><span class="pre">#...</span></code>) einer Dateiadresse ablegen.</p>
 <p>Die Tests des Plugins sind in <code class="docutils literal notranslate"><span class="pre">qgis_plugin/tests/</span></code>. Die Tests, die QGIS erfordern, werden übersprungen, wenn das Python-Modul <code class="docutils literal notranslate"><span class="pre">qgis</span></code> nicht verfügbar ist. Das Skript <code class="docutils literal notranslate"><span class="pre">scripts/build_plugin_zip.py</span></code> erstellt das Plugin-Archiv und überprüft die Anforderungen des QGIS-Plugin-Repository.</p>
 <p><strong>Freigaben.</strong> Das Plugin und das Programm werden zusammen unter einer Versionsnummer veröffentlicht, die <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">src/axqua/__init__.py</span></code> (<code class="docutils literal notranslate"><span class="pre">_FALLBACK_VERSION</span></code>), <code class="docutils literal notranslate"><span class="pre">qgis_plugin/axqua/metadata.txt</span></code> und <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> tragen. Ein Release benötigt kein Tag, der von Hand gedrückt wird: Wenn die Tests für einen Push an <code class="docutils literal notranslate"><span class="pre">main</span></code> bestanden haben, liest der Workflow <code class="docutils literal notranslate"><span class="pre">auto-release</span></code> (<code class="docutils literal notranslate"><span class="pre">.github/workflows/auto-release.yml</span></code>) die Version von <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, und wenn sein Tag <code class="docutils literal notranslate"><span class="pre">v&lt;version&gt;</span></code> noch nicht existiert, überprüft er, ob die vier Dateien dieselbe Version benennen und dass das Changelog von <code class="docutils literal notranslate"><span class="pre">metadata.txt</span></code> damit beginnt, markiert den getesteten Commit und startet den Workflow <code class="docutils literal notranslate"><span class="pre">release</span></code> (<code class="docutils literal notranslate"><span class="pre">.github/workflows/plugin-release.yml</span></code>) auf diesem Tag. Ein Push, der die Version nicht ändert, gibt nichts frei. Ein Tag, der von Hand gedrückt wird, beginnt auch <code class="docutils literal notranslate"><span class="pre">release</span></code>. Der Workflow <code class="docutils literal notranslate"><span class="pre">release</span></code> baut das Plugin-Archiv und fügt es an die GitHub-Version an, baut dann das Programm, überprüft das Rad und lädt es durch vertrauenswürdiges Veröffentlichen auf PyPI hoch, so dass kein Token irgendwo gespeichert wird. Der Upload läuft nur nach den Überprüfungen des Plugins und nur während die Repository-Variable <code class="docutils literal notranslate"><span class="pre">PYPI_UPLOAD</span></code> <code class="docutils literal notranslate"><span class="pre">true</span></code> ist. Ohne sie wird das Programm von Hand aus einer sauberen Kopie des getaggten Commits hochgeladen; <code class="docutils literal notranslate"><span class="pre">twine</span></code> fragt nach einem API-Token von pypi.org (<em>Account settings &gt; API tokens</em>; ein auf das Projekt <code class="docutils literal notranslate"><span class="pre">axqua</span></code> begrenztes Token genügt):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rm<span class="w"> </span>-rf<span class="w"> </span>build<span class="w"> </span>dist/pypi

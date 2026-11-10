@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/validation.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -60,7 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -132,7 +132,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -188,7 +188,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -206,7 +206,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC Backend</a><ul>
@@ -255,9 +255,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
@@ -271,9 +271,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -294,7 +294,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -310,7 +310,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -473,7 +473,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">calibrated_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CalibratedSet</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The joint posterior maximum of the newest calibration of this case.</span>
 
-<span class="sd">    HydroBayesCal saves one dictionary per calibration quantity; the newest is read.</span>
+<span class="sd">    HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.</span>
 <span class="sd">    An older HydroBayesCal that did not save the joint maximum gives the mean of the</span>
 <span class="sd">    posterior sample instead, and :attr:`CalibratedSet.estimate` says so.</span>
 <span class="sd">    """</span>
@@ -481,8 +481,14 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
 
-    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">RESULTS</span> <span class="o">/</span> <span class="s2">"calibration-data"</span>
-    <span class="n">found</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*/BAL_dictionary.pkl"</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+    <span class="c1"># the single-flow calibration writes into the calibration folder, a calibration at</span>
+    <span class="c1"># several discharges into its multiflow folder; the newer result counts</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.bayescal</span><span class="w"> </span><span class="kn">import</span> <span class="n">MULTIFLOW</span>
+
+    <span class="n">roots</span> <span class="o">=</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">),</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">MULTIFLOW</span><span class="p">)</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">path</span> <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">roots</span>
+                    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">RESULTS</span> <span class="o">/</span> <span class="s2">"calibration-data"</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
+                        <span class="s2">"*/BAL_dictionary.pkl"</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">"no finished calibration in </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
@@ -542,8 +548,8 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_liquids_for</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""The liquid boundaries with the discharges of *situation*, and their total."""</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_liquids_for</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"validation"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The liquid boundaries with the discharges of *situation* (of the *role* validation or calibration), and their total."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">boundary</span>
 
@@ -554,14 +560,14 @@
                           <span class="n">remedy</span><span class="o">=</span><span class="s2">"Build the case first (tab Preprocessing)."</span><span class="p">)</span>
     <span class="n">liquids</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">load_liquid_boundaries</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
     <span class="n">inflows</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span><span class="p">]</span>
-    <span class="n">subject</span> <span class="o">=</span> <span class="s2">"calibration.validation"</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="s2">"calibration.validation"</span> <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="s2">"validation"</span> <span class="k">else</span> <span class="s2">"calibration.situations"</span>
     <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="p">:</span>
         <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">lb</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">}</span>
         <span class="n">wrong</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="p">)</span> <span class="o">-</span> <span class="n">known</span><span class="p">)</span>
         <span class="n">missing</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">known</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">wrong</span> <span class="ow">or</span> <span class="n">missing</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
-                <span class="s2">"the discharges of the validation situation do not match the inflows "</span>
+                <span class="sa">f</span><span class="s2">"the discharges of the </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2"> situation do not match the inflows "</span>
                 <span class="s2">"of the model, which are the liquid boundaries "</span>
                 <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">known</span><span class="p">))</span>
                 <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"; not an inflow: </span><span class="si">{</span><span class="n">wrong</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">wrong</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
@@ -572,9 +578,9 @@
         <span class="k">return</span> <span class="n">liquids</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
     <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"the validation situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names no discharge"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2"> situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names no discharge"</span><span class="p">,</span>
             <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.prescribed_flowrate"</span><span class="p">,</span>
-            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the discharge at which the validation data were measured."</span><span class="p">)</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Enter the discharge at which the </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2"> data were measured."</span><span class="p">)</span>
     <span class="n">total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">inflows</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">):</span>
         <span class="n">before</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span><span class="p">)</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">)</span>
@@ -635,15 +641,70 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">with_boundaries_of</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                       <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"validation"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""*text* of a steering file with the boundary values of *situation*.</span>
+
+<span class="sd">    ``PRESCRIBED FLOWRATES`` per inflow (a total keeps the split of the case, ``inflows``</span>
+<span class="sd">    gives each boundary its own) and ``PRESCRIBED ELEVATIONS`` at the outflow: the</span>
+<span class="sd">    situation's level where the case prescribes one, else the level of the case's</span>
+<span class="sd">    rating for the discharge of the situation, synthesized into *folder* by the case's</span>
+<span class="sd">    own ``rating_method`` when the case has no measured curve. Shared by the</span>
+<span class="sd">    validation and by a calibration at several discharges. Returns the text, the</span>
+<span class="sd">    total discharge, notes for the report and the two keyword values.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_outflow_wse</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">steering</span>
+
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">_liquids_for</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+    <span class="n">there</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="o">=</span> <span class="n">total</span>
+    <span class="n">condition</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">!=</span> <span class="s2">"fixed"</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The outflow water level of the </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2"> situation is not "</span>
+                         <span class="sa">f</span><span class="s2">"used: the case computes it (</span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">)."</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"fixed"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the case prescribes the water level at the outflow, and the </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names none"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"calibration.</span><span class="si">{</span><span class="s1">'validation'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">role</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">'validation'</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'situations'</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="s2">".prescribed_elevation"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Enter the outflow water level at which the </span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2"> data were "</span>
+                   <span class="s2">"measured. The level of the case belongs to its discharge."</span><span class="p">)</span>
+    <span class="n">given</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"rating"</span> <span class="ow">and</span> <span class="p">(</span><span class="n">given</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+        <span class="c1"># The case has no measured rating curve: its outflow level was derived from</span>
+        <span class="c1"># the channel geometry for the case's discharge. The level of this</span>
+        <span class="c1"># situation is derived the same way, for its own discharge.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_rating_if_missing</span>
+
+        <span class="n">own</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"rating-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span>
+        <span class="n">own</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">own</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="o">=</span> <span class="n">own</span>
+        <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+    <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">))</span>
+    <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span> <span class="n">_profiles</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">_prescribed_arrays</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">stage</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">bayescal</span>
+
+    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED FLOWRATES"</span><span class="p">,</span> <span class="n">flow</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED ELEVATIONS"</span><span class="p">,</span> <span class="n">elev</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">total</span><span class="p">),</span> <span class="n">notes</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span>
+
+
 <div class="viewcode-block" id="build">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.validation.build">[Doku]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ValidationSetup</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Write the steering file of the validation run into the model folder."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">bayescal</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_outflow_wse</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">steering</span>
 
     <span class="n">bayescal</span><span class="o">.</span><span class="n">restore_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>              <span class="c1"># a killed calibration restores nothing</span>
     <span class="n">base</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
@@ -657,39 +718,8 @@
     <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># ---- the boundary values of the situation --------------------------------------</span>
-    <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">_liquids_for</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">)</span>
-    <span class="n">there</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
-    <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="o">=</span> <span class="n">total</span>
-    <span class="n">condition</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span>
-    <span class="n">level</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">level</span> <span class="o">!=</span> <span class="s2">"fixed"</span><span class="p">:</span>
-            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"The outflow water level of the validation situation is not "</span>
-                         <span class="sa">f</span><span class="s2">"used: the case computes it (</span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">)."</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"fixed"</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
-            <span class="s2">"the case prescribes the water level at the outflow, and the validation "</span>
-            <span class="sa">f</span><span class="s2">"situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names none"</span><span class="p">,</span>
-            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.validation.prescribed_elevation"</span><span class="p">,</span>
-            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the outflow water level at which the validation data were "</span>
-                   <span class="s2">"measured. The level of the calibration belongs to its discharge."</span><span class="p">)</span>
-    <span class="n">given</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span>
-    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"rating"</span> <span class="ow">and</span> <span class="p">(</span><span class="n">given</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
-        <span class="c1"># The case has no measured rating curve: its outflow level was derived from</span>
-        <span class="c1"># the channel geometry for the calibrated discharge. The level of this</span>
-        <span class="c1"># situation is derived the same way, for its own discharge.</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_rating_if_missing</span>
-
-        <span class="n">own</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"rating-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span>
-        <span class="n">own</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">own</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="o">=</span> <span class="n">own</span>
-        <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
-    <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">))</span>
-    <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span> <span class="n">_profiles</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">_prescribed_arrays</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">stage</span><span class="p">)</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED FLOWRATES"</span><span class="p">,</span> <span class="n">flow</span><span class="p">)</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED ELEVATIONS"</span><span class="p">,</span> <span class="n">elev</span><span class="p">)</span>
+    <span class="n">text</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">notes</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span> <span class="o">=</span> <span class="n">with_boundaries_of</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span><span class="p">)</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"TITLE"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> validation </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
     <span class="n">results</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.slf"</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"RESULTS FILE"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
@@ -787,7 +817,9 @@
     <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"ground-truth-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.xlsx"</span>
     <span class="n">there</span><span class="o">.</span><span class="n">calibration_csv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">FOLDER</span><span class="si">}</span><span class="s2">/measurements-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span>
-    <span class="k">return</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">build_velocity_csv</span><span class="p">(</span><span class="n">there</span><span class="p">)</span>
+    <span class="c1"># the errors of the validation stay those of the instrument: the positional term</span>
+    <span class="c1"># is measured on the steady result of the calibration discharge</span>
+    <span class="k">return</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">build_velocity_csv</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">positional</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="inside_model">

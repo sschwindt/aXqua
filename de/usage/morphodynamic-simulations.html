@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/usage/morphodynamic-simulations.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -382,12 +382,12 @@
 </section>
 <section id="telemac-gaia-setup">
 <span id="help-morphodynamics-telemac"></span><h2>Einrichtung von TELEMAC-GAIA<a class="headerlink" href="#telemac-gaia-setup" title="Link to this heading"></a></h2>
-<p><a class="reference external" href="http://www.opentelemac.org/">GAIA</a> ist das Sedimenttransportmodul von TELEMAC. Wenn <code class="docutils literal notranslate"><span class="pre">morphodynamics.enabled</span></code> in der Fall-Datei gesetzt wird, schreibt der Preprocessing ein GAIA Steuerdatei (<code class="docutils literal notranslate"><span class="pre">gaia.cas</span></code>) neben das TELEMAC-Modell und koppelt es mit den hydraulischen Simulationen.</p>
+<p><a class="reference external" href="http://www.opentelemac.org/">GAIA</a> ist das Sedimenttransportmodul von TELEMAC. Wenn <code class="docutils literal notranslate"><span class="pre">morphodynamics.enabled</span></code> im Falldatei gesetzt wird, schreibt der Preprocessing ein GAIA Steuerdatei (<code class="docutils literal notranslate"><span class="pre">gaia.cas</span></code>) neben das TELEMAC-Modell und koppelt es mit den hydraulischen Simulationen.</p>
 <figure class="align-default" id="id2">
-<a class="reference internal image-reference" href="../_images/gui-case-editor-morphodynamics.png"><img alt="Die Seite Morphodynamische Simulation der Fall-Einstellungen" src="../_images/gui-case-editor-morphodynamics.png" style="width: 85%;" />
+<a class="reference internal image-reference" href="../_images/gui-case-editor-morphodynamics.png"><img alt="Die Seite Morphodynamische Simulation des Falleinstellungen" src="../_images/gui-case-editor-morphodynamics.png" style="width: 85%;" />
 </a>
 <figcaption>
-<p><span class="caption-text">Der Sedimenttransport wird in den Einstellungen Fall eingeschaltet (<em>Open case settings…</em> auf der Registerkarte <em>Case Setup</em>). (1) Die Seite <em>Morphodynamic simulation</em>. (2) Seine Einstellungen, von denen weitere mit <em>Add setting…</em> hinzugefügt werden.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+<p><span class="caption-text">Der Sedimenttransport wird in den Falleinstellungen (<em>Open case settings…</em> auf der <em>Case Setup</em> Registerkarte) eingeschaltet. (1) Die Seite <em>Morphodynamic simulation</em>. (2) Seine Einstellungen, von denen weitere mit <em>Add setting…</em> hinzugefügt werden.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <table class="docutils align-default">
@@ -437,7 +437,7 @@
 </tbody>
 </table>
 <p>Eine Klasse von <code class="docutils literal notranslate"><span class="pre">sediment_classes</span></code> kann ihre eigenen <code class="docutils literal notranslate"><span class="pre">type</span></code> (<code class="docutils literal notranslate"><span class="pre">CO</span></code>kohäsiv oder <code class="docutils literal notranslate"><span class="pre">NCO</span></code>nichtkohäsiv) und <code class="docutils literal notranslate"><span class="pre">fraction</span></code> tragen. GAIA berechnet den Transport bei jedem Zeitschritt des Flusses; die Einstellung <code class="docutils literal notranslate"><span class="pre">coupling_period</span></code> von früheren Versionen von aXqua wird ignoriert, da TELEMAC v9.1.1 kein solches Schlüsselwort hat und angehalten wird.</p>
-<p><strong>Im Hydrologiemodus</strong> wird GAIA in den Hydrologielauf gekoppelt, und die <em>Sediment transport wizard…</em> auf der Unterkarte <em>Simulations &gt; Hydrology</em> empfiehlt die Klassen und Formeln für den Boden und den Hang des Einzugsgebiets (<a class="reference internal" href="hydrology-simulations.html#hydrology-sediment"><span class="std std-ref">Sedimenttransport</span></a>).</p>
+<p><strong>Im Hydrologiemodus</strong> wird GAIA in den Hydrologielauf eingekoppelt, und die <em>Sediment transport wizard…</em> auf der Unterregisterkarte <em>Simulations &gt; Hydrology</em> empfiehlt die Klassen und Formeln für den Boden und die Steigung des Einzugsgebiets (<a class="reference internal" href="hydrology-simulations.html#hydrology-sediment"><span class="std std-ref">Sedimenttransport</span></a>).</p>
 <p>Signifikante Bettveränderungen treten während Überschwemmungen auf. Eine morphodynamische Simulation wird daher üblicherweise mit einer Abfluss-Zeitreihe durchgeführt. Definieren Sie die Zeitreihe unter <code class="docutils literal notranslate"><span class="pre">boundaries.inflow</span></code>, aktivieren Sie <code class="docutils literal notranslate"><span class="pre">morphodynamics</span></code>, wiederholen Sie Preprocessing und starten Sie den unstetigen Lauf (<a class="reference internal" href="hydraulic-simulations.html#hydraulics-hotstarts"><span class="std std-ref">TELEMAC-Hotstarts</span></a>):</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua &lt;case-file&gt;
 axqua submit &lt;case-file&gt; --kind unsteady
@@ -454,12 +454,12 @@ axqua submit &lt;case-file&gt; --kind unsteady
 <p>Mit OpenFOAM simuliert aXqua <strong>Feinsediment über eine Flusssohle, die an Ort und Stelle bleibt</strong>. Die Simulation zeigt, wo sich Sand oder Schlamm, den die Strömung trägt, auf dem Bett absetzt und wo die Strömung es wieder aufnimmt. Die Sohlhöhe ändert sich nicht. Verwenden Sie diese Simulation, bei der Umfragen keine messbare Bettveränderung zeigen, während der Anteil von Feinsediment im Bett von einem Probenahmedatum zum nächsten unterschiedlich ist. Verwenden Sie TELEMAC und GAIA, wo sich das Bett bewegt.</p>
 <p>Die Simulation verwendet das Solver <code class="docutils literal notranslate"><span class="pre">sediDriftFoam2</span></code> von Nils Reidar B. Olsen (<a class="reference external" href="https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/">Dokumentation</a>). Der Solver berechnet einen stetigen, dreidimensionalen Fluss unter einem festen Wasserspiegel und die Konzentration einer Korngröße in diesem Fluss. Die Körner wandern mit dem Wasser, sinken mit ihrer Absetzgeschwindigkeit und werden durch Turbulenzen vermischt. Am Bett tauschen zwei Prozesse Sediment aus:</p>
 <ul class="simple">
-<li><p><strong>Setling.</strong> Getreide Flussabschnitt das Bett mit der Rate <em>settling velocity × concentration in the cell at the bed</em>.</p></li>
+<li><p><strong>Setling.</strong> Körner erreichen das Bett mit der Rate <em>settling velocity × concentration in the cell at the bed</em>.</p></li>
 <li><p><strong>Sedimentaufnahme.</strong> Der Fluss entfernt Körner mit einer Geschwindigkeit, die aus der Sohlschubspannung folgt, mit den Formeln von van Rijn (1984a, 1984b). Die kritische Scherspannung, bei der sich die Körner zu bewegen beginnen, wird für die Neigung des Bettes korrigiert (Dey 2003).</p></li>
 </ul>
-<p>Das Solver ist nicht Teil von OpenFOAM. Es wird durch die OpenFOAM-Installation von aXqua (<a class="reference internal" href="../installation/simulation-software.html#install-openfoam"><span class="std std-ref">OpenFOAM</span></a>) erstellt und läuft in einem Prozess.</p>
+<p>Das Solver ist nicht Teil von OpenFOAM. Es wird von OpenFOAM Installation von aXqua (<a class="reference internal" href="../installation/simulation-software.html#install-openfoam"><span class="std std-ref">OpenFOAM</span></a>) erstellt und läuft in einem Prozess.</p>
 <p><strong>Anforderungen.</strong> Die Simulation benötigt das stetige 2D-Ergebnis des Falls (<a class="reference internal" href="hydraulic-simulations.html#hydraulics-dry-runs"><span class="std std-ref">TELEMAC Trockenläufe 2D/3D</span></a>), weil der Wasserspiegel dieses Ergebnisses die obere Grenze des dreidimensionalen Rechennetzes ist. Das Rechennetz selbst ist das Rechennetz des OpenFOAM-Modells im Modus <code class="docutils literal notranslate"><span class="pre">rigid-lid</span></code> (<a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">OpenFOAM-Auswahl</span></a>), welcher Modus auch immer die hydraulische OpenFOAM-Simulation des Falls verwendet. Seine Zellgröße (<code class="docutils literal notranslate"><span class="pre">openfoam.cell_size</span></code> oder <code class="docutils literal notranslate"><span class="pre">openfoam.cell_size_factor</span></code>) entscheidet, wie lange die Simulation dauert.</p>
-<p><strong>Einstellungen.</strong> Die Simulation wird im Block <code class="docutils literal notranslate"><span class="pre">fine_sediment</span></code> der Fall-Datei definiert, der den Rahmen <em>Fine sediment over a fixed bed with OpenFOAM</em> auf der Seite <em>Morphodynamic simulation</em> der Fall-Einstellungen darstellt:</p>
+<p><strong>Einstellungen.</strong> Die Simulation ist im Block <code class="docutils literal notranslate"><span class="pre">fine_sediment</span></code> der Falldatei definiert, der den Rahmen <em>Fine sediment over a fixed bed with OpenFOAM</em> auf der Seite <em>Morphodynamic simulation</em> der Falleinstellungen darstellt:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">fine_sediment</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="nt">grain_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.00003</span><span class="w">          </span><span class="c1"># [m], coarse silt</span>
@@ -511,23 +511,23 @@ axqua submit &lt;case-file&gt; --kind unsteady
 </tbody>
 </table>
 <figure class="align-default" id="id3">
-<a class="reference internal image-reference" href="../_images/gui-case-editor-fine-sediment.png"><img alt="Der Rahmen Feinsediment über einem festen Bett in den Fall Einstellungen" src="../_images/gui-case-editor-fine-sediment.png" style="width: 85%;" />
+<a class="reference internal image-reference" href="../_images/gui-case-editor-fine-sediment.png"><img alt="Der Rahmen Feinsediment über einem Festbett in den Falleinstellungen" src="../_images/gui-case-editor-fine-sediment.png" style="width: 85%;" />
 </a>
 <figcaption>
-<p><span class="caption-text">Die Feinsediment-Simulation wird in den Fall-Einstellungen definiert (<em>Open case settings…</em> auf der Registerkarte <em>Case Setup</em>). (1) Der Rahmen <em>Fine sediment over a fixed bed with OpenFOAM</em>. (2) Seine Einstellungen, von denen weitere mit <em>Add setting…</em> hinzugefügt werden.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+<p><span class="caption-text">Die Feinsediment-Simulation wird in den Falleinstellungen (<em>Open case settings…</em> auf der <em>Case Setup</em> Registerkarte) definiert. (1) Der Rahmen <em>Fine sediment over a fixed bed with OpenFOAM</em>. (2) Seine Einstellungen, von denen weitere mit <em>Add setting…</em> hinzugefügt werden.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p><strong>Wahl der Sedimentaufnahme.</strong> Die Formeln von van Rijn beschreiben ein Sandbett, aus dem der Fluss so viele Körner entfernen kann, wie es seine Scherspannung erlaubt. Ein Kiesbett hält Feinsediment nur in seinen Poren, so dass diese Formeln die Entfernung um Größenordnungen überschätzen. Für Feinsediment über einem Kiesbett, set <code class="docutils literal notranslate"><span class="pre">pick_up:</span> <span class="pre">off</span></code>. Das Ergebnis zeigt dann, wo sich Feinsediment absetzt und wie viel, und die Sohlschubspannung im Ergebnis zeigt, wo der Fluss es wieder entfernen kann.</p>
-<p><strong>Simulation.</strong> Gehen Sie zu der Registerkarte <em>Simulations</em>, Sub-Tab <em>Morphodynamics</em> und wählen Sie das Simulationsprogramm <em>OpenFOAM</em> aus. Klicken Sie auf <em>Build</em> in der Box <em>Fine sediment over a fixed bed</em>, dann <em>Submit</em>. Beide können nacheinander angeklickt werden, da die Simulation auf ihren Build wartet und der Build auf eine stetige 2D-Simulation wartet, die noch läuft. Die Fortschrittsanzeige zählt Iterationen. Auf einem Rechennetz von 11.000 Zellen dauert die Simulation weniger als eine Minute. In einem Terminal sind die Befehle:</p>
+<p><strong>Simulation.</strong> Gehen Sie zur Registerkarte <em>Simulations</em>, Unterregisterkarte <em>Morphodynamics</em> und wählen Sie das Simulationsprogramm <em>OpenFOAM</em>. Klicken Sie auf <em>Build</em> in der Box <em>Fine sediment over a fixed bed</em>, dann <em>Submit</em>. Beide können nacheinander angeklickt werden, da die Simulation auf ihren Build wartet und der Build auf eine stetige 2D-Simulation wartet, die noch läuft. Die Fortschrittsanzeige zählt Iterationen. Auf einem Rechennetz von 11.000 Zellen dauert die Simulation weniger als eine Minute. In einem Terminal sind die Befehle:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua submit &lt;case-file&gt; --kind openfoam-sediment-build
 axqua submit &lt;case-file&gt; --kind openfoam-sediment
 </pre></div>
 </div>
 <figure class="align-default" id="id4">
-<a class="reference internal image-reference" href="../_images/gui-morphodynamics-openfoam.png"><img alt="Die Sub-Tab Morphodynamik der Tab Simulationen" src="../_images/gui-morphodynamics-openfoam.png" style="width: 70%;" />
+<a class="reference internal image-reference" href="../_images/gui-morphodynamics-openfoam.png"><img alt="Die Unterregisterkarte Morphodynamik der Registerkarte Simulationen" src="../_images/gui-morphodynamics-openfoam.png" style="width: 70%;" />
 </a>
 <figcaption>
-<p><span class="caption-text">Das Unter-Tab <em>Morphodynamics</em> des Tabs <em>Simulations</em> mit dem Simulationsprogramm <em>OpenFOAM</em>. (1) Die Auswahl des Simulationsprogramms. (2) Die Optionen: das Aufwärmen für den Build und die größte Anzahl von Iterationen für die Simulation. (3) <em>Build</em> erstellt das Modell. (4) <em>Submit</em> startet die Simulation. (5) <em>Load results</em> fügt das Bett mit seinen Feinsediment auf die Karte.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+<p><span class="caption-text">Die Unterregisterkarte <em>Morphodynamics</em> der Registerkarte <em>Simulations</em> mit dem Simulationsprogramm <em>OpenFOAM</em>. (1) Die Auswahl des Simulationsprogramms. (2) Die Optionen: das Aufwärmen für den Build und die größte Anzahl von Iterationen für die Simulation. (3) <em>Build</em> erstellt das Modell. (4) <em>Submit</em> startet die Simulation. (5) <em>Load results</em> fügt das Bett mit seinen Feinsediment auf die Karte.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p><strong>Ergebnisse.</strong> <em>Load results</em> fügt die Layer <em>Fine sediment at the bed</em> zur Karte hinzu. Es hält ein Polygon für jede Spalte von Zellen mit den unten aufgeführten Attributen und wird durch die Änderung des Anteils der Geldbußen oder durch den Nettozinssatz gefärbt, wenn der Fall keine Periode definiert. Die Datei ist <code class="docutils literal notranslate"><span class="pre">axqua-case/openfoam-sediment/fine-sediment-bed.gpkg</span></code>. Die dreidimensionalen Felder von Geschwindigkeit und Konzentration können in ParaView durch <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> im gleichen Ordner geöffnet werden.</p>

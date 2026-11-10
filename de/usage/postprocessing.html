@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/usage/postprocessing.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -372,9 +372,9 @@
 </div>
 <section id="qgis-map-generation">
 <span id="help-postprocessing-qgis"></span><h2>QGIS-Kartenerzeugung<a class="headerlink" href="#qgis-map-generation" title="Link to this heading"></a></h2>
-<p><strong>Belastungsergebnisse.</strong> Wählen Sie in der Jobliste unter den Registerkarten einen abgeschlossenen Job aus und klicken Sie auf <em>Load results</em>. Das Ergebnis Layer wird dem QGIS-Projekt in einer Gruppe hinzugefügt, die nach dem Job benannt ist. aXqua kopiert keine Dateien. Die Layer beziehen sich auf die Ergebnisdateien an ihrem Standort in <code class="docutils literal notranslate"><span class="pre">axqua-case/</span></code>. Die Karte zeigt den letzten Zeitschritt des Ergebnisses, der für einen stationäre Simulation der stationärer Zustand ist. Das <em>Temporal Controller</em> Panel von QGIS wählt ein anderes Zeitschritt aus, zum Beispiel eine Simulation mit einem variierenden Abfluss.</p>
+<p><strong>Belastungsergebnisse.</strong> Wählen Sie in der Jobliste unter Registerkarten einen abgeschlossenen Job aus und klicken Sie auf <em>Load results</em>. Das Ergebnis Layer wird dem QGIS-Projekt in einer Gruppe hinzugefügt, die nach dem Job benannt ist. aXqua kopiert keine Dateien. Die Layer beziehen sich auf die Ergebnisdateien an ihrem Standort in <code class="docutils literal notranslate"><span class="pre">axqua-case/</span></code>. Die Karte zeigt das letzte Zeitschritt des Ergebnisses, das für stationäre Simulation das stationärer Zustand ist. Das <em>Temporal Controller</em> Panel von QGIS wählt ein anderes Zeitschritt aus, zum Beispiel eine Simulation mit einem variierenden Abfluss.</p>
 <figure class="align-default" id="id1">
-<a class="reference internal image-reference" href="../_images/gui-postprocessing-qgis.png"><img alt="Der Unter-Tab QGIS des Tabs Postprocessing" src="../_images/gui-postprocessing-qgis.png" style="width: 70%;" />
+<a class="reference internal image-reference" href="../_images/gui-postprocessing-qgis.png"><img alt="Die Unterregisterkarte QGIS der Registerkarte Postprocessing" src="../_images/gui-postprocessing-qgis.png" style="width: 70%;" />
 </a>
 <figcaption>
 <p><span class="caption-text">Die Registerkarte <em>Postprocessing</em>, Unterregisterkarte <em>QGIS</em>. (1) Laden der Ergebnisse des ausgewählten Auftrags. (2) Die vordefinierten Kartenstile. (3) Das Drucklayout, der Filmexport und die Anzeigeeinstellungen.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
@@ -385,7 +385,7 @@
 <li><p><strong>Wassertiefe</strong> wird von weiß über hellblau bis dunkelblau gezeichnet. Wasser, das flacher als die minimale Wassertiefe ist, ist transparent, so dass die Karte den Bereich zeigt, in dem Wasser tatsächlich fließt (<a class="reference internal" href="../installation/plugin-setup.html#plugin-profile"><span class="std std-ref">Plugin-Profil</span></a>).</p></li>
 <li><p><strong>Fließgeschwindigkeit</strong> ist als Farbfüllung der Geschwindigkeitsgröße von Gelb (langsam) bis Lila (schnell) mit dunklen Pfeilen in Strömungsrichtung gezeichnet. Die Farbskala endet an der oberen Grenze des Profils und aXqua meldet, wenn ein Ergebnis es überschreitet. Die Pfeile stehen auf einem regelmäßigen Raster der Karte, so dass ihre Anzahl nicht vom Rechennetz abhängt und kein Pfeil gezeichnet wird, wo das Wasser steht.</p></li>
 </ul>
-<p><strong>Vordefinierte Kartenstile.</strong> Die Registerkarte <em>Postprocessing</em>, Sub-Tab <em>QGIS</em>, bietet vier Kartenstile, die die Flussrichtung mit einer zweiten Größe in einem Layer kombinieren. Wählen Sie ein Ergebnis Layer im Layer Panel von QGIS, wählen Sie einen Stil und klicken Sie <em>Apply to the selected layer</em>:</p>
+<p><strong>Vordefinierte Kartenstile.</strong> Die Registerkarte <em>Postprocessing</em>, Unterregisterkarte <em>QGIS</em>, bietet vier Kartenstile, die die Flussrichtung mit einer zweiten Größe in einem Layer kombinieren. Wählen Sie ein Ergebnis Layer im Layer Panel von QGIS, wählen Sie einen Stil und klicken Sie <em>Apply to the selected layer</em>:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 36.0%" />
@@ -411,7 +411,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Karten eines Fall.</strong> Welches Layer <em>Load results</em> hinzufügt und ob einer dieser Kartenstile sofort angewendet wird, wird für jedes Fall in seinen Einstellungen gesetzt (<em>Open case settings…</em> auf der <em>Case Setup</em>-Tab, Seite <em>Post-processing</em>): <code class="docutils literal notranslate"><span class="pre">postproc.telemac_maps</span></code> wählt die Karten eines TELEMAC-Ergebnisses aus (<code class="docutils literal notranslate"><span class="pre">depth</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">free-surface</span></code>; Wassertiefe und Geschwindigkeit standardmäßig), und <code class="docutils literal notranslate"><span class="pre">postproc.map_style</span></code> nennt einen Kartenstil, der auf das WassertiefeLayer jedes geladenen TELEMAC-Ergebnisses angewendet wird (<code class="docutils literal notranslate"><span class="pre">depth-streamlines</span></code>, <code class="docutils literal notranslate"><span class="pre">depth-arrows</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity-streamlines</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity-arrows</span></code>; standardmäßig keines).</p>
+<p><strong>Karten eines Fall.</strong> Welches Layer <em>Load results</em> hinzufügt und ob einer dieser Kartenstile sofort angewendet wird, wird für jedes Fall in seinen Einstellungen gesetzt (<em>Open case settings…</em> auf <em>Case Setup</em> Registerkarte, Seite <em>Post-processing</em>): <code class="docutils literal notranslate"><span class="pre">postproc.telemac_maps</span></code> wählt die Karten eines TELEMAC-Ergebnisses aus (<code class="docutils literal notranslate"><span class="pre">depth</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity</span></code>, <code class="docutils literal notranslate"><span class="pre">free-surface</span></code>; Wassertiefe und Geschwindigkeit standardmäßig), und <code class="docutils literal notranslate"><span class="pre">postproc.map_style</span></code> nennt einen Kartenstil, der auf das WassertiefeLayer jedes geladenen TELEMAC-Ergebnisses angewendet wird (<code class="docutils literal notranslate"><span class="pre">depth-streamlines</span></code>, <code class="docutils literal notranslate"><span class="pre">depth-arrows</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity-streamlines</span></code>, <code class="docutils literal notranslate"><span class="pre">velocity-arrows</span></code>; standardmäßig keines).</p>
 <p>Eine Stromlinie ist eine Linie, die die Geschwindigkeit an jedem ihrer Punkte tangiert. Stromlinien zeigen daher Strömungswege, Rezirkulationszonen und die Aufteilung des Abflusses auf mehrere Gerinne deutlicher als Pfeile. Es werden weder Pfeile noch Stromlinien gezeichnet, wenn die Geschwindigkeit unter 0,05 m/s liegt. Alle anderen Eigenschaften des Layers werden wie gewohnt in den QGIS Layer-Eigenschaften geändert (<em>Layer Properties &gt; Symbology</em>).</p>
 <figure class="align-default" id="id2">
 <a class="reference internal image-reference" href="../_images/gui-map-streamlines.png"><img alt="Ein Ergebnis im Kartenstil Wassertiefe mit Stromlinien" src="../_images/gui-map-streamlines.png" style="width: 60%;" />
@@ -428,7 +428,7 @@
 <section id="paraview">
 <span id="help-postprocessing-paraview"></span><h2>Paraview<a class="headerlink" href="#paraview" title="Link to this heading"></a></h2>
 <p>ParaView eignet sich für die interaktive Inspektion von Ergebnissen in drei Dimensionen. Es öffnet ein OpenFOAM-Modell direkt und ein TELEMAC-Ergebnis nach einem Export.</p>
-<p id="export-telemac-results"><strong>Export von TELEMAC-Ergebnissen.</strong> ParaView und VisIt lesen das Ergebnisformat von TELEMAC (SELAFIN) nicht. aXqua konvertiert daher ein Ergebnis einmalig in das VTK-Format, das beide Programme lesen. Auf der Registerkarte <em>Postprocessing &gt; ParaView</em> listet die Tabelle die TELEMAC-Ergebnisse des ausgewählten Falls mit ihrer Anzahl von Zeitschritten auf. Wählen Sie ein oder mehrere Ergebnisse, wählen Sie zwischen allen Zeitschritten und nur dem letzten Zeitschritt und klicken Sie auf <em>Export</em>. Ohne Auswahl werden alle Ergebnisse exportiert. Die Umrechnung eines Zeitschritts dauert etwa eine Sekunde für ein Rechennetz von 230.000 Knoten. Der gleiche Export dient ParaView und VisIt und wird wiederholt, nachdem eine Simulation erneut ausgeführt wurde: In der Spalte <em>Exported</em> wird angegeben, ob die exportierten Dateien älter sind als das Ergebnis.</p>
+<p id="export-telemac-results"><strong>Export von TELEMAC-Ergebnissen.</strong> ParaView und VisIt lesen das Ergebnisformat von TELEMAC (SELAFIN) nicht. aXqua konvertiert daher ein Ergebnis einmalig in das VTK-Format, das beide Programme lesen. Auf der Registerkarte <em>Postprocessing &gt; ParaView</em> listet die Tabelle die TELEMAC-Ergebnisse des ausgewählten Falls mit ihrer Anzahl an Zeitschritten auf. Wählen Sie ein oder mehrere Ergebnisse, wählen Sie zwischen allen Zeitschritten und nur dem letzten Zeitschritt und klicken Sie auf <em>Export</em>. Ohne Auswahl werden alle Ergebnisse exportiert. Die Umrechnung eines Zeitschritts dauert etwa eine Sekunde für ein Rechennetz von 230.000 Knoten. Der gleiche Export dient ParaView und VisIt und wird wiederholt, nachdem eine Simulation erneut ausgeführt wurde: In der Spalte <em>Exported</em> wird angegeben, ob die exportierten Dateien älter sind als das Ergebnis.</p>
 <p>Die exportierten Dateien werden in den Ordner <code class="docutils literal notranslate"><span class="pre">axqua-case/postprocessing/vtk/</span></code> geschrieben. Jedes Ergebnis hat eine Datei <code class="docutils literal notranslate"><span class="pre">&lt;result&gt;.pvd</span></code> für ParaView, eine Datei <code class="docutils literal notranslate"><span class="pre">&lt;result&gt;.visit</span></code> für VisIt und einen Ordner mit einer Datei pro Zeitschritt. In einem Terminal ist der Export:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua export &lt;case-file&gt;                              # all results of the case
 axqua export &lt;case-file&gt; --result r2d.slf --frames last
@@ -436,10 +436,10 @@ axqua export &lt;case-file&gt; --list                       # what the case has,
 </pre></div>
 </div>
 <figure class="align-default" id="id3">
-<a class="reference internal image-reference" href="../_images/gui-postprocessing-paraview.png"><img alt="Das Sub-Tab ParaView des Tabs Postprocessing" src="../_images/gui-postprocessing-paraview.png" style="width: 70%;" />
+<a class="reference internal image-reference" href="../_images/gui-postprocessing-paraview.png"><img alt="Die Unterregisterkarte ParaView der Registerkarte Postprocessing" src="../_images/gui-postprocessing-paraview.png" style="width: 70%;" />
 </a>
 <figcaption>
-<p><span class="caption-text">Die Registerkarte <em>Postprocessing</em>, Sub-Tab <em>ParaView</em>. (1) Die Sub-Tabs der drei Programme. (2) Die TELEMAC-Ergebnisse des aktiven Falls. (3) <em>Export</em> konvertiert die ausgewählten Ergebnisse. (4) <em>Open in ParaView</em> startet das Programm mit dem exportierten Ergebnis. Das Sub-Tab <em>VisIt</em> hat die gleiche Struktur.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+<p><span class="caption-text">Die Registerkarte <em>Postprocessing</em>, Unterregisterkarte <em>ParaView</em>. (1) Die Unterregisterkarten der drei Programme. (2) Die TELEMAC-Ergebnisse des aktiven Falls. (3) <em>Export</em> konvertiert die ausgewählten Ergebnisse. (4) <em>Open in ParaView</em> startet das Programm mit dem exportierten Ergebnis. Die Unterregisterkarte <em>VisIt</em> hat die gleiche Struktur.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p>Was die exportierten Dateien enthalten:</p>
@@ -456,7 +456,7 @@ axqua export &lt;case-file&gt; --list                       # what the case has,
 <li><p>Um das Relief eines 2D-Ergebnisses anzuzeigen, wenden Sie den Filter <em>Warp By Scalar</em> mit <code class="docutils literal notranslate"><span class="pre">BOTTOM</span></code> für das Gelände oder mit <code class="docutils literal notranslate"><span class="pre">FREE</span> <span class="pre">SURFACE</span></code> für den Wasserspiegel an. Das Rechennetz ist standardmäßig aus einem Grund flach: Ein Bereich oder ein Volumen, den der Filter <em>Integrate Variables</em> über das flache Rechennetz berechnet, ist der Bereich oder das Volumen des Modells, während das gleiche Integral über ein Rechennetz auf dem geneigten Bett größer ist.</p></li>
 <li><p>Für Stromlinien wenden Sie den Filter <em>Stream Tracer</em> mit dem Vektor <code class="docutils literal notranslate"><span class="pre">VELOCITY</span></code> und einer Linie über die Gerinne als Seed an.</p></li>
 </ol>
-<p><strong>Öffne ein OpenFOAM-Modell.</strong> Ein OpenFOAM-Modell von aXqua benötigt keinen Export. Die Box <em>OpenFOAM cases of the selected case</em> auf den Unterregisterkarten <em>ParaView</em> und <em>VisIt</em> listet die OpenFOAM-Modelle des aktiven Falls (das Modell der freien Oberfläche und das Feinsediment-Modell) auf, und <em>Open the OpenFOAM case in ParaView</em> (oder <em>in VisIt</em>) startet das Programm damit. Was ein OpenFOAM-Modell bietet, wird in den Herbsteinstellungen eingestellt, Seite <em>Post-processing</em>, mit <code class="docutils literal notranslate"><span class="pre">postproc.openfoam_outputs</span></code>: <code class="docutils literal notranslate"><span class="pre">paraview</span></code> (die Datei <code class="docutils literal notranslate"><span class="pre">case.foam</span></code>), <code class="docutils literal notranslate"><span class="pre">visit</span></code> (die Datei <code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code>, durch die VisIt einen OpenFOAM Fall öffnet) und <code class="docutils literal notranslate"><span class="pre">vtk</span></code>, eine Konvertierung mit <code class="docutils literal notranslate"><span class="pre">foamToVTK</span></code> nach jedem Durchlauf, die die Größe eines Falls verdoppeln kann. ParaView und VisIt werden standardmäßig angeboten. In ParaView kann das Modell auch mit <em>File &gt; Open</em> und der Datei <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> im Ordner <code class="docutils literal notranslate"><span class="pre">axqua-case/openfoam/</span></code> geöffnet werden. Die Rechennetz-Regionen und die Ergebnisfelder können dann im Eigenschaften-Panel ausgewählt werden. Um nur das Wasser anzuzeigen, wenden Sie den Filter <em>Threshold</em> oder <em>Clip</em> auf das Feld <code class="docutils literal notranslate"><span class="pre">alpha.water</span></code> an, das 1 in Wasser und 0 in Luft ist.</p>
+<p><strong>Öffne ein OpenFOAM-Modell.</strong> Ein OpenFOAM-Modell von aXqua benötigt keinen Export. Die Box <em>OpenFOAM cases of the selected case</em> auf den Unterregisterkarten <em>ParaView</em> und <em>VisIt</em> listet die OpenFOAM-Modelle des aktiven Falls (das freie Oberfläche-Modell und das Feinsediment-Modell) auf und <em>Open the OpenFOAM case in ParaView</em> (oder <em>in VisIt</em>) startet das Programm damit. Was ein OpenFOAM-Modell bietet, ist in den Falleinstellungen, Seite <em>Post-processing</em>, mit <code class="docutils literal notranslate"><span class="pre">postproc.openfoam_outputs</span></code> festgelegt: <code class="docutils literal notranslate"><span class="pre">paraview</span></code> (die Datei <code class="docutils literal notranslate"><span class="pre">case.foam</span></code>), <code class="docutils literal notranslate"><span class="pre">visit</span></code> (die Datei <code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code>, durch die VisIt einen OpenFOAM Fall öffnet), und <code class="docutils literal notranslate"><span class="pre">vtk</span></code>, eine Konvertierung mit <code class="docutils literal notranslate"><span class="pre">foamToVTK</span></code> nach jedem Durchlauf, die die Größe eines Falls verdoppeln kann. ParaView und VisIt werden standardmäßig angeboten. In ParaView kann das Modell auch mit <em>File &gt; Open</em> und der Datei <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> im Ordner <code class="docutils literal notranslate"><span class="pre">axqua-case/openfoam/</span></code> geöffnet werden. Die Rechennetz-Regionen und die Ergebnisfelder können dann im Eigenschaften-Panel ausgewählt werden. Um nur das Wasser anzuzeigen, wenden Sie den Filter <em>Threshold</em> oder <em>Clip</em> auf das Feld <code class="docutils literal notranslate"><span class="pre">alpha.water</span></code> an, das 1 in Wasser und 0 in Luft ist.</p>
 </section>
 <section id="visit">
 <span id="help-postprocessing-visit"></span><h2>VisIt<a class="headerlink" href="#visit" title="Link to this heading"></a></h2>
@@ -492,7 +492,7 @@ axqua postproc &lt;case-file&gt;             # render all figures
 axqua postproc &lt;case-file&gt; --script-only   # write the VisIt scripts without rendering
 </pre></div>
 </div>
-<p>Die Zahlen werden an <code class="docutils literal notranslate"><span class="pre">axqua-case/postprocessing/figures/</span></code> geschrieben. Die Skripte werden in <code class="docutils literal notranslate"><span class="pre">axqua-case/postprocessing/visit/</span></code> gehalten, so dass jede Figur reproduziert und angepasst werden kann. Die Liste der Figuren (<code class="docutils literal notranslate"><span class="pre">postproc.scenes</span></code>) und die Bildgröße werden im <code class="docutils literal notranslate"><span class="pre">postproc</span></code>-Block der Fall-Datei festgelegt, der Seite <em>Post-processing</em> der Fall-Einstellungen.</p>
+<p>Die Zahlen werden an <code class="docutils literal notranslate"><span class="pre">axqua-case/postprocessing/figures/</span></code> geschrieben. Die Skripte werden in <code class="docutils literal notranslate"><span class="pre">axqua-case/postprocessing/visit/</span></code> gehalten, so dass jede Figur reproduziert und angepasst werden kann. Die Liste der Figuren (<code class="docutils literal notranslate"><span class="pre">postproc.scenes</span></code>) und die Bildgröße werden im <code class="docutils literal notranslate"><span class="pre">postproc</span></code>-Block der Falldatei festgelegt, der die Seite <em>Post-processing</em> der Falleinstellungen ist.</p>
 <div class="admonition note">
 <p class="admonition-title">Bemerkung</p>
 <p>Das Starten der vordefinierten Figuren aus dem Plugin ist in dieser Version noch nicht verfügbar. Verwenden Sie die Befehle oben.</p>

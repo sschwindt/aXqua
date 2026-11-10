@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/automation/terminal-syntax.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=c62eb6c0"></script>
+      <script src="../_static/documentation_options.js?v=f1d63caa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -63,7 +63,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade der Backend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installieren aus dem Quellcode (Entwicklung)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
@@ -135,7 +135,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Auslass</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#sediment-transport">Sedimenttransport</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
@@ -191,7 +191,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Konfiguration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Falldatei-Typ</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
@@ -209,7 +209,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Fähigkeiten und Backend Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC Backend</a><ul>
@@ -258,9 +258,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation der Simulationssoftware</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation Pläne</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Ausführen eines Installation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
@@ -274,9 +274,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Falldatei-Befehle</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
 </ul>
 </li>
@@ -297,7 +297,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warnmeldungen</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
@@ -313,7 +313,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Falldatei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
@@ -368,11 +368,11 @@
 axqua<span class="w"> </span>--version
 </pre></div>
 </div>
-<p>Öffnen Sie bei <strong>Windows</strong> das <em>Miniforge Prompt</em> aus dem Startmenü und geben Sie die gleichen zwei Befehle ein. Wenn die Simulationssoftware im Windows-Subsystem für Linux installiert ist, öffnen Sie stattdessen die Terminal der Linux-Distribution und fahren Sie wie unter Linux fort.</p>
+<p>Öffnen Sie bei <strong>Windows</strong> das <em>Miniforge Prompt</em> aus dem Startmenü und geben Sie die gleichen zwei Befehle ein. Wenn die Simulationssoftware im Windows-Subsystem für Linux installiert ist, öffnen Sie stattdessen den Terminal des Linux-Distribution und fahren Sie wie unter Linux fort.</p>
 </section>
 <section id="commands">
 <h2>Befehle<a class="headerlink" href="#commands" title="Link to this heading"></a></h2>
-<p>Ein Befehl besteht aus dem Programmnamen, einer Aktion und für die meisten Aktionen der Fall-Datei:</p>
+<p>Ein Befehl besteht aus dem Programmnamen, einer Aktion und für die meisten Aktionen der Falldatei:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua &lt;action&gt; &lt;case-file&gt; [options]
 </pre></div>
 </div>
@@ -418,19 +418,19 @@ axqua<span class="w"> </span>--version
 <td><p>Zeigen Sie das erkannte Betriebssystem und für TELEMAC OpenFOAM und die Postprozessoren an, wo jeder installiert ist.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">plan</span> <span class="pre">telemac</span></code></p></td>
-<td><p>Zeigen Sie, was die Installation tun würde, welche Systempakete fehlen und den Befehl, der sie installiert. Nichts wird geändert. Die anderen Programme sind <code class="docutils literal notranslate"><span class="pre">openfoam</span></code> und <code class="docutils literal notranslate"><span class="pre">postprocessors</span></code>.</p></td>
+<td><p>Zeigen Sie, was die Installation tun würden, welche Systempakete fehlen und den Befehl, der sie installiert. Nichts wird geändert. Die anderen Programme sind <code class="docutils literal notranslate"><span class="pre">openfoam</span></code> und <code class="docutils literal notranslate"><span class="pre">postprocessors</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">start</span> <span class="pre">telemac</span></code></p></td>
-<td><p>Starten Sie die Installation als eigenen Prozess und geben Sie das Ergebnis im Profil ein. Fügen Sie <code class="docutils literal notranslate"><span class="pre">--foreground</span></code> hinzu, um der Installation im Terminal zu folgen. <code class="docutils literal notranslate"><span class="pre">--folder</span></code> wählt den Installationsordner aus. Für <code class="docutils literal notranslate"><span class="pre">openfoam</span></code> und <code class="docutils literal notranslate"><span class="pre">postprocessors</span></code> lässt <code class="docutils literal notranslate"><span class="pre">--no-visit</span></code> VisIt aus.</p></td>
+<td><p>Starten Sie Installation als eigenen Prozess und geben Sie das Ergebnis in das Profil ein. Fügen Sie <code class="docutils literal notranslate"><span class="pre">--foreground</span></code> hinzu, um dem Installation in Terminal zu folgen. <code class="docutils literal notranslate"><span class="pre">--folder</span></code> wählt den Installationsordner aus. Für <code class="docutils literal notranslate"><span class="pre">openfoam</span></code> und <code class="docutils literal notranslate"><span class="pre">postprocessors</span></code> lässt <code class="docutils literal notranslate"><span class="pre">--no-visit</span></code> VisIt aus.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">status</span> <span class="pre">telemac</span> <span class="pre">--tail</span> <span class="pre">20</span></code></p></td>
-<td><p>Zeigen Sie den Zustand der Installation und die letzten Zeilen des Logs an.</p></td>
+<td><p>Zeigen Sie den Zustand des Installation und die letzten Zeilen seines Protokolls.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">cancel</span> <span class="pre">telemac</span></code></p></td>
-<td><p>Stoppen Sie die Installation. Was bereits heruntergeladen und gebaut wurde, wird beibehalten.</p></td>
+<td><p>Stoppen Sie Installation. Was bereits heruntergeladen und gebaut wurde, wird beibehalten.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">telemac-examples</span> <span class="pre">&lt;folder&gt;</span></code></p></td>
-<td><p>Laden Sie die Eingabedateien des Beispiels Fälle eines installierten TELEMAC herunter, die noch fehlen. <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;</span></code> ist der Ordner <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code> der Installation.</p></td>
+<td><p>Laden Sie die Eingabedateien des Beispiels Fälle eines installierten TELEMAC herunter, die noch fehlen. <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;</span></code> ist der Ordner <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code> des Installation.</p></td>
 </tr>
 </tbody>
 </table>
@@ -447,19 +447,19 @@ axqua<span class="w"> </span>--version
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code></p></td>
-<td><p>Melden Sie alles in der Fall-Datei, das nicht in Ordnung ist: fehlende Dateien, unbekannte oder unmögliche Einstellungen und Einstellungen, die noch leer sind. Der Befehl listet alle Probleme auf einmal auf.</p></td>
+<td><p>Melden Sie alles im Falldatei, was nicht in Ordnung ist: fehlende Dateien, unbekannte oder unmögliche Einstellungen und Einstellungen, die noch leer sind. Der Befehl listet alle Probleme auf einmal auf.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">&lt;case-file&gt;</span> <span class="pre">--check</span></code></p></td>
-<td><p>Überprüfen Sie die Fall-Datei, die Eingabedateien und die Simulationssoftware und stoppen Sie beim ersten Problem.</p></td>
+<td><p>Überprüfen Sie die Falldatei, die Eingabedateien und die Simulationssoftware und stoppen Sie beim ersten Problem.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">case</span> <span class="pre">new</span> <span class="pre">&lt;case-file&gt;</span></code></p></td>
-<td><p>Erstellen Sie eine Fall-Datei mit den Einträgen, die jeder Fall hat.</p></td>
+<td><p>Erstellen Sie ein Falldatei mit den Einträgen, die jeder Fall hat.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">example</span> <span class="pre">list</span></code></p></td>
 <td><p>Listen Sie das Beispiel Fälle mit ihrer Größe (<a class="reference internal" href="../usage/case-setup.html#help-example-case"><span class="std std-ref">Beispielfall</span></a>).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">example</span> <span class="pre">get</span> <span class="pre">&lt;name&gt;</span> <span class="pre">--folder</span> <span class="pre">&lt;folder&gt;</span></code></p></td>
-<td><p>Laden Sie das Beispiel Fall <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;</span></code> herunter: die Fall-Datei, die Eingabedaten und ein Handbuch. Der Name kann ausgelassen werden, während es nur ein Beispiel gibt.</p></td>
+<td><p>Laden Sie das Beispiel Fall <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;</span></code> herunter: das Falldatei, die Eingabedaten und einen Leitfaden. Der Name kann ausgelassen werden, während es nur ein Beispiel gibt.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">&lt;case-file&gt;</span></code></p></td>
 <td><p>Führen Sie Preprocessing aus und schreiben Sie das TELEMAC-Modell.</p></td>
@@ -529,7 +529,7 @@ axqua<span class="w"> </span>--version
 <td><p>Schätzen Sie eine Abflusskurve von Gerinne Breite, Betthang und Rauheit.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">migrate</span> <span class="pre">&lt;old-file&gt;</span> <span class="pre">--to-case</span></code></p></td>
-<td><p>Schreibe eine Fall Datei des aktuellen Typs (<code class="docutils literal notranslate"><span class="pre">.axq-case</span></code>) neben eine Fall Datei einer älteren aXqua Version.</p></td>
+<td><p>Schreibe ein Falldatei des aktuellen Typs (<code class="docutils literal notranslate"><span class="pre">.axq-case</span></code>) neben ein Falldatei einer älteren aXqua Version.</p></td>
 </tr>
 </tbody>
 </table>
@@ -608,7 +608,7 @@ axqua<span class="w"> </span>--version
 <td><p>Erfolgreich</p></td>
 </tr>
 <tr class="row-odd"><td><p>2</p></td>
-<td><p>Fehler in der Fall-Datei</p></td>
+<td><p>Fehler im Falldatei</p></td>
 </tr>
 <tr class="row-even"><td><p>3</p></td>
 <td><p>Fehler in den Geodaten</p></td>

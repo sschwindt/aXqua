@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/core/machine.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -439,6 +439,64 @@
                  <span class="s2">"*/ParaView*/bin/paraview"</span><span class="p">),</span>
 <span class="p">}</span>
 
+<span class="c1">#: On Windows, below the home folders of a WSL distribution: where aXqua's own installers put TELEMAC and OpenFOAM when they install for one user (``~/opt``, ``~/.local``).</span>
+<span class="n">WSL_HOME_DISCOVERY</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"telemac"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"opt/telemac-mascaret/configs/pysource.*.sh"</span><span class="p">,),</span>
+    <span class="s2">"openfoam"</span><span class="p">:</span> <span class="p">(</span><span class="s2">".local/openfoam-sediment*/shell-rc.sh"</span><span class="p">,),</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wsl_distros</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The WSL 2 distributions of this user, the default first (Windows only; cached per process)."""</span>
+    <span class="k">global</span> <span class="n">_WSL_DISTROS</span>
+    <span class="k">if</span> <span class="n">_WSL_DISTROS</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">wsl</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">wsl</span><span class="o">.</span><span class="n">distros</span><span class="p">()</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">_WSL_DISTROS</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">found</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="ow">not</span> <span class="n">d</span><span class="o">.</span><span class="n">default</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">_WSL_DISTROS</span>
+
+
+<span class="n">_WSL_DISTROS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_discover_in_wsl</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""An installation inside a WSL distribution, as Windows reaches it (``\\\\wsl.localhost\\&lt;distro&gt;\\...``).</span>
+
+<span class="sd">    TELEMAC and OpenFOAM run in WSL on Windows (the user's decision of 2026-11-06), so a Windows computer whose programs are installed has them there; looked for only where nothing else named one.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">"nt"</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">WSL_HOME_DISCOVERY</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_WSL_FOUND</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_WSL_FOUND</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">wsl</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">distro</span> <span class="ow">in</span> <span class="n">_wsl_distros</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">distro</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"docker-desktop"</span><span class="p">):</span>
+            <span class="k">continue</span>                       <span class="c1"># Docker's own, never an installation; looking would start it</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">wsl</span><span class="o">.</span><span class="n">to_unc</span><span class="p">(</span><span class="n">distro</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">homes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"home"</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="n">homes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># in the order of preference, as on Linux: the first pattern with a file wins, its newest version</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">[[</span><span class="n">root</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">))]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">DISCOVERY</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">())</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)]</span>
+        <span class="n">groups</span> <span class="o">+=</span> <span class="p">[[</span><span class="n">home</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">home</span> <span class="ow">in</span> <span class="n">homes</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">WSL_HOME_DISCOVERY</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+            <span class="n">readable</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">m</span> <span class="k">for</span> <span class="n">matches</span> <span class="ow">in</span> <span class="n">group</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"template"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">readable</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="n">readable</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_WSL_FOUND</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">found</span>     <span class="c1"># what is not there yet may be installed while this process runs</span>
+    <span class="k">return</span> <span class="n">found</span>
+
+
+<span class="c1">#: What was found in WSL, per program (asked once per process: each look starts the distribution).</span>
+<span class="n">_WSL_FOUND</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+
 <span class="c1">#: Roots the relative DISCOVERY patterns are joined to. ``AXQUA_SOLVER_ROOT``</span>
 <span class="c1">#: lets a site add its own (e.g. a shared software folder) without that root</span>
 <span class="c1">#: ever appearing in the repository.</span>
@@ -455,7 +513,13 @@
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"AXQUA_HOME"</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"AXQUA_HOME"</span><span class="p">])</span> <span class="o">/</span> <span class="n">SETTINGS_NAME</span>
     <span class="n">base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"XDG_CONFIG_HOME"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".config"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"axqua"</span> <span class="o">/</span> <span class="n">SETTINGS_NAME</span></div>
+    <span class="n">unix_style</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"axqua"</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"APPDATA"</span><span class="p">):</span>
+        <span class="c1"># %APPDATA%\axqua, the folder of profiles.yml and the job settings too; a computer that already has its settings in ~/.config/axqua (aXqua 1.3 and older) keeps them</span>
+        <span class="n">appdata</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"APPDATA"</span><span class="p">])</span> <span class="o">/</span> <span class="s2">"axqua"</span>
+        <span class="n">legacy</span> <span class="o">=</span> <span class="nb">any</span><span class="p">((</span><span class="n">unix_style</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">SETTINGS_NAME</span><span class="p">,</span> <span class="s2">"default.axq-profile"</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">unix_style</span> <span class="k">if</span> <span class="n">legacy</span> <span class="k">else</span> <span class="n">appdata</span><span class="p">)</span> <span class="o">/</span> <span class="n">SETTINGS_NAME</span>
+    <span class="k">return</span> <span class="n">unix_style</span> <span class="o">/</span> <span class="n">SETTINGS_NAME</span></div>
 
 
 
@@ -501,7 +565,7 @@
             <span class="n">readable</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">matches</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">is_file</span><span class="p">()]</span>
             <span class="k">if</span> <span class="n">readable</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">readable</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>     <span class="c1"># the highest-sorting, i.e. newest version</span>
-    <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">_discover_in_wsl</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Resolved">

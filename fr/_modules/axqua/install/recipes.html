@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/install/recipes.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=33dd81c8"></script>
+      <script src="../../../_static/documentation_options.js?v=04250ba2"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -438,6 +438,15 @@
 <span class="c1">#: What can be downloaded of the example cases of TELEMAC (Options.telemac_examples).</span>
 <span class="n">TELEMAC_EXAMPLES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"inputs"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">,</span> <span class="s2">"none"</span><span class="p">)</span>
 
+<span class="c1">#: TELEMAC built on Windows itself (Options.modules): TELEMAC-2D with GAIA, or all modules.</span>
+<span class="n">MODULES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"2d"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">)</span>
+
+<span class="c1">#: The packages of the compiler environment of TELEMAC built on Windows, from conda-forge: the versions a Windows test computer built TELEMAC v9.1.1 with (2026-11-09).</span>
+<span class="n">WINDOWS_PACKAGES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"python=3.12"</span><span class="p">,</span> <span class="s2">"numpy"</span><span class="p">,</span> <span class="s2">"scipy"</span><span class="p">,</span> <span class="s2">"gfortran=15.2"</span><span class="p">,</span> <span class="s2">"gcc=15.2"</span><span class="p">,</span> <span class="s2">"cmake"</span><span class="p">,</span> <span class="s2">"make"</span><span class="p">,</span> <span class="s2">"git"</span><span class="p">)</span>
+
+<span class="c1">#: Where TELEMAC built on Windows comes from (no installer script: aXqua's own steps, axqua.install.windows_telemac).</span>
+<span class="n">_TELEMAC_SOURCE</span> <span class="o">=</span> <span class="s2">"https://gitlab.pam-retd.fr/otm/telemac-mascaret"</span>
+
 <span class="c1">#: What happens to an installation that exists in the folder (Options.reinstall).</span>
 <span class="c1">#: ``""``/``continue``: the installer continues in it, keeping what is downloaded and</span>
 <span class="c1">#: built; ``replace``: the earlier installation is removed first and installed anew.</span>
@@ -459,6 +468,8 @@
     <span class="s2">"telemac"</span><span class="p">:</span> <span class="s2">"10 to 30 minutes"</span><span class="p">,</span>
     <span class="s2">"telemac-all"</span><span class="p">:</span> <span class="s2">"one to two hours; most of it downloads the example cases of TELEMAC"</span><span class="p">,</span>
     <span class="s2">"telemac-none"</span><span class="p">:</span> <span class="s2">"5 to 20 minutes"</span><span class="p">,</span>
+    <span class="s2">"telemac-windows"</span><span class="p">:</span> <span class="s2">"20 to 40 minutes; the compilers are a download of several hundred MB"</span><span class="p">,</span>
+    <span class="s2">"telemac-windows-all"</span><span class="p">:</span> <span class="s2">"one to two hours; the compilers are a download of several hundred MB"</span><span class="p">,</span>
     <span class="s2">"openfoam"</span><span class="p">:</span> <span class="s2">"a few minutes with an existing OpenFOAM v2406"</span><span class="p">,</span>
     <span class="s2">"openfoam-source"</span><span class="p">:</span> <span class="s2">"several hours; OpenFOAM v2406 is compiled from its source code"</span><span class="p">,</span>
     <span class="s2">"postprocessors"</span><span class="p">:</span> <span class="s2">"a few minutes; VisIt is a download of 600 MB"</span><span class="p">,</span>
@@ -558,6 +569,10 @@
     <span class="n">bind</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>                   <span class="c1"># enter the result into the profile</span>
     <span class="c1">#: What happens to an earlier installation in the folder (see :data:`REINSTALL`).</span>
     <span class="n">reinstall</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="c1">#: Windows: build TELEMAC as a Windows program in the user folder, without WSL and without an administrator (one processor core, no MPI).</span>
+    <span class="n">native</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1">#: TELEMAC built on Windows: ``2d`` (TELEMAC-2D with GAIA, the tested build) or ``all``.</span>
+    <span class="n">modules</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"2d"</span>
 
 <div class="viewcode-block" id="Options.from_dict">
 <a class="viewcode-back" href="../../../code/install.html#axqua.install.recipes.Options.from_dict">[docs]</a>
@@ -577,7 +592,7 @@
                 <span class="n">value</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"jobs"</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"visualization"</span><span class="p">,</span> <span class="s2">"visit"</span><span class="p">,</span> <span class="s2">"examples"</span><span class="p">,</span> <span class="s2">"smoke_test"</span><span class="p">,</span> <span class="s2">"bind"</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"visualization"</span><span class="p">,</span> <span class="s2">"visit"</span><span class="p">,</span> <span class="s2">"examples"</span><span class="p">,</span> <span class="s2">"smoke_test"</span><span class="p">,</span> <span class="s2">"bind"</span><span class="p">,</span> <span class="s2">"native"</span><span class="p">):</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"scope"</span><span class="p">:</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="s2">"user"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -591,6 +606,12 @@
                     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
                     <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"reinstall must be one of continue, replace, "</span>
                                       <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"reinstall"</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"modules"</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span> <span class="ow">or</span> <span class="s2">"2d"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MODULES</span><span class="p">:</span>
+                    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+                    <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"modules must be one of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MODULES</span><span class="p">)</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span>
+                                      <span class="n">subject</span><span class="o">=</span><span class="s2">"modules"</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"telemac_examples"</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>         <span class="c1"># the switch this setting once was</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="s2">"inputs"</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="s2">"none"</span>
@@ -628,9 +649,40 @@
             <span class="s2">"base"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
             <span class="s2">"bind"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">,</span>
             <span class="s2">"reinstall"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">reinstall</span><span class="p">,</span>
+            <span class="s2">"native"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">native</span><span class="p">,</span>
+            <span class="s2">"modules"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">windows_folder</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where TELEMAC built on Windows goes when the user names no folder: the source code, the build and the compiler environment side by side."""</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"opt"</span> <span class="o">/</span> <span class="s2">"telemac"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">conda_base</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The conda installation aXqua runs from (Miniforge, Miniconda, Anaconda), or ``None``.</span>
+
+<span class="sd">    aXqua is installed in an environment of it (``&lt;base&gt;\\envs\\axqua-env``); the plugin starts it without the variables of an activated conda, so the folder of this Python is what tells.</span>
+<span class="sd">    """</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"CONDA_EXE"</span><span class="p">):</span>
+        <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"CONDA_EXE"</span><span class="p">])</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">here</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">prefix</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">+=</span> <span class="p">[</span><span class="n">here</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="k">if</span> <span class="n">here</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"envs"</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">here</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">conda_program</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">base</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">conda_program</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The conda program of the installation *base*."""</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">((</span><span class="s2">"Scripts"</span><span class="p">,</span> <span class="s2">"conda.exe"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"condabin"</span><span class="p">,</span> <span class="s2">"conda.bat"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"_conda.exe"</span><span class="p">,),</span> <span class="p">(</span><span class="s2">"bin"</span><span class="p">,</span> <span class="s2">"conda"</span><span class="p">),</span>
+             <span class="p">(</span><span class="s2">"condabin"</span><span class="p">,</span> <span class="s2">"conda"</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">((</span><span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="o">*</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="default_folder">
@@ -775,14 +827,19 @@
 <span class="sd">    The proxy and certificate variables are kept, because without them a download</span>
 <span class="sd">    behind a proxy fails; the display variables are kept for the graphical installers</span>
 <span class="sd">    of the postprocessors.</span>
+
+<span class="sd">    The language is English (``C.UTF-8``) whatever the computer is set to: aXqua reads the answers of apt (``Unable to locate package``, ``selecting ... instead of``), which a German system writes in German, and an English installation log is one language with the English lines of aXqua (review of 2026-11-06).</span>
 <span class="sd">    """</span>
-    <span class="n">keep</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"HOME"</span><span class="p">,</span> <span class="s2">"USER"</span><span class="p">,</span> <span class="s2">"LOGNAME"</span><span class="p">,</span> <span class="s2">"TERM"</span><span class="p">,</span> <span class="s2">"LANG"</span><span class="p">,</span> <span class="s2">"LC_ALL"</span><span class="p">,</span> <span class="s2">"DISPLAY"</span><span class="p">,</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_clean_windows_environment</span><span class="p">()</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"HOME"</span><span class="p">,</span> <span class="s2">"USER"</span><span class="p">,</span> <span class="s2">"LOGNAME"</span><span class="p">,</span> <span class="s2">"TERM"</span><span class="p">,</span> <span class="s2">"DISPLAY"</span><span class="p">,</span> <span class="s2">"WSL_INTEROP"</span><span class="p">,</span> <span class="s2">"WSL_DISTRO_NAME"</span><span class="p">,</span> <span class="s2">"WSLENV"</span><span class="p">,</span>
+            <span class="s2">"AXQUA_WSL_DISTRO"</span><span class="p">,</span>
             <span class="s2">"WAYLAND_DISPLAY"</span><span class="p">,</span> <span class="s2">"XDG_RUNTIME_DIR"</span><span class="p">,</span> <span class="s2">"DBUS_SESSION_BUS_ADDRESS"</span><span class="p">,</span>
             <span class="s2">"XAUTHORITY"</span><span class="p">,</span> <span class="s2">"http_proxy"</span><span class="p">,</span> <span class="s2">"https_proxy"</span><span class="p">,</span> <span class="s2">"no_proxy"</span><span class="p">,</span>
             <span class="s2">"HTTP_PROXY"</span><span class="p">,</span> <span class="s2">"HTTPS_PROXY"</span><span class="p">,</span> <span class="s2">"NO_PROXY"</span><span class="p">,</span> <span class="s2">"SSL_CERT_FILE"</span><span class="p">}</span>
     <span class="n">env</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">}</span>
     <span class="n">env</span><span class="p">[</span><span class="s2">"PATH"</span><span class="p">]</span> <span class="o">=</span> <span class="n">SYSTEM_PATH</span>
-    <span class="n">env</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"LANG"</span><span class="p">,</span> <span class="s2">"C.UTF-8"</span><span class="p">)</span>
+    <span class="n">env</span><span class="p">[</span><span class="s2">"LANG"</span><span class="p">]</span> <span class="o">=</span> <span class="n">env</span><span class="p">[</span><span class="s2">"LC_ALL"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"C.UTF-8"</span>
     <span class="c1"># The OpenFOAM installer is Python. Without this, running it leaves compiled</span>
     <span class="c1"># files beside its sources, which for a local copy of the scripts</span>
     <span class="c1"># (AXQUA_INSTALLERS) is somebody's working folder: the first real runs left 17</span>
@@ -793,10 +850,33 @@
 
 
 
+<span class="c1">#: What a Windows program needs of the environment: the folders of the user and of Windows, the processor, the proxy.</span>
+<span class="n">WINDOWS_KEEP</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"SYSTEMROOT"</span><span class="p">,</span> <span class="s2">"SYSTEMDRIVE"</span><span class="p">,</span> <span class="s2">"WINDIR"</span><span class="p">,</span> <span class="s2">"COMSPEC"</span><span class="p">,</span> <span class="s2">"PATHEXT"</span><span class="p">,</span> <span class="s2">"USERPROFILE"</span><span class="p">,</span> <span class="s2">"USERNAME"</span><span class="p">,</span>
+                <span class="s2">"USERDOMAIN"</span><span class="p">,</span> <span class="s2">"HOMEDRIVE"</span><span class="p">,</span> <span class="s2">"HOMEPATH"</span><span class="p">,</span> <span class="s2">"APPDATA"</span><span class="p">,</span> <span class="s2">"LOCALAPPDATA"</span><span class="p">,</span> <span class="s2">"PROGRAMDATA"</span><span class="p">,</span> <span class="s2">"PROGRAMFILES"</span><span class="p">,</span>
+                <span class="s2">"PROGRAMFILES(X86)"</span><span class="p">,</span> <span class="s2">"PROGRAMW6432"</span><span class="p">,</span> <span class="s2">"COMMONPROGRAMFILES"</span><span class="p">,</span> <span class="s2">"ALLUSERSPROFILE"</span><span class="p">,</span> <span class="s2">"PUBLIC"</span><span class="p">,</span> <span class="s2">"TEMP"</span><span class="p">,</span> <span class="s2">"TMP"</span><span class="p">,</span>
+                <span class="s2">"NUMBER_OF_PROCESSORS"</span><span class="p">,</span> <span class="s2">"PROCESSOR_ARCHITECTURE"</span><span class="p">,</span> <span class="s2">"PROCESSOR_IDENTIFIER"</span><span class="p">,</span> <span class="s2">"OS"</span><span class="p">,</span> <span class="s2">"COMPUTERNAME"</span><span class="p">,</span>
+                <span class="s2">"HTTP_PROXY"</span><span class="p">,</span> <span class="s2">"HTTPS_PROXY"</span><span class="p">,</span> <span class="s2">"NO_PROXY"</span><span class="p">,</span> <span class="s2">"SSL_CERT_FILE"</span><span class="p">,</span> <span class="s2">"REQUESTS_CA_BUNDLE"</span><span class="p">,</span>
+                <span class="s2">"AXQUA_DATA_DIR"</span><span class="p">,</span> <span class="s2">"AXQUA_HOME"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_clean_windows_environment</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The environment of an installation step on Windows: Windows itself, nothing of conda or of QGIS.</span>
+
+<span class="sd">    The search path is the one of Windows alone, as on the test computer where the build ran: a conda environment's or QGIS's compilers and DLLs would otherwise mix into it. The steps that need the compilers add their environment themselves.</span>
+<span class="sd">    """</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">upper</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">WINDOWS_KEEP</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">upper</span><span class="p">}</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"SYSTEMROOT"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"WINDIR"</span><span class="p">)</span> <span class="ow">or</span> <span class="sa">r</span><span class="s2">"C:\Windows"</span>
+    <span class="n">env</span><span class="p">[</span><span class="s2">"PATH"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">";"</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">rf</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2">\system32"</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="sa">rf</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2">\System32\Wbem"</span><span class="p">])</span>
+    <span class="n">env</span><span class="p">[</span><span class="s2">"PYTHONDONTWRITEBYTECODE"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"1"</span>
+    <span class="n">env</span><span class="p">[</span><span class="s2">"PYTHONUTF8"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"1"</span>
+    <span class="k">return</span> <span class="n">env</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_run</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">120.0</span><span class="p">,</span> <span class="n">cwd</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
          <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CompletedProcess</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">argv</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                          <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">clean_environment</span><span class="p">(),</span>
+    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">argv</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span>
+                          <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">clean_environment</span><span class="p">(),</span>
                           <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span> <span class="k">if</span> <span class="n">cwd</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
@@ -1121,15 +1201,39 @@
 <div class="viewcode-block" id="elevation">
 <a class="viewcode-back" href="../../../code/install.html#axqua.install.recipes.elevation">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">elevation</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""How this session can ask for administrator rights: ``pkexec`` or ``""``.</span>
+<span class="w">    </span><span class="sd">"""How this session can get administrator rights: ``wsl``, ``pkexec`` or ``""``.</span>
 
-<span class="sd">    ``pkexec`` shows the password dialog of the desktop, so aXqua never sees a</span>
-<span class="sd">    password. It needs a graphical session; in a plain terminal session the command is</span>
-<span class="sd">    shown instead and the administrator runs it.</span>
+<span class="sd">    Inside WSL, ``wsl.exe -u root`` gives the root of the distribution without a password and without an administrator of Windows (that is how WSL works), so the student's computer without administrator rights can still install the system packages. ``pkexec`` shows the password dialog of a Linux desktop, so aXqua never sees a password; WSLg sets ``DISPLAY`` but has no polkit agent, which is why ``wsl`` is asked first. Without either, the command is shown and an administrator runs it.</span>
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">_wsl_exe</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_wsl_distro</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"wsl"</span>
     <span class="n">graphical</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"DISPLAY"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"WAYLAND_DISPLAY"</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">"pkexec"</span> <span class="k">if</span> <span class="n">graphical</span> <span class="ow">and</span> <span class="n">_which</span><span class="p">(</span><span class="s2">"pkexec"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">""</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wsl_distro</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The distribution this process runs in, or ``""`` outside WSL."""</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"AXQUA_WSL_DISTRO"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"WSL_DISTRO_NAME"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wsl_exe</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``wsl.exe`` of Windows as a program inside WSL reaches it (interoperability), or ``""``."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_wsl_distro</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">""</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"wsl.exe"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">found</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"/mnt/c/Windows/System32/wsl.exe"</span><span class="p">,</span> <span class="s2">"/mnt/c/WINDOWS/system32/wsl.exe"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">candidate</span>
+    <span class="k">return</span> <span class="s2">""</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">wsl_root</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""*argv* as the root of this WSL distribution."""</span>
+    <span class="c1"># --exec: after --, the default shell of the distribution would parse the joined command line again (a folder with a space or a $)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">_wsl_exe</span><span class="p">(),</span> <span class="s2">"-d"</span><span class="p">,</span> <span class="n">_wsl_distro</span><span class="p">(),</span> <span class="s2">"-u"</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">,</span> <span class="s2">"--exec"</span><span class="p">,</span> <span class="o">*</span><span class="n">argv</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="install_packages">
@@ -1147,7 +1251,8 @@
     <span class="n">command</span> <span class="o">=</span> <span class="n">admin_command</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">names</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">"returncode"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"nothing to install"</span><span class="p">}</span>
-    <span class="k">if</span> <span class="n">elevation</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">"pkexec"</span><span class="p">:</span>
+    <span class="n">way</span> <span class="o">=</span> <span class="n">elevation</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">way</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"pkexec"</span><span class="p">,</span> <span class="s2">"wsl"</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">"returncode"</span><span class="p">:</span> <span class="mi">127</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
                 <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"this session cannot ask for administrator rights; an "</span>
                            <span class="s2">"administrator runs: "</span> <span class="o">+</span> <span class="n">command</span><span class="p">}</span>
@@ -1159,7 +1264,8 @@
     <span class="n">log_path</span> <span class="o">=</span> <span class="n">log_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"packages-</span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">'%Y%m</span><span class="si">%d</span><span class="s1">-%H%M%S'</span><span class="p">)</span><span class="si">}</span><span class="s2">.log"</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="s2">"ab"</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s2">"pkexec"</span><span class="p">,</span> <span class="s2">"/bin/sh"</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">script</span><span class="p">],</span>
+            <span class="n">elevated</span> <span class="o">=</span> <span class="n">wsl_root</span><span class="p">([</span><span class="s2">"/bin/sh"</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">script</span><span class="p">])</span> <span class="k">if</span> <span class="n">way</span> <span class="o">==</span> <span class="s2">"wsl"</span> <span class="k">else</span> <span class="p">[</span><span class="s2">"pkexec"</span><span class="p">,</span> <span class="s2">"/bin/sh"</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">script</span><span class="p">]</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">elevated</span><span class="p">,</span>
                                    <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">out</span><span class="p">,</span>
                                    <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">clean_environment</span><span class="p">())</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -1265,8 +1371,12 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_quote</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"'&lt;a short Python program&gt;'"</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span><span class="p">:</span>                     <span class="c1"># as the Command Prompt reads it</span>
+        <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">list2cmdline</span><span class="p">([</span><span class="n">text</span><span class="p">])</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
-    <span class="k">return</span> <span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">else</span> <span class="s2">"'&lt;a short Python program&gt;'"</span>
+    <span class="k">return</span> <span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Plan">
@@ -1304,6 +1414,10 @@
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span> \
             <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">severity</span> <span class="o">==</span> <span class="n">ERROR</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">findings</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_native</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s2">"windows"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">==</span> <span class="s2">"telemac"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">native</span>
+
 <div class="viewcode-block" id="Plan.as_dict">
 <a class="viewcode-back" href="../../../code/install.html#axqua.install.recipes.Plan.as_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
@@ -1314,9 +1428,9 @@
             <span class="s2">"options"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
             <span class="s2">"folder"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">folder</span><span class="p">),</span>
             <span class="s2">"installers"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"path"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">installers</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">installers</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
-                           <span class="s2">"repository"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"bundled with aXqua"</span>
-                                          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">installers</span> <span class="o">==</span> <span class="n">BUNDLED</span> <span class="k">else</span> <span class="n">REPOSITORY</span><span class="p">),</span>
-                           <span class="s2">"ref"</span><span class="p">:</span> <span class="p">(</span><span class="s2">""</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">installers</span> <span class="o">==</span> <span class="n">BUNDLED</span>
+                           <span class="s2">"repository"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"bundled with aXqua"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">installers</span> <span class="o">==</span> <span class="n">BUNDLED</span> <span class="k">else</span>
+                                          <span class="n">_TELEMAC_SOURCE</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_native</span> <span class="k">else</span> <span class="n">REPOSITORY</span><span class="p">),</span>
+                           <span class="s2">"ref"</span><span class="p">:</span> <span class="p">(</span><span class="s2">""</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">installers</span> <span class="o">==</span> <span class="n">BUNDLED</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_native</span>
                                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">ref</span> <span class="ow">or</span> <span class="n">PINNED</span><span class="p">)},</span>
             <span class="s2">"steps"</span><span class="p">:</span> <span class="p">[</span><span class="n">step</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">],</span>
             <span class="s2">"packages"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"needed"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">needed</span><span class="p">,</span> <span class="s2">"missing"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing</span><span class="p">,</span>
@@ -1346,6 +1460,13 @@
         <span class="k">return</span> <span class="kc">None</span>
 
 
+<span class="c1">#: What a Windows computer without WSL needs, once. Everything after it happens in the plugin, without an administrator.</span>
+<span class="n">WINDOWS_REMEDY</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"An administrator of this computer sets up WSL once: 'wsl --install -d Ubuntu-24.04' in a "</span>
+                  <span class="s2">"terminal with administrator rights, then a restart. Open Ubuntu from the Start menu and "</span>
+                  <span class="s2">"create a Linux user. The Setup Wizard then installs TELEMAC and OpenFOAM into it, "</span>
+                  <span class="s2">"without an administrator."</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="plan">
 <a class="viewcode-back" href="../../../code/install.html#axqua.install.recipes.plan">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">plan</span><span class="p">(</span><span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="n">Options</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
@@ -1364,7 +1485,8 @@
                           <span class="n">remedy</span><span class="o">=</span><span class="s2">"One of: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">TARGETS</span><span class="p">))</span>
     <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="n">Options</span><span class="p">()</span>
     <span class="n">host</span> <span class="o">=</span> <span class="n">host</span> <span class="ow">or</span> <span class="n">hosts</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">base</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">base</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">folder</span> <span class="o">=</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">folder</span> <span class="ow">or</span> <span class="n">default_folder</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">scope</span><span class="p">))</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">native</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s2">"windows"</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">==</span> <span class="s2">"telemac"</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">native</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">folder</span> <span class="ow">or</span> <span class="p">(</span><span class="n">windows_folder</span><span class="p">()</span> <span class="k">if</span> <span class="n">native</span> <span class="k">else</span> <span class="n">default_folder</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">scope</span><span class="p">)))</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">folder</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
         <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="n">folder</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">Plan</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">)</span>
@@ -1376,13 +1498,15 @@
                                     <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">))</span>
 
     <span class="c1"># ---- the computer ------------------------------------------------------------</span>
+    <span class="k">if</span> <span class="n">host</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s2">"windows"</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">==</span> <span class="s2">"telemac"</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">native</span><span class="p">:</span>
+        <span class="n">_plan_telemac_windows</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">severity</span> <span class="o">==</span> <span class="n">ERROR</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">findings</span><span class="p">):</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">out</span>
     <span class="k">if</span> <span class="n">host</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s2">"windows"</span><span class="p">:</span>
         <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.windows_needs_wsl"</span><span class="p">,</span>
-            <span class="s2">"TELEMAC and OpenFOAM are installed in the Windows Subsystem for Linux, "</span>
-            <span class="s2">"not in Windows itself"</span><span class="p">,</span>
-            <span class="s2">"Install a distribution with 'wsl --install -d Ubuntu-24.04' in a "</span>
-            <span class="s2">"PowerShell with administrator rights, install aXqua in it, and start "</span>
-            <span class="s2">"this installation there."</span><span class="p">)</span>
+            <span class="s2">"TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2), which is not set up on this computer"</span> <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">host</span><span class="o">.</span><span class="n">pretty</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">host</span><span class="o">.</span><span class="n">pretty</span> <span class="k">else</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="n">WINDOWS_REMEDY</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">host</span><span class="o">.</span><span class="n">supported</span><span class="p">:</span>
         <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.unsupported_system"</span><span class="p">,</span>
@@ -1576,7 +1700,9 @@
         <span class="s2">"asked twice, before the build to create the folder and at its end to hand it "</span>
         <span class="s2">"over to root. Every user can run the programs; only an administrator can "</span>
         <span class="s2">"change them."</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">elevation</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">"pkexec"</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">elevation</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"wsl"</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">notes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Installed for all users of the WSL distribution: the folder is created before the build and handed over to root at its end, as the root of the distribution, which needs no password."</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">elevation</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">"pkexec"</span><span class="p">:</span>
         <span class="n">out</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="s2">"This session has no password dialog of the desktop. Start the installation "</span>
             <span class="s2">"in a terminal with 'axqua install start ... --foreground', where sudo asks "</span>
@@ -1647,6 +1773,83 @@
                          <span class="s2">"are downloaded (1,500 files, 1.65 GB)."</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">out</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">salome</span><span class="p">:</span>
         <span class="n">out</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"SALOME is not installed. aXqua does not need it."</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_plan_telemac_windows</span><span class="p">(</span><span class="n">out</span><span class="p">:</span> <span class="n">Plan</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""TELEMAC built on Windows itself: no WSL, no administrator, one processor core.</span>
+
+<span class="sd">    A conda environment with the GNU compilers for Windows from conda-forge, then the steps of :mod:`axqua.install.windows_telemac`: the source code with Git, CMake with MinGW Makefiles, the build, and the environment script ``configs\\pysource.win.bat``. These are the commands a Windows test computer without administrator rights built TELEMAC v9.1.1 with and ran the Isar example on (2026-11-09). The example cases of TELEMAC come with their steering files only.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">windows_telemac</span> <span class="k">as</span> <span class="n">wt</span>
+
+    <span class="n">subject</span> <span class="o">=</span> <span class="s2">"install.telemac"</span>
+    <span class="n">options</span><span class="p">,</span> <span class="n">root</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">folder</span>
+    <span class="n">home</span><span class="p">,</span> <span class="n">env</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"telemac-mascaret"</span><span class="p">,</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"telemac-build"</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">ch</span><span class="o">.</span><span class="n">isspace</span><span class="p">()</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">)):</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.folder_with_space"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"the folder </span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2"> has a space in its name; TELEMAC cannot be built in such a folder"</span><span class="p">,</span>
+            <span class="s2">"Select a folder without spaces, for example opt</span><span class="se">\\</span><span class="s2">telemac in your user folder."</span><span class="p">,</span>
+            <span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.folder"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">scope</span> <span class="o">==</span> <span class="s2">"system"</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.windows_user_only"</span><span class="p">,</span>
+            <span class="s2">"TELEMAC built on Windows is installed for you alone, in your user folder; an installation for all "</span>
+            <span class="s2">"users of a Windows computer is not available"</span><span class="p">,</span> <span class="s2">"Install it for yourself."</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.scope"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">salome</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"SALOME is not installed with TELEMAC built on Windows. aXqua does not need it."</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">conda_base</span><span class="p">()</span>
+    <span class="n">conda</span> <span class="o">=</span> <span class="n">conda_program</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="k">if</span> <span class="n">base</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">conda</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.conda_missing"</span><span class="p">,</span>
+            <span class="s2">"TELEMAC built on Windows takes its compilers from conda-forge, and aXqua does not run from a conda "</span>
+            <span class="s2">"installation (Miniforge, Miniconda or Anaconda)"</span><span class="p">,</span>
+            <span class="s2">"Install aXqua in a conda environment as the installation guide describes, then start this "</span>
+            <span class="s2">"installation from that aXqua."</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">home</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">options</span><span class="o">.</span><span class="n">reinstall</span> <span class="o">!=</span> <span class="s2">"replace"</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.install.folder_exists"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">home</span><span class="si">}</span><span class="s2"> exists already; the installation keeps its source code and builds TELEMAC in it again"</span><span class="p">,</span>
+            <span class="s2">"Select another folder to leave this installation untouched."</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.folder"</span><span class="p">)</span>
+    <span class="n">python</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-B"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="n">wt</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>
+    <span class="n">where</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"--home"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">home</span><span class="p">),</span> <span class="s2">"--env"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">env</span><span class="p">)]</span>
+    <span class="n">compilers</span> <span class="o">=</span> <span class="n">env</span> <span class="o">/</span> <span class="s2">"Library"</span> <span class="o">/</span> <span class="s2">"bin"</span> <span class="o">/</span> <span class="s2">"x86_64-w64-mingw32-gfortran.exe"</span>
+    <span class="k">if</span> <span class="n">compilers</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The compiler environment </span><span class="si">{</span><span class="n">env</span><span class="si">}</span><span class="s2"> exists and is used as it is."</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Step</span><span class="p">(</span><span class="s2">"Download the compilers (conda-forge)"</span><span class="p">,</span>
+                              <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">conda</span><span class="p">),</span> <span class="s2">"create"</span><span class="p">,</span> <span class="s2">"-y"</span><span class="p">,</span> <span class="s2">"--override-channels"</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="s2">"conda-forge"</span><span class="p">,</span>
+                               <span class="s2">"--prefix"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">env</span><span class="p">),</span> <span class="o">*</span><span class="n">WINDOWS_PACKAGES</span><span class="p">]))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Step</span><span class="p">(</span><span class="s2">"Download the source code of TELEMAC"</span><span class="p">,</span>
+                          <span class="p">[</span><span class="o">*</span><span class="n">python</span><span class="p">,</span> <span class="s2">"source"</span><span class="p">,</span> <span class="o">*</span><span class="n">where</span><span class="p">,</span> <span class="s2">"--tag"</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">tag</span> <span class="ow">or</span> <span class="n">wt</span><span class="o">.</span><span class="n">TAG</span><span class="p">]))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Step</span><span class="p">(</span><span class="s2">"Configure the build"</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">python</span><span class="p">,</span> <span class="s2">"configure"</span><span class="p">,</span> <span class="o">*</span><span class="n">where</span><span class="p">]))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Step</span><span class="p">(</span><span class="s2">"Compile TELEMAC"</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">python</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">,</span> <span class="o">*</span><span class="n">where</span><span class="p">,</span> <span class="s2">"--jobs"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">jobs</span> <span class="ow">or</span> <span class="n">default_jobs</span><span class="p">()),</span>
+                                              <span class="s2">"--modules"</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">modules</span><span class="p">]))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Step</span><span class="p">(</span><span class="s2">"Write the environment script"</span><span class="p">,</span> <span class="p">[</span><span class="o">*</span><span class="n">python</span><span class="p">,</span> <span class="s2">"script"</span><span class="p">,</span> <span class="o">*</span><span class="n">where</span><span class="p">]))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s2">"solvers.telemac.setup_script"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">home</span> <span class="o">/</span> <span class="s2">"configs"</span> <span class="o">/</span> <span class="n">wt</span><span class="o">.</span><span class="n">SCRIPT</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">expects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">wt</span><span class="o">.</span><span class="n">build_dir</span><span class="p">(</span><span class="n">home</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"bin"</span> <span class="o">/</span> <span class="s2">"telemac2d.exe"</span><span class="p">))</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">notes</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">"TELEMAC </span><span class="si">{</span><span class="n">options</span><span class="o">.</span><span class="n">tag</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">wt</span><span class="o">.</span><span class="n">TAG</span><span class="si">}</span><span class="s2"> is built as a Windows program in </span><span class="si">{</span><span class="n">home</span><span class="si">}</span><span class="s2">, with the GNU compilers of "</span>
+        <span class="sa">f</span><span class="s2">"conda-forge in </span><span class="si">{</span><span class="n">env</span><span class="si">}</span><span class="s2">. No administrator and no WSL are needed."</span><span class="p">,</span>
+        <span class="s2">"It runs every simulation on one processor core: this build has no parallel computing (MPI)."</span><span class="p">,</span>
+        <span class="s2">"TELEMAC-2D with GAIA is built, as tested on Windows."</span> <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">modules</span> <span class="o">==</span> <span class="s2">"2d"</span> <span class="k">else</span>
+        <span class="s2">"All modules are built, also TELEMAC-3D. Only TELEMAC-2D has been tested on Windows so far."</span><span class="p">,</span>
+        <span class="s2">"The example cases of TELEMAC come with their steering files only."</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">reinstall</span> <span class="o">==</span> <span class="s2">"replace"</span><span class="p">:</span>
+        <span class="n">replaced</span><span class="p">,</span> <span class="n">why</span> <span class="o">=</span> <span class="n">_removal</span><span class="p">(</span><span class="s2">"telemac"</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">replaced</span><span class="p">:</span>
+            <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.nothing_to_replace"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"there is no earlier installation to remove: </span><span class="si">{</span><span class="n">why</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="s2">"Select the folder of the existing installation, or install into a new folder."</span><span class="p">,</span>
+                <span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.folder"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Step</span><span class="p">(</span><span class="s2">"Remove the earlier installation"</span><span class="p">,</span>
+                                     <span class="p">[</span><span class="o">*</span><span class="n">python</span><span class="p">,</span> <span class="s2">"remove"</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">replaced</span><span class="p">)]))</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"The earlier installation is removed before it is installed again: "</span>
+                             <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">replaced</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"."</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">estimate</span> <span class="o">=</span> <span class="n">ESTIMATES</span><span class="p">[</span><span class="s2">"telemac-windows"</span> <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">modules</span> <span class="o">==</span> <span class="s2">"2d"</span> <span class="k">else</span> <span class="s2">"telemac-windows-all"</span><span class="p">]</span>
+    <span class="n">free</span> <span class="o">=</span> <span class="n">_free_gb</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">free</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">free</span> <span class="o">&lt;</span> <span class="n">DISK_GB</span><span class="p">[</span><span class="s2">"telemac"</span><span class="p">]:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.install.little_space"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">free</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> GiB are free in </span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2">; the installation needs about </span><span class="si">{</span><span class="n">DISK_GB</span><span class="p">[</span><span class="s1">'telemac'</span><span class="p">]</span><span class="si">}</span><span class="s2"> GiB"</span><span class="p">,</span>
+            <span class="s2">"Select a folder on a drive with more free space."</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.folder"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_plan_openfoam</span><span class="p">(</span><span class="n">out</span><span class="p">:</span> <span class="n">Plan</span><span class="p">,</span> <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">add</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
