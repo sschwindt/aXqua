@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.3.2
+version=1.3.3
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,24 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.3.2
+changelog=1.3.3
+    - Calibration at several discharges: 'calibration.situations' names
+      surveys measured at other discharges, each with its measurements and
+      its discharge. Every tested set of parameters is simulated at each
+      discharge, and HydroBayesCal fits one set to all of them. In the case
+      settings, a file of the table Measurement files used for Calibration
+      gets a situation name and its discharge.
+    - 'calibration.hotstart: true' starts every calibration run from the
+      steady result instead of the dry or pre-wetted start; each run lasts
+      1.2 residence times of the reach unless 'hotstart_duration' says
+      otherwise.
+    - 'calibration.structural_error: unreachable' adds to the error of a
+      point the misfit that no tested set of parameters removes, so a point
+      the model cannot reproduce no longer decides the calibration alone.
+    - HydroBayesCal 1.12.2 or newer is required, also in an environment
+      that had an older one: 'pip install -U hydrobayescal'.
+    - Upgrade the program with 'pip install --upgrade "axqua[calibration]"'.
+    1.3.2
     - Windows: QGIS, the plugin and aXqua run in Windows. Without WSL, the
       Setup Wizard builds TELEMAC as a Windows program in the user folder,
       with no administrator rights; it runs on one processor core. With WSL
