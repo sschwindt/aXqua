@@ -40,7 +40,7 @@ Open **QGIS**, then:
 * Go to *Plugins > Manage and Install Plugins*.
 * Search for **aXqua**, click *Install Plugin*.
 
-Until the plugin is in the QGIS plugin repository, take the ``.zip`` from the `releases page <https://github.com/sschwindt/aXqua/releases>`_ and use *Install from ZIP*.
+The plugin is published in the official `QGIS plugin repository <https://plugins.qgis.org/plugins/axqua/>`_, so QGIS reports when a new version is available. Each `release on GitHub <https://github.com/sschwindt/aXqua/releases>`_ includes the plugin as a ``.zip`` file as well, which *Install from ZIP* in the same window installs on a computer without access to the repository.
 
 Install the aXqua program (backend)
 -----------------------------------
