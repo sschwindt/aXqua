@@ -96,6 +96,8 @@ class ConfigurationTab(QWidget):
         self.findings: list[fnd.Finding] = []
         self.unreadable = ""               # why the profile could not be read, if so
         self.on_findings = None            # the dock marks the tab with a triangle
+        #: the dock reads the active case once the axqua program has answered
+        self.on_runner_ready = None
         self._build()
 
     def _build(self) -> None:
@@ -214,6 +216,8 @@ class ConfigurationTab(QWidget):
         self.load_kinds()
         self.load_profile()
         self.load_software()
+        if self.on_runner_ready is not None:
+            self.on_runner_ready()
 
     def _runner_failed(self, exc: Exception) -> None:
         text = exc.user_text() if isinstance(exc, RunnerError) else str(exc)

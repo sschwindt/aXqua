@@ -21,7 +21,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-__all__ = ["BUILD", "REPOSITORY", "SCRIPT", "TAG", "build_dir", "cmd_line", "compiler_env",
+__all__ = ["BUILD", "REPOSITORY", "SCRIPT", "TAG", "activation_hooks", "build_dir", "cmd_line", "compiler_env",
            "configure_argv", "environment_script", "main"]
 
 #: Where the source code of TELEMAC is published, and the version this route was tested with.
@@ -64,16 +64,22 @@ def cmd_line(argv: list[str]) -> str:
     return " ".join(f'"{part}"' for part in argv)
 
 
-def _run(argv: list[str], env: Path, conda_base: Path | None) -> int:
+def activation_hooks(env: Path) -> list[Path]:
+    """The batch files the packages of *env* run when it is activated (``etc\\conda\\activate.d``), in the order conda runs them."""
+    return sorted((env / "etc" / "conda" / "activate.d").glob("*.bat"))
+
+
+def _run(argv: list[str], env: Path) -> int:
     """Run *argv* inside the compiler environment and return its exit code.
 
-    The conda activation of the environment is what the test computer used (``call activate.bat <env> && ...``); without it, the folders of the environment are put first on ``PATH``.
+    What ``conda activate`` does, without conda's ``activate.bat``: the folders of the environment go first on ``PATH`` (:func:`compiler_env`), and the activation scripts of its packages are called before the command. ``activate.bat`` asks PowerShell for a name of a temporary file, and on the Windows test computer without PowerShell (2026-11-10) every configure and compile printed "'powershell' is not recognized" although the build succeeded.
     """
     print("$ " + " ".join(argv), flush=True)
-    activate = conda_base / "Scripts" / "activate.bat" if conda_base else None
-    if os.name == "nt" and activate is not None and activate.is_file():
-        line = f'cmd /d /s /c "call "{activate}" "{env}" && {cmd_line(argv)}"'
-        return subprocess.run(line, env=compiler_env(env)).returncode
+    hooks = activation_hooks(env) if os.name == "nt" else []
+    if hooks:
+        # "&", not "&&": a hook's exit code is not the command's, and it must not stop the command
+        line = " & ".join([*(f'call "{hook}"' for hook in hooks), cmd_line(argv)])
+        return subprocess.run(f'cmd /d /s /c "{line}"', env=compiler_env(env)).returncode
     return subprocess.run(argv, env=compiler_env(env)).returncode
 
 
@@ -133,21 +139,21 @@ def configure_argv(home: Path, env: Path) -> list[str]:
             f"-DPython_EXECUTABLE={env / 'python.exe'}", *CMAKE_OPTIONS]
 
 
-def configure(home: Path, env: Path, conda_base: Path | None) -> int:
+def configure(home: Path, env: Path) -> int:
     if not _complete(home):
         print(f"There is no source code of TELEMAC in {home}.", flush=True)
         return 2
-    return _run(configure_argv(home, env), env, conda_base)
+    return _run(configure_argv(home, env), env)
 
 
-def build(home: Path, env: Path, conda_base: Path | None, jobs: int, modules: str) -> int:
+def build(home: Path, env: Path, jobs: int, modules: str) -> int:
     cmake = str(_first(_bin(env), "cmake.exe") or "cmake")
     argv = [cmake, "--build", str(build_dir(home)), "--parallel", str(max(1, jobs))]
     targets = TARGETS.get(modules, TARGETS["2d"])
-    code = _run(argv + (["--target", *targets] if targets else []), env, conda_base)
+    code = _run(argv + (["--target", *targets] if targets else []), env)
     if code == 0 and not targets:
         # all modules: the commands for user Fortran are a target of their own
-        code = _run(argv + ["--target", "build_commands"], env, conda_base)
+        code = _run(argv + ["--target", "build_commands"], env)
     return code
 
 
@@ -224,7 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("paths", nargs="*", type=Path, help="remove: what to remove")
     p.add_argument("--home", type=Path, help="the folder telemac-mascaret")
     p.add_argument("--env", type=Path, help="the compiler environment")
-    p.add_argument("--conda-base", type=Path, help="the conda installation that has activate.bat")
+    p.add_argument("--conda-base", type=Path, help=argparse.SUPPRESS)   # not used; a plan of aXqua 1.3.1 passes it
     p.add_argument("--tag", default=TAG)
     p.add_argument("--jobs", type=int, default=4)
     p.add_argument("--modules", choices=sorted(TARGETS), default="2d")
@@ -236,9 +242,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.step == "source":
         return source(args.home, args.env, args.tag)
     if args.step == "configure":
-        return configure(args.home, args.env, args.conda_base)
+        return configure(args.home, args.env)
     if args.step == "build":
-        return build(args.home, args.env, args.conda_base, args.jobs, args.modules)
+        return build(args.home, args.env, args.jobs, args.modules)
     return script(args.home, args.env)
 
 

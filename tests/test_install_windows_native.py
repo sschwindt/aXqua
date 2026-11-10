@@ -159,8 +159,8 @@ def test_configure_uses_the_compilers_of_the_environment(tmp_path):
 ])
 def test_the_build_compiles_the_chosen_modules(tmp_path, monkeypatch, modules, calls):
     ran = []
-    monkeypatch.setattr(wt, "_run", lambda argv, env, base: ran.append(argv) or 0)
-    assert wt.build(tmp_path / "home", tmp_path / "env", None, 6, modules) == 0
+    monkeypatch.setattr(wt, "_run", lambda argv, env: ran.append(argv) or 0)
+    assert wt.build(tmp_path / "home", tmp_path / "env", 6, modules) == 0
     assert [argv[1:5] for argv in ran] == [["--build", str(wt.build_dir(tmp_path / "home")), "--parallel", "6"]] * len(calls)
     assert [argv[5:] for argv in ran] == calls
 
@@ -263,3 +263,24 @@ def test_windows_takes_its_own_environment(monkeypatch, as_windows):
     env = recipes.clean_environment()
     assert env["PATH"] == r"C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
     assert env["USERPROFILE"] == r"C:\Users\student" and "CONDA_PREFIX" not in env
+
+
+def test_the_build_runs_without_conda_activate_and_powershell(tmp_path, monkeypatch):
+    """conda's ``activate.bat`` asks PowerShell for a file name: on the Windows test computer without PowerShell (2026-11-10) every configure and compile printed "'powershell' is not recognized". The environment is set up by aXqua and the activation scripts of its packages are called."""
+    env = tmp_path / "telemac-build"
+    hooks = env / "etc" / "conda" / "activate.d"
+    hooks.mkdir(parents=True)
+    for name in ("openssl_activate-win.bat", "libxml2_activate.bat", "notes.txt"):
+        (hooks / name).write_text("")
+    ran = []
+    monkeypatch.setattr(wt.os, "name", "nt")
+    monkeypatch.setattr(wt.subprocess, "run",
+                        lambda line, env=None: ran.append((line, env)) or subprocess.CompletedProcess(line, 0))
+    assert wt._run(["cmake.exe", "--build", "b"], env) == 0
+    line, environment = ran[0]
+    assert "Scripts" not in line and "powershell" not in line.lower()
+    assert line == (f'cmd /d /s /c "call "{hooks / "libxml2_activate.bat"}" & '
+                    f'call "{hooks / "openssl_activate-win.bat"}" & "cmake.exe" "--build" "b""')
+    assert environment["CONDA_PREFIX"] == str(env) and environment["PATH"].startswith(str(env))
+    monkeypatch.setattr(wt.os, "name", "posix")
+    assert wt._run(["cmake", "--version"], env) == 0 and ran[1][0] == ["cmake", "--version"]

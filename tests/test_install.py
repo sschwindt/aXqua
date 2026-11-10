@@ -9,6 +9,7 @@ them as a detached process, checks what they produced and enters it in the profi
 from __future__ import annotations
 
 import json
+import re
 import os
 import shutil
 import subprocess
@@ -859,6 +860,9 @@ def test_an_installation_ends_in_the_profile_of_this_computer(installers, debian
     assert status["findings"] == []
     log = Path(status["log"]).read_text()
     assert "=== " in log and "[*] Installation finished." in log
+    # each step says when it started and how long it took
+    assert re.search(r"=== 1/\d+: .* \(started \d{4}-\d\d-\d\d \d\d:\d\d:\d\d\) ===", log)
+    assert len(re.findall(r"^--- \d+/\d+: .*: done after \d+ s ---$", log, re.M)) == len(plan.steps)
 
 
 def test_an_installation_can_leave_the_profile_alone(installers, debian, tmp_path):

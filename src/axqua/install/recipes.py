@@ -1397,7 +1397,7 @@ def _plan_telemac_windows(out: Plan, add) -> None:
             f"{home} exists already; the installation keeps its source code and builds TELEMAC in it again",
             "Select another folder to leave this installation untouched.", where=f"{subject}.folder")
     python = [sys.executable, "-B", "-m", wt.__name__]
-    where = ["--home", str(home), "--env", str(env), "--conda-base", str(base)]
+    where = ["--home", str(home), "--env", str(env)]
     compilers = env / "Library" / "bin" / "x86_64-w64-mingw32-gfortran.exe"
     if compilers.is_file():
         out.notes.append(f"The compiler environment {env} exists and is used as it is.")

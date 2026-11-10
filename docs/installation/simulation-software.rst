@@ -132,9 +132,9 @@ for example ``/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh``. A TE
 
 .. _setup-telemac-windows-native:
 
-**TELEMAC built on Windows, without WSL.** On a Windows computer where WSL cannot be set up, for example without administrator rights, the *Setup Wizard* compiles TELEMAC as a Windows program in your user folder. Nothing of this needs administrator rights. The resulting TELEMAC has no parallel computing (no MPI) and runs every simulation on one processor core. The commands of this installation were tested by hand with TELEMAC v9.1.1 on Windows 11 without administrator rights: the steady run of the Isar example case, started and cancelled from the job list of the plugin, took 58 minutes on one core. Only TELEMAC-2D was tested. TELEMAC-3D, morphodynamics with GAIA, the hydrology mode and the calibration with HydroBayesCal have not been tested on Windows yet, and the installation through the wizard has not yet run on a Windows computer.
+**TELEMAC built on Windows, without WSL.** On a Windows computer where WSL cannot be set up, for example without administrator rights, the *Setup Wizard* compiles TELEMAC as a Windows program in your user folder. Nothing of this needs administrator rights. The resulting TELEMAC has no parallel computing (no MPI) and runs every simulation on one processor core. On Windows 11 without administrator rights, the wizard built TELEMAC v9.1.1 with TELEMAC-2D in 16 minutes, and a build with the same commands ran the steady simulation of the Isar example case to its end in 58 minutes on one core. Only TELEMAC-2D was tested. TELEMAC-3D, morphodynamics with GAIA, the hydrology mode and the calibration with HydroBayesCal have not been tested on Windows yet.
 
-Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. On Windows, the *Settings* tab starts with the setting *Build TELEMAC*:
+Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. When aXqua already knows a TELEMAC on this computer, it asks whether to install it again: answer *Yes*, and keep *Install it again in a new folder* on the *Settings* tab to leave the existing TELEMAC as it is. On Windows, the *Settings* tab then has the setting *Build TELEMAC*:
 
 * *In Windows itself: one processor core, no administrator* is the only choice on a computer without WSL.
 * *Inside WSL: parallel runs; WSL must be set up by an administrator* is offered when WSL is set up, and is then the default (see the note at the top of this page).
@@ -148,21 +148,23 @@ Built in Windows itself, TELEMAC has these settings:
    * - Setting
      - Meaning
    * - *Installation folder*
-     - The default is ``opt\telemac`` in your user folder. The source code and the build go into its subfolder ``telemac-mascaret``, the compilers into its subfolder ``telemac-build``. The path must not contain spaces.
+     - The default is ``opt\telemac`` in your user folder, and a new folder next to the existing one when TELEMAC is installed again. The source code and the build go into its subfolder ``telemac-mascaret``, the compilers into its subfolder ``telemac-build``. The path must not contain spaces.
    * - *Modules*
      - *TELEMAC-2D with GAIA* (the default) is the build that was tested on Windows. *All modules, also TELEMAC-3D* takes longer to compile and has not been tested on Windows yet.
    * - *TELEMAC version*
      - Leave the field empty for v9.1.1.
 
-The *Check* tab lists the steps of the installation:
+In a new folder, the *Check* tab lists five steps:
 
 #. *Download the compilers (conda-forge)*: a conda environment with the GNU compilers for Windows (MinGW-w64), CMake, Make and Git, a download of several hundred MB. It is created with the conda of the installation that aXqua runs from, so for this route aXqua must be installed in a conda environment (Miniforge, Miniconda or Anaconda), as :doc:`qgis-plugin` describes.
 #. *Download the source code of TELEMAC* with Git, without the large files of TELEMAC's own example cases.
-#. *Configure the build* with CMake, without MPI, MED and MUMPS.
-#. *Compile TELEMAC*. TELEMAC-2D took 12 minutes with 8 processes on the test computer.
-#. *Write the environment script* ``telemac-mascaret\configs\pysource.win.bat``. It only sets variables and changes nothing on the computer. aXqua then enters it in the profile, as at the end of every installation.
+#. *Configure the build* with CMake and MinGW Makefiles, without MPI, MED and MUMPS.
+#. *Compile TELEMAC*. TELEMAC-2D took 10 minutes with 8 processes on the test computer.
+#. *Write the environment script* ``telemac-mascaret\configs\pysource.win.bat``. It only sets variables and changes nothing on the computer. aXqua then enters it in the profile, as at the end of every installation, unless *Enter the installation in the profile of this computer* is cleared (``--no-bind`` in a terminal). The *Configuration* tab then shows it in the row of TELEMAC.
 
-When the server of TELEMAC does not answer (it returned the error HTTP 504 on 9 November 2026), the installation stops at the second step. Start it again later: it keeps the compilers and continues. In a terminal (the *Anaconda Prompt* or *Miniforge Prompt*), ``axqua install start telemac --native`` does the same as the wizard.
+The installation goes on when the wizard or QGIS is closed. After QGIS is opened again, the button in the row of TELEMAC reads *Show the installation...* and opens the wizard on its *Installation* tab. In a terminal, ``axqua install status telemac --tail 20`` shows the step and the last lines of the log. The log, ``install.log`` in ``%LOCALAPPDATA%\axqua\installs\<installation>``, gives the start and the duration of each step.
+
+When the server of TELEMAC does not answer (it returned the error HTTP 504 on 9 November 2026), the installation stops at the second step. Start it again later with the same *Installation folder*: the plan then has fewer steps, because the compilers are kept, and a source code that was downloaded completely is kept too. In a terminal (the *Anaconda Prompt* or *Miniforge Prompt*), ``axqua install start telemac --native`` does the same as the wizard; give it the folder of the first attempt with ``--folder``.
 
 aXqua runs the Python scripts of TELEMAC with the Python of the aXqua environment. The check of the profile reports that parallel runs are not available. A job then runs on one core: a number of processes that comes from the case or the computer profile becomes 1, with a warning in the message bar of QGIS and at the top of the log of the job. A number above 1 that is asked for with the job (*MPI processes* in the plugin, ``--np`` in a terminal) is refused before the job starts, because TELEMAC would stop with the error *Parallel inconsistency*. Cancelling a job ends TELEMAC and every process it started. A TELEMAC built on Windows by hand is entered with *Select existing config file* and its ``configs\pysource.<configuration>.bat``.
 

@@ -457,7 +457,9 @@ def execute(folder: str | os.PathLike, *, echo: bool = False,
             for number, step in enumerate(steps, start=1):
                 status.update(step=number, step_name=step.name)
                 _write(folder, status)
-                header = (f"\n=== {number}/{len(steps)}: {step.name} ===\n"
+                began = time.time()
+                header = (f"\n=== {number}/{len(steps)}: {step.name} "
+                          f"(started {time.strftime('%Y-%m-%d %H:%M:%S')}) ===\n"
                           f"$ {step.as_dict()['command']}\n")
                 out.write(header.encode("utf-8"))
                 out.flush()
@@ -482,6 +484,15 @@ def execute(folder: str | os.PathLike, *, echo: bool = False,
                 code = _run_step(step, folder, out, status, stop, echo=echo,
                                  log_path=log_path,
                                  ask_here=step.admin and argv[0] == "sudo")
+                # the time of each step, which a test on Windows had to piece together
+                # from the status file (2026-11-10)
+                footer = (f"--- {number}/{len(steps)}: {step.name}: "
+                          f"{'done' if code == 0 else f'exit code {code}'} after "
+                          f"{time.time() - began:.0f} s ---\n")
+                out.write(footer.encode("utf-8"))
+                out.flush()
+                if echo:
+                    print(footer, end="", flush=True)
                 if code and step.optional:
                     # the program is installed; what this step adds is not complete
                     add(Finding(
@@ -640,7 +651,7 @@ def _kill_group(pid: int, *, hard: bool = False) -> None:
 def _last_words(log_path: Path, lines: int = 3) -> str:
     # without the two lines the runner itself writes above each command
     rows = [row.strip() for row in tail(log_path, 30).splitlines()
-            if row.strip() and not row.startswith(("=== ", "$ "))]
+            if row.strip() and not row.startswith(("=== ", "--- ", "$ "))]
     return " | ".join(rows[-lines:])[:600] or "(the log is empty)"
 
 

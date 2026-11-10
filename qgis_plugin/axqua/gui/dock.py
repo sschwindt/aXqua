@@ -266,6 +266,9 @@ class AxquaDock(QDockWidget):
         self.configuration_tab = ConfigurationTab(self.ctx)
         self.configuration_tab.on_findings = lambda level: self.mark("configuration",
                                                                      level)
+        # the case of the last session is in the list, and its tabs are filled when axqua
+        # answers: they said "Add a case" after every start until Refresh was clicked
+        self.configuration_tab.on_runner_ready = self.refresh_case
         self.case_tab = CaseTab(self.ctx)
         self.case_tab.on_findings = lambda level: self.mark("case", level)
         special = {
