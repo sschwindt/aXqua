@@ -95,6 +95,12 @@ def _parser() -> argparse.ArgumentParser:
                         "administrator password in a dialog of the desktop")
     p.add_argument("--tail", type=int, default=0, metavar="N",
                    help="status: include the last N lines of the log")
+    p.add_argument("--native", action="store_true",
+                   help="Windows, TELEMAC: build it as a Windows program in your user folder, without WSL and without "
+                        "an administrator; it runs on one processor core. The default where WSL is not set up")
+    p.add_argument("--modules", choices=recipes.MODULES, default="2d",
+                   help="TELEMAC built on Windows: 2d (TELEMAC-2D with GAIA, the tested build; default) or all "
+                        "(also TELEMAC-3D)")
     p.add_argument("--distro", default="",
                    help="Windows: the WSL distribution to install into (default: the default distribution)")
     p.add_argument("--installed", default="", help=argparse.SUPPRESS)   # overview inside WSL: what the Windows profile names
@@ -112,7 +118,8 @@ def _options(args):
         examples=args.examples,
         smoke_test=not args.no_smoke_test, installers=args.installers,
         ref=args.ref or "", base=args.base or "", bind=not args.no_bind,
-        reinstall=args.reinstall or "")
+        reinstall=args.reinstall or "", native=bool(getattr(args, "native", False)),
+        modules=getattr(args, "modules", "2d") or "2d")
 
 
 def _need_target(args) -> str:
@@ -397,9 +404,10 @@ def _windows_host(data: dict, distro: str | None, status) -> None:
     inside = data.get("host") or {}
     windows = f"Windows {platform.release()}".strip()
     data["host"] = {**inside, "system": "windows", "windows": windows, "distro_wsl": distro or "",
-                    "supported": bool(inside.get("supported")) and distro is not None,
+                    # without WSL, TELEMAC is built on Windows itself; OpenFOAM still needs WSL
+                    "supported": distro is None or bool(inside.get("supported")),
                     "description": (f"{windows}, TELEMAC and OpenFOAM in WSL: {inside.get('description', '')}"
-                                    if distro else f"{windows}, without a WSL distribution")}
+                                    if distro else f"{windows}, without WSL: TELEMAC is built in Windows itself")}
     data["wsl"] = status.as_dict()
 
 
@@ -418,6 +426,9 @@ def _on_windows(args, argv: list[str], command: str) -> int:
             data = _overview()
             for entry in data.get("targets") or []:
                 entry["default_folder"], entry["default_folders"] = "", {}   # a folder of Windows would never be used
+                if entry["target"] == "telemac":    # except for TELEMAC built on Windows itself
+                    entry["default_folder"] = str(recipes.windows_folder())
+                    entry["default_folders"] = {"user": entry["default_folder"]}
         else:
             here = _installed_here()
             linux = {key: wsl.to_linux(value) for key, value in here.items() if wsl.is_unc(value)}
@@ -425,11 +436,17 @@ def _on_windows(args, argv: list[str], command: str) -> int:
             for entry in data.get("targets") or []:
                 entry["installed"] = {key: here[key] for key in KEYS[entry["target"]] if key in here}
         _windows_host(data, distro, status)
+        for entry in data.get("targets") or []:
+            if entry["target"] == "telemac":        # the folder of TELEMAC built on Windows, which the wizard offers too
+                entry["native_folder"] = str(recipes.windows_folder())
+                entry["native_existing"] = recipes.existing_installation("telemac", entry.get("installed") or {})
         return emit(command, data, as_json=args.as_json, lines=_overview_lines(data))
 
     target = args.target if args.action != "telemac-examples" else None
     if target is not None:
         target = _need_target(args)
+    if target == "telemac" and (args.native or distro is None):
+        return _native_windows(args, command, distro, status)
     if distro is None:
         # no WSL: the plan of this computer says so (axqua.install.windows_needs_wsl)
         if args.action == "start":
@@ -473,6 +490,32 @@ def _on_windows(args, argv: list[str], command: str) -> int:
         return emit(command, data, as_json=args.as_json, lines=_plan_lines(data))
     started = runner.start_in_wsl(data, distro, detach=not args.foreground, echo=args.foreground,
                                   bind_here=not args.no_bind)
+    lines = _status_lines(started)
+    if not args.foreground:
+        lines += ["The installation runs by itself. Follow it with:", f"  axqua install status {started['id']} --tail 20"]
+    emit(command, started, as_json=args.as_json, lines=lines)
+    return 0 if started.get("state") in ("queued", "running", "succeeded") else 1
+
+
+def _native_windows(args, command: str, distro: str | None, status) -> int:
+    """``axqua install plan|packages|start telemac`` for TELEMAC built on Windows itself (:func:`axqua.install.recipes._plan_telemac_windows`): the plan is made and run on this side, the result entered in the profile by the runner itself."""
+    from axqua.install import host as hosts
+    from axqua.install import recipes, runner
+
+    options = _options(args)
+    options.native = True
+    plan = recipes.plan("telemac", options, host=hosts.detect(system="win32"))
+    if args.action == "packages":
+        data = {**plan.as_dict()["packages"], "wsl": status.as_dict()}
+        return emit(command, data, as_json=args.as_json,
+                    lines=["TELEMAC built on Windows needs no system packages: its compilers come from conda-forge"])
+    if args.action == "plan":
+        data = plan.as_dict()
+        _windows_host(data, distro, status)
+        data["host"]["description"] = f"{data['host']['windows']}: TELEMAC is built in Windows itself"
+        data["native"] = True
+        return emit(command, data, as_json=args.as_json, lines=_plan_lines(data))
+    started = runner.start(plan, detach=not args.foreground, echo=args.foreground)
     lines = _status_lines(started)
     if not args.foreground:
         lines += ["The installation runs by itself. Follow it with:", f"  axqua install status {started['id']} --tail 20"]

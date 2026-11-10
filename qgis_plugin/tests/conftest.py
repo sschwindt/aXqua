@@ -63,3 +63,22 @@ def _no_conda_environments_of_this_computer(monkeypatch):
     real = runner_client.conda_programs
     monkeypatch.setattr(runner_client, "conda_programs",
                         lambda home=None, environ=None: real(home, environ) if home is not None else [])
+
+
+@pytest.fixture(scope="session")
+def qgis_app():
+    """One QGIS application for the whole session, for the test files that need one and do not make their own.
+
+    Kept until the session ends: an application a test module made for itself was collected after that module, and the next module that used QGIS crashed the process.
+    """
+    import os
+
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from qgis.core import QgsApplication
+
+    app = QgsApplication.instance()
+    if app is None:
+        app = QgsApplication([], False)
+        QgsApplication.setPrefixPath(os.environ.get("QGIS_PREFIX_PATH", "/usr"), True)
+        app.initQgis()
+    yield app

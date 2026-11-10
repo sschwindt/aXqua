@@ -811,6 +811,11 @@ def install_flags(options: dict | None) -> list[str]:
         flags.append("--no-smoke-test")
     if options.get("bind") is False:
         flags.append("--no-bind")
+    # TELEMAC on Windows: built in Windows itself, and which modules
+    if options.get("route") == "windows":
+        flags.append("--native")
+        if options.get("modules") == "all":
+            flags += ["--modules", "all"]
     return flags
 
 

@@ -16,19 +16,6 @@ pytest.importorskip("qgis.core", reason="PyQGIS is not importable in this interp
 from axqua_plugin.gui import report_issue  # noqa: E402
 
 
-@pytest.fixture(scope="module")
-def qgis_app():
-    """The QGIS application of the session, or one of its own; a second one aborts the process."""
-    from qgis.core import QgsApplication
-
-    app = QgsApplication.instance()
-    if app is None:
-        app = QgsApplication([], False)
-        QgsApplication.setPrefixPath(os.environ.get("QGIS_PREFIX_PATH", "/usr"), True)
-        app.initQgis()
-    yield app
-
-
 @pytest.mark.parametrize("written", [
     r"C:\Users\Student\opt\telemac", "C:/Users/Student/opt/telemac",
     r"c:\users\student\opt\telemac", r"C:\\Users\\Student\\opt\\telemac"])

@@ -93,7 +93,7 @@ TELEMAC
 
 `TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC). Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1.
 
-Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. The installation wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its *Settings* tab has four settings besides *Install for*:
+Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. The installation wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22, and on Windows (:ref:`TELEMAC built on Windows <setup-telemac-windows-native>`). On Linux, its *Settings* tab has four settings besides *Install for*:
 
 .. list-table::
    :header-rows: 1
@@ -132,48 +132,39 @@ for example ``/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh``. A TE
 
 .. _setup-telemac-windows-native:
 
-**TELEMAC built on Windows, without WSL.** On a Windows computer where WSL cannot be set up, for example without administrator rights, TELEMAC can be compiled as a Windows program in your user folder. The *Setup Wizard* does not install TELEMAC in this way: the four steps below are done once by hand, and none of them needs administrator rights. The resulting TELEMAC has no parallel computing (no MPI) and runs every simulation on one processor core. This route was tested with TELEMAC v9.1.1 on Windows 11 without administrator rights: the steady run of the Isar example case, started and cancelled from the job list of the plugin, took 58 minutes on one core. The build tested there was TELEMAC-2D only. TELEMAC-3D, GAIA, the hydrology mode and the calibration with HydroBayesCal have not been tested in this way yet.
+**TELEMAC built on Windows, without WSL.** On a Windows computer where WSL cannot be set up, for example without administrator rights, the *Setup Wizard* compiles TELEMAC as a Windows program in your user folder. Nothing of this needs administrator rights. The resulting TELEMAC has no parallel computing (no MPI) and runs every simulation on one processor core. The commands of this installation were tested by hand with TELEMAC v9.1.1 on Windows 11 without administrator rights: the steady run of the Isar example case, started and cancelled from the job list of the plugin, took 58 minutes on one core. Only TELEMAC-2D was tested. TELEMAC-3D, morphodynamics with GAIA, the hydrology mode and the calibration with HydroBayesCal have not been tested on Windows yet, and the installation through the wizard has not yet run on a Windows computer.
 
-All commands run in the *Anaconda Prompt* or *Miniforge Prompt*, which is a Command Prompt (``cmd``) and not PowerShell. The folders below are examples: another folder in your user folder can be used by changing it in every step. The tested folders had no spaces in their paths.
+Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. On Windows, the *Settings* tab starts with the setting *Build TELEMAC*:
 
-#. Create a conda environment with the compilers, apart from ``axqua-env``:
+* *In Windows itself: one processor core, no administrator* is the only choice on a computer without WSL.
+* *Inside WSL: parallel runs; WSL must be set up by an administrator* is offered when WSL is set up, and is then the default (see the note at the top of this page).
 
-   .. code-block:: bat
+Built in Windows itself, TELEMAC has these settings:
 
-      conda create -y --override-channels -c conda-forge --prefix "%USERPROFILE%\opt\telemac\telemac-build" python=3.12 numpy scipy gfortran=15.2 gcc=15.2 cmake make git
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
 
-   The compilers are the GNU compilers for Windows (MinGW-w64) of conda-forge, and ``make`` provides ``mingw32-make.exe``. Make programs from other sources may fail to start for lack of a library.
+   * - Setting
+     - Meaning
+   * - *Installation folder*
+     - The default is ``opt\telemac`` in your user folder. The source code and the build go into its subfolder ``telemac-mascaret``, the compilers into its subfolder ``telemac-build``. The path must not contain spaces.
+   * - *Modules*
+     - *TELEMAC-2D with GAIA* (the default) is the build that was tested on Windows. *All modules, also TELEMAC-3D* takes longer to compile and has not been tested on Windows yet.
+   * - *TELEMAC version*
+     - Leave the field empty for v9.1.1.
 
-#. Download the source code of TELEMAC v9.1.1 and compile it:
+The *Check* tab lists the steps of the installation:
 
-   .. code-block:: bat
+#. *Download the compilers (conda-forge)*: a conda environment with the GNU compilers for Windows (MinGW-w64), CMake, Make and Git, a download of several hundred MB. It is created with the conda of the installation that aXqua runs from, so for this route aXqua must be installed in a conda environment (Miniforge, Miniconda or Anaconda), as :doc:`qgis-plugin` describes.
+#. *Download the source code of TELEMAC* with Git, without the large files of TELEMAC's own example cases.
+#. *Configure the build* with CMake, without MPI, MED and MUMPS.
+#. *Compile TELEMAC*. TELEMAC-2D took 12 minutes with 8 processes on the test computer.
+#. *Write the environment script* ``telemac-mascaret\configs\pysource.win.bat``. It only sets variables and changes nothing on the computer. aXqua then enters it in the profile, as at the end of every installation.
 
-      conda activate "%USERPROFILE%\opt\telemac\telemac-build"
-      git -c core.longpaths=true clone --depth 1 --branch v9.1.1 https://gitlab.pam-retd.fr/otm/telemac-mascaret.git "%USERPROFILE%\opt\telemac\telemac-v9.1.1"
-      set "TB=%USERPROFILE%\opt\telemac\telemac-build\Library\bin"
-      cmake -S "%USERPROFILE%\opt\telemac\telemac-v9.1.1" -B "%USERPROFILE%\opt\telemac\telemac-v9.1.1\builds\win64-seq" -G "MinGW Makefiles" -DCMAKE_MAKE_PROGRAM="%TB%\mingw32-make.exe" -DCMAKE_C_COMPILER="%TB%\x86_64-w64-mingw32-gcc.exe" -DCMAKE_Fortran_COMPILER="%TB%\x86_64-w64-mingw32-gfortran.exe" -DPython_EXECUTABLE="%USERPROFILE%\opt\telemac\telemac-build\python.exe" -DCMAKE_BUILD_TYPE=Release -DUSE_MPI=OFF -DUSE_MED=OFF -DUSE_MUMPS=OFF -DUSE_AED2=OFF -DUSE_GOTM=OFF -DBUILD_TELAPY=OFF -DBUILD_HERMES_WRAPPER=OFF
-      cmake --build "%USERPROFILE%\opt\telemac\telemac-v9.1.1\builds\win64-seq" --parallel 8 --target homere_telemac2d build_commands
+When the server of TELEMAC does not answer (it returned the error HTTP 504 on 9 November 2026), the installation stops at the second step. Start it again later: it keeps the compilers and continues. In a terminal (the *Anaconda Prompt* or *Miniforge Prompt*), ``axqua install start telemac --native`` does the same as the wizard.
 
-   ``--parallel 8`` compiles with 8 processes; use the number of processor cores of the computer. On the test computer, the configuration took 1 minute and the compilation of TELEMAC-2D 12 minutes. The target ``build_commands`` writes the commands with which TELEMAC compiles user Fortran during a run. Without ``--target ...``, the last command compiles all modules, including TELEMAC-3D and GAIA, which takes longer and has not been tested on Windows yet. When the server of TELEMAC does not answer (it returned the error HTTP 504 on 9 November 2026), the source code of the release is also archived by `Software Heritage <https://archive.softwareheritage.org/browse/release/ed0ec0c755ed5a8618865b250c38c85d20f1cff5/>`_.
-
-#. Write the environment script. Create the file ``pysource.win.bat`` in the folder ``configs`` of the source code, for example with Notepad, with these lines:
-
-   .. code-block:: bat
-
-      @echo off
-      set "HOMETEL=%USERPROFILE%\opt\telemac\telemac-v9.1.1"
-      set "BUILD_DIR=%HOMETEL%\builds\win64-seq"
-      set "SYSTELCFG=%BUILD_DIR%\systel.cfg"
-      set "USETELCFG=general"
-      set "PYTHONPATH=%HOMETEL%\scripts\python3;%BUILD_DIR%\lib"
-      set "PATH=%HOMETEL%\scripts\python3;%BUILD_DIR%\bin;%USERPROFILE%\opt\telemac\telemac-build\Library\bin;%PATH%"
-      set "PYTHONUNBUFFERED=1"
-
-   The script only sets variables, so it changes nothing on the computer. The folder ``Library\bin`` of the compiler environment is on the ``PATH`` because TELEMAC needs the runtime libraries of the compiler and compiles user Fortran with it. aXqua looks for TELEMAC scripts in the folder ``configs`` with names that start with ``pysource.`` and end with ``.bat``.
-
-#. Enter TELEMAC in aXqua. In the plugin, click *Setup Wizard...* in the row of TELEMAC, select *Select existing config file*, select ``configs\pysource.win.bat`` with *Browse...*, click *Check*, and then *Use this installation*. In a terminal, ``axqua profile use telemac "%USERPROFILE%\opt\telemac\telemac-v9.1.1\configs\pysource.win.bat"`` does the same.
-
-aXqua runs the Python scripts of TELEMAC with the Python of the aXqua environment. The check reports that parallel runs are not available. A job then runs on one core: a number of processes that comes from the case or the computer profile becomes 1, with a warning in the message bar of QGIS and at the top of the log of the job. A number above 1 that is asked for with the job (*MPI processes* in the plugin, ``--np`` in a terminal) is refused before the job starts, because TELEMAC would stop with the error *Parallel inconsistency*. Cancelling a job ends TELEMAC and every process it started.
+aXqua runs the Python scripts of TELEMAC with the Python of the aXqua environment. The check of the profile reports that parallel runs are not available. A job then runs on one core: a number of processes that comes from the case or the computer profile becomes 1, with a warning in the message bar of QGIS and at the top of the log of the job. A number above 1 that is asked for with the job (*MPI processes* in the plugin, ``--np`` in a terminal) is refused before the job starts, because TELEMAC would stop with the error *Parallel inconsistency*. Cancelling a job ends TELEMAC and every process it started. A TELEMAC built on Windows by hand is entered with *Select existing config file* and its ``configs\pysource.<configuration>.bat``.
 
 .. _install-openfoam:
 

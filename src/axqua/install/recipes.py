@@ -85,6 +85,15 @@ TITLES = {
 #: What can be downloaded of the example cases of TELEMAC (Options.telemac_examples).
 TELEMAC_EXAMPLES = ("inputs", "all", "none")
 
+#: TELEMAC built on Windows itself (Options.modules): TELEMAC-2D with GAIA, or all modules.
+MODULES = ("2d", "all")
+
+#: The packages of the compiler environment of TELEMAC built on Windows, from conda-forge: the versions a Windows test computer built TELEMAC v9.1.1 with (2026-11-09).
+WINDOWS_PACKAGES = ("python=3.12", "numpy", "scipy", "gfortran=15.2", "gcc=15.2", "cmake", "make", "git")
+
+#: Where TELEMAC built on Windows comes from (no installer script: aXqua's own steps, axqua.install.windows_telemac).
+_TELEMAC_SOURCE = "https://gitlab.pam-retd.fr/otm/telemac-mascaret"
+
 #: What happens to an installation that exists in the folder (Options.reinstall).
 #: ``""``/``continue``: the installer continues in it, keeping what is downloaded and
 #: built; ``replace``: the earlier installation is removed first and installed anew.
@@ -106,6 +115,8 @@ ESTIMATES = {
     "telemac": "10 to 30 minutes",
     "telemac-all": "one to two hours; most of it downloads the example cases of TELEMAC",
     "telemac-none": "5 to 20 minutes",
+    "telemac-windows": "20 to 40 minutes; the compilers are a download of several hundred MB",
+    "telemac-windows-all": "one to two hours; the compilers are a download of several hundred MB",
     "openfoam": "a few minutes with an existing OpenFOAM v2406",
     "openfoam-source": "several hours; OpenFOAM v2406 is compiled from its source code",
     "postprocessors": "a few minutes; VisIt is a download of 600 MB",
@@ -203,6 +214,10 @@ class Options:
     bind: bool = True                   # enter the result into the profile
     #: What happens to an earlier installation in the folder (see :data:`REINSTALL`).
     reinstall: str = ""
+    #: Windows: build TELEMAC as a Windows program in the user folder, without WSL and without an administrator (one processor core, no MPI).
+    native: bool = False
+    #: TELEMAC built on Windows: ``2d`` (TELEMAC-2D with GAIA, the tested build) or ``all``.
+    modules: str = "2d"
 
     @classmethod
     def from_dict(cls, data: dict[str, Any] | None) -> "Options":
@@ -220,7 +235,7 @@ class Options:
                 value = Path(value).expanduser() if value not in (None, "") else None
             elif key == "jobs":
                 value = int(value) if value not in (None, "") else None
-            elif key in ("visualization", "visit", "examples", "smoke_test", "bind"):
+            elif key in ("visualization", "visit", "examples", "smoke_test", "bind", "native"):
                 value = bool(value)
             elif key == "scope":
                 value = str(value or "user").strip().lower()
@@ -234,6 +249,12 @@ class Options:
                     from axqua.core.errors import ConfigError
                     raise ConfigError("reinstall must be one of continue, replace, "
                                       f"got {value!r}", subject="reinstall")
+            elif key == "modules":
+                value = str(value or "2d").strip().lower()
+                if value not in MODULES:
+                    from axqua.core.errors import ConfigError
+                    raise ConfigError(f"modules must be one of {', '.join(MODULES)}, got {value!r}",
+                                      subject="modules")
             elif key == "telemac_examples":
                 if isinstance(value, bool):         # the switch this setting once was
                     value = "inputs" if value else "none"
@@ -268,7 +289,38 @@ class Options:
             "base": self.base,
             "bind": self.bind,
             "reinstall": self.reinstall,
+            "native": self.native,
+            "modules": self.modules,
         }
+
+
+def windows_folder() -> Path:
+    """Where TELEMAC built on Windows goes when the user names no folder: the source code, the build and the compiler environment side by side."""
+    return Path.home() / "opt" / "telemac"
+
+
+def conda_base(prefix: str | None = None) -> Path | None:
+    """The conda installation aXqua runs from (Miniforge, Miniconda, Anaconda), or ``None``.
+
+    aXqua is installed in an environment of it (``<base>\\envs\\axqua-env``); the plugin starts it without the variables of an activated conda, so the folder of this Python is what tells.
+    """
+    candidates = []
+    if os.environ.get("CONDA_EXE"):
+        candidates.append(Path(os.environ["CONDA_EXE"]).resolve().parents[1])
+    here = Path(prefix or sys.prefix)
+    candidates += [here.parents[1]] if here.parent.name.lower() == "envs" else []
+    candidates.append(here)
+    for base in candidates:
+        if conda_program(base):
+            return base
+    return None
+
+
+def conda_program(base: Path) -> Path | None:
+    """The conda program of the installation *base*."""
+    names = (("Scripts", "conda.exe"), ("condabin", "conda.bat"), ("_conda.exe",), ("bin", "conda"),
+             ("condabin", "conda"))
+    return next((base.joinpath(*name) for name in names if base.joinpath(*name).is_file()), None)
 
 
 def default_folder(target: str, scope: str = "user") -> Path:
@@ -408,6 +460,8 @@ def clean_environment() -> dict[str, str]:
 
     The language is English (``C.UTF-8``) whatever the computer is set to: aXqua reads the answers of apt (``Unable to locate package``, ``selecting ... instead of``), which a German system writes in German, and an English installation log is one language with the English lines of aXqua (review of 2026-11-06).
     """
+    if os.name == "nt":
+        return _clean_windows_environment()
     keep = {"HOME", "USER", "LOGNAME", "TERM", "DISPLAY", "WSL_INTEROP", "WSL_DISTRO_NAME", "WSLENV",
             "AXQUA_WSL_DISTRO",
             "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS",
@@ -422,6 +476,29 @@ def clean_environment() -> dict[str, str]:
     # such files in the clone they were given. The commands also carry -B, because
     # an isolated interpreter (-I) does not read this variable.
     env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return env
+
+
+#: What a Windows program needs of the environment: the folders of the user and of Windows, the processor, the proxy.
+WINDOWS_KEEP = ("SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "PATHEXT", "USERPROFILE", "USERNAME",
+                "USERDOMAIN", "HOMEDRIVE", "HOMEPATH", "APPDATA", "LOCALAPPDATA", "PROGRAMDATA", "PROGRAMFILES",
+                "PROGRAMFILES(X86)", "PROGRAMW6432", "COMMONPROGRAMFILES", "ALLUSERSPROFILE", "PUBLIC", "TEMP", "TMP",
+                "NUMBER_OF_PROCESSORS", "PROCESSOR_ARCHITECTURE", "PROCESSOR_IDENTIFIER", "OS", "COMPUTERNAME",
+                "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "SSL_CERT_FILE", "REQUESTS_CA_BUNDLE",
+                "AXQUA_DATA_DIR", "AXQUA_HOME")
+
+
+def _clean_windows_environment() -> dict[str, str]:
+    """The environment of an installation step on Windows: Windows itself, nothing of conda or of QGIS.
+
+    The search path is the one of Windows alone, as on the test computer where the build ran: a conda environment's or QGIS's compilers and DLLs would otherwise mix into it. The steps that need the compilers add their environment themselves.
+    """
+    upper = {key.upper(): value for key, value in os.environ.items()}
+    env = {key: upper[key] for key in WINDOWS_KEEP if key in upper}
+    root = env.get("SYSTEMROOT") or env.get("WINDIR") or r"C:\Windows"
+    env["PATH"] = ";".join([rf"{root}\system32", root, rf"{root}\System32\Wbem"])
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    env["PYTHONUTF8"] = "1"
     return env
 
 
@@ -890,8 +967,12 @@ class Step:
 
 
 def _quote(text: str) -> str:
+    if "\n" in text:
+        return "'<a short Python program>'"
+    if os.name == "nt":                     # as the Command Prompt reads it
+        return subprocess.list2cmdline([text])
     import shlex
-    return shlex.quote(text) if "\n" not in text else "'<a short Python program>'"
+    return shlex.quote(text)
 
 
 @dataclass
@@ -927,6 +1008,10 @@ class Plan:
         return bool(self.steps or self.outputs) \
             and not any(f.severity == ERROR for f in self.findings)
 
+    @property
+    def _native(self) -> bool:
+        return self.host.system == "windows" and self.target == "telemac" and self.options.native
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "target": self.target,
@@ -935,9 +1020,9 @@ class Plan:
             "options": self.options.as_dict(),
             "folder": str(self.folder),
             "installers": {"path": str(self.installers) if self.installers else "",
-                           "repository": ("bundled with aXqua"
-                                          if self.installers == BUNDLED else REPOSITORY),
-                           "ref": ("" if self.installers == BUNDLED
+                           "repository": ("bundled with aXqua" if self.installers == BUNDLED else
+                                          _TELEMAC_SOURCE if self._native else REPOSITORY),
+                           "ref": ("" if self.installers == BUNDLED or self._native
                                    else self.options.ref or PINNED)},
             "steps": [step.as_dict() for step in self.steps],
             "packages": {"needed": self.needed, "missing": self.missing,
@@ -988,7 +1073,8 @@ def plan(target: str, options: Options | None = None, *,
                           remedy="One of: " + ", ".join(TARGETS))
     options = options or Options()
     host = host or hosts.detect(base=options.base or None)
-    folder = (options.folder or default_folder(target, options.scope)).expanduser()
+    native = host.system == "windows" and target == "telemac" and options.native
+    folder = (options.folder or (windows_folder() if native else default_folder(target, options.scope))).expanduser()
     if not folder.is_absolute():
         folder = Path.cwd() / folder
     out = Plan(target=target, host=host, options=options, folder=folder)
@@ -1000,6 +1086,11 @@ def plan(target: str, options: Options | None = None, *,
                                     remedy=remedy))
 
     # ---- the computer ------------------------------------------------------------
+    if host.system == "windows" and target == "telemac" and options.native:
+        _plan_telemac_windows(out, add)
+        if any(f.severity == ERROR for f in out.findings):
+            out.steps = []
+        return out
     if host.system == "windows":
         add(ERROR, "axqua.install.windows_needs_wsl",
             "TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2), which is not set up on this computer" + (f" ({host.pretty})" if host.pretty else ""),
@@ -1269,6 +1360,83 @@ def _plan_telemac(out: Plan, checkout: Path, add) -> None:
                          "are downloaded (1,500 files, 1.65 GB).")
     if not out.options.salome:
         out.notes.append("SALOME is not installed. aXqua does not need it.")
+
+
+def _plan_telemac_windows(out: Plan, add) -> None:
+    """TELEMAC built on Windows itself: no WSL, no administrator, one processor core.
+
+    A conda environment with the GNU compilers for Windows from conda-forge, then the steps of :mod:`axqua.install.windows_telemac`: the source code with Git, CMake with MinGW Makefiles, the build, and the environment script ``configs\\pysource.win.bat``. These are the commands a Windows test computer without administrator rights built TELEMAC v9.1.1 with and ran the Isar example on (2026-11-09). The example cases of TELEMAC come with their steering files only.
+    """
+    from axqua.install import windows_telemac as wt
+
+    subject = "install.telemac"
+    options, root = out.options, out.folder
+    home, env = root / "telemac-mascaret", root / "telemac-build"
+    if any(ch.isspace() for ch in str(root)):
+        add(ERROR, "axqua.install.folder_with_space",
+            f"the folder {root} has a space in its name; TELEMAC cannot be built in such a folder",
+            "Select a folder without spaces, for example opt\\telemac in your user folder.",
+            where=f"{subject}.folder")
+    if options.scope == "system":
+        add(ERROR, "axqua.install.windows_user_only",
+            "TELEMAC built on Windows is installed for you alone, in your user folder; an installation for all "
+            "users of a Windows computer is not available", "Install it for yourself.", where=f"{subject}.scope")
+    if options.salome:
+        out.notes.append("SALOME is not installed with TELEMAC built on Windows. aXqua does not need it.")
+    base = conda_base()
+    conda = conda_program(base) if base else None
+    if conda is None:
+        add(ERROR, "axqua.install.conda_missing",
+            "TELEMAC built on Windows takes its compilers from conda-forge, and aXqua does not run from a conda "
+            "installation (Miniforge, Miniconda or Anaconda)",
+            "Install aXqua in a conda environment as the installation guide describes, then start this "
+            "installation from that aXqua.")
+        return
+    if home.exists() and options.reinstall != "replace":
+        add(WARNING, "axqua.install.folder_exists",
+            f"{home} exists already; the installation keeps its source code and builds TELEMAC in it again",
+            "Select another folder to leave this installation untouched.", where=f"{subject}.folder")
+    python = [sys.executable, "-B", "-m", wt.__name__]
+    where = ["--home", str(home), "--env", str(env), "--conda-base", str(base)]
+    compilers = env / "Library" / "bin" / "x86_64-w64-mingw32-gfortran.exe"
+    if compilers.is_file():
+        out.notes.append(f"The compiler environment {env} exists and is used as it is.")
+    else:
+        out.steps.append(Step("Download the compilers (conda-forge)",
+                              [str(conda), "create", "-y", "--override-channels", "-c", "conda-forge",
+                               "--prefix", str(env), *WINDOWS_PACKAGES]))
+    out.steps.append(Step("Download the source code of TELEMAC",
+                          [*python, "source", *where, "--tag", options.tag or wt.TAG]))
+    out.steps.append(Step("Configure the build", [*python, "configure", *where]))
+    out.steps.append(Step("Compile TELEMAC", [*python, "build", *where, "--jobs", str(options.jobs or default_jobs()),
+                                              "--modules", options.modules]))
+    out.steps.append(Step("Write the environment script", [*python, "script", *where]))
+    out.outputs["solvers.telemac.setup_script"] = str(home / "configs" / wt.SCRIPT)
+    out.expects.append(str(wt.build_dir(home) / "bin" / "telemac2d.exe"))
+    out.notes += [
+        f"TELEMAC {options.tag or wt.TAG} is built as a Windows program in {home}, with the GNU compilers of "
+        f"conda-forge in {env}. No administrator and no WSL are needed.",
+        "It runs every simulation on one processor core: this build has no parallel computing (MPI).",
+        "TELEMAC-2D with GAIA is built, as tested on Windows." if options.modules == "2d" else
+        "All modules are built, also TELEMAC-3D. Only TELEMAC-2D has been tested on Windows so far.",
+        "The example cases of TELEMAC come with their steering files only."]
+    if options.reinstall == "replace":
+        replaced, why = _removal("telemac", root)
+        if not replaced:
+            add(ERROR, "axqua.install.nothing_to_replace", f"there is no earlier installation to remove: {why}",
+                "Select the folder of the existing installation, or install into a new folder.",
+                where=f"{subject}.folder")
+        else:
+            out.steps.insert(0, Step("Remove the earlier installation",
+                                     [*python, "remove", *(str(path) for path in replaced)]))
+            out.notes.append("The earlier installation is removed before it is installed again: "
+                             + ", ".join(str(path) for path in replaced) + ".")
+    out.estimate = ESTIMATES["telemac-windows" if options.modules == "2d" else "telemac-windows-all"]
+    free = _free_gb(root)
+    if free is not None and free < DISK_GB["telemac"]:
+        add(WARNING, "axqua.install.little_space",
+            f"{free:.0f} GiB are free in {root}; the installation needs about {DISK_GB['telemac']} GiB",
+            "Select a folder on a drive with more free space.", where=f"{subject}.folder")
 
 
 def _plan_openfoam(out: Plan, checkout: Path, add) -> None:

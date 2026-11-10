@@ -71,9 +71,10 @@ def test_a_plan_on_windows_is_made_in_wsl_and_binds_in_windows(monkeypatch, caps
 
 
 def test_windows_without_wsl_gets_one_finding_for_its_administrator(monkeypatch, capsys, as_windows):
+    """For OpenFOAM; TELEMAC is built in Windows itself there (tests/test_install_windows_native.py)."""
     as_windows(installcli)
     monkeypatch.setattr(wsl, "executable", lambda: None)
-    assert installcli.run_install(["plan", "telemac", "--json"]) == 0
+    assert installcli.run_install(["plan", "openfoam", "--json"]) == 0
     data = json.loads(capsys.readouterr().out)["data"]
     codes = [f["code"] for f in data["findings"]]
     assert codes == ["axqua.install.windows_needs_wsl"]
@@ -202,7 +203,7 @@ def test_windows_with_the_wsl_stub_but_no_wsl_gets_the_finding_for_its_administr
         "The Windows Subsystem for Linux is not installed. You can install by running 'wsl.exe --install'.",
         "For more information please visit https://aka.ms/wslinstall"]
     as_windows(installcli)
-    assert installcli.run_install(["plan", "telemac", "--json"]) == 0
+    assert installcli.run_install(["plan", "openfoam", "--json"]) == 0
     data = json.loads(capsys.readouterr().out)["data"]
     assert [f["code"] for f in data["findings"]] == ["axqua.install.windows_needs_wsl"]
     assert "administrator" in data["findings"][0]["remedy"] and not data["ready"]
@@ -210,4 +211,6 @@ def test_windows_with_the_wsl_stub_but_no_wsl_gets_the_finding_for_its_administr
     assert data["folder"] == ""                               # not C:\Users\<name>\opt, where nothing is installed
     assert installcli.run_install(["overview", "--json"]) == 0
     targets = json.loads(capsys.readouterr().out)["data"]["targets"]
-    assert all(t["default_folder"] == "" and t["default_folders"] == {} for t in targets)
+    assert all(t["default_folder"] == "" and t["default_folders"] == {} for t in targets if t["target"] != "telemac")
+    telemac = next(t for t in targets if t["target"] == "telemac")      # built in Windows itself, in the user folder
+    assert telemac["default_folder"] == str(Path.home() / "opt" / "telemac")

@@ -59,7 +59,17 @@ The *Check* tab of an installation wizard, the *Installation* tab of a failed in
 .. _axqua-install-windows-needs-wsl:
 
 ``TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2), which is not set up on this computer``
-    The simulation programs do not run in Windows itself but inside WSL. An administrator sets up WSL once with ``wsl --install -d Ubuntu-24.04`` in a terminal with administrator rights, then restarts the computer; open *Ubuntu* from the Start menu and create a Linux user. The *Setup Wizard* then installs TELEMAC and OpenFOAM into it without an administrator (:doc:`../installation/simulation-software`).
+    OpenFOAM does not run in Windows itself but inside WSL; TELEMAC can also be built in Windows itself, without WSL (:ref:`TELEMAC built on Windows <setup-telemac-windows-native>`). An administrator sets up WSL once with ``wsl --install -d Ubuntu-24.04`` in a terminal with administrator rights, then restarts the computer; open *Ubuntu* from the Start menu and create a Linux user. The *Setup Wizard* then installs TELEMAC and OpenFOAM into it without an administrator (:doc:`../installation/simulation-software`).
+
+.. _axqua-install-conda-missing:
+
+``TELEMAC built on Windows takes its compilers from conda-forge, and aXqua does not run from a conda installation``
+    The installation of TELEMAC in Windows itself downloads its compilers into a conda environment, with the conda of the installation that aXqua runs from. aXqua was installed without conda, for example with the Python of python.org. Install Miniforge in your user folder, create the environment ``axqua-env`` and install aXqua in it as :doc:`../installation/qgis-plugin` describes, select its ``axqua.exe`` in *aXqua > Settings*, and start the installation again (:ref:`TELEMAC built on Windows <setup-telemac-windows-native>`).
+
+.. _axqua-install-windows-user-only:
+
+``TELEMAC built on Windows is installed for you alone, in your user folder``
+    TELEMAC built in Windows itself goes into a folder of your user account and needs no administrator. An installation for all users of a Windows computer is not available. Install it for yourself; another user of the computer installs it for themselves.
 
 .. _axqua-install-as-root:
 

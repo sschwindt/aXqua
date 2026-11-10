@@ -124,6 +124,14 @@ CHOICES = {
         ("user", "Me only, in my Linux home folder in WSL (no administrator rights)"),
         ("system", "All users of the WSL distribution, below /opt (no password)"),
     ),
+    "route": (
+        ("windows", "In Windows itself: one processor core, no administrator"),
+        ("wsl", "Inside WSL: parallel runs; WSL must be set up by an administrator"),
+    ),
+    "modules": (
+        ("2d", "TELEMAC-2D with GAIA (tested on Windows)"),
+        ("all", "All modules, also TELEMAC-3D (not yet tested on Windows)"),
+    ),
     "telemac_examples": (
         ("inputs", "Input files of examples only (about 360 files, 460 MB)"),
         ("all", "Everything, with reference results and manuals (1,500 files, 1.65 GB)"),
@@ -143,6 +151,16 @@ REINSTALL = (
     ("continue", "Continue in the existing folder, keeping what is downloaded and built"),
     ("new", "Install it again in a new folder; the existing installation stays"),
 )
+
+#: TELEMAC on Windows: built in Windows itself or inside WSL (``route``), and which modules a build in Windows compiles. Shown only on Windows (:meth:`InstallWizard._fields`).
+ROUTE_HINT = ("In Windows itself, TELEMAC is compiled in your user folder with compilers from conda-forge. It needs "
+              "no administrator and no WSL, and runs every simulation on one processor core. Inside WSL, TELEMAC "
+              "can run in parallel; an administrator sets up WSL once.")
+MODULES_HINT = ("TELEMAC-2D with GAIA is the build that has been tested on Windows. All modules add TELEMAC-3D "
+                "and take longer to compile.")
+#: The settings of TELEMAC that a build in Windows itself does not have, and the one it has alone.
+NOT_IN_WINDOWS = ("scope", "telemac_examples", "salome")
+ONLY_IN_WINDOWS = ("modules",)
 
 #: ``(program, option) -> answers that are not offered there``. The installation of the
 #: postprocessors installs at least one of them.
@@ -228,6 +246,7 @@ class InstallWizard(QDialog):
         self._planned_with: dict | None = None    # the options of the plan shown
         self._widgets: dict[str, QWidget] = {}
         self._triangles: dict[str, fnd.TriangleButton] = {}
+        self._rows: dict[str, list[QWidget]] = {}    # key -> label, field, hint
         # Run fixes
         self._fixing = ""                          # "", "desktop" or "terminal"
         self._fix_rounds = 0
@@ -291,14 +310,18 @@ class InstallWizard(QDialog):
         form = QFormLayout()
         if self.reinstall:
             self._reinstall_row(form)
-        for key, label, kind, hint in FIELDS[self.target]:
-            form.addRow("" if kind == "bool" else label, self._row(key, label, kind))
+        for key, label, kind, hint in self._fields():
+            holder = self._row(key, label, kind)
+            form.addRow("" if kind == "bool" else label, holder)
+            self._rows[key] = [w for w in (form.labelForField(holder), holder) if w is not None]
             if key in REQUIRED:
                 mark_required(form.labelForField(form.itemAt(form.rowCount() - 1,
                                                              _FIELD_ROLE).widget()),
                               True)
             if hint:
-                form.addRow("", _note(hint))
+                note = _note(hint)
+                form.addRow("", note)
+                self._rows[key].append(note)
         layout.addLayout(form)
 
         self.advanced = QGroupBox("Further settings")
@@ -324,6 +347,38 @@ class InstallWizard(QDialog):
         layout.addStretch(1)
         self._fill_defaults()
         return page
+
+    def _fields(self) -> list[tuple]:
+        """The settings of this program; TELEMAC on Windows adds how it is built and, built in Windows itself, which modules."""
+        fields = list(FIELDS[self.target])
+        if self.target == "telemac" and self._windows():
+            fields.insert(0, ("route", "Build TELEMAC", "choice", ROUTE_HINT))
+            after = next(i for i, field in enumerate(fields) if field[0] == "folder") + 1
+            fields.insert(after, ("modules", "Modules", "choice", MODULES_HINT))
+        return fields
+
+    def _windows(self) -> bool:
+        return str(((self.overview or {}).get("host") or {}).get("system") or "") == "windows"
+
+    def _native(self) -> bool:
+        """Whether TELEMAC is built in Windows itself: chosen, or the one way without WSL."""
+        route = self._widgets.get("route")
+        return route is not None and route.currentData() == "windows"
+
+    def _route_changed(self) -> None:
+        """Show the settings of the chosen way of building, and move the folder along unless the user typed one."""
+        native = self._native()
+        for key, widgets in self._rows.items():
+            shown = not (native and key in NOT_IN_WINDOWS) and (native or key not in ONLY_IN_WINDOWS)
+            for widget in widgets:
+                widget.setVisible(shown)
+        folder = self._widgets.get("folder")
+        if folder is None or self.reinstall:
+            return
+        here = str(self.entry.get("native_folder") or self.entry.get("default_folder") or "")
+        wsl = str(self.entry.get("default_folder") or "") if self._distro_of_overview() else ""
+        if folder.text().strip() in ("", here, wsl):
+            folder.setText(here if native else wsl)
 
     def _reinstall_row(self, form: QFormLayout) -> None:
         """What happens to the installation that exists."""
@@ -377,8 +432,11 @@ class InstallWizard(QDialog):
         elif kind == "choice":
             widget = QComboBox()
             for value, text in CHOICES[key]:
-                if value not in NOT_OFFERED.get((self.target, key), ()):
-                    widget.addItem(text, value)
+                if value in NOT_OFFERED.get((self.target, key), ()):
+                    continue
+                if key == "route" and value == "wsl" and not self._distro_of_overview():
+                    continue            # no WSL distribution: TELEMAC is built in Windows itself
+                widget.addItem(text, value)
             line.addWidget(widget, 1)
         elif kind == "openfoam":
             widget = QComboBox()
@@ -452,6 +510,12 @@ class InstallWizard(QDialog):
             self._widgets["reuse_openfoam"].setCurrentIndex(0 if found else 1)
         if self.reinstall:
             self._reinstall_changed()
+        if "route" in self._widgets:
+            route = self._widgets["route"]
+            # with WSL set up, TELEMAC goes there and can run in parallel; without it, in Windows itself
+            route.setCurrentIndex(max(0, route.findData("wsl" if self._distro_of_overview() else "windows")))
+            route.currentIndexChanged.connect(lambda _=0: self._route_changed())
+            self._route_changed()
 
     def _browse(self, key: str, folder: bool) -> None:
         edit = self._widgets[key]
@@ -467,7 +531,10 @@ class InstallWizard(QDialog):
             edit.setText(linux(chosen) if folder and distro else chosen)
 
     def _distro(self) -> str:
-        """The WSL distribution this Windows computer installs into, or ``""``."""
+        """The WSL distribution this Windows computer installs into, or ``""`` (also for TELEMAC built in Windows itself)."""
+        return "" if self._native() else self._distro_of_overview()
+
+    def _distro_of_overview(self) -> str:
         host = (self.overview or {}).get("host") or {}
         return str(host.get("distro_wsl") or "")
 

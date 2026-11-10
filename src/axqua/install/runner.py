@@ -351,12 +351,32 @@ def start(plan: recipes.Plan, *, detach: bool = True, echo: bool = False
         execute(folder, echo=echo, interactive=_terminal())
         return read(folder)
 
+    argv = [sys.executable, "-m", "axqua", "install", "run", str(folder)]
     with open(folder / "runner.log", "ab") as out:
-        subprocess.Popen(                       # the runner; it outlives this process
-            [sys.executable, "-m", "axqua", "install", "run", str(folder)],
-            cwd=str(folder), stdin=subprocess.DEVNULL, stdout=out,
-            stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
+        if os.name == "nt":
+            _detach_on_windows(argv, folder, out)
+        else:
+            subprocess.Popen(                   # the runner; it outlives this process
+                argv, cwd=str(folder), stdin=subprocess.DEVNULL, stdout=out,
+                stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
     return read(folder)
+
+
+#: CreateProcess flags of the runner on Windows: a process group of its own, a hidden console that the programs of the build share (none of them opens a window), and out of the job object QGIS may hold its children in, so that closing QGIS does not end the build.
+CREATE_NEW_PROCESS_GROUP = 0x00000200
+CREATE_NO_WINDOW = 0x08000000
+CREATE_BREAKAWAY_FROM_JOB = 0x01000000
+
+
+def _detach_on_windows(argv: list[str], folder: Path, out) -> subprocess.Popen:
+    """Start the runner of a TELEMAC built on Windows so that it outlives QGIS; a job object that forbids breaking away keeps it inside."""
+    flags = CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW
+    kwargs = dict(cwd=str(folder), stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,
+                  close_fds=True)
+    try:
+        return subprocess.Popen(argv, creationflags=flags | CREATE_BREAKAWAY_FROM_JOB, **kwargs)
+    except OSError:
+        return subprocess.Popen(argv, creationflags=flags, **kwargs)
 
 
 # ------------------------------------------------------------------------- executing
@@ -559,11 +579,13 @@ def _run_step(step: recipes.Step, folder: Path, out, status: dict[str, Any],
               stop: dict[str, bool], *, echo: bool, log_path: Path,
               ask_here: bool = False) -> int:
     # sudo asks on the terminal of this session, so it must stay in it.
+    group = ({"creationflags": CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW} if os.name == "nt"
+             else {"start_new_session": not ask_here})
     proc = subprocess.Popen(
         step.argv, cwd=step.cwd or str(folder),
         env={**recipes.clean_environment(), **step.env},
         stdin=None if ask_here else subprocess.DEVNULL, stdout=out,
-        stderr=subprocess.STDOUT, start_new_session=not ask_here, close_fds=True)
+        stderr=subprocess.STDOUT, close_fds=True, **group)
     status["child_pid"] = proc.pid
     _write(folder, status)
     shown = log_path.stat().st_size if echo else 0
@@ -581,7 +603,7 @@ def _run_step(step: recipes.Step, folder: Path, out, status: dict[str, Any],
             try:
                 proc.wait(timeout=15)
             except subprocess.TimeoutExpired:
-                _kill_group(proc.pid, signal.SIGKILL)
+                _kill_group(proc.pid, hard=True)
                 proc.wait()
             raise _Stop()
 
@@ -600,9 +622,17 @@ def _echo(log_path: Path, shown: int) -> int:
     return shown + len(fresh)
 
 
-def _kill_group(pid: int, sig: int = signal.SIGTERM) -> None:
+def _kill_group(pid: int, *, hard: bool = False) -> None:
+    """End the step *pid* and everything it started: its process group, or on Windows its process tree (a compile is cmake, make and a compiler per file)."""
+    if os.name == "nt":
+        try:
+            subprocess.run(["taskkill", "/PID", str(int(pid)), "/T", "/F"], capture_output=True, timeout=60,
+                           check=False, creationflags=CREATE_NO_WINDOW)
+        except (OSError, subprocess.SubprocessError):
+            pass
+        return
     try:
-        os.killpg(pid, sig)
+        os.killpg(pid, signal.SIGKILL if hard else signal.SIGTERM)
     except (ProcessLookupError, PermissionError, OSError):
         pass
 
@@ -758,19 +788,25 @@ def cancel(ident: str | os.PathLike, *, grace: float = 20.0) -> dict[str, Any]:
         return _cancel_in_wsl(folder, status, grace=grace)
     pid = status.get("pid")
     if pid and _alive(status):
-        try:
-            os.kill(int(pid), signal.SIGTERM)   # the runner stops its own command
-        except OSError:
-            pass
+        if os.name != "nt":
+            # On Windows a signal would end the runner at once (TerminateProcess) and leave its build running; there it reads the request above instead.
+            try:
+                os.kill(int(pid), signal.SIGTERM)   # the runner stops its own command
+            except OSError:
+                pass
         deadline = time.time() + grace
         while time.time() < deadline and _alive(_load(folder) or status):
             time.sleep(0.2)
         if _alive(status):                      # it did not listen
-            if status.get("child_pid"):
-                _kill_group(int(status["child_pid"]), signal.SIGKILL)
-            try:
-                os.kill(int(pid), signal.SIGKILL)
-            except OSError:
-                pass
+            current = _load(folder) or status
+            if current.get("child_pid"):
+                _kill_group(int(current["child_pid"]), hard=True)
+            if os.name == "nt":
+                _kill_group(int(pid), hard=True)
+            else:
+                try:
+                    os.kill(int(pid), signal.SIGKILL)
+                except OSError:
+                    pass
             time.sleep(0.3)
     return read(folder)
