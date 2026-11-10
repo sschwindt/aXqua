@@ -111,6 +111,20 @@ def user_text(exc: Exception) -> str:
     return exc.user_text() if isinstance(exc, RunnerError) else str(exc)
 
 
+def submit_warnings(data) -> list[str]:
+    """The warnings an ``axqua submit`` answer carries, as sentences.
+
+    A submit that succeeds can still have changed something, such as the process count of a TELEMAC built without MPI (the Windows test computer, 2026-11-09); axqua gives such warnings in its answer since then, and an older axqua gives none.
+    """
+    out = []
+    for text in (data.get("warnings") or []) if isinstance(data, dict) else []:
+        text = str(text).strip()
+        if text:
+            text = text[0].upper() + text[1:]
+            out.append(text if text.endswith((".", "!", "?")) else text + ".")
+    return out
+
+
 @dataclass
 class RunnerInfo:
     """What a validated executable turned out to be."""

@@ -238,6 +238,27 @@ def test_submit_json_stdout_carries_the_document_alone(fake_case, capsys, monkey
     assert json.loads(out)["data"]["job_id"] == _Result.job_id
 
 
+def test_the_warnings_of_a_submit_are_in_its_json_answer(fake_case, capsys, monkeypatch,
+                                                         tmp_path):
+    """The plugin reads stdout only, so a warning of the submit went nowhere it showed: on the Windows test computer (2026-11-09) a job ran on 1 process instead of the case's 8 and QGIS did not say why."""
+    import logging
+
+    from axqua.jobs import submit as submit_mod
+
+    class _Result:
+        job_id = "2026-09-05-inn-steady-abcdef"
+        root = tmp_path / "job"
+
+    def _submit(*args, **kwargs):
+        logging.getLogger("axqua.jobs.submit").warning("runs on %d process only", 1)
+        return _Result()
+
+    monkeypatch.setattr(submit_mod, "submit_job", _submit)
+    config = str(fake_case.config_dir / "case-config.yml")
+    assert main(["submit", config, "--kind", "steady", "--json"]) == 0
+    assert _json(capsys)["data"]["warnings"] == ["runs on 1 process only"]
+
+
 def test_submit_without_json_still_prints_the_bare_job_id(fake_case, capsys, monkeypatch,
                                                           tmp_path):
     """The other half of the contract: ``$(axqua submit ...)`` is a job id."""

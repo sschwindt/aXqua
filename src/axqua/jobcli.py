@@ -207,14 +207,16 @@ def run_submit(argv: list[str]) -> int:
             from axqua.jobs.model import parse_kind
             solver = KIND_META[parse_kind(args.kind)].solver
             profile = resolve_profile(args.profile, solver=solver, cfg=cfg)
-        result = submit_mod.submit_job(
-            cfg, args.kind, profile=profile, options=_options(args.option),
-            job_root=args.job_root, np=args.np, workspace=args.workspace,
-            source_job=args.source_job, launcher=args.launcher,
-            # the full path: the job list is read from other folders (Clean Up asks it which jobs a case has)
-            source_config=str(Path(args.target).expanduser().resolve()),
-            validate_env=not args.no_validate_env,
-            dry_run=args.dry_run)
+        # The warnings go into the answer as well: the plugin reads stdout only.
+        with submit_mod.collect_warnings() as warned:
+            result = submit_mod.submit_job(
+                cfg, args.kind, profile=profile, options=_options(args.option),
+                job_root=args.job_root, np=args.np, workspace=args.workspace,
+                source_job=args.source_job, launcher=args.launcher,
+                # the full path: the job list is read from other folders (Clean Up asks it which jobs a case has)
+                source_config=str(Path(args.target).expanduser().resolve()),
+                validate_env=not args.no_validate_env,
+                dry_run=args.dry_run)
         if args.dry_run:
             return emit("submit.dry-run", result.as_dict(), as_json=args.as_json,
                         lines=[json.dumps(result.as_dict(), indent=2, default=str)])
@@ -223,7 +225,8 @@ def run_submit(argv: list[str]) -> int:
             # document and nothing else; printing the job id first made it parseable
             # only by the grace of a reader that goes hunting for the first '{'.
             return emit("submit", {"job_id": result.job_id,
-                                   "job_dir": str(result.root)}, as_json=True)
+                                   "job_dir": str(result.root),
+                                   "warnings": list(warned)}, as_json=True)
         # Without --json, the job id on its own line: the plan's contract is that
         # `submit` returns at minimum a JOB_ID, so `$(axqua submit ...)` works.
         print(result.job_id)

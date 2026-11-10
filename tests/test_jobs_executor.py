@@ -510,6 +510,24 @@ def test_a_telemac_without_mpi_runs_a_default_count_on_one_process(fake_case, mo
     assert spec.resources.mpi_processes == (1 if parallel is False else 8)
 
 
+def test_the_fitted_count_is_written_into_the_runner_log_of_the_job(fake_case, monkeypatch,
+                                                                    tmp_path):
+    """``axqua logs`` and the job list read ``runner.log``; the warning of the submit was only on the stderr of the process that submitted (the Windows test computer, 2026-11-09)."""
+    from axqua.core import installation
+
+    monkeypatch.setattr(installation, "_telemac_modules", lambda variables, checked: [
+        installation.Module("parallel", "parallel runs", False, detail="no partel")])
+    monkeypatch.setattr(submit_mod, "_validate_and_capture", lambda *a, **k: {})
+    monkeypatch.setattr(submit_mod, "_launch", lambda *a, **k: None)
+    monkeypatch.setattr(submit_mod, "_index", lambda jd: None)
+    fake_case.telemac.n_processors = 8
+    jd = submit_mod.submit_job(fake_case, JobKind.STEADY_RUN, job_root=tmp_path / "jobs")
+    text = jd.runner_log.read_text(encoding="utf-8")
+    assert "WARNING axqua.jobs.submit: this TELEMAC runs on one process only" in text
+    assert "instead of the 8 set for the case" in text
+    assert json.loads(jd.spec.read_text(encoding="utf-8"))["resources"]["mpi_processes"] == 1
+
+
 def test_a_count_asked_for_with_the_job_is_refused_by_a_telemac_without_mpi(fake_case,
                                                                             monkeypatch):
     from axqua.core import errors, installation

@@ -14,7 +14,7 @@ from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterEnum,
                        QgsProcessingParameterFile, QgsProcessingParameterNumber,
                        QgsProcessingParameterString)
 
-from ...core.runner_client import RunnerClient, RunnerError
+from ...core.runner_client import RunnerClient, RunnerError, submit_warnings
 from ...gui.settings_dialog import read_settings
 
 #: The fallback list, used until axqua has been asked. It is a copy of what axqua
@@ -128,6 +128,8 @@ class SubmitJobAlgorithm(QgsProcessingAlgorithm):
 
         job_id = str((data or {}).get("job_id") or "")
         feedback.pushInfo(f"Submitted {job_id}.")
+        for text in submit_warnings(data):
+            feedback.pushWarning(text)
         feedback.pushInfo("The solver is now running independently of QGIS; you can "
                           "close QGIS and it will keep going.")
         return {self.JOB_ID: job_id}

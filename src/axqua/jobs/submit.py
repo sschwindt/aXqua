@@ -25,8 +25,10 @@ import logging
 import os
 import socket
 import sys
+import time
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from axqua.core import errors
 from axqua.core.environment import ENTERED_MARKER
@@ -152,11 +154,13 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
     resolved = profile or profiles.implicit(cfg, spec.solver)
     env = resolved.solver_environment()
     captured: dict[str, str] = {}
-    if validate_env and spec.meta.needs_environment:
-        captured = _validate_and_capture(resolved, env, spec)
-        _fit_processes_to_installation(spec, captured, explicit_np=np)
+    with collect_warnings() as warned:
+        if validate_env and spec.meta.needs_environment:
+            captured = _validate_and_capture(resolved, env, spec)
+            _fit_processes_to_installation(spec, captured, explicit_np=np)
 
     jd = create_job(cfg, spec, job_root=job_root)
+    _note_in_runner_log(jd, warned)
     if spec.workspace.mode == "case":
         # The ticket that fixes this job's place among the jobs of its case. Written
         # here and not by the runner, so that the order is the order of submission and
@@ -177,6 +181,48 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
         raise
     _index(jd)
     return jd
+
+
+@contextmanager
+def collect_warnings() -> Iterator[list[str]]:
+    """The warnings the ``axqua`` logger gives while the block runs, as text.
+
+    A warning of the submit (a process count fitted to the installation, solver variables from the ambient shell) went only to the stderr of the submitting process, which the plugin does not show: on the Windows test computer (2026-11-09) the job ran on 1 process and nothing in QGIS said why.
+    """
+    found: list[str] = []
+
+    class _Collect(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            try:
+                found.append(record.getMessage())
+            except Exception:                       # noqa: BLE001
+                self.handleError(record)
+
+    handler = _Collect(logging.WARNING)
+    root = logging.getLogger("axqua")
+    root.addHandler(handler)
+    try:
+        yield found
+    finally:
+        root.removeHandler(handler)
+
+
+def _note_in_runner_log(jd: JobDir, warned: list[str]) -> None:
+    """The warnings of the submit at the top of the job's ``runner.log``, where ``axqua logs`` and the job list find them later.
+
+    The runner appends to the same file when it starts.
+    """
+    if not warned:
+        return
+    stamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        jd.runner_log.parent.mkdir(parents=True, exist_ok=True)
+        with open(jd.runner_log, "a", encoding="utf-8") as fh:
+            for text in warned:
+                fh.write(f"{stamp} WARNING axqua.jobs.submit: {text}\n")
+    except OSError as exc:
+        log.debug("the warnings of the submit were not written to %s (%s)",
+                  jd.runner_log, exc)
 
 
 def _fit_processes_to_installation(spec: JobSpec, variables: dict[str, str], *,

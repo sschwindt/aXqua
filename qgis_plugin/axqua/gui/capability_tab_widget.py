@@ -13,7 +13,7 @@ from qgis.PyQt.QtWidgets import (QCheckBox, QComboBox, QFormLayout, QGroupBox,
                                  QVBoxLayout, QWidget)
 
 from ..compat import PARTIALLY_CHECKED, UNCHECKED
-from ..core.runner_client import user_text
+from ..core.runner_client import submit_warnings, user_text
 from ..core.tasks import run_async
 
 #: Per-kind knobs worth exposing. Everything else stays in the case file, where it
@@ -209,7 +209,12 @@ class CapabilityTab(QWidget):
 
     def _submitted(self, data) -> None:
         job_id = (data or {}).get("job_id", "")
-        self.ctx.info(f"Submitted {job_id}. It keeps running if you close QGIS.")
+        text = f"Submitted {job_id}. It keeps running if you close QGIS."
+        warned = submit_warnings(data)
+        if warned:
+            self.ctx.warn(" ".join([text, *warned]))
+        else:
+            self.ctx.info(text)
         self.ctx.job_submitted(job_id)
 
     def _load_results(self) -> None:

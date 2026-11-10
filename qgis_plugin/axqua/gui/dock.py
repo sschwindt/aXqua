@@ -31,7 +31,7 @@ from ..compat import (CRITICAL, INFO, WARNING, enum_value, exec_dialog, log_mess
                       push_message)
 from ..core import styles
 from ..core import project as project_io
-from ..core.runner_client import RunnerClient, user_text
+from ..core.runner_client import RunnerClient, submit_warnings, user_text
 from . import findings as fnd
 from . import help as help_pages
 from . import sections
@@ -492,23 +492,30 @@ class AxquaDock(QDockWidget):
         kinds = list(kinds)
 
         def work():
-            submitted = []
+            submitted, warned = [], []
             for kind in kinds:
                 data = client.submit(config, kind,
                                      options=options if len(kinds) == 1 else None)
                 submitted.append(str((data or {}).get("job_id") or ""))
-            return submitted
+                warned += submit_warnings(data)
+            return submitted, warned
 
         from ..core.tasks import run_async
         run_async("aXqua: submitting " + ", ".join(kinds), work,
                   on_success=self._submitted,
                   on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
 
-    def _submitted(self, job_ids) -> None:
+    def _submitted(self, result) -> None:
+        job_ids, warned = result
         count = len(job_ids)
-        self.ctx.info((f"Submitted {job_ids[0]}." if count == 1 else
-                       f"Submitted {count} jobs. Each waits for the one before it.")
-                      + " They keep running if you close QGIS.")
+        text = ((f"Submitted {job_ids[0]}." if count == 1 else
+                 f"Submitted {count} jobs. Each waits for the one before it.")
+                + " They keep running if you close QGIS.")
+        # A warning of the submit (a process count fitted to the installation) is shown with it, not only in axqua's stderr.
+        if warned:
+            self.ctx.warn(" ".join([text, *warned]))
+        else:
+            self.ctx.info(text)
         self.job_submitted(job_ids[-1] if job_ids else "")
 
     def job_submitted(self, job_id: str) -> None:
