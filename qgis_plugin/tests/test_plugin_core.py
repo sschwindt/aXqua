@@ -54,6 +54,10 @@ def test_qgis_can_read_the_metadata():
     assert parser.get("general", "qgisMinimumVersion") == "3.44"
     # every release of the changelog is a continuation line of the one key
     assert "0.2.0" in parser.get("general", "changelog", raw=True)
+    # plugins.qgis.org reads every value with interpolation, so a single "%" refused the
+    # upload of 1.3.3 ("'%' must be followed by '%' or '('"), though QGIS itself loaded it
+    for key in parser["general"]:
+        parser.get("general", key)
 
 
 def test_metadata_declares_both_qgis_generations():

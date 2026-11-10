@@ -82,6 +82,12 @@ def qgis_cannot_read(path: Path) -> str:
         return " ".join(str(exc).split())
     if not parser.has_section("general"):
         return "there is no [general] section"
+    # plugins.qgis.org reads every value with interpolation: a single "%" refuses the upload
+    try:
+        for key in parser["general"]:
+            parser.get("general", key)
+    except configparser.Error as exc:
+        return f"{key}: " + " ".join(str(exc).split())[:200]
     return ""
 
 
