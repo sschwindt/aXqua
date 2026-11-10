@@ -635,6 +635,7 @@ class InstallWizard(QDialog):
 
     def show_plan(self, plan: dict | None, *, error: str = "") -> None:
         self.plan = plan
+        self.check_error = "" if plan is not None else error    # for Report issue
         self.recheck_button.setEnabled(True)
         if plan is None:
             self.plan_label.setText("The check could not be made: " + error)
@@ -797,7 +798,7 @@ class InstallWizard(QDialog):
     def report(self) -> None:
         title, body = report_issue.installation_report(
             self.target, self.plan, self.status if self.install_id else None,
-            rounds=self._fix_rounds)
+            rounds=self._fix_rounds, error=getattr(self, "check_error", ""))
         exec_dialog(report_issue.report_dialog(title, body, parent=self))
 
     # -- the installation ---------------------------------------------------------

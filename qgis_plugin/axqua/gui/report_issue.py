@@ -15,6 +15,7 @@ from __future__ import annotations
 import configparser
 import os
 import platform
+import re
 from pathlib import Path
 from urllib.parse import quote, urlencode
 
@@ -39,14 +40,31 @@ def metadata(path: Path = METADATA) -> dict[str, str]:
 
 
 def anonymize(text: str, home: str | None = None) -> str:
-    """*text* with the home folder of the user written as ``~``."""
+    """*text* with the home folder of the user written as ``~``.
+
+    A Windows home folder is matched with either separator and in any case, as Windows reads it: ``C:/Users/name`` stayed in a report while ``C:\\Users\\name`` was replaced (the Windows test computer, 2026-11-10). A longer folder name that starts with the home folder's (``name2``) is not replaced.
+    """
     home = home if home is not None else os.path.expanduser("~")
-    return text.replace(home, "~") if home and home != "/" else text
+    home = home.rstrip("/\\") if home else home
+    if not home:
+        return text
+    windows = "\\" in home or re.match(r"^[A-Za-z]:", home) is not None
+    if windows:
+        parts = [re.escape(part) for part in re.split(r"[\\/]+", home)]
+        pattern = r"[\\/]+".join(parts)
+        flags = re.IGNORECASE
+    else:
+        pattern, flags = re.escape(home), 0
+    return re.sub(pattern + r"(?![\w.-])", "~", text, flags=flags)
 
 
 def installation_report(target: str, plan: dict | None = None,
-                        status: dict | None = None, *, rounds: int = 0) -> tuple[str, str]:
-    """``(title, body)`` of a report on an installation that did not work out."""
+                        status: dict | None = None, *, rounds: int = 0,
+                        error: str = "") -> tuple[str, str]:
+    """``(title, body)`` of a report on an installation that did not work out.
+
+    *error* is the message of a check that could not be made: then there is no plan, and the report said nothing of what went wrong (the Windows test computer, 2026-11-10).
+    """
     info = metadata()
     plan = plan or {}
     status = status or {}
@@ -54,6 +72,9 @@ def installation_report(target: str, plan: dict | None = None,
     lines = [f"**What:** installation of {target} from the aXqua plugin",
              f"**Plugin version:** {info.get('version') or 'unknown'}",
              f"**Computer:** {host}", ""]
+    if error:
+        lines += ["**The check could not be made:**", "```", *error.strip().splitlines(),
+                  "```", ""]
     packages = plan.get("packages") or {}
     if packages.get("missing"):
         lines += [f"**System packages still missing after {rounds} round(s) of fixes:**",
