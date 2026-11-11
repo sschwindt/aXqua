@@ -43,14 +43,19 @@ def test_without_wsl_telemac_is_built_in_windows_itself(qgis_app):
 
     wizard = install_wizard.InstallWizard(_Client(), "telemac", _overview())
     route = wizard._widgets["route"]
-    assert [route.itemData(i) for i in range(route.count())] == ["windows"]
+    assert [route.itemData(i) for i in range(route.count())] == ["windows", "windows-mpi"]
+    assert route.currentData() == "windows"                     # one core stays the default
     assert wizard._native() and wizard._widgets["folder"].text() == NATIVE
     assert all(_hidden(wizard, key) for key in ("scope", "telemac_examples", "salome"))
     assert not _hidden(wizard, "modules")
     wizard._widgets["modules"].setCurrentIndex(wizard._widgets["modules"].findData("all"))
     flags = install_flags(wizard.options())
     assert "--native" in flags and flags[flags.index("--modules") + 1] == "all"
-    assert "--for-all-users" not in flags and "--telemac-examples" not in flags
+    assert "--for-all-users" not in flags and "--telemac-examples" not in flags and "--mpi" not in flags
+    route.setCurrentIndex(route.findData("windows-mpi"))
+    assert wizard._native() and not _hidden(wizard, "modules") and _hidden(wizard, "scope")
+    flags = install_flags(wizard.options())
+    assert "--native" in flags and "--mpi" in flags and flags[flags.index("--modules") + 1] == "all"
     wizard.deleteLater()
 
 

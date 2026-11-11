@@ -435,6 +435,24 @@ def test_status_dispatch_is_not_fooled_by_a_flag_value(tmp_path, capsys):
     assert _first_positional(["--json"]) == ""
 
 
+def test_status_of_a_job_folder_is_the_job(tmp_path, monkeypatch):
+    """The Windows MPI test (2026-11-11) passed the folder of a job and got the case form's
+    "unrecognized arguments: --job-root"; a folder holding ``job.json`` is a job."""
+    from axqua import cli, jobcli
+
+    seen = []
+    monkeypatch.setattr(jobcli, "run_job_status", lambda argv: seen.append(("job", argv)) or 0)
+    monkeypatch.setattr(cli, "_run_status", lambda argv: seen.append(("case", argv)) or 0)
+    job = tmp_path / "jobs" / "2026-01-01-x-steady-aaaaaa"
+    job.mkdir(parents=True)
+    (job / "job.json").write_text("{}")
+    case = tmp_path / "case.axq-case"
+    case.write_text("")
+    for argv in ([str(job), "--json"], ["--job-root", str(tmp_path / "jobs"), str(job)], [str(job / "job.json")]):
+        assert main(["status", *argv]) == 0 and seen.pop() == ("job", argv)
+    assert main(["status", str(case)]) == 0 and seen.pop() == ("case", [str(case)])
+
+
 def test_the_plan_example_profiles_parse_verbatim(tmp_path, monkeypatch, capsys):
     """The four profiles in plan §6, unchanged. If the schema drifted from what the
     plan documents, this is what would notice."""

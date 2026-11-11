@@ -117,6 +117,8 @@ ESTIMATES = {
     "telemac-none": "5 to 20 minutes",
     "telemac-windows": "20 to 40 minutes; the compilers are a download of several hundred MB",
     "telemac-windows-all": "one to two hours; the compilers are a download of several hundred MB",
+    "telemac-windows-mpi": "25 to 45 minutes; the compilers are a download of several hundred MB",
+    "telemac-windows-mpi-all": "one to two hours; the compilers are a download of several hundred MB",
     "openfoam": "a few minutes with an existing OpenFOAM v2406",
     "openfoam-source": "several hours; OpenFOAM v2406 is compiled from its source code",
     "postprocessors": "a few minutes; VisIt is a download of 600 MB",
@@ -214,10 +216,12 @@ class Options:
     bind: bool = True                   # enter the result into the profile
     #: What happens to an earlier installation in the folder (see :data:`REINSTALL`).
     reinstall: str = ""
-    #: Windows: build TELEMAC as a Windows program in the user folder, without WSL and without an administrator (one processor core, no MPI).
+    #: Windows: build TELEMAC as a Windows program in the user folder, without WSL and without an administrator (one processor core unless ``mpi``).
     native: bool = False
     #: TELEMAC built on Windows: ``2d`` (TELEMAC-2D with GAIA, the tested build) or ``all``.
     modules: str = "2d"
+    #: TELEMAC built on Windows: with parallel runs, MS-MPI and METIS in the installation folder (still no administrator).
+    mpi: bool = False
 
     @classmethod
     def from_dict(cls, data: dict[str, Any] | None) -> "Options":
@@ -235,7 +239,7 @@ class Options:
                 value = Path(value).expanduser() if value not in (None, "") else None
             elif key == "jobs":
                 value = int(value) if value not in (None, "") else None
-            elif key in ("visualization", "visit", "examples", "smoke_test", "bind", "native"):
+            elif key in ("visualization", "visit", "examples", "smoke_test", "bind", "native", "mpi"):
                 value = bool(value)
             elif key == "scope":
                 value = str(value or "user").strip().lower()
@@ -291,6 +295,7 @@ class Options:
             "reinstall": self.reinstall,
             "native": self.native,
             "modules": self.modules,
+            "mpi": self.mpi,
         }
 
 
@@ -1085,8 +1090,14 @@ def plan(target: str, options: Options | None = None, *,
         out.findings.append(Finding(severity, code, message, subject=where,
                                     remedy=remedy))
 
+    if options.mpi and not native:
+        add(ERROR, "axqua.install.mpi_native_only",
+            "the choice of MPI is for TELEMAC built in Windows itself; TELEMAC installed on Linux or inside WSL "
+            "has parallel runs anyway", "Leave out --mpi, or build TELEMAC in Windows itself (--native).",
+            where=f"{subject}.mpi")
+        return out
     # ---- the computer ------------------------------------------------------------
-    if host.system == "windows" and target == "telemac" and options.native:
+    if native:
         _plan_telemac_windows(out, add)
         if any(f.severity == ERROR for f in out.findings):
             out.steps = []
@@ -1363,9 +1374,9 @@ def _plan_telemac(out: Plan, checkout: Path, add) -> None:
 
 
 def _plan_telemac_windows(out: Plan, add) -> None:
-    """TELEMAC built on Windows itself: no WSL, no administrator, one processor core.
+    """TELEMAC built on Windows itself: no WSL, no administrator; one processor core, or parallel with ``mpi``.
 
-    A conda environment with the GNU compilers for Windows from conda-forge, then the steps of :mod:`axqua.install.windows_telemac`: the source code with Git, CMake with MinGW Makefiles, the build, and the environment script ``configs\\pysource.win.bat``. These are the commands a Windows test computer without administrator rights built TELEMAC v9.1.1 with and ran the Isar example on (2026-11-09). The example cases of TELEMAC come with their steering files only.
+    A conda environment with the GNU compilers for Windows from conda-forge, then the steps of :mod:`axqua.install.windows_telemac`: the source code with Git, for the parallel build MS-MPI and METIS, CMake with MinGW Makefiles, the build, and the environment script ``configs\\pysource.win.bat`` (``pysource.win-mpi.bat``). These are the commands a Windows test computer without administrator rights built TELEMAC v9.1.1 with and ran the Isar example on (2026-11-09 on one core, 2026-11-11 on four). The example cases of TELEMAC come with their steering files only.
     """
     from axqua.install import windows_telemac as wt
 
@@ -1407,18 +1418,34 @@ def _plan_telemac_windows(out: Plan, add) -> None:
                                "--prefix", str(env), *WINDOWS_PACKAGES]))
     out.steps.append(Step("Download the source code of TELEMAC",
                           [*python, "source", *where, "--tag", options.tag or wt.TAG]))
-    out.steps.append(Step("Configure the build", [*python, "configure", *where]))
-    out.steps.append(Step("Compile TELEMAC", [*python, "build", *where, "--jobs", str(options.jobs or default_jobs()),
-                                              "--modules", options.modules]))
-    out.steps.append(Step("Write the environment script", [*python, "script", *where]))
-    out.outputs["solvers.telemac.setup_script"] = str(home / "configs" / wt.SCRIPT)
-    out.expects.append(str(wt.build_dir(home) / "bin" / "telemac2d.exe"))
+    mpi = ["--mpi"] if options.mpi else []
+    jobs = str(options.jobs or default_jobs())
+    if options.mpi:
+        out.steps.append(Step("Prepare MS-MPI", [*python, "msmpi", *where]))
+        out.steps.append(Step("Compile METIS", [*python, "metis", *where, "--jobs", jobs]))
+    out.steps.append(Step("Configure the build", [*python, "configure", *where, *mpi]))
+    out.steps.append(Step("Compile TELEMAC", [*python, "build", *where, "--jobs", jobs,
+                                              "--modules", options.modules, *mpi]))
+    out.steps.append(Step("Write the environment script", [*python, "script", *where, *mpi]))
+    out.outputs["solvers.telemac.setup_script"] = str(home / "configs" / wt.script_name(options.mpi))
+    out.expects.append(str(wt.build_dir(home, options.mpi) / "bin" / "telemac2d.exe"))
+    if options.mpi:
+        out.expects.append(str(wt.build_dir(home, True) / "bin" / "partel.exe"))
+    out.notes.append(f"TELEMAC {options.tag or wt.TAG} is built as a Windows program in {home}, with the GNU "
+                     f"compilers of conda-forge in {env}. No administrator and no WSL are needed.")
+    if options.mpi:
+        out.notes.append(
+            f"It runs simulations on several processor cores (MPI). MS-MPI 10.1.3 of Microsoft and METIS 5.1.0.3 "
+            f"are downloaded into {wt.msmpi_dir(home)} and {wt.metis_dir(home)} and checked against the files "
+            "aXqua was tested with; nothing is installed in Windows itself. Before TELEMAC is compiled, MS-MPI "
+            "runs a test on two processes.")
+    else:
+        out.notes.append("It runs every simulation on one processor core: this build has no parallel computing "
+                         "(MPI). Select the parallel build (--mpi) for several cores.")
     out.notes += [
-        f"TELEMAC {options.tag or wt.TAG} is built as a Windows program in {home}, with the GNU compilers of "
-        f"conda-forge in {env}. No administrator and no WSL are needed.",
-        "It runs every simulation on one processor core: this build has no parallel computing (MPI).",
         "TELEMAC-2D with GAIA is built, as tested on Windows." if options.modules == "2d" else
-        "All modules are built, also TELEMAC-3D. Only TELEMAC-2D has been tested on Windows so far.",
+        "All modules are built, also TELEMAC-3D. TELEMAC-3D and GAIA ran TELEMAC's reference cases on a Windows "
+        "build; with aXqua only TELEMAC-2D has been tested on Windows so far.",
         "The example cases of TELEMAC come with their steering files only."]
     if options.reinstall == "replace":
         replaced, why = _removal("telemac", root)
@@ -1431,7 +1458,8 @@ def _plan_telemac_windows(out: Plan, add) -> None:
                                      [*python, "remove", *(str(path) for path in replaced)]))
             out.notes.append("The earlier installation is removed before it is installed again: "
                              + ", ".join(str(path) for path in replaced) + ".")
-    out.estimate = ESTIMATES["telemac-windows" if options.modules == "2d" else "telemac-windows-all"]
+    out.estimate = ESTIMATES["telemac-windows" + ("-mpi" if options.mpi else "")
+                             + ("" if options.modules == "2d" else "-all")]
     free = _free_gb(root)
     if free is not None and free < DISK_GB["telemac"]:
         add(WARNING, "axqua.install.little_space",

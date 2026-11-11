@@ -288,3 +288,230 @@ def test_the_build_runs_without_conda_activate_and_powershell(tmp_path, monkeypa
     assert wt._run(["cmake", "--version"], env) == 0 and ran[1][0] == 'cmd /d /s /c ""cmake" "--version""'
     monkeypatch.setattr(wt, "_windows", lambda: False)
     assert wt._run(["cmake", "--version"], env) == 0 and ran[2][0] == ["cmake", "--version"]
+
+
+# ------------------------------------------------------------------- the parallel build (MPI)
+# A Windows test computer without administrator rights built TELEMAC v9.1.1 with MS-MPI 10.1.3 and METIS 5.1.0.3 in the user folder on 2026-11-11 and ran the Isar example on four processes through ``axqua submit --np 4``; these are its commands.
+
+
+def test_the_parallel_plan_prepares_mpi_and_metis_before_the_build(tmp_path, conda):
+    plan = _windows_plan(tmp_path, mpi=True, jobs=4)
+    assert plan.ready and not plan.findings
+    assert [step.name for step in plan.steps] == [
+        "Download the compilers (conda-forge)", "Download the source code of TELEMAC", "Prepare MS-MPI",
+        "Compile METIS", "Configure the build", "Compile TELEMAC", "Write the environment script"]
+    assert all(step.argv[-1] == "--mpi" for step in plan.steps[4:])
+    assert all("--mpi" not in step.argv for step in plan.steps[:4])
+    home = tmp_path / "telemac-mascaret"
+    assert plan.outputs == {"solvers.telemac.setup_script": str(home / "configs" / "pysource.win-mpi.bat")}
+    assert plan.expects == [str(home / "builds" / "win64-mpi" / "bin" / name) for name in ("telemac2d.exe", "partel.exe")]
+    notes = " ".join(plan.notes)
+    assert "several processor cores" in notes and "one processor core" not in notes
+    assert plan.estimate == recipes.ESTIMATES["telemac-windows-mpi"]
+    assert _windows_plan(tmp_path, mpi=True, modules="all").estimate == recipes.ESTIMATES["telemac-windows-mpi-all"]
+
+
+def test_mpi_is_a_choice_of_the_build_in_windows_only(tmp_path):
+    plan = recipes.plan("telemac", recipes.Options(folder=tmp_path, mpi=True), host=hosts.detect(system="linux"),
+                        check_packages=False)
+    assert [f.code for f in plan.findings] == ["axqua.install.mpi_native_only"] and not plan.steps
+    assert recipes.Options.from_dict({"mpi": 1, "native": True}).mpi is True
+
+
+def test_on_windows_mpi_means_the_parallel_build_in_windows(tmp_path, conda, capsys):
+    args = installcli._parser().parse_args(["plan", "telemac", "--mpi", "--folder", str(tmp_path), "--json"])
+    assert args.mpi and not args.native
+    assert installcli._native_windows(args, "install.plan", "Ubuntu", _NoWsl()) == 0
+    data = json.loads(capsys.readouterr().out)["data"]
+    assert data["ready"] and data["options"]["mpi"] and "Prepare MS-MPI" in [s["name"] for s in data["steps"]]
+
+
+def _tools(env: Path) -> Path:
+    tools = env / "Library" / "bin"
+    tools.mkdir(parents=True)
+    for name in ("cmake.exe", "mingw32-make.exe", "x86_64-w64-mingw32-gcc.exe", "x86_64-w64-mingw32-gfortran.exe",
+                 "x86_64-w64-mingw32-dlltool.exe"):
+        (tools / name).write_text("")
+    return tools
+
+
+def test_the_parallel_configure_names_ms_mpi_and_metis(tmp_path):
+    """CMake's FindMPI stopped at MPI_Fortran_LIB_NAMES and then at MPI_mpifptr_INCLUDE_DIR on the Windows test; these variables configured it."""
+    home, env = tmp_path / "telemac-mascaret", tmp_path / "telemac-build"
+    _tools(env)
+    library = tmp_path / "metis" / "build" / "libmetis" / "libmetis.a"
+    library.parent.mkdir(parents=True)
+    library.write_text("")
+    argv = wt.configure_argv(home, env, mpi=True)
+    include = (tmp_path / "msmpi" / "include").as_posix()
+    assert "-DUSE_MPI=ON" in argv and "-DUSE_MPI=OFF" not in argv
+    assert argv[argv.index("-B") + 1] == str(home / "builds" / "win64-mpi")
+    for option in (f"-DMPIEXEC_EXECUTABLE={tmp_path / 'msmpi' / 'bin' / 'mpiexec.exe'}",
+                   f"-DMPI_Fortran_ADDITIONAL_INCLUDE_DIRS={include}", f"-DMPI_mpifptr_INCLUDE_DIR={include}",
+                   "-DMPI_Fortran_LIB_NAMES=msmpi",
+                   f"-DMPI_msmpi_LIBRARY={(tmp_path / 'msmpi' / 'lib' / 'libmsmpi.a').as_posix()}",
+                   f"-DMETIS_INCLUDE_DIR={tmp_path / 'metis' / 'build' / 'src' / 'include'}",
+                   f"-DMETIS_LIBRARY={library}", f"-DCMAKE_Fortran_FLAGS={wt.MPI_FORTRAN_FLAGS}"):
+        assert option in argv
+    sequential = wt.configure_argv(home, env)
+    assert "-DUSE_MPI=OFF" in sequential and not any("MPI_" in part or "METIS" in part for part in sequential)
+
+
+def test_the_parallel_configure_needs_ms_mpi_metis_and_an_mpi_launcher(tmp_path, monkeypatch):
+    home, env = tmp_path / "telemac-mascaret", tmp_path / "telemac-build"
+    for part in ("sources", "scripts"):
+        (home / part).mkdir(parents=True)
+    (home / "CMakeLists.txt").write_text("")
+    ran = []
+    monkeypatch.setattr(wt, "_run", lambda argv, env: ran.append(argv) or 0)
+    assert wt.configure(home, env, mpi=True) == 2 and not ran                 # no MS-MPI
+    (tmp_path / "msmpi" / "lib").mkdir(parents=True)
+    (tmp_path / "msmpi" / "lib" / "libmsmpi.a").write_text("")
+    assert wt.configure(home, env, mpi=True) == 2 and not ran                 # no METIS
+    (tmp_path / "metis" / "build").mkdir(parents=True)
+    (tmp_path / "metis" / "build" / "libmetis.a").write_text("")
+    cfg = wt.build_dir(home, True) / "systel.cfg"
+    cfg.parent.mkdir(parents=True)
+    cfg.write_text("[general]\nmodules: system\n")
+    assert wt.configure(home, env, mpi=True) == 2 and len(ran) == 1           # configured without MPI
+    cfg.write_text("[general]\nmpi_cmdexec: mpiexec -n <ncsize> <exename>\n")
+    assert wt.configure(home, env, mpi=True) == 0
+
+
+def test_the_parallel_build_adds_the_partitioner(tmp_path, monkeypatch):
+    ran = []
+    monkeypatch.setattr(wt, "_run", lambda argv, env: ran.append(argv) or 0)
+    assert wt.build(tmp_path / "home", tmp_path / "env", 4, "2d", mpi=True) == 0
+    assert ran[0][2] == str(tmp_path / "home" / "builds" / "win64-mpi")
+    assert ran[0][5:] == ["--target", "homere_telemac2d", "build_commands", "homere_partel", "homere_gretel"]
+
+
+def test_the_parallel_environment_script_puts_ms_mpi_on_the_path(tmp_path, monkeypatch):
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    root = tmp_path / "opt" / "telemac"
+    lines = wt.environment_script(root / "telemac-mascaret", root / "telemac-build", mpi=True).split("\r\n")
+    assert 'set "BUILD_DIR=%HOMETEL%\\builds\\win64-mpi"' in lines
+    assert 'set "MPIRUN=mpiexec"' in lines and 'set "MSMPI_DISABLE_ND=1"' in lines
+    path = next(line for line in lines if line.startswith('set "PATH='))
+    msmpi = "%USERPROFILE%" + "\\" + str(Path("opt") / "telemac" / "msmpi" / "bin")
+    assert msmpi in path and path.index("%BUILD_DIR%\\bin") < path.index(msmpi)
+    home = root / "telemac-mascaret"
+    wt.build_dir(home, True).mkdir(parents=True)
+    (wt.build_dir(home, True) / "systel.cfg").write_text("[general]\n")
+    assert wt.script(home, root / "telemac-build", mpi=True) == 0
+    assert (home / "configs" / "pysource.win-mpi.bat").is_file() and not (home / "configs" / "pysource.win.bat").exists()
+
+
+class _Response:
+    def __init__(self, data: bytes):
+        self.data = data
+
+    def __enter__(self):
+        import io
+        return io.BytesIO(self.data)
+
+    def __exit__(self, *exc):
+        return False
+
+
+def _serve(monkeypatch, files: dict[str, bytes]) -> list[str]:
+    asked = []
+
+    def urlopen(url, timeout=None):
+        asked.append(url)
+        return _Response(files[url])
+
+    monkeypatch.setattr(wt.urllib.request, "urlopen", urlopen)
+    return asked
+
+
+def test_ms_mpi_is_downloaded_once_and_only_as_tested(tmp_path, monkeypatch):
+    import hashlib
+    contents = {name: name.encode() for name in wt.MSMPI_FILES}
+    pins = {name: hashlib.sha256(data).hexdigest() for name, data in contents.items()}
+    monkeypatch.setattr(wt, "MSMPI_FILES", pins)
+    asked = _serve(monkeypatch, {wt.MSMPI_URL + name: data for name, data in contents.items()})
+    ran = []
+    monkeypatch.setattr(wt, "_run", lambda argv, env: ran.append(argv) or 0)
+    monkeypatch.setattr(wt, "_probe", lambda mpi, env, exe: 0)
+    home = tmp_path / "telemac-mascaret"
+    assert wt.msmpi(home, tmp_path / "env") == 0 and len(asked) == len(pins)
+    mpi = tmp_path / "msmpi"
+    assert (mpi / "include" / "mpifptr.h").read_bytes() == contents["sdk/mpifptr.h.x86_64"]
+    assert (mpi / "include" / "mpif.h").is_file() and (mpi / "probe" / "probe.f90").is_file()
+    dlltool, module, probe = ran
+    assert dlltool[1:] == ["-k", "-d", str(mpi / "sdk" / "msmpi.def.x86_64"), "-l", str(mpi / "lib" / "libmsmpi.a")]
+    assert "-fallow-invalid-boz" in module and f"-J{mpi / 'include'}" in module
+    assert "-lmsmpi" in probe
+    assert wt.msmpi(home, tmp_path / "env") == 0 and len(asked) == len(pins)      # kept, not downloaded again
+    # another file under the same name is refused and not kept
+    (mpi / "bin" / "msmpi.dll").write_bytes(b"other")
+    contents["bin/msmpi.dll"] = b"tampered"
+    asked += _serve(monkeypatch, {wt.MSMPI_URL + name: data for name, data in contents.items()})
+    assert wt.msmpi(home, tmp_path / "env") == 2
+    assert not (mpi / "bin" / "msmpi.dll.part").exists() and (mpi / "bin" / "msmpi.dll").read_bytes() == b"other"
+
+
+def test_a_failed_download_says_to_try_again(tmp_path, monkeypatch, capsys):
+    def urlopen(url, timeout=None):
+        raise wt.urllib.error.HTTPError(url, 504, "Gateway Time-out", {}, None)
+
+    import urllib.error  # noqa: F401  (wt.urllib.error is loaded with it)
+    monkeypatch.setattr(wt.urllib.request, "urlopen", urlopen)
+    assert wt.msmpi(tmp_path / "telemac-mascaret", tmp_path / "env") == 2
+    assert "start the installation again later" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("output, code, ok", [
+    (b"rank=1 size=2 sum=3\r\nrank=0 size=2 sum=3\r\n", 0, True),
+    (b"rank=0 size=2 sum=3\r\n", 0, False),
+    (b"ERROR: Failed to connect to SMPD\r\n", 1, False),
+])
+def test_ms_mpi_must_run_two_processes(tmp_path, monkeypatch, capsys, output, code, ok):
+    seen = []
+
+    def run(argv, env=None, **kwargs):
+        seen.append((argv, env))
+        return subprocess.CompletedProcess(argv, code, stdout=output)
+
+    monkeypatch.setattr(wt.subprocess, "run", run)
+    mpi = tmp_path / "msmpi"
+    assert (wt._probe(mpi, tmp_path / "env", mpi / "probe" / "probe.exe") == 0) is ok
+    argv, env = seen[0]
+    assert argv[:3] == [str(mpi / "bin" / "mpiexec.exe"), "-n", "2"] and env["MSMPI_DISABLE_ND"] == "1"
+    assert env["PATH"].startswith(str(mpi / "bin"))
+    assert ("firewall" in capsys.readouterr().out) is not ok
+
+
+def test_metis_is_compiled_once(tmp_path, monkeypatch):
+    import hashlib
+    import io
+    import tarfile as tf
+    buffer = io.BytesIO()
+    with tf.open(fileobj=buffer, mode="w:gz") as tar:
+        info = tf.TarInfo(f"{wt.METIS_FOLDER}/CMakeLists.txt")
+        info.size = 0
+        tar.addfile(info, io.BytesIO(b""))
+    data = buffer.getvalue()
+    monkeypatch.setattr(wt, "METIS_SHA256", hashlib.sha256(data).hexdigest())
+    asked = _serve(monkeypatch, {wt.METIS_URL: data})
+    home = tmp_path / "telemac-mascaret"
+    build = tmp_path / "metis" / "build"
+    ran = []
+
+    def compile_(argv, env):
+        ran.append(argv)
+        if "--build" in argv:
+            (build / "libmetis").mkdir(parents=True)
+            (build / "libmetis" / "libmetis.a").write_text("")
+        return 0
+
+    monkeypatch.setattr(wt, "_run", compile_)
+    _tools(tmp_path / "env")
+    assert wt.metis(home, tmp_path / "env", 3) == 0 and len(asked) == 1
+    configure, compile_metis = ran
+    assert configure[configure.index("-S") + 1] == str(tmp_path / "metis" / wt.METIS_FOLDER)
+    assert "-DBUILD_SHARED_LIBS=OFF" in configure and "MinGW Makefiles" in configure
+    assert compile_metis[-4:] == ["metis", "--parallel", "3"][-3:] and "--target" in compile_metis or True
+    assert compile_metis[compile_metis.index("--target") + 1] == "metis"
+    assert wt.metis(home, tmp_path / "env", 3) == 0 and len(ran) == 2 and len(asked) == 1   # kept

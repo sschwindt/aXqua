@@ -97,7 +97,11 @@ def _parser() -> argparse.ArgumentParser:
                    help="status: include the last N lines of the log")
     p.add_argument("--native", action="store_true",
                    help="Windows, TELEMAC: build it as a Windows program in your user folder, without WSL and without "
-                        "an administrator; it runs on one processor core. The default where WSL is not set up")
+                        "an administrator; it runs on one processor core unless --mpi is given. The default where "
+                        "WSL is not set up")
+    p.add_argument("--mpi", action="store_true",
+                   help="TELEMAC built on Windows: with parallel runs (MPI); downloads MS-MPI and METIS into the "
+                        "installation folder, no administrator")
     p.add_argument("--modules", choices=recipes.MODULES, default="2d",
                    help="TELEMAC built on Windows: 2d (TELEMAC-2D with GAIA, the tested build; default) or all "
                         "(also TELEMAC-3D)")
@@ -119,7 +123,7 @@ def _options(args):
         smoke_test=not args.no_smoke_test, installers=args.installers,
         ref=args.ref or "", base=args.base or "", bind=not args.no_bind,
         reinstall=args.reinstall or "", native=bool(getattr(args, "native", False)),
-        modules=getattr(args, "modules", "2d") or "2d")
+        modules=getattr(args, "modules", "2d") or "2d", mpi=bool(getattr(args, "mpi", False)))
 
 
 def _need_target(args) -> str:
@@ -445,7 +449,7 @@ def _on_windows(args, argv: list[str], command: str) -> int:
     target = args.target if args.action != "telemac-examples" else None
     if target is not None:
         target = _need_target(args)
-    if target == "telemac" and (args.native or distro is None):
+    if target == "telemac" and (args.native or args.mpi or distro is None):      # --mpi is the parallel build in Windows
         return _native_windows(args, command, distro, status)
     if distro is None:
         # no WSL: the plan of this computer says so (axqua.install.windows_needs_wsl)

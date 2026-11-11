@@ -799,11 +799,16 @@ def _dispatch_status(argv: list[str]) -> int:
 
     An existing path is a case configuration - the historic meaning, which keeps every
     script and doc snippet written against it working, with a notice pointing at the new
-    spelling. Anything matching the job-id grammar is a job. Neither can be mistaken for
-    the other, so there is no guess here, only a rule.
+    spelling - unless it is a job folder (it holds ``job.json``) or that ``job.json``.
+    Anything matching the job-id grammar is a job. Neither can be mistaken for the other,
+    so there is no guess here, only a rule.
     """
     first = _first_positional(argv)
-    if first and Path(first).exists():
+    path = Path(first) if first else None
+    # a job folder (or its job.json) is a job: the Windows MPI test passed one and got
+    # "unrecognized arguments: --job-root" from the case form (2026-11-11)
+    is_job = path is not None and ((path / "job.json").is_file() or (path.name == "job.json" and path.is_file()))
+    if path is not None and path.exists() and not is_job:
         logging.getLogger("axqua").warning(
             "'axqua status <config>' now also accepts a job id; the case form is "
             "spelled 'axqua case-status <config>'. Both work.")

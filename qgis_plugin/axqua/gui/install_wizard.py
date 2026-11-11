@@ -126,11 +126,12 @@ CHOICES = {
     ),
     "route": (
         ("windows", "In Windows itself: one processor core, no administrator"),
+        ("windows-mpi", "In Windows itself: parallel runs (MPI), no administrator"),
         ("wsl", "Inside WSL: parallel runs; WSL must be set up by an administrator"),
     ),
     "modules": (
         ("2d", "TELEMAC-2D with GAIA (tested on Windows)"),
-        ("all", "All modules, also TELEMAC-3D (not yet tested on Windows)"),
+        ("all", "All modules, also TELEMAC-3D (tested on TELEMAC's examples, not yet with aXqua)"),
     ),
     "telemac_examples": (
         ("inputs", "Input files of examples only (about 360 files, 460 MB)"),
@@ -154,12 +155,15 @@ REINSTALL = (
 
 #: TELEMAC on Windows: built in Windows itself or inside WSL (``route``), and which modules a build in Windows compiles. Shown only on Windows (:meth:`InstallWizard._fields`).
 ROUTE_HINT = ("In Windows itself, TELEMAC is compiled in your user folder with compilers from conda-forge. It needs "
-              "no administrator and no WSL, and runs every simulation on one processor core. Inside WSL, TELEMAC "
-              "can run in parallel; an administrator sets up WSL once.")
+              "no administrator and no WSL. The one-core build is the one tested most. The parallel build also "
+              "downloads MS-MPI and METIS into the installation folder and tests two processes before it compiles "
+              "TELEMAC. Inside WSL, TELEMAC runs in parallel too; an administrator sets up WSL once.")
 MODULES_HINT = ("TELEMAC-2D with GAIA is the build that has been tested on Windows. All modules add TELEMAC-3D "
                 "and take longer to compile.")
 #: The settings of TELEMAC that a build in Windows itself does not have, and the one it has alone.
 NOT_IN_WINDOWS = ("scope", "telemac_examples", "salome")
+#: The values of ``route`` that build TELEMAC in Windows itself.
+NATIVE_ROUTES = ("windows", "windows-mpi")
 ONLY_IN_WINDOWS = ("modules",)
 
 #: ``(program, option) -> answers that are not offered there``. The installation of the
@@ -363,7 +367,7 @@ class InstallWizard(QDialog):
     def _native(self) -> bool:
         """Whether TELEMAC is built in Windows itself: chosen, or the one way without WSL."""
         route = self._widgets.get("route")
-        return route is not None and route.currentData() == "windows"
+        return route is not None and route.currentData() in NATIVE_ROUTES
 
     def _route_changed(self) -> None:
         """Show the settings of the chosen way of building, and move the folder along unless the user typed one."""
