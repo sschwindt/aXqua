@@ -41,8 +41,9 @@ from axqua.core.environment import SolverEnvironment
 #: ``calibration`` extra in ``pyproject.toml`` (a test keeps the two equal). 1.12.1
 #: starts the Sobol design at the first point of the sequence, so that a design of
 #: 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the
-#: scikit-learn emulator (``gp_library: skl``) run with TELEMAC.
-HBC_MINIMUM = "1.12.2"
+#: scikit-learn emulator (``gp_library: skl``) run with TELEMAC; 1.13.0 reads the
+#: per-parameter posterior peaks over bootstrap resamples, which aXqua applies.
+HBC_MINIMUM = "1.13.0"
 
 
 def _release(text: str) -> tuple[int, ...]:
@@ -92,7 +93,9 @@ def require_hbc():
             f"The installed HydroBayesCal {installed} is too old: aXqua needs "
             f"{HBC_MINIMUM} or newer. Before 1.12.1, a Sobol initial design never "
             "tried the lowest part of each parameter range, and before 1.12.2 the "
-            "scikit-learn emulator failed with TELEMAC. Upgrade it in the "
+            "scikit-learn emulator failed with TELEMAC; before 1.13.0 the "
+            "per-parameter peak of a flat posterior depended on where its histogram "
+            "bins started, and aXqua reports those peaks. Upgrade it in the "
             "environment of aXqua:\n"
             "    pip install -U hydrobayescal"
         )

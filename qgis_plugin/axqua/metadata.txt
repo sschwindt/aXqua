@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.3.3
+version=1.3.4
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,27 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.3.3
+changelog=1.3.4
+    - Calibration: a roughness zone without a calibration point is no
+      longer calibrated, and a zone whose measured water is shallower than
+      its largest ks gets that depth as its largest ks. Submit on the tab
+      Calibration and validation asks first: calibrate only the zones with
+      data, or abort and see the zones and the points in QGIS.
+      'axqua calibration <case>' lists the zones in a terminal.
+    - The calibrated values are the peaks of each parameter's own
+      posterior (per-parameter maxima), also in the validation.
+    - After a calibration, aXqua writes a report: the posterior of each
+      zone, a map of the zones with their ks, the evidence over the
+      iterations, and a zones layer that Load results shows labeled.
+    - A Colebrook-White friction zone is written with TELEMAC's law 6 and
+      its Manning column.
+    - HydroBayesCal 1.13.0 or newer is required:
+      'pip install -U hydrobayescal'.
+    - Windows: the Setup Wizard offers an optional parallel TELEMAC build
+      in Windows itself (MS-MPI and METIS, no administrator rights); one
+      processor core stays the default.
+    - 'axqua status <job folder>' shows the job instead of an error.
+    1.3.3
     - Calibration at several discharges: 'calibration.situations' names
       surveys measured at other discharges, each with its measurements and
       its discharge. Every tested set of parameters is simulated at each

@@ -138,6 +138,18 @@ def test_the_calibrated_values_are_the_joint_maximum_of_the_last_iteration(built
     assert older.as_dict() == pytest.approx({"zone4": 0.07, "zone6": 0.07})
 
 
+def test_the_calibrated_values_are_the_per_parameter_peaks_where_they_are_stored(built):
+    """The user's decision of 2026-11-11: a roughness zone is reported by the peak of its
+    own posterior (HydroBayesCal's marginal_optima), not by the joint maximum."""
+    _calibrated(built, marginal_optima=[np.array([0.1, 0.1]), np.array([0.0283, 0.3256])])
+    found = validation.calibrated_parameters(built)
+    assert found.as_dict() == pytest.approx({"zone4": 0.0283, "zone6": 0.3256})
+    assert found.estimate == "per-parameter posterior maximum"
+    # peaks that are not finite leave the joint maximum
+    _calibrated(built, marginal_optima=[np.array([np.nan, 0.1])] * 2)
+    assert validation.calibrated_parameters(built).estimate == "joint posterior maximum"
+
+
 
 def test_a_joint_maximum_of_nan_is_never_applied(built):
     """With one surviving posterior sample HydroBayesCal writes NaN as the joint

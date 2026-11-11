@@ -332,7 +332,7 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
 
 #: Loggers whose warnings the user has to see, not only find in the log: the plugin
 #: shows the ``warnings`` of the result manifest when the results are loaded.
-SURFACED_LOGGERS = ("axqua.near_boundary",)
+SURFACED_LOGGERS = ("axqua.near_boundary", "axqua.calibration_zones")
 
 
 class _Collector(logging.Handler):

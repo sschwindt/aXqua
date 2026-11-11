@@ -363,15 +363,18 @@ def _refuse_continued_keywords(cfg: Config, names: list[str], control_file: str)
 
 
 def emit_hbc_config(cfg: Config, calibration_csv: Path | None, *,
-                    complete_bal_mode: bool = True, only_bal_mode: bool = False) -> Path:
+                    complete_bal_mode: bool = True, only_bal_mode: bool = False,
+                    parameters: list | None = None) -> Path:
     """Emit a HydroBayesCal ``config_Telemac.py`` for the produced case.
 
     *complete_bal_mode* False runs the initial simulations only; *only_bal_mode* True
     (with *complete_bal_mode*) continues from the saved initial simulations with the
-    active learning (HydroBayesCal's two execution switches).
+    active learning (HydroBayesCal's two execution switches). *parameters* are the
+    ones to calibrate (default :func:`telemac_parameters`; a calibration passes those of
+    its zone plan, :func:`axqua.calibration_zones.zone_plan`).
     """
     c = cfg.calibration
-    parameters = telemac_parameters(cfg)
+    parameters = telemac_parameters(cfg) if parameters is None else list(parameters)
     params = [p.name for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
     # which case HydroBayesCal drives: the built steady 2D case by default, or the

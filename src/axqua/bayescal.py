@@ -486,19 +486,15 @@ def run_single_flow_calibration(
     cfg.ensure_dirs()
     calibration_quantities = _set_quantities(cfg, calibration_quantities,
                                              extraction_quantities)
-    from axqua.calibration import telemac_parameters
-
-    # the zones of the roughness table and the rows of the target workbook too, not
-    # only the list of the case file (the Inn KB15 case printed "parameters: []")
-    try:
-        names = [p.name for p in telemac_parameters(cfg)]
-    except Exception:                        # noqa: BLE001 - a log line, never a stop
-        names = [p.name for p in cfg.calibration.parameters]
-    print(f"calibration target(s): {list(calibration_quantities)}  parameters: {names}")
+    print(f"calibration target(s): {list(calibration_quantities)}")
 
     csv, table = build_velocity_csv(cfg, vel_err_floor=vel_err_floor,
                                     depth_err_floor=depth_err_floor)
     print(f"calibration points ({len(table)}) -> {csv}")
+    # the zones of the roughness table and the rows of the target workbook too, not
+    # only the list of the case file (the Inn KB15 case printed "parameters: []"),
+    # less the zones the points say nothing about (calibration_zones)
+    parameters = settle_zone_plan(cfg, [table], Path(cfg.calibration_dir), resume=resume)
     if "SCALAR VELOCITY_DATA" in table:
         print(f"  scalar velocity [m/s]: {table['SCALAR VELOCITY_DATA'].min():.3f} .. "
               f"{table['SCALAR VELOCITY_DATA'].max():.3f}")
@@ -513,15 +509,18 @@ def run_single_flow_calibration(
 
     def emit(complete: bool, only_bal: bool) -> Path:
         return emit_hbc_config(cfg, csv, complete_bal_mode=complete,
-                               only_bal_mode=only_bal)
+                               only_bal_mode=only_bal, parameters=parameters)
 
     driver = stage_driver(cfg.calibration_dir, "bal_telemac.py", checkout=checkout)
     folder = Path(cfg.calibration_dir)
-    return _launch_in_passes(
+    code = _launch_in_passes(
         cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
         driver=driver, restarts={"calibration": folder / RESTART_OUTPUTS},
         csvs={"calibration": Path(csv)}, folder=folder, env=env,
         note="HydroBayesCal calibration")
+    if code == 0 and not prepare_only:
+        report(cfg, folder)
+    return code
 
 
 #: Folder in the calibration directory that holds the files of the built case while a
@@ -725,16 +724,18 @@ def emit_multiflow_config(cfg: Config, out_dir: Path, model_dir: Path,
                           complete_bal_mode: bool = True,
                           only_bal_mode: bool = False,
                           prior_samples: int | None = None,
-                          adaptive_init_runs: bool | None = None) -> Path:
+                          adaptive_init_runs: bool | None = None,
+                          parameters: list | None = None) -> Path:
     """Write ``config_Telemac_multiflow.py`` (standard blocks + a ``multiflow``
-    block of per-flow steering/CSV entries)."""
+    block of per-flow steering/CSV entries). *parameters* as in
+    :func:`axqua.calibration.emit_hbc_config`."""
     from axqua.calibration import telemac_parameters
 
     c = cfg.calibration
     # the merged parameters, not c.parameters: the roughness table's calibrated zones
     # and the target template's rows must reach the multiflow config too; and only
     # TELEMAC's, so an OpenFOAM ks or Cmu of the same list is not emitted
-    parameters = telemac_parameters(cfg)
+    parameters = telemac_parameters(cfg) if parameters is None else list(parameters)
     params = [p.name for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
     prior = prior_samples if prior_samples is not None else getattr(
@@ -1370,7 +1371,7 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
     folder = cfg.calibration_path(MULTIFLOW)
     folder.mkdir(parents=True, exist_ok=True)
     ensure_graphic_output(cfg.model_path(cfg.cas_file))
-    flows, csvs = [], {}
+    flows, csvs, tables = [], {}, []
     print("calibration situations:")
     for situation, tag in zip(situations, tags):
         csv, table = situation_points(cfg, situation, folder,
@@ -1379,20 +1380,78 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
         cas, q = write_situation_cas(cfg, situation, folder)
         flows.append(FlowSpec(name=tag, discharge=q, kind="csv", values=csv))
         csvs[tag] = csv
+        tables.append(table)
         print(f"  {situation.name}: Q = {q:g} m3/s, {len(table)} points -> {cas}")
+    parameters = settle_zone_plan(cfg, tables, folder, resume=resume)
+
     def emit(complete: bool, only_bal: bool) -> Path:
         return emit_multiflow_config(
             cfg, folder, cfg.model_dir, flows, csvs, n_cpus=cfg.telemac.n_processors,
             init_runs=cfg.calibration.init_runs, max_runs=cfg.calibration.max_runs,
-            complete_bal_mode=complete, only_bal_mode=only_bal)
+            complete_bal_mode=complete, only_bal_mode=only_bal, parameters=parameters)
 
     driver = stage_driver(folder, "bal_telemac_multiflow.py", checkout=checkout,
                           also=("bal_telemac.py",))
     restarts = {tag: folder / f"flow-{tag}" / RESTART_OUTPUTS for tag in tags}
-    return _launch_in_passes(
+    code = _launch_in_passes(
         cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
         driver=driver, restarts=restarts, csvs=csvs, folder=folder,
         note=f"HydroBayesCal calibration at {len(flows)} discharges")
+    if code == 0 and not prepare_only:
+        report(cfg, folder)
+    return code
+
+
+def report(cfg: Config, folder: Path) -> dict:
+    """Write the calibration report of *folder* (:mod:`axqua.calibration_report`);
+    a failure is a warning, never a failed calibration."""
+    from axqua.calibration_report import write_report
+
+    try:
+        written = write_report(cfg, folder)
+    except Exception as exc:                      # noqa: BLE001 - the calibration is done
+        log.warning("the calibration report could not be written: %s", exc)
+        return {}
+    if written:
+        print(f"calibration report -> {Path(folder) / 'report'}")
+    return written
+
+
+def settle_zone_plan(cfg: Config, tables, folder: Path, *, resume: bool = False) -> list:
+    """The parameters a calibration varies, after the zone check, written down.
+
+    :func:`axqua.calibration_zones.zone_plan` leaves out the roughness zones without a
+    calibration point and lowers the largest ks of zones shallower than it; the plan
+    is printed, its warnings logged, and written as ``zone-plan.json`` into *folder*.
+    A *resume* continues the initial simulations of an earlier calibration, which were
+    run with the parameters of that calibration: a plan that names other parameters or
+    other ranges is refused.
+    """
+    from axqua.calibration_zones import log_plan, read_plan, zone_plan
+    from axqua.core.errors import ConfigError
+
+    plan = zone_plan(cfg, tables)
+    log_plan(plan)
+    if plan.excluded and not plan.parameters:
+        raise ConfigError(
+            "no calibration parameter is left: " + " ".join(plan.warnings),
+            subject="geodata.roughness_table",
+            remedy="Check in QGIS where the measurement points lie relative to the "
+                   "roughness zones, and which zones the roughness table calibrates.")
+    if resume:
+        earlier = read_plan(folder)
+        now = [[p.name, float(p.min), float(p.max)] for p in plan.parameters]
+        before = ([[q["name"], float(q["min"]), float(q["max"])]
+                   for q in earlier["parameters"]] if earlier else None)
+        if before is not None and before != now:
+            raise ConfigError(
+                "the saved initial simulations were run with other calibration "
+                f"parameters ({before}) than this calibration would vary ({now})",
+                subject=str(Path(folder) / "zone-plan.json"),
+                remedy="Start the calibration without 'resume'.")
+    plan.write(folder)
+    print(f"calibration parameters: {[p.name for p in plan.parameters]}")
+    return plan.parameters
 
 
 def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: bool,

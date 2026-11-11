@@ -57,6 +57,9 @@ class ResultItem:
     #: A predefined map style (``styles.MAP_STYLES``) the case asks for on this layer
     #: (``postproc.map_style``), applied after the plain style.
     map_style: str = ""
+    #: The attribute a vector layer is labeled with (``extra.label_field``), e.g. the
+    #: zone and ks of the calibrated roughness zones.
+    label_field: str = ""
 
     @property
     def loadable(self) -> bool:
@@ -120,6 +123,7 @@ def _from_manifest(root: Path, payload: dict) -> JobResults:
             variable=str(entry.get("variable") or ""),
             description=str(entry.get("description") or ""),
             map_style=str((entry.get("extra") or {}).get("map_style") or ""),
+            label_field=str((entry.get("extra") or {}).get("label_field") or ""),
         ))
     return JobResults(job_id=str(payload.get("job_id") or root.name), root=root,
                       items=items, objective=payload.get("objective"),
@@ -345,7 +349,8 @@ class ResultLoader:
     def _style(self, layer, item: ResultItem) -> None:
         from qgis.core import QgsMeshLayer, QgsVectorLayer
         # a mesh entry that names its variable is shown with that variable, also without a style
-        if not item.style and not (item.variable and isinstance(layer, QgsMeshLayer)):
+        if not item.style and not item.label_field and not (
+                item.variable and isinstance(layer, QgsMeshLayer)):
             return
         try:
             if isinstance(layer, QgsMeshLayer):
@@ -359,6 +364,8 @@ class ResultLoader:
                     self.warnings.append(
                         f"{item.name}: the layer has no attribute '{item.variable}' "
                         "to color it by")
+            if isinstance(layer, QgsVectorLayer) and item.label_field:
+                label_by_attribute(layer, item.label_field)
         except Exception as exc:  # noqa: BLE001
             # Styling is a nicety; an unstyled layer the user can restyle beats no layer.
             self.warnings.append(f"{item.name}: default styling failed ({exc})")
@@ -460,6 +467,19 @@ HIGHEST_DEPTH = "highest water depth"
 #: whose values span several orders of magnitude, as rates of deposition do, still
 #: shows a pattern and not one color with a few outliers.
 GRADUATED_CLASSES = 7
+
+
+def label_by_attribute(layer, attribute: str) -> bool:
+    """Label every feature of *layer* with *attribute*; False when it has no such field."""
+    from qgis.core import QgsPalLayerSettings, QgsVectorLayerSimpleLabeling
+
+    if attribute not in layer.fields().names():
+        return False
+    settings = QgsPalLayerSettings()
+    settings.fieldName = attribute
+    layer.setLabeling(QgsVectorLayerSimpleLabeling(settings))
+    layer.setLabelsEnabled(True)
+    return True
 
 
 def color_by_attribute(layer, attribute: str, *, classes: int = GRADUATED_CLASSES) -> bool:

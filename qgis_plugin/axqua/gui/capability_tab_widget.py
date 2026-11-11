@@ -16,6 +16,10 @@ from ..compat import PARTIALLY_CHECKED, UNCHECKED
 from ..core.runner_client import submit_warnings, user_text
 from ..core.tasks import run_async
 
+#: Kinds whose roughness zones are checked against the measurement points before they
+#: are submitted (calibration_zones_dialog).
+CHECKED_ZONES = ("calibration",)
+
 #: Per-kind knobs worth exposing. Everything else stays in the case file, where it
 #: is documented - a form that duplicated the whole config would be a second, undocumented
 #: copy of it.
@@ -203,11 +207,40 @@ class CapabilityTab(QWidget):
             options = {**self.options(), **self.view.fixed_options}
         else:
             options = self.options(build=True)
+
+        def submit() -> None:
+            run_async(
+                f"aXqua: submitting {kind}",
+                lambda: client.submit(config, kind, options=options),
+                on_success=self._submitted,
+                on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
+
+        if kind not in CHECKED_ZONES or options.get("resume"):
+            submit()
+            return
+        # which roughness zones the points can calibrate: asked first, so that a zone
+        # without a measurement point is not calibrated without the user knowing
+        # (the user's order of 2026-11-11); an aXqua without the command, or a case it
+        # cannot read yet, is submitted as before, and the job applies the same rule
         run_async(
-            f"aXqua: submitting {kind}",
-            lambda: client.submit(config, kind, options=options),
-            on_success=self._submitted,
-            on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
+            "aXqua: checking the roughness zones of the calibration",
+            lambda: client.calibration_info(config),
+            on_success=lambda data: self._zones_checked(data, submit),
+            on_error=lambda exc: submit(), owner=self)
+
+    def _zones_checked(self, data, submit) -> None:
+        from . import calibration_zones_dialog as dialog
+
+        if not (data or {}).get("needs_confirmation"):
+            submit()
+            return
+        answer = dialog.ask(self, data)
+        if answer == dialog.SUBMIT:
+            submit()
+        elif answer == dialog.CHECK:
+            dialog.show_in_qgis(data)
+            self.ctx.info("Calibration not submitted: the roughness zones and the "
+                          "calibration points are on the map.")
 
     def _submitted(self, data) -> None:
         job_id = (data or {}).get("job_id", "")

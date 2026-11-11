@@ -16,8 +16,10 @@ and friction files, and the calibrated values. Mesh, bed, numerical settings and
 initial state are untouched, so a difference between model and measurement cannot come
 from a model that was built differently.
 
-The calibrated values are the **joint posterior maximum** of the newest calibration
-(:func:`calibrated_parameters`), read from what HydroBayesCal saved. They are written
+The calibrated values are the **per-parameter posterior maxima** of the newest
+calibration (:func:`calibrated_parameters`): the peak of each parameter's own posterior,
+read from what HydroBayesCal saved (``marginal_optima``, since HydroBayesCal 1.13.0 its
+calibrated set as well). They are written
 into copies of the files HydroBayesCal changed during the calibration, by the same
 rules: ``zone<N>`` is the coefficient of friction zone N in the friction table,
 ``f.<NAME>`` a constant in the user Fortran file, and any other name a keyword of the
@@ -97,18 +99,21 @@ class CalibratedSet:
     names: list[str]
     values: list[float]
     source: Path
-    estimate: str = "joint posterior maximum"
+    estimate: str = "per-parameter posterior maximum"
 
     def as_dict(self) -> dict[str, float]:
         return {name: float(value) for name, value in zip(self.names, self.values)}
 
 
 def calibrated_parameters(cfg) -> CalibratedSet:
-    """The joint posterior maximum of the newest calibration of this case.
+    """The per-parameter posterior maxima of the newest calibration of this case.
 
+    The peak of each parameter's own posterior (``marginal_optima`` of the last
+    iteration), as HydroBayesCal 1.13.0 reports the calibrated set; the user's decision
+    of 2026-11-11, since a roughness zone is read and reported per zone. A result without
+    finite peaks gives the joint posterior maximum, and one without that the mean of the
+    posterior sample; :attr:`CalibratedSet.estimate` says which.
     HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.
-    An older HydroBayesCal that did not save the joint maximum gives the mean of the
-    posterior sample instead, and :attr:`CalibratedSet.estimate` says so.
     """
     import pickle
 
@@ -131,12 +136,16 @@ def calibrated_parameters(cfg) -> CalibratedSet:
     with open(source, "rb") as handle:
         data = pickle.load(handle)          # nosec B301 - written by the calibration
     names = [str(name) for name in data.get("calibration_parameters") or []]
-    optimum = data.get("joint_optimum")
-    optimum = [] if optimum is None else optimum
-    estimate = "joint posterior maximum"
-    values = None
-    if len(optimum) and optimum[-1] is not None:
-        values = np.asarray(optimum[-1], dtype=float).ravel()
+    values, estimate = None, None
+    for key, label in (("marginal_optima", "per-parameter posterior maximum"),
+                       ("joint_optimum", "joint posterior maximum")):
+        stored = data.get(key)
+        stored = [] if stored is None else stored
+        if len(stored) and stored[-1] is not None:
+            candidate = np.asarray(stored[-1], dtype=float).ravel()
+            if candidate.size == len(names) and np.isfinite(candidate).all():
+                values, estimate = candidate, label
+                break
     # HydroBayesCal writes NaN as the joint maximum when too few prior samples survive
     # the likelihood to estimate a density (one, on the example of 2026-10-15, whose
     # model was 37 % too slow at every point). A NaN would be written into the

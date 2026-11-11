@@ -639,6 +639,13 @@ class RunnerClient:
         return self.call(["profile", "use", str(solver), str(script)],
                          timeout=240).data or {}
 
+    # -- calibration --------------------------------------------------------------
+    def calibration_info(self, case: str | os.PathLike) -> dict:
+        """``{zones, parameters, calibrated_zones, excluded_zones, capped_zones,
+        warnings, points, needs_confirmation, ...}``: which roughness zones a
+        calibration of the case would vary (``axqua calibration``). Writes nothing."""
+        return self.call(["calibration", str(case)], timeout=600).data or {}
+
     # -- validation ---------------------------------------------------------------
     def validation_info(self, case: str | os.PathLike) -> dict:
         """``{situations, boundaries, outflow_condition, calibrated, reports}``: what

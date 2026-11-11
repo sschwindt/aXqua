@@ -22,7 +22,7 @@ import yaml
 import streamlit as st
 
 SOLVERS = ["telemac2d", "telemac3d"]
-LAWS = {0: "NOFR", 1: "HAAL", 2: "CHEZ", 3: "STRI", 4: "MANN", 5: "NIKU", 7: "COWH"}
+LAWS = {0: "NOFR", 1: "HAAL", 2: "CHEZ", 3: "STRI", 4: "MANN", 5: "NIKU", 6: "COWH"}
 # turbulence model: "auto" picks from the mesh resolution + velocity guess; the
 # integers are the TELEMAC-2D model numbers (finite volumes accept only 1).
 TURB_OPTIONS = ["auto", 1, 3, 4, 6]

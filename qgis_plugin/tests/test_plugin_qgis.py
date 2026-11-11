@@ -3897,3 +3897,146 @@ def test_the_buttons_of_a_question_are_english_whatever_language_qt_has(monkeypa
     assert help_pages.language_for("en", "de_DE") == "en"            # the default, on a German QGIS
     assert help_pages.language_for("de") == "de" and help_pages.language_for("unknown") == "en"
     assert help_pages.language_for("qgis", "de_DE") == "de" and help_pages.language_for("qgis", "it_IT") == "en"
+
+
+def _zone_plan(needs=True):
+    return {"needs_confirmation": needs, "calibrated_zones": [1, 3, 5],
+            "excluded_zones": [4], "capped_zones": [5],
+            "zones": [{"zone": 4, "reason": "no calibration point lies in the zone"},
+                      {"zone": 5, "ks_max": 0.3, "ks_max_used": 0.2, "points": 35}],
+            "points": [{"situation": "August 2026", "x": 759500.0, "y": 5348500.0,
+                        "zone": 5, "depth": 0.19}],
+            "crs_epsg": 25832, "roughness_zones": "", "zone_field": "Zone ID"}
+
+
+def test_a_calibration_asks_before_it_leaves_out_a_zone(qgis_app, monkeypatch):
+    """The user's order of 2026-11-11: a roughness zone without a measurement point is
+    not calibrated, and the plugin asks first: calibrate only the other zones, or abort
+    and look at the measurements in QGIS."""
+    from axqua_plugin.gui import calibration_zones_dialog as dialog
+    from axqua_plugin.gui import capability_tab_widget
+    from axqua_plugin.gui.capability_tab_widget import CapabilityTab
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    sent, shown, asked, plans = [], [], [], []
+
+    class _Client:
+        def calibration_info(self, config):
+            if isinstance(plans[0], Exception):
+                raise plans[0]
+            return plans[0]
+
+        def submit(self, config, kind, **kwargs):
+            sent.append(kind)
+            return {"job_id": "JOB"}
+
+    class _Ctx(_Context):
+        project = type("P", (), {"profile": "", "job_root": "", "launcher": "auto"})()
+
+        def client_or_warn(self):
+            return _Client()
+
+        def active_case_or_warn(self):
+            return "case.axq-case"
+
+        def job_submitted(self, job_id):
+            pass
+
+    def run_now(title, call, on_success=None, on_error=None, owner=None):
+        try:
+            result = call()
+        except Exception as exc:              # noqa: BLE001 - as the task does
+            on_error and on_error(exc)
+            return
+        on_success and on_success(result)
+
+    answers = []
+    monkeypatch.setattr(capability_tab_widget, "run_async", run_now)
+    monkeypatch.setattr(dialog, "ask", lambda parent, data: (asked.append(data),
+                                                             answers.pop(0))[1])
+    monkeypatch.setattr(dialog, "show_in_qgis", lambda data: shown.append(data))
+    view = CapabilityView(name="calibration", solver="telemac", implemented="yes",
+                          configured=True, built=True)
+    tab = CapabilityTab(view, _Ctx())
+    kind = view.submit_kind
+    assert kind in capability_tab_widget.CHECKED_ZONES
+
+    plans[:] = [_zone_plan()]
+    answers[:] = [dialog.SUBMIT]
+    tab._submit(kind)
+    assert sent == [kind] and len(asked) == 1 and not shown
+    answers[:] = [dialog.CHECK]
+    tab._submit(kind)
+    assert sent == [kind] and shown == [plans[0]]           # nothing submitted
+    answers[:] = [None]                                     # window closed
+    tab._submit(kind)
+    assert sent == [kind]
+    plans[:] = [_zone_plan(needs=False)]                    # every zone has points
+    tab._submit(kind)
+    assert sent == [kind, kind] and len(asked) == 3
+    plans[:] = [RuntimeError("an aXqua without the command")]
+    tab._submit(kind)
+    assert sent == [kind] * 3
+    tab.deleteLater()
+
+
+def test_the_zone_question_names_what_is_left_out_and_what_is_capped(qgis_app):
+    from axqua_plugin.gui.calibration_zones_dialog import message
+
+    text = message(_zone_plan())
+    assert "Zone 4 is left out: no calibration point lies in the zone" in text
+    assert "lowered from 0.3 m to 0.2 m" in text and "35 points" in text
+    assert "Calibrate only zones 1, 3, 5" in text
+
+
+def test_the_ground_truth_check_puts_the_points_on_the_map(qgis_app, tmp_path):
+    from qgis.core import QgsProject
+
+    from axqua_plugin.gui.calibration_zones_dialog import show_in_qgis
+
+    layers = show_in_qgis(_zone_plan())
+    try:
+        (points,) = layers                          # no roughness zones file named
+        assert points.featureCount() == 1
+        feature = next(points.getFeatures())
+        assert feature["zone"] == 5 and feature["situation"] == "August 2026"
+        assert points.crs().authid() == "EPSG:25832"
+    finally:
+        for layer in layers:
+            QgsProject.instance().removeMapLayer(layer.id())
+
+
+def test_the_calibrated_zones_load_labeled_with_their_ks(project, tmp_path, qgis_app):
+    """The calibration report's zones layer names a label field in the manifest
+    (``extra.label_field``); Load results labels the zones with their ks."""
+    import json as _json
+
+    from qgis.core import QgsVectorFileWriter, QgsVectorLayer
+
+    from axqua_plugin.core.result_loader import ResultLoader, discover
+
+    memory = QgsVectorLayer("Polygon?crs=EPSG:25832&field=zone:integer"
+                            "&field=ks_cm:double&field=label:string", "z", "memory")
+    from qgis.core import QgsFeature, QgsGeometry, QgsRectangle
+
+    feature = QgsFeature(memory.fields())
+    feature.setGeometry(QgsGeometry.fromRect(QgsRectangle(0, 0, 10, 10)))
+    feature.setAttributes([3, 32.6, "Zone 3\nks 33 cm"])
+    memory.dataProvider().addFeatures([feature])
+    root = tmp_path / "job"
+    (root / "results").mkdir(parents=True)
+    path = root / "zones.gpkg"
+    options = QgsVectorFileWriter.SaveVectorOptions()
+    options.driverName = "GPKG"
+    QgsVectorFileWriter.writeAsVectorFormatV3(memory, str(path),
+                                              project.transformContext(), options)
+    (root / "results" / "results.json").write_text(_json.dumps({"results": [
+        {"name": "Calibrated roughness zones", "path": "zones.gpkg", "kind": "vector",
+         "style": "graduated", "variable": "ks_cm",
+         "extra": {"label_field": "label"}}]}))
+    results = discover(root)
+    assert results.items[0].label_field == "label"
+    loader = ResultLoader(project)
+    (layer,) = loader.load(results)
+    assert layer.labelsEnabled() and layer.labeling().settings().fieldName == "label"
+    assert loader.warnings == []

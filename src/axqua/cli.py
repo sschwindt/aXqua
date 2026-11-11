@@ -612,6 +612,12 @@ def _case_cli(name: str, argv: list[str]) -> int:
     return getattr(casecli, name)(argv)
 
 
+def _run_calibration(argv: list[str]) -> int:
+    """``axqua calibration`` - which zones a calibration would vary (:mod:`axqua.calibrationcli`)."""
+    from axqua import calibrationcli
+    return calibrationcli.run_calibration(argv)
+
+
 def _run_validation(argv: list[str]) -> int:
     """``axqua validation`` - what a case has for one (:mod:`axqua.validationcli`)."""
     from axqua import validationcli
@@ -761,6 +767,7 @@ _DISPATCH = {
     "profile": lambda argv: _run_profile(argv),
     "install": lambda argv: _run_install(argv),
     "export": lambda argv: _run_export(argv),
+    "calibration": lambda argv: _run_calibration(argv),
     "validation": lambda argv: _run_validation(argv),
     "example": lambda argv: _run_example(argv),
     "hydrology": lambda argv: _run_hydrology(argv),

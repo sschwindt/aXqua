@@ -127,6 +127,24 @@ def test_friction_tbl_from_roughness(tmp_path):
     assert steering._global_friction(cfg) == (5, 0.2)
 
 
+def test_a_colebrook_white_zone_is_law_6_with_its_manning_column(tmp_path):
+    """TELEMAC-2D numbers Colebrook-White 6 and reads a Manning value after its ks
+    (friction_read.f); aXqua had it as 7, so a law-6 zone was written as MANN."""
+    import pytest
+
+    from axqua import steering
+    from axqua.config import load_config
+
+    cfg = load_config(_write_fixtures(tmp_path))
+    cfg.ensure_dirs()
+    cfg.friction.roughness_law = 6
+    tbl = Path(steering.write_friction_tbl(cfg)).read_text()
+    assert "1\tCOWH\t0.2000\t0.02\tNULL" in tbl, tbl
+    cfg.friction.roughness_law = 7
+    with pytest.raises(ValueError, match="no friction law 7"):
+        steering.write_friction_tbl(cfg)
+
+
 BOUNDS_CSV = """zone_id,ks_min, ks_max, calibration
 1,0.01,0.3, True
 2,0.5,0.5, False

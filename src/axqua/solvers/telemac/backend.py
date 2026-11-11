@@ -386,6 +386,8 @@ class TelemacBackend(BaseBackend):
                 component="hydrobayescal",
                 return_code=code,
             )
+        if ctx is not None and not prepare_only and not flows:
+            _record_calibration_report(cfg, ctx)
         return code
 
     def _validation(self, cfg, *, ctx: Any = None, situation: str = "",
@@ -647,6 +649,25 @@ def _write_study_report(report, folder: Path, stem: str, ctx: Any, *,
     from axqua.convergence import write_study_report
 
     write_study_report(report, folder, stem, ctx, readme=readme)
+
+
+def _record_calibration_report(cfg, ctx) -> None:
+    """Put the calibration report (:mod:`axqua.calibration_report`) into the manifest."""
+    from axqua import bayescal
+    from axqua.calibration_report import FOLDER
+
+    root = Path(cfg.calibration_dir)
+    folder = (root / bayescal.MULTIFLOW if bayescal.calibration_situations(cfg)
+              else root) / FOLDER
+    ctx.record("Calibration: posterior of each parameter", folder / "posteriors.png",
+               kind="figure")
+    ctx.record("Calibration: roughness zones and their ks", folder / "roughness-zones.png",
+               kind="figure")
+    ctx.record("Calibration: evidence and relative entropy", folder / "evidence.png",
+               kind="figure")
+    ctx.record("Calibration: summary", folder / "calibration-report.json", kind="file")
+    ctx.record("Calibrated roughness zones", folder / "roughness-zones-calibrated.gpkg",
+               kind="vector", style="graduated", variable="ks_cm", label_field="label")
 
 
 def _calibration_progress(cfg, ctx: Any, *, folder: str = ""):

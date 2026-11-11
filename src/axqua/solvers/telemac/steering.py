@@ -25,8 +25,14 @@ from axqua.solvers.telemac.boundary import LiquidBoundary
 
 log = logging.getLogger("axqua")
 
-# friction-law number -> 4-letter name used in the .tbl
-LAW_NAMES = {0: "NOFR", 1: "HAAL", 2: "CHEZ", 3: "STRI", 4: "MANN", 5: "NIKU", 7: "COWH"}
+# friction-law number (LAW OF BOTTOM FRICTION) -> 4-letter name used in the .tbl;
+# Colebrook-White is law 6 in TELEMAC-2D (telemac2d.dico; it was listed as 7 here, so
+# a law-6 zone was written as MANN and its ks read as a Manning n)
+LAW_NAMES = {0: "NOFR", 1: "HAAL", 2: "CHEZ", 3: "STRI", 4: "MANN", 5: "NIKU", 6: "COWH"}
+#: Manning value a Colebrook-White row carries in its Mdef column (TELEMAC's default of
+#: MANNING DEFAULT VALUE FOR COLEBROOK-WHITE LAW); friction_read.f reads that column
+#: for COWH rows only, and a row without it fails to read.
+COLEBROOK_WHITE_MDEF = 0.02
 
 # TELEMAC-2D TURBULENCE MODEL number -> name
 TURB_NAMES = {1: "constant viscosity", 2: "Elder", 3: "k-epsilon",
@@ -416,10 +422,14 @@ def write_friction_tbl(cfg: Config) -> Path:
         "*",
     ]
     for fric_id, law_num, coef, name in _friction_rows(cfg):
-        law = LAW_NAMES.get(law_num, "MANN")
+        if law_num not in LAW_NAMES:
+            raise ValueError(f"friction zone {fric_id} ({name}): no friction law "
+                             f"{law_num}; TELEMAC-2D knows {sorted(LAW_NAMES)}")
+        law = LAW_NAMES[law_num]
         # data rows carry only numeric columns; names go in a '*' comment
         lines.append(f"* zone {fric_id}: {name}")
-        lines.append(f"{fric_id}\t{law}\t{coef:.4f}\tNULL")
+        mdef = f"\t{COLEBROOK_WHITE_MDEF}" if law == "COWH" else ""
+        lines.append(f"{fric_id}\t{law}\t{coef:.4f}{mdef}\tNULL")
     lines.append("END")
     path = cfg.model_path(cfg.friction_tbl)
     path.write_text("\n".join(lines) + "\n")

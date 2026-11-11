@@ -1035,6 +1035,41 @@ def read_roughness_zones(path: Path) -> dict[int, "geodata.ZoneRoughness"]:
     return geodata.read_roughness_zones(path)
 
 
+def roughness_zone_frame(cfg: Config):
+    """The roughness zones of the case as a GeoDataFrame ``zone_id, geometry`` in the
+    case CRS (``geodata.roughness_zones``, id field ``mesh.roughness_zone_field``)."""
+    zones = dataset(cfg).roughness_zones()
+    if zones.crs and zones.crs.to_epsg() != cfg.crs_epsg:
+        zones = zones.to_crs(epsg=cfg.crs_epsg)
+    field = next((c for c in zones.columns
+                  if c.lower() == cfg.mesh.roughness_zone_field.lower()), None)
+    if field is None:
+        raise ValueError(
+            f"roughness_zones {Path(cfg.geodata.roughness_zones).name!r} has no "
+            f"'{cfg.mesh.roughness_zone_field}' column (has {list(zones.columns)})"
+        )
+    return zones[[field, "geometry"]].rename(columns={field: "zone_id"})
+
+
+def zone_of_points(zones, xs, ys, epsg: int) -> np.ndarray:
+    """Roughness zone id of each point: the polygon it lies in, else the nearest one.
+
+    The rule the mesh nodes get their ``FRIC_ID`` by, so that a measurement point is
+    counted in the zone whose roughness acts on it in the model.
+    """
+    import geopandas as gpd
+
+    pts = gpd.GeoDataFrame(geometry=gpd.points_from_xy(np.asarray(xs, dtype=float),
+                                                       np.asarray(ys, dtype=float)),
+                           crs=f"EPSG:{epsg}")
+    if not len(pts):
+        return np.zeros(0, dtype=int)
+    joined = gpd.sjoin_nearest(pts, zones, how="left").sort_index()
+    # a point on a shared edge can match >1 polygon; keep the first per point
+    ids = joined[~joined.index.duplicated()]["zone_id"].to_numpy()
+    return ids.astype(int)
+
+
 def interpolate_roughness(cfg: Config, mesh: Mesh) -> Mesh:
     """Map the roughness zones onto the mesh: friction zone id + roughness value.
 
@@ -1046,33 +1081,14 @@ def interpolate_roughness(cfg: Config, mesh: Mesh) -> Mesh:
     The matching ``geodata.roughness_table`` value (e.g. a Nikuradse k_s) is stored
     in ``mesh.roughness`` (BOTTOM FRICTION); HydroBayesCal later perturbs it.
     """
-    import geopandas as gpd
-
     if cfg.geodata.roughness_zones is None or cfg.geodata.roughness_table is None:
         raise ValueError("interpolate_roughness needs geodata.roughness_zones "
                          "and geodata.roughness_table to be set")
     table = read_roughness_table(Path(cfg.geodata.roughness_table))
-
-    zones = dataset(cfg).roughness_zones()
-    if zones.crs and zones.crs.to_epsg() != cfg.crs_epsg:
-        zones = zones.to_crs(epsg=cfg.crs_epsg)
-    field = next((c for c in zones.columns
-                  if c.lower() == cfg.mesh.roughness_zone_field.lower()), None)
-    if field is None:
-        raise ValueError(
-            f"roughness_zones {Path(cfg.geodata.roughness_zones).name!r} has no "
-            f"'{cfg.mesh.roughness_zone_field}' column (has {list(zones.columns)})"
-        )
-    zones = zones[[field, "geometry"]].rename(columns={field: "zone_id"})
+    zones = roughness_zone_frame(cfg)
 
     def _zone_of(xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
-        pts = gpd.GeoDataFrame(
-            geometry=gpd.points_from_xy(xs, ys), crs=f"EPSG:{cfg.crs_epsg}"
-        )
-        joined = gpd.sjoin_nearest(pts, zones, how="left").sort_index()
-        # a point on a shared edge can match >1 polygon; keep the first per point
-        ids = joined[~joined.index.duplicated()]["zone_id"].to_numpy()
-        return ids.astype(int)
+        return zone_of_points(zones, xs, ys, cfg.crs_epsg)
 
     node_zone = _zone_of(mesh.x, mesh.y)
     cx = mesh.x[mesh.triangles].mean(axis=1)
