@@ -448,9 +448,15 @@ def test_status_of_a_job_folder_is_the_job(tmp_path, monkeypatch):
     (job / "job.json").write_text("{}")
     case = tmp_path / "case.axq-case"
     case.write_text("")
-    for argv in ([str(job), "--json"], ["--job-root", str(tmp_path / "jobs"), str(job)], [str(job / "job.json")]):
+    unwritten = tmp_path / "jobs" / "2026-01-01-x-steady-bbbbbb"     # interrupted before job.json
+    unwritten.mkdir()
+    for argv in ([str(job), "--json"], ["--job-root", str(tmp_path / "jobs"), str(job)], [str(job / "job.json")],
+                 [str(unwritten), "--job-root", str(tmp_path / "jobs")]):
         assert main(["status", *argv]) == 0 and seen.pop() == ("job", argv)
     assert main(["status", str(case)]) == 0 and seen.pop() == ("case", [str(case)])
+    plan = tmp_path / "job.json"                                      # a submit plan beside a case, not a job
+    plan.write_text("{}")
+    assert main(["status", str(plan)]) == 0 and seen.pop() == ("case", [str(plan)])
 
 
 def test_the_plan_example_profiles_parse_verbatim(tmp_path, monkeypatch, capsys):

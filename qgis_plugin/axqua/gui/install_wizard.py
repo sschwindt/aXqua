@@ -37,7 +37,7 @@ from qgis.PyQt.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog,
                                  QVBoxLayout, QWidget)
 
 from ..compat import enum_value, exec_dialog, question
-from ..core.runner_client import user_text
+from ..core.runner_client import NATIVE_ROUTES, user_text
 from ..core.tasks import run_async
 from . import findings as fnd
 from . import help as help_pages
@@ -162,8 +162,6 @@ MODULES_HINT = ("TELEMAC-2D with GAIA is the build that has been tested on Windo
                 "and take longer to compile.")
 #: The settings of TELEMAC that a build in Windows itself does not have, and the one it has alone.
 NOT_IN_WINDOWS = ("scope", "telemac_examples", "salome")
-#: The values of ``route`` that build TELEMAC in Windows itself.
-NATIVE_ROUTES = ("windows", "windows-mpi")
 ONLY_IN_WINDOWS = ("modules",)
 
 #: ``(program, option) -> answers that are not offered there``. The installation of the

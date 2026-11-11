@@ -782,6 +782,10 @@ _INSTALL_VALUES = (("folder", "--folder"), ("tag", "--tag"), ("salome", "--salom
                    ("reinstall", "--reinstall"))
 
 
+#: The values of the installation wizard's ``route`` that build TELEMAC in Windows itself: on one core, or in parallel (``--mpi``).
+NATIVE_ROUTES = ("windows", "windows-mpi")
+
+
 def install_flags(options: dict | None) -> list[str]:
     """The command-line form of the choices made in an installation wizard.
 
@@ -812,7 +816,7 @@ def install_flags(options: dict | None) -> list[str]:
     if options.get("bind") is False:
         flags.append("--no-bind")
     # TELEMAC on Windows: built in Windows itself (on one core or in parallel), and which modules
-    if options.get("route") in ("windows", "windows-mpi"):
+    if options.get("route") in NATIVE_ROUTES:
         flags.append("--native")
         if options.get("route") == "windows-mpi":
             flags.append("--mpi")

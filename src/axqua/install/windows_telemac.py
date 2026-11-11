@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import os
 import re
 import shutil
@@ -204,8 +205,12 @@ def _make_options(env: Path) -> list[str]:
 
 
 def _metis_library(home: Path) -> Path | None:
-    found = sorted((metis_dir(home) / "build").rglob("libmetis.a")) if (metis_dir(home) / "build").is_dir() else []
-    return found[0] if len(found) == 1 else None
+    """The compiled METIS: the one CMake writes below ``libmetis``, else the first one found."""
+    build = metis_dir(home) / "build"
+    if not build.is_dir():
+        return None
+    expected = build / "libmetis" / "libmetis.a"
+    return expected if expected.is_file() else next(iter(sorted(build.rglob("libmetis.a"))), None)
 
 
 def _mpi_options(home: Path) -> list[str]:
@@ -243,7 +248,7 @@ def _download(url: str, target: Path, sha256: str) -> bool:
     try:
         with urllib.request.urlopen(url, timeout=120) as response, part.open("wb") as handle:
             shutil.copyfileobj(response, handle)
-    except OSError as exc:                         # URLError and HTTPError are OSErrors
+    except (OSError, http.client.HTTPException) as exc:     # URLError and HTTPError are OSErrors; a cut connection is IncompleteRead
         part.unlink(missing_ok=True)
         print(f"The download of {url} failed: {exc}. {SERVER_DOWN}", flush=True)
         return False
@@ -260,13 +265,17 @@ def _download(url: str, target: Path, sha256: str) -> bool:
 def msmpi(home: Path, env: Path) -> int:
     """Download MS-MPI into ``msmpi`` beside *home*, make what GNU Fortran needs of it, and run two processes.
 
-    MS-MPI comes for Microsoft's compilers: GNU Fortran needs an import library made from ``msmpi.def`` and the module ``mpi.mod`` compiled from ``mpi.f90``. Nothing is installed in Windows and no service is registered: ``mpiexec`` starts its helper ``smpd`` itself.
+    MS-MPI comes for Microsoft's compilers: GNU Fortran needs an import library made from ``msmpi.def`` and the module ``mpi.mod`` compiled from ``mpi.f90``. Nothing is installed in Windows and no service is registered: ``mpiexec`` starts its helper ``smpd`` itself. A step that passed once is not repeated (a second run of ``mpiexec`` may bring up the question of a firewall again): ``probe\\passed`` records it, next to the files it was made from.
     """
     mpi = msmpi_dir(home)
     for name, sha256 in MSMPI_FILES.items():
         if not _download(MSMPI_URL + name, mpi / name, sha256):
             return 2
     include, lib = mpi / "include", mpi / "lib"
+    passed = mpi / "probe" / "passed"
+    if passed.is_file() and (lib / "libmsmpi.a").is_file() and (include / "mpi.mod").is_file():
+        print(f"MS-MPI is prepared in {mpi} and ran two processes before; it is kept.", flush=True)
+        return 0
     include.mkdir(exist_ok=True)
     lib.mkdir(exist_ok=True)
     shutil.copyfile(mpi / "sdk" / "mpif.h", include / "mpif.h")
@@ -285,7 +294,11 @@ def msmpi(home: Path, env: Path) -> int:
         code = _run(argv, env)
         if code:
             return code
-    return _probe(mpi, env, exe)
+    passed.unlink(missing_ok=True)
+    code = _probe(mpi, env, exe)
+    if code == 0:
+        passed.write_text("mpiexec -n 2: sum=3 on both processes\n", encoding="ascii")
+    return code
 
 
 def _probe(mpi: Path, env: Path, exe: Path) -> int:
@@ -296,10 +309,19 @@ def _probe(mpi: Path, env: Path, exe: Path) -> int:
     argv = [str(mpi / "bin" / "mpiexec.exe"), "-n", "2", str(exe)]
     print("$ " + " ".join(argv), flush=True)
     try:
-        done = subprocess.run(argv, env=environment, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=90)
-    except (OSError, subprocess.TimeoutExpired) as exc:
+        process = subprocess.Popen(argv, env=environment, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except OSError as exc:
         print(f"MS-MPI did not run two processes: {exc}", flush=True)
         return 2
+    try:
+        stdout, _ = process.communicate(timeout=90)
+    except subprocess.TimeoutExpired:
+        # mpiexec has started smpd and the two processes: end the whole tree, not mpiexec alone
+        _end_tree(process)
+        print("MS-MPI did not run two processes within 90 s. A firewall or security program may block mpiexec "
+              "and smpd; allow them for private networks, or install the build on one processor core.", flush=True)
+        return 2
+    done = subprocess.CompletedProcess(argv, process.returncode, stdout=stdout)
     output = done.stdout.decode("utf-8", errors="replace")
     print(output, end="" if output.endswith("\n") else "\n", flush=True)
     sums = re.findall(r"rank=(\d+) size=2 sum=(\d+)", output)
@@ -310,6 +332,19 @@ def _probe(mpi: Path, env: Path, exe: Path) -> int:
         return done.returncode or 2
     print("MS-MPI ran two processes.", flush=True)
     return 0
+
+
+def _end_tree(process: subprocess.Popen) -> None:
+    """End *process* and every process it started (``taskkill /T`` on Windows)."""
+    if _windows():
+        subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        process.kill()
+    try:
+        process.communicate(timeout=10)
+    except subprocess.TimeoutExpired:                   # pragma: no cover - taskkill failed
+        process.kill()
 
 
 def _extract(archive: Path, target: Path) -> None:
@@ -357,7 +392,9 @@ def configure_argv(home: Path, env: Path, mpi: bool = False) -> list[str]:
     """The CMake command of the tested build, with the compilers of *env*; with *mpi* the parallel one."""
     fortran = _tool(env, "x86_64-w64-mingw32-gfortran.exe", "gfortran.exe")
     options = [o for o in CMAKE_OPTIONS if not (mpi and o == "-DUSE_MPI=OFF")]
-    return [_cmake(env), "-S", str(home), "-B", str(build_dir(home, mpi)), *_make_options(env),
+    # parallel: --fresh, as the Windows test had it, so that FindMPI does not keep what a failed attempt cached
+    return [_cmake(env), *(["--fresh"] if mpi else []), "-S", str(home), "-B", str(build_dir(home, mpi)),
+            *_make_options(env),
             f"-DCMAKE_Fortran_COMPILER={fortran}", f"-DPython_EXECUTABLE={env / 'python.exe'}", *options,
             *(_mpi_options(home) if mpi else [])]
 

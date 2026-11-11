@@ -799,15 +799,20 @@ def _dispatch_status(argv: list[str]) -> int:
 
     An existing path is a case configuration - the historic meaning, which keeps every
     script and doc snippet written against it working, with a notice pointing at the new
-    spelling - unless it is a job folder (it holds ``job.json``) or that ``job.json``.
-    Anything matching the job-id grammar is a job. Neither can be mistaken for the other,
-    so there is no guess here, only a rule.
+    spelling - unless it is a job folder (a folder named like a job id) or the
+    ``job.json`` inside one. Anything matching the job-id grammar is a job. Neither can
+    be mistaken for the other, so there is no guess here, only a rule.
     """
+    from axqua.jobs import ids
+
     first = _first_positional(argv)
     path = Path(first) if first else None
-    # a job folder (or its job.json) is a job: the Windows MPI test passed one and got
-    # "unrecognized arguments: --job-root" from the case form (2026-11-11)
-    is_job = path is not None and ((path / "job.json").is_file() or (path.name == "job.json" and path.is_file()))
+    # a job folder is a job, also before its job.json is written: the Windows MPI test
+    # passed one and got "unrecognized arguments: --job-root" from the case form
+    # (2026-11-11). A job.json elsewhere is a submit plan, not a job record.
+    is_job = path is not None and (
+        (path.is_dir() and ids.is_job_id(path.resolve().name))
+        or (path.name == "job.json" and path.is_file() and ids.is_job_id(path.resolve().parent.name)))
     if path is not None and path.exists() and not is_job:
         logging.getLogger("axqua").warning(
             "'axqua status <config>' now also accepts a job id; the case form is "

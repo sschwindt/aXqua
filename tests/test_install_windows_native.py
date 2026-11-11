@@ -470,11 +470,18 @@ def test_a_failed_download_says_to_try_again(tmp_path, monkeypatch, capsys):
 def test_ms_mpi_must_run_two_processes(tmp_path, monkeypatch, capsys, output, code, ok):
     seen = []
 
-    def run(argv, env=None, **kwargs):
-        seen.append((argv, env))
-        return subprocess.CompletedProcess(argv, code, stdout=output)
+    class Finished:
+        pid = 1
+        returncode = code
 
-    monkeypatch.setattr(wt.subprocess, "run", run)
+        def communicate(self, timeout=None):
+            return output, None
+
+    def popen(argv, env=None, **kwargs):
+        seen.append((argv, env))
+        return Finished()
+
+    monkeypatch.setattr(wt.subprocess, "Popen", popen)
     mpi = tmp_path / "msmpi"
     assert (wt._probe(mpi, tmp_path / "env", mpi / "probe" / "probe.exe") == 0) is ok
     argv, env = seen[0]
@@ -515,3 +522,85 @@ def test_metis_is_compiled_once(tmp_path, monkeypatch):
     assert compile_metis[-4:] == ["metis", "--parallel", "3"][-3:] and "--target" in compile_metis or True
     assert compile_metis[compile_metis.index("--target") + 1] == "metis"
     assert wt.metis(home, tmp_path / "env", 3) == 0 and len(ran) == 2 and len(asked) == 1   # kept
+
+
+def test_a_cut_connection_is_a_failed_download_not_a_traceback(tmp_path, monkeypatch, capsys):
+    import http.client
+
+    class Cut(_Response):
+        def __enter__(self):
+            raise http.client.IncompleteRead(b"part", 100)
+
+    monkeypatch.setattr(wt.urllib.request, "urlopen", lambda url, timeout=None: Cut(b""))
+    target = tmp_path / "msmpi" / "bin" / "msmpi.dll"
+    assert wt._download("https://example.org/msmpi.dll", target, "0" * 64) is False
+    assert "start the installation again later" in capsys.readouterr().out
+    assert not target.exists() and not target.with_name("msmpi.dll.part").exists()
+
+
+def test_a_hanging_probe_ends_mpiexec_with_everything_it_started(tmp_path, monkeypatch, capsys):
+    ended = []
+
+    class Hanging:
+        pid = 4321
+        returncode = None
+
+        def communicate(self, timeout=None):
+            if not ended:
+                raise subprocess.TimeoutExpired("mpiexec", timeout)
+            return b"", None
+
+        def kill(self):
+            ended.append("kill")
+
+    monkeypatch.setattr(wt.subprocess, "Popen", lambda argv, **kwargs: Hanging())
+    monkeypatch.setattr(wt, "_windows", lambda: True)
+    monkeypatch.setattr(wt.subprocess, "run", lambda argv, **kwargs: ended.append(argv))
+    mpi = tmp_path / "msmpi"
+    assert wt._probe(mpi, tmp_path / "env", mpi / "probe" / "probe.exe") == 2
+    assert ended[0] == ["taskkill", "/PID", "4321", "/T", "/F"] and "90 s" in capsys.readouterr().out
+
+
+def test_ms_mpi_that_passed_once_is_not_prepared_again(tmp_path, monkeypatch):
+    import hashlib
+    pins = {name: hashlib.sha256(name.encode()).hexdigest() for name in wt.MSMPI_FILES}
+    monkeypatch.setattr(wt, "MSMPI_FILES", pins)
+    _serve(monkeypatch, {wt.MSMPI_URL + name: name.encode() for name in pins})
+    ran, probed = [], []
+
+    def run(argv, env):
+        ran.append(argv)
+        for part in argv:                       # what dlltool and gfortran would write
+            if part.endswith("libmsmpi.a"):
+                Path(part).write_text("")
+            if part.startswith("-J"):
+                (Path(part[2:]) / "mpi.mod").write_text("")
+        return 0
+
+    monkeypatch.setattr(wt, "_run", run)
+    monkeypatch.setattr(wt, "_probe", lambda mpi, env, exe: probed.append(exe) or 0)
+    home = tmp_path / "telemac-mascaret"
+    assert wt.msmpi(home, tmp_path / "env") == 0 and len(ran) == 3 and len(probed) == 1
+    assert (tmp_path / "msmpi" / "probe" / "passed").is_file()
+    assert wt.msmpi(home, tmp_path / "env") == 0 and len(ran) == 3 and len(probed) == 1      # kept
+    monkeypatch.setattr(wt, "_probe", lambda mpi, env, exe: 2)
+    (tmp_path / "msmpi" / "probe" / "passed").unlink()
+    assert wt.msmpi(home, tmp_path / "env") == 2 and not (tmp_path / "msmpi" / "probe" / "passed").exists()
+
+
+def test_metis_is_found_also_when_there_are_two_copies(tmp_path):
+    build = tmp_path / "metis" / "build"
+    (build / "libmetis").mkdir(parents=True)
+    for path in (build / "libmetis.a", build / "libmetis" / "libmetis.a"):
+        path.write_text("")
+    assert wt._metis_library(tmp_path / "telemac-mascaret") == build / "libmetis" / "libmetis.a"
+    (build / "libmetis" / "libmetis.a").unlink()
+    assert wt._metis_library(tmp_path / "telemac-mascaret") == build / "libmetis.a"
+
+
+def test_the_parallel_configure_starts_from_a_fresh_cache(tmp_path):
+    """The Windows test configured with --fresh after two failed attempts: FindMPI keeps what it cached."""
+    env = tmp_path / "telemac-build"
+    _tools(env)
+    assert wt.configure_argv(tmp_path / "telemac-mascaret", env, mpi=True)[1] == "--fresh"
+    assert "--fresh" not in wt.configure_argv(tmp_path / "telemac-mascaret", env)
