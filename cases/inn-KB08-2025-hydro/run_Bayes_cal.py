@@ -7,10 +7,9 @@ velocity ground truth (from ``ground_truth.sources`` in inn-KB08-2025-hydro.axq-
 HydroBayesCal calibration-points CSV, makes sure the ``.cas`` prints SCALAR
 VELOCITY, emits ``config_Telemac.py`` and launches HydroBayesCal.
 
-The calibration target is the FlowTracker velocity at 0.6*h (~ the depth-averaged
-velocity a 2D model resolves), compared to TELEMAC-2D ``SCALAR VELOCITY``. Point
-HydroBayesCal is a pip dependency (pip install 'axqua[calibration]'); the
---hbc-dir / --hbc-env flags).
+The calibration target is the FlowTracker velocity at 0.6 of the water depth above the riverbed (profile rule ``log-profile``), compared to TELEMAC-2D ``SCALAR VELOCITY``.
+
+HydroBayesCal is a pip dependency (``pip install 'axqua[calibration]'``).
 
 Run: mamba run -n axqua-env python <case>/run_Bayes_cal.py [--prepare-only]
 """

@@ -7,11 +7,7 @@ calibration-points CSV in the HydroBayesCal schema (first four columns
 ``id, x, y, z`` read by position, then ``<QTY>_DATA`` / ``<QTY>_ERROR`` read by
 name).
 
-Per vertical it keeps the measurement nearest **0.6 x depth** (the standard
-depth-averaged-velocity proxy that TELEMAC-2D ``SCALAR VELOCITY`` =
-sqrt(u^2+v^2) is compared to) and forms the target from the **horizontal**
-components only. ``WATER DEPTH`` (the vertical's total depth) is carried
-alongside.
+Per vertical it takes the velocity at **0.6 of the depth above the riverbed**, read off a logarithmic profile fitted to the vertical's readings (the ``log-profile`` rule of :func:`axqua.ground_truth.select_profile_rows`), which TELEMAC-2D ``SCALAR VELOCITY`` = sqrt(U^2+V^2) is compared to, and forms the target from the **horizontal** components only. ``WATER DEPTH`` (the vertical's total depth) is carried alongside.
 
 Three source layouts are handled (``kind`` on :class:`~axqua.config`-level
 flow specs, or the ``compile_*`` helpers directly):
@@ -26,7 +22,7 @@ flow specs, or the ``compile_*`` helpers directly):
   0.2/0.6/0.8 profiles.
 * ``points`` - a point layer with one point per reading, as the corrected campaign
   layers of 2026-10 are (via :func:`axqua.ground_truth.read_points`); the readings
-  of a vertical are reduced by a profile rule, the depth average by default.
+  of a vertical are reduced by a profile rule, ``log-profile`` by default.
 
 The per-point velocity error propagates the FlowTracker component errors and is
 floored (``vel_err_floor``). Raise the floor for a campaign that is not an
@@ -86,9 +82,21 @@ def assemble_velocity_csv(x, y, z, u, v, u_err, v_err, h, labels,
     })
 
 
-def _pick_relative_depth(profile: list[dict], target: float = 0.6) -> dict:
-    """The profile sub-vertical whose relative depth is nearest ``target``."""
-    return min(profile, key=lambda r: abs(r["pct"] - target))
+def _at_profile_height(verticals: dict) -> dict:
+    """Per vertical, one reading at 0.6 of the depth above the bed.
+
+    *verticals* maps a vertical to its readings (``pct`` is the FlowTracker
+    ``% Depth``, measured from the surface, then ``h``, ``u``, ``v``, ``u_err``,
+    ``v_err``). The rule ``log-profile`` of
+    :func:`axqua.ground_truth.select_profile_rows` fits each vertical.
+    """
+    from axqua.ground_truth import select_profile_rows
+
+    table = pd.DataFrame([{**{k: v for k, v in r.items() if k != "pct"},
+                           "pct_depth": r["pct"], "_vertical": key}
+                          for key, readings in verticals.items() for r in readings])
+    out = select_profile_rows(table, "log-profile", group_key="_vertical")
+    return dict(zip(out["_vertical"].tolist(), out.to_dict("records")))
 
 
 def _num(row, col):
@@ -123,7 +131,7 @@ def compile_adapter(values_xlsx: Path, positions, crs_epsg: int = 25832,
 
 def compile_transect(values_xlsx: Path, positions_gpkg: Path, sheet: str = "KB15",
                      vel_err_floor: float = VELOCITY_ERROR_FLOOR,
-                     target_depth: float = 0.6, label: str = "tr") -> pd.DataFrame:
+                     label: str = "tr") -> pd.DataFrame:
     """Taped cross-section: values from the xlsx, positions from a point gpkg.
 
     ``Station`` is ``<vertical>-<sub>``; positions come from ``positions_gpkg``
@@ -165,7 +173,7 @@ def compile_transect(values_xlsx: Path, positions_gpkg: Path, sheet: str = "KB15
     if missing:
         raise ValueError(f"{Path(positions_gpkg).name}: verticals {missing} have no position")
 
-    rows = {k: _pick_relative_depth(v, target_depth) for k, v in sorted(verticals.items())}
+    rows = _at_profile_height(dict(sorted(verticals.items())))
     return assemble_velocity_csv(
         [pos[k][0] for k in rows], [pos[k][1] for k in rows], [pos[k][2] for k in rows],
         [r["u"] for r in rows.values()], [r["v"] for r in rows.values()],
@@ -175,7 +183,7 @@ def compile_transect(values_xlsx: Path, positions_gpkg: Path, sheet: str = "KB15
 
 def compile_inline(values_xlsx: Path, sheet: str = "KB15",
                    vel_err_floor: float = VELOCITY_ERROR_FLOOR,
-                   target_depth: float = 0.6, label: str = "in") -> pd.DataFrame:
+                   label: str = "in") -> pd.DataFrame:
     """Verticals with inline EPSG coordinates on every row and 0.2/0.6/0.8 profiles."""
     raw = read_xlsx_sheet(Path(values_xlsx), sheet=sheet)
     hidx, cols = _header_map(raw)
@@ -207,7 +215,7 @@ def compile_inline(values_xlsx: Path, sheet: str = "KB15",
     if bad:
         raise ValueError(f"{Path(values_xlsx).name}: verticals {bad} carry no inline coordinates")
 
-    rows = {k: _pick_relative_depth(g["profile"], target_depth) for k, g in groups.items()}
+    rows = _at_profile_height({k: g["profile"] for k, g in groups.items()})
     return assemble_velocity_csv(
         [groups[k]["x"] for k in rows], [groups[k]["y"] for k in rows],
         [groups[k]["z"] for k in rows],
@@ -218,7 +226,7 @@ def compile_inline(values_xlsx: Path, sheet: str = "KB15",
 
 
 def compile_points(layer, crs_epsg: int, vel_err_floor=VELOCITY_ERROR_FLOOR,
-                   label: str = "pt", profile: str = "depth-average") -> pd.DataFrame:
+                   label: str = "pt", profile: str = "log-profile") -> pd.DataFrame:
     """A point layer with one point per reading -> one calibration point per vertical.
 
     The layer carries no component errors, so every point gets ``vel_err_floor``. It

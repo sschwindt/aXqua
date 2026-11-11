@@ -142,15 +142,16 @@ ground_truth:
   # both gravel bars, KB8 and KB15). See the README there.
   #
   # CALIBRATION: September 1-2, 2025, the flow situation of this model.
-  # depth-average reduces each vertical to the USGS three-point depth average of the
-  # velocity components, which is what a depth-averaged model computes. The
+  # log-profile fits a logarithmic profile to the readings of each vertical and
+  # takes the velocity at 0.6 of the water depth above the riverbed (the user's
+  # rule of 2026-11-11; it was the USGS three-point depth average before). The
   # OpenFOAM calibration reads the same table; give it profile: all, so that every
   # reading becomes a target at its own height.
   sources:
     - category: hydraulics
       kind: points
       positions: user-sources/ground-truth/flowtracker/Sep25/KB8_Sep25.gpkg
-      profile: depth-average
+      profile: log-profile
 
 calibration:
   calibration_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]                    # measured columns used for calibration
@@ -176,18 +177,18 @@ calibration:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Nov25/KB8_Nov25.gpkg
-          profile: depth-average
+          profile: log-profile
     - name: March 2026
       prescribed_flowrate: 47.0   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Mar26/KB8_Mar26.gpkg
-          profile: depth-average
+          profile: log-profile
     - name: August 2026
       prescribed_flowrate: 53.9   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Aug26/KB8_Aug26.gpkg
-          profile: depth-average
+          profile: log-profile

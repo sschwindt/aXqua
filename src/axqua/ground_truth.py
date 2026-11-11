@@ -196,7 +196,7 @@ def _read_flowtracker_profile(xlsx: Path, sheet: str | int) -> pd.DataFrame:
 def read_flowtracker(xlsx: Path, positions: Path, crs_epsg: int,
                      join_key: str = "ID", *,
                      sheet: str | int | None = None,
-                     profile: str = "single",
+                     profile: str = "log-profile",
                      group_key: str | None = None) -> pd.DataFrame:
     """Join FlowTracker values to their DGPS positions -> tidy hydraulics table.
 
@@ -264,7 +264,7 @@ def read_flowtracker(xlsx: Path, positions: Path, crs_epsg: int,
     # but each must still resolve to exactly ONE position. Relaxing the left side
     # too would let a duplicated position silently multiply the targets.
     merged = pos.merge(values, on="ID", how="inner",
-                       validate="one_to_one" if profile == "single"
+                       validate="one_to_one" if profile in ONE_ROW_RULES
                        else "one_to_many")
     if len(merged) < len(values):
         missing = sorted(set(values["ID"].dropna()) - set(pos["ID"].dropna()))
@@ -381,12 +381,12 @@ def _compile_source(src, crs_epsg: int) -> pd.DataFrame:
     if src.kind == "flowtracker":
         return read_flowtracker(src.values, src.positions, crs_epsg, src.join_key,
                                 sheet=getattr(src, "sheet", None),
-                                profile=getattr(src, "profile", "single"),
+                                profile=getattr(src, "profile", "log-profile"),
                                 group_key=getattr(src, "group_key", None))
     if src.kind == "points":
         layer = src.positions or src.values
         return select_point_profiles(read_points(layer, crs_epsg),
-                                     getattr(src, "profile", "single"),
+                                     getattr(src, "profile", "log-profile"),
                                      group_key=getattr(src, "group_key", None))
     raise ValueError(f"unknown ground_truth source kind: {src.kind!r}")
 
@@ -397,7 +397,7 @@ def _compile_source(src, crs_epsg: int) -> pd.DataFrame:
 VERTICAL_TOLERANCE = 0.01
 
 
-def select_point_profiles(df: pd.DataFrame, rule: str = "single", *,
+def select_point_profiles(df: pd.DataFrame, rule: str = "log-profile", *,
                           group_key: str | None = None) -> pd.DataFrame:
     """Apply a profile rule to a point layer that holds several readings per vertical.
 
@@ -405,7 +405,7 @@ def select_point_profiles(df: pd.DataFrame, rule: str = "single", *,
     points on top of each other where a vertical was sampled at 0.2, 0.6 and 0.8 of
     the depth. A depth-averaged model has one value there, so the readings of a
     vertical are reduced by the same rules as a FlowTracker workbook
-    (:func:`select_profile_rows`) - by default the reading nearest 0.6 of the depth.
+    (:func:`select_profile_rows`), by default ``log-profile``: the velocity at 0.6 of the depth above the bed, read off a logarithmic profile.
 
     The vertical is named by *group_key* where the layer has such a column, and
     otherwise by the position itself. A layer with one reading per position comes
@@ -491,10 +491,25 @@ def write_tidy(tables: dict[str, pd.DataFrame], path: Path) -> Path:
 # --------------------------------------------------------------------------- #
 # Where in the water column a measurement sits
 # --------------------------------------------------------------------------- #
-#: Height above the bed, as a fraction of the column, of the conventional
-#: "0.6 depth" point. **0.6 is measured DOWN FROM THE SURFACE** (that is the
-#: FlowTracker/USGS convention), so the probe sits at 0.4 of the depth ABOVE the
-#: bed. Getting this backwards misplaces every target by 0.2*h.
+#: Height above the bed, as a fraction of the water depth, at which the velocity of
+#: a vertical is compared with a depth-averaged (2D) model: **0.6 of the depth above
+#: the riverbed** (the user's rule of 2026-11-11, which replaces the "0.6 of the depth
+#: below the surface" of the FlowTracker manual). Where a vertical has several
+#: readings, the ``log-profile`` rule reads the velocity at this height off a
+#: logarithmic profile fitted to them. On a logarithmic profile this velocity is
+#: approximately 10 % above the depth average (KB15 surveys, median of 36 fits).
+PROFILE_HEIGHT = 0.6
+
+#: Height above the bed, as a fraction of the column, assumed for a reading whose
+#: height the data do not give (no MeasD, % Depth or label): 0.4, where a crew that
+#: follows the FlowTracker manual holds the probe (0.6 of the depth below the
+#: surface; the single readings of August 2026 on KB15 sit at a median 0.35 h). This
+#: is where the reading was taken, not where it is compared (:data:`PROFILE_HEIGHT`);
+#: the ``log-profile`` rule moves it there. A *recorded* measurement depth (MeasD,
+#: ``Meas. Depth``, ``% Depth``) counts DOWN FROM THE SURFACE, as a FlowTracker
+#: records it: in the KB15 surveys of 2025 and 2026, the reading with the smallest
+#: MeasD is the fastest in 39 of the 50 verticals with several readings. Getting
+#: this backwards misplaces every target by 0.2 h.
 DEFAULT_RELATIVE_HEIGHT = 0.4
 
 
@@ -541,7 +556,7 @@ def relative_height(df: pd.DataFrame, *,
     log.warning(
         "no MeasD/%%Depth/label in the ground truth, so the measurement height "
         "is unknown for all %d point(s); assuming %.2f of the depth above the "
-        "bed (the 0.6-depth convention, which is measured from the SURFACE). "
+        "bed, where the FlowTracker manual places the probe. "
         "Carry MeasD + FinalD to place targets from the data instead.", n, default)
     return pd.Series(np.full(n, float(default)), index=df.index), f"default {default}"
 
@@ -555,7 +570,10 @@ _USGS_DEPTHS = (0.2, 0.6, 0.8)
 #: Weights of the USGS three-point rule, in the order of :data:`_USGS_DEPTHS`.
 _USGS_WEIGHTS = (1.0, 2.0, 1.0)
 
-PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average")
+PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average", "log-profile")
+
+#: The rules that leave one row per vertical.
+ONE_ROW_RULES = ("single", "depth-average", "log-profile")
 
 
 def _height_above_bed(df: pd.DataFrame) -> pd.Series:
@@ -578,9 +596,9 @@ def select_profile_rows(df: pd.DataFrame, rule: str = "single", *,
     property, so it is named explicitly:
 
     ``single``
-        one row per vertical - the reading nearest the conventional 0.6 depth.
-        **The default, and a no-op when there is already one row per vertical**,
-        so every existing config keeps its present behavior.
+        one row per vertical - the reading nearest :data:`PROFILE_HEIGHT` (0.6 of
+        the depth above the bed; of two equally near, the lower). A no-op when
+        there is already one row per vertical.
     ``all``
         every reading, one target each.
     ``drop-lowest``
@@ -594,6 +612,11 @@ def select_profile_rows(df: pd.DataFrame, rule: str = "single", *,
         velocity ``(u_0.2 + 2*u_0.6 + u_0.8) / 4`` where three readings allow it,
         else the plain mean. This is the quantity a depth-averaged 2D model
         actually predicts.
+    ``log-profile``
+        one row per vertical carrying the velocity at :data:`PROFILE_HEIGHT` (0.6
+        of the depth above the bed), read off a logarithmic profile
+        ``u = a ln z + b`` fitted to the vertical's readings at their recorded
+        heights where they span that height (:func:`_log_profile`); the fit is never extrapolated. Any other vertical is represented by its reading nearest that height and moved there along the log law, with the roughness length of its own fit or the median of the survey. The default of a ground-truth source (``GroundTruthSource.profile``).
 
     The lowest reading is found by **height above the bed**, never by row order:
     the readings of one vertical arrive in whatever order they were entered
@@ -618,10 +641,9 @@ def select_profile_rows(df: pd.DataFrame, rule: str = "single", *,
         rank = work.groupby(group_key)["_f"].rank(method="first", ascending=True)
         out = work[(sizes == 1) | (rank > 1)]
     elif rule == "single":
-        # nearest the 0.6-depth convention == 0.4 of the column above the bed
-        order = (work["_f"] - DEFAULT_RELATIVE_HEIGHT).abs()
-        keep = order.groupby(work[group_key]).transform("min") == order
-        out = work[keep].groupby(group_key, as_index=False).head(1)
+        out = _nearest_profile_height(work, group_key)
+    elif rule == "log-profile":
+        out = _log_profile(work, group_key)
     else:                                                  # depth-average
         out = _depth_average(work, group_key)
 
@@ -631,6 +653,189 @@ def select_profile_rows(df: pd.DataFrame, rule: str = "single", *,
                  "across %d vertical(s)", rule, len(out), len(df), dropped,
                  work[group_key].nunique())
     return out.drop(columns="_f", errors="ignore").reset_index(drop=True)
+
+
+def _nearest_profile_height(work: pd.DataFrame, group_key: str) -> pd.DataFrame:
+    """The reading of each vertical nearest :data:`PROFILE_HEIGHT` above the bed.
+
+    Of two readings equally near, the lower one is taken.
+    """
+    order = (work["_f"] - PROFILE_HEIGHT).abs().round(9)
+    keep = order.groupby(work[group_key]).transform("min") == order
+    return (work[keep].sort_values("_f", kind="stable")
+            .groupby(group_key, as_index=False, sort=False).head(1)
+            .sort_index())
+
+
+#: A reading is moved along the log law only where it stands at least e roughness
+#: lengths above the bed (ln(z/z0) >= 1). Closer to the bed the law does not hold,
+#: and the factor ln(z*/z0) / ln(z/z0) would grow without bound.
+_MIN_LOG_ARGUMENT = 1.0
+
+#: The height suffix of a point label (``q47-3-1501-0.93h``), as relative_height reads it.
+_LABEL_HEIGHT = re.compile(r"-[0-9.]+h$")
+
+
+def _log_profile(work: pd.DataFrame, group_key: str) -> pd.DataFrame:
+    """Collapse each vertical to its velocity at :data:`PROFILE_HEIGHT` above the bed.
+
+    The readings of a vertical stand at the heights ``z = f h`` above the bed that
+    :func:`relative_height` derives from the data (MeasD and the total depth). Where
+    they span ``z* = PROFILE_HEIGHT h`` and their speed grows with height, so that the
+    fit ``a ln z + b`` of the speed has ``a > 0`` and a roughness length
+    ``z0 = exp(-b/a)`` below the lowest reading, each velocity component is fitted by
+    least squares with ``a ln z + b`` (the logarithmic law of the wall
+    ``u = (u*/kappa) ln(z/z0)`` when the direction does not change over the column)
+    and evaluated at ``z*``. With two readings the fit passes through both; with three
+    or more it averages out the scatter, which then enters the error of the component
+    in quadrature with the mean error of the readings. Fitting the components rather
+    than the speed keeps the direction of the flow at that height (see
+    :func:`_depth_average` on why).
+
+    The fit is never extrapolated. Every other vertical (one reading, readings at one
+    height, readings all above or all below ``z*``, or a speed that does not grow
+    with height) is represented by its reading nearest ``z*``, with repeat readings
+    at that height averaged, and moved to ``z*`` along the log law: the components
+    and their errors are scaled by ``ln(z*/z0) / ln(z/z0)``, with the ``z0`` of the
+    vertical's own fit where it has a valid one and otherwise the median ``z0`` of the
+    valid fits of the survey. Without a ``z0``, or where the reading stands closer
+    than e ``z0`` to the bed, the reading is kept as measured.
+
+    Every other column (TKE, the standard deviations, z, the point name) comes from
+    the reading nearest ``z*``. The rows that come out stand at ``z*``: ``h_meas``,
+    ``pct_depth``, ``f`` and the height suffix of a ``label`` are set accordingly, so
+    that a later placement reads the height they now represent.
+    """
+    comps = [c for c in ("u", "v", "w") if c in work.columns]
+    if not comps or "h" not in work.columns:
+        log.warning("profile rule 'log-profile' needs the velocity components and the "
+                    "total water depth of each reading; taking the reading nearest "
+                    "%.1f of the depth above the bed instead", PROFILE_HEIGHT)
+        return _nearest_profile_height(work, group_key)
+    depth = pd.to_numeric(work["h"], errors="coerce")
+    height = work["_f"] * depth
+    numeric = {c: pd.to_numeric(work[c], errors="coerce")
+               for c in work.columns if c in comps or c in {f"{k}_err" for k in comps}}
+    errors = [f"{c}_err" for c in comps if f"{c}_err" in work.columns]
+
+    percent = ("pct_depth" in work.columns and pd.to_numeric(
+        work["pct_depth"], errors="coerce").dropna().gt(1.5).any())
+    label_height = f"-{1.0 - PROFILE_HEIGHT:.2f}h"
+
+    def at_target(index, h: float) -> dict:
+        """The placement columns of a row that now stands at PROFILE_HEIGHT."""
+        moved = {"_f": PROFILE_HEIGHT}
+        if "f" in work.columns:
+            moved["f"] = PROFILE_HEIGHT
+        if "h_meas" in work.columns:
+            moved["h_meas"] = (1.0 - PROFILE_HEIGHT) * h
+        if "pct_depth" in work.columns:
+            moved["pct_depth"] = (1.0 - PROFILE_HEIGHT) * (100.0 if percent else 1.0)
+        if "label" in work.columns:
+            label = work.at[index, "label"]
+            if isinstance(label, str) and _LABEL_HEIGHT.search(label):
+                moved["label"] = _LABEL_HEIGHT.sub(label_height, label)
+        return moved
+
+    def combined(mean_error: float, scatter: float) -> float:
+        """A reading error and a scatter in quadrature, NaN where neither is known."""
+        if mean_error == mean_error:
+            return float(np.hypot(mean_error, scatter))
+        return scatter if scatter > 0 else np.nan
+
+    # one template row per vertical (the reading nearest z*, which keeps the other
+    # columns and their types), and the values that replace its own
+    template: dict = {}
+    update: dict = {}
+    nearest: dict = {}
+    log_z0: list[float] = []
+    fitted = 0
+    for key, grp in work.groupby(group_key, sort=False):
+        z = height.loc[grp.index]
+        usable = z.gt(0)
+        for c in comps:
+            usable &= numeric[c].loc[grp.index].notna()
+        g, zg = grp[usable], z[usable]
+        if g.empty:
+            template[key] = (grp["_f"] - PROFILE_HEIGHT).abs().idxmin()
+            continue
+        h = float(depth.loc[g.index].iloc[0])
+        target = PROFILE_HEIGHT * h
+        # the reading(s) nearest z*; of two heights equally near, the lower
+        distance = (zg - target).abs().round(9)
+        level = zg[distance == distance.min()].round(9).min()
+        at = g.index[zg.round(9) == level]
+        template[key] = at[0]
+
+        own = None
+        if zg.round(6).nunique() >= 2:
+            lnz = np.log(zg.to_numpy(float))
+            design = np.column_stack([lnz, np.ones_like(lnz)])
+            speed = np.sqrt(sum(numeric[c].loc[g.index].to_numpy(float) ** 2
+                                for c in comps if c != "w"))
+            (a, b), *_ = np.linalg.lstsq(design, speed, rcond=None)
+            if a > 0 and -b / a < lnz.min():
+                own = -b / a
+                log_z0.append(own)
+            if own is not None and zg.min() <= target <= zg.max():
+                new = at_target(at[0], h)
+                for c in comps:
+                    y = numeric[c].loc[g.index].to_numpy(float)
+                    (a, b), *_ = np.linalg.lstsq(design, y, rcond=None)
+                    new[c] = a * np.log(target) + b
+                    err = f"{c}_err"
+                    if err in errors:
+                        resid = y - (a * lnz + b)
+                        scatter = float(np.sqrt(np.mean(resid ** 2))) if len(y) > 2 else 0.0
+                        reading = numeric[err].loc[g.index]
+                        mean = float(reading.mean()) if reading.notna().any() else np.nan
+                        new[err] = combined(mean, scatter)
+                update[key] = new
+                fitted += 1
+                continue
+
+        values = {}
+        for c in comps:
+            y = numeric[c].loc[at]
+            values[c] = float(y.mean())
+            err = f"{c}_err"
+            if err in errors:
+                reading = numeric[err].loc[at]
+                mean = float(reading.mean()) if reading.notna().any() else np.nan
+                values[err] = combined(mean, float(y.std(ddof=0)) if len(y) > 1 else 0.0)
+        nearest[key] = (at[0], h, float(level), values, own)
+
+    survey = float(np.median(log_z0)) if log_z0 else None
+    moved = 0
+    for key, (index, h, z, values, own) in nearest.items():
+        log_z0_here = own if own is not None else survey
+        new = dict(values)
+        if log_z0_here is not None:
+            z0 = float(np.exp(log_z0_here))
+            lever = np.log(z / z0)
+            if lever >= _MIN_LOG_ARGUMENT and PROFILE_HEIGHT * h > z0:
+                factor = np.log(PROFILE_HEIGHT * h / z0) / lever
+                new = {c: v * factor for c, v in values.items()}
+                new.update(at_target(index, h))
+                moved += 1
+        update[key] = new
+    log.info("profile rule 'log-profile': velocity at %.1f of the depth above the bed "
+             "from a logarithmic fit for %d vertical(s); %d reading(s) moved there along "
+             "the log law (z0 of the vertical's own fit, else the survey median %s from "
+             "%d fit(s)), %d kept as measured",
+             PROFILE_HEIGHT, fitted, moved,
+             f"{np.exp(survey):.4f} m" if survey is not None else "unknown",
+             len(log_z0), len(template) - fitted - moved)
+
+    out = work.loc[list(template.values())].copy()
+    changed = {column for new in update.values() for column in new}
+    for column in changed:
+        if column in ("u", "v", "w", "f", "h_meas", "pct_depth") or column.endswith("_err"):
+            out[column] = pd.to_numeric(out[column], errors="coerce").astype(float)
+    for key, new in update.items():
+        for column, value in new.items():
+            out.loc[template[key], column] = value
+    return out
 
 
 def _depth_average(work: pd.DataFrame, group_key: str) -> pd.DataFrame:

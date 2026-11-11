@@ -40,12 +40,14 @@ def test_assemble_velocity_csv_schema():
     assert (df["SCALAR VELOCITY_ERROR"] == 0.02).all()   # zero prop error -> floor
 
 
-def test_pick_relative_depth_nearest_06():
-    profile = [{"pct": 0.2, "u": 1}, {"pct": 0.6, "u": 2}, {"pct": 0.8, "u": 3}]
-    assert campaigns._pick_relative_depth(profile, 0.6)["u"] == 2
-    # nearest wins when 0.6 is absent
-    assert campaigns._pick_relative_depth(
-        [{"pct": 0.2, "u": 1}, {"pct": 0.5, "u": 9}], 0.6)["u"] == 9
+def test_a_vertical_is_read_at_0_6_of_the_depth_above_the_bed():
+    """% Depth counts from the surface; the target is 0.6 h above the bed on a log fit."""
+    h, z0, ustar = 1.0, 0.003, 0.05
+    readings = [{"pct": p, "h": h, "u": ustar / 0.41 * np.log((1 - p) * h / z0),
+                 "v": 0.0, "u_err": 0.01, "v_err": 0.01} for p in (0.2, 0.6, 0.8)]
+    rows = campaigns._at_profile_height({7: readings})
+    assert list(rows) == [7]
+    assert rows[7]["u"] == pytest.approx(ustar / 0.41 * np.log(0.6 * h / z0))
 
 
 def test_compile_campaign_rejects_unknown_layout():
@@ -74,6 +76,12 @@ def test_a_point_layer_gives_one_calibration_point_per_vertical(tmp_path):
                      crs="EPSG:25832").to_file(layer, driver="GPKG")
     out = compile_campaign("points", layer=layer, crs_epsg=25832, label="sep")
     assert list(out["label"]) == ["sep-1", "sep-2"]
-    # USGS three-point average (1.0 + 2*0.8 + 0.6) / 4 for the first vertical
-    assert out["SCALAR VELOCITY_DATA"].tolist() == pytest.approx([0.8, 0.3])
+    # first vertical: 1.0, 0.8, 0.6 m/s at 0.4, 0.2, 0.1 m above the bed lie on
+    # u = a ln z + b, read at 0.6 of 0.5 m above the bed; the second, one reading
+    # 0.08 m above the bed of a 0.2 m column, goes to 0.12 m with the z0 of the first
+    a = 0.2 / np.log(2.0)
+    b = 1.0 - a * np.log(0.4)
+    z0 = np.exp(-b / a)
+    expected = [a * np.log(0.3) + b, 0.3 * np.log(0.12 / z0) / np.log(0.08 / z0)]
+    assert out["SCALAR VELOCITY_DATA"].tolist() == pytest.approx(expected, abs=1e-6)
     assert out["WATER DEPTH_DATA"].tolist() == pytest.approx([0.5, 0.2])

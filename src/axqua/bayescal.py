@@ -140,8 +140,8 @@ def build_velocity_csv(cfg: Config, *, vel_err_floor: float = campaigns.VELOCITY
                        positional: bool = True) -> tuple[Path, pd.DataFrame]:
     """Compile the configured ground truth and write the calibration-points CSV.
 
-    The velocity target is the horizontal FlowTracker speed (0.6-depth proxy for
-    the depth-averaged velocity) with propagated, floored error; water depth is
+    The velocity target is the horizontal FlowTracker speed at 0.6 of the depth
+    above the riverbed (profile rule ``log-profile``) with propagated, floored error; water depth is
     carried alongside. Reads ``ground_truth.sources`` via
     :func:`axqua.ground_truth.compile_ground_truth`.
 

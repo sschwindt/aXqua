@@ -172,7 +172,7 @@ class TelemacEnv:
 
 #: Valid ``GroundTruthSource.profile`` rules. Must stay in step with
 #: :data:`axqua.ground_truth.PROFILE_RULES` (fenced by a test).
-PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average")
+PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average", "log-profile")
 
 
 @dataclass
@@ -194,13 +194,15 @@ class GroundTruthSource:
 
     #: Worksheet to read the values from. ``None`` keeps the historic behavior
     #: (the first sheet, one row per vertical). Name a per-reading profile sheet
-    #: to use any ``profile`` rule other than ``single``.
+    #: to give the ``profile`` rule several readings per vertical.
     sheet: str | int | None = None
 
     #: Which reading of a multi-depth vertical becomes a target - see
-    #: :func:`axqua.ground_truth.select_profile_rows`. ``single`` is the default
-    #: and reproduces the previous behavior exactly.
-    profile: str = "single"
+    #: :func:`axqua.ground_truth.select_profile_rows`. The default ``log-profile``
+    #: reads the velocity at 0.6 of the depth above the bed off a logarithmic
+    #: profile fitted to the readings of each vertical (the user's rule of
+    #: 2026-11-11); a vertical with one reading at that height is kept as it is.
+    profile: str = "log-profile"
 
     #: Column identifying the vertical a reading belongs to, for the profile
     #: rules. Defaults to ``join_key``.

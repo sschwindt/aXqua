@@ -735,8 +735,12 @@ ground_truth:
   #   # MULTI-DEPTH VERTICALS. A FlowTracker vertical often carries several
   #   # readings at different depths. `sheet` names the per-reading worksheet and
   #   # `profile` says which of them become targets:
-  #   #   single         one per vertical, nearest the 0.6 depth. THE DEFAULT, and
-  #   #                  what every config without these keys already does.
+  #   #   log-profile    one per vertical: the velocity at 0.6 of the depth above
+  #   #                  the riverbed, read off a logarithmic profile fitted to the
+  #   #                  readings (a lone reading is moved there along the log law
+  #   #                  with the roughness length of the survey). THE DEFAULT.
+  #   #   single         one per vertical, the reading nearest 0.6 of the depth
+  #   #                  above the riverbed.
   #   #   all            every reading, one target each.
   #   #   drop-lowest    every reading except the one nearest the bed (a vertical
   #   #                  with only one reading keeps it). The near-bed reading sits
