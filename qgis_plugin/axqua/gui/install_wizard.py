@@ -125,8 +125,8 @@ CHOICES = {
         ("system", "All users of the WSL distribution, below /opt (no password)"),
     ),
     "route": (
-        ("windows", "In Windows itself: one processor core, no administrator"),
         ("windows-mpi", "In Windows itself: parallel runs (MPI), no administrator"),
+        ("windows", "In Windows itself: one processor core, no administrator"),
         ("wsl", "Inside WSL: parallel runs; WSL must be set up by an administrator"),
     ),
     "modules": (
@@ -155,9 +155,9 @@ REINSTALL = (
 
 #: TELEMAC on Windows: built in Windows itself or inside WSL (``route``), and which modules a build in Windows compiles. Shown only on Windows (:meth:`InstallWizard._fields`).
 ROUTE_HINT = ("In Windows itself, TELEMAC is compiled in your user folder with compilers from conda-forge. It needs "
-              "no administrator and no WSL. The one-core build is the one tested most. The parallel build also "
-              "downloads MS-MPI and METIS into the installation folder and tests two processes before it compiles "
-              "TELEMAC. Inside WSL, TELEMAC runs in parallel too; an administrator sets up WSL once.")
+              "no administrator and no WSL. The parallel build also downloads MS-MPI and METIS into the installation "
+              "folder and tests two processes before it compiles TELEMAC; if that test fails, choose the one-core "
+              "build. Inside WSL, TELEMAC runs in parallel too; an administrator sets up WSL once.")
 MODULES_HINT = ("TELEMAC-2D with GAIA is the build that has been tested on Windows. All modules add TELEMAC-3D "
                 "and take longer to compile.")
 #: The settings of TELEMAC that a build in Windows itself does not have, and the one it has alone.
@@ -514,8 +514,8 @@ class InstallWizard(QDialog):
             self._reinstall_changed()
         if "route" in self._widgets:
             route = self._widgets["route"]
-            # with WSL set up, TELEMAC goes there and can run in parallel; without it, in Windows itself
-            route.setCurrentIndex(max(0, route.findData("wsl" if self._distro_of_overview() else "windows")))
+            # with WSL set up, TELEMAC goes there; without it, in Windows itself, in parallel (re-test 7, 2026-11-12)
+            route.setCurrentIndex(max(0, route.findData("wsl" if self._distro_of_overview() else "windows-mpi")))
             route.currentIndexChanged.connect(lambda _=0: self._route_changed())
             self._route_changed()
 

@@ -97,11 +97,13 @@ def _parser() -> argparse.ArgumentParser:
                    help="status: include the last N lines of the log")
     p.add_argument("--native", action="store_true",
                    help="Windows, TELEMAC: build it as a Windows program in your user folder, without WSL and without "
-                        "an administrator; it runs on one processor core unless --mpi is given. The default where "
+                        "an administrator; with parallel runs (MPI) unless --one-core is given. The default where "
                         "WSL is not set up")
     p.add_argument("--mpi", action="store_true",
-                   help="TELEMAC built on Windows: with parallel runs (MPI); downloads MS-MPI and METIS into the "
-                        "installation folder, no administrator")
+                   help="TELEMAC built on Windows: with parallel runs (MPI), the default; downloads MS-MPI and METIS "
+                        "into the installation folder, no administrator")
+    p.add_argument("--one-core", action="store_true",
+                   help="TELEMAC built on Windows: on one processor core, without MS-MPI and METIS")
     p.add_argument("--modules", choices=recipes.MODULES, default="2d",
                    help="TELEMAC built on Windows: 2d (TELEMAC-2D with GAIA, the tested build; default) or all "
                         "(also TELEMAC-3D)")
@@ -449,7 +451,7 @@ def _on_windows(args, argv: list[str], command: str) -> int:
     target = args.target if args.action != "telemac-examples" else None
     if target is not None:
         target = _need_target(args)
-    if target == "telemac" and (args.native or args.mpi or distro is None):      # --mpi is the parallel build in Windows
+    if target == "telemac" and (args.native or args.mpi or args.one_core or distro is None):      # --mpi and --one-core are builds in Windows
         return _native_windows(args, command, distro, status)
     if distro is None:
         # no WSL: the plan of this computer says so (axqua.install.windows_needs_wsl)
@@ -506,8 +508,14 @@ def _native_windows(args, command: str, distro: str | None, status) -> int:
     from axqua.install import host as hosts
     from axqua.install import recipes, runner
 
+    if args.mpi and args.one_core:
+        from axqua.core.errors import ConfigError
+        raise ConfigError("--mpi and --one-core exclude each other", subject="install.mpi",
+                          remedy="Give --one-core for the build on one processor core, or neither for the parallel build.")
     options = _options(args)
     options.native = True
+    # parallel by default since re-test 7 (2026-11-12, the user's decision): the one-core build is asked for
+    options.mpi = not args.one_core
     plan = recipes.plan("telemac", options, host=hosts.detect(system="win32"))
     if args.action == "packages":
         data = {**plan.as_dict()["packages"], "wsl": status.as_dict()}

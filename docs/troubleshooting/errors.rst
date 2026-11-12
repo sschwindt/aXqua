@@ -74,7 +74,7 @@ The *Check* tab of an installation wizard, the *Installation* tab of a failed in
 .. _axqua-install-mpi-native-only:
 
 ``the choice of MPI is for TELEMAC built in Windows itself``
-    The option ``--mpi`` selects the parallel build of TELEMAC in Windows itself. TELEMAC installed on Linux or inside WSL runs in parallel anyway. Leave out ``--mpi``, or build TELEMAC in Windows itself with ``--native``.
+    The option ``--mpi`` selects the parallel build of TELEMAC in Windows itself, which is also the default of ``--native``. TELEMAC installed on Linux or inside WSL runs in parallel anyway. Leave out ``--mpi``, or build TELEMAC in Windows itself with ``--native``.
 
 .. _axqua-install-as-root:
 

@@ -216,7 +216,7 @@ class Options:
     bind: bool = True                   # enter the result into the profile
     #: What happens to an earlier installation in the folder (see :data:`REINSTALL`).
     reinstall: str = ""
-    #: Windows: build TELEMAC as a Windows program in the user folder, without WSL and without an administrator (one processor core unless ``mpi``).
+    #: Windows: build TELEMAC as a Windows program in the user folder, without WSL and without an administrator (one processor core unless ``mpi``; the command line sets ``mpi`` unless ``--one-core``).
     native: bool = False
     #: TELEMAC built on Windows: ``2d`` (TELEMAC-2D with GAIA, the tested build) or ``all``.
     modules: str = "2d"
@@ -1441,7 +1441,7 @@ def _plan_telemac_windows(out: Plan, add) -> None:
             "runs a test on two processes.")
     else:
         out.notes.append("It runs every simulation on one processor core: this build has no parallel computing "
-                         "(MPI). Select the parallel build (--mpi) for several cores.")
+                         "(MPI). Leave out --one-core for the parallel build.")
     out.notes += [
         "TELEMAC-2D with GAIA is built, as tested on Windows." if options.modules == "2d" else
         "All modules are built, also TELEMAC-3D. TELEMAC-3D and GAIA ran TELEMAC's reference cases on a Windows "

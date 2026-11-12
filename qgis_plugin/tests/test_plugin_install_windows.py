@@ -43,8 +43,10 @@ def test_without_wsl_telemac_is_built_in_windows_itself(qgis_app):
 
     wizard = install_wizard.InstallWizard(_Client(), "telemac", _overview())
     route = wizard._widgets["route"]
-    assert [route.itemData(i) for i in range(route.count())] == ["windows", "windows-mpi"]
-    assert route.currentData() == "windows"                     # one core stays the default
+    assert [route.itemData(i) for i in range(route.count())] == ["windows-mpi", "windows"]
+    assert route.currentData() == "windows-mpi"                 # parallel is the default (re-test 7, 2026-11-12)
+    assert "--mpi" in install_flags(wizard.options())
+    route.setCurrentIndex(route.findData("windows"))
     assert wizard._native() and wizard._widgets["folder"].text() == NATIVE
     assert all(_hidden(wizard, key) for key in ("scope", "telemac_examples", "salome"))
     assert not _hidden(wizard, "modules")
@@ -52,6 +54,7 @@ def test_without_wsl_telemac_is_built_in_windows_itself(qgis_app):
     flags = install_flags(wizard.options())
     assert "--native" in flags and flags[flags.index("--modules") + 1] == "all"
     assert "--for-all-users" not in flags and "--telemac-examples" not in flags and "--mpi" not in flags
+    assert "--one-core" in flags                                # said out loud: aXqua builds in parallel otherwise
     route.setCurrentIndex(route.findData("windows-mpi"))
     assert wizard._native() and not _hidden(wizard, "modules") and _hidden(wizard, "scope")
     flags = install_flags(wizard.options())
@@ -70,7 +73,7 @@ def test_with_wsl_the_wizard_asks_and_the_settings_follow(qgis_app):
     route.setCurrentIndex(route.findData("windows"))
     assert wizard._native() and wizard._distro() == ""          # a folder of Windows, no \\wsl.localhost
     assert wizard._widgets["folder"].text() == NATIVE and _hidden(wizard, "scope")
-    assert "--native" in install_flags(wizard.options())
+    assert "--native" in install_flags(wizard.options()) and "--one-core" in install_flags(wizard.options())
     route.setCurrentIndex(route.findData("wsl"))
     assert wizard._widgets["folder"].text() == "/home/student/opt" and not _hidden(wizard, "scope")
     wizard.deleteLater()

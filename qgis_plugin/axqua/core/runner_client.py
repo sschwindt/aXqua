@@ -825,8 +825,8 @@ def install_flags(options: dict | None) -> list[str]:
     # TELEMAC on Windows: built in Windows itself (on one core or in parallel), and which modules
     if options.get("route") in NATIVE_ROUTES:
         flags.append("--native")
-        if options.get("route") == "windows-mpi":
-            flags.append("--mpi")
+        # both said out loud: the parallel build is aXqua's default since 2026-11-12, and --mpi keeps it so for an older aXqua
+        flags.append("--mpi" if options.get("route") == "windows-mpi" else "--one-core")
         if options.get("modules") == "all":
             flags += ["--modules", "all"]
     return flags

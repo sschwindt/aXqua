@@ -319,7 +319,7 @@ def _probe(mpi: Path, env: Path, exe: Path) -> int:
         # mpiexec has started smpd and the two processes: end the whole tree, not mpiexec alone
         _end_tree(process)
         print("MS-MPI did not run two processes within 90 s. A firewall or security program may block mpiexec "
-              "and smpd; allow them for private networks, or install the build on one processor core.", flush=True)
+              "and smpd; allow them for private networks, or install the build on one processor core (--one-core).", flush=True)
         return 2
     done = subprocess.CompletedProcess(argv, process.returncode, stdout=stdout)
     output = done.stdout.decode("utf-8", errors="replace")
@@ -327,7 +327,7 @@ def _probe(mpi: Path, env: Path, exe: Path) -> int:
     sums = re.findall(r"rank=(\d+) size=2 sum=(\d+)", output)
     if done.returncode or sorted(sums) != [("0", "3"), ("1", "3")]:
         print("MS-MPI did not run two processes on this computer. A firewall or security program may block "
-              "mpiexec and smpd; allow them for private networks, or install the build on one processor core.",
+              "mpiexec and smpd; allow them for private networks, or install the build on one processor core (--one-core).",
               flush=True)
         return done.returncode or 2
     print("MS-MPI ran two processes.", flush=True)

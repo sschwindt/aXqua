@@ -218,7 +218,27 @@ def test_on_windows_without_wsl_telemac_is_planned_in_windows(tmp_path, conda, m
     assert data["ready"] and data["native"] and data["options"]["modules"] == "all"
     assert data["host"]["system"] == "windows" and data["host"]["supported"]
     assert "Windows itself" in data["host"]["description"]
-    assert "--modules" in data["steps"][3]["argv"] and "all" in data["steps"][3]["argv"]
+    build = next(step for step in data["steps"] if step["name"] == "Compile TELEMAC")
+    assert "--modules" in build["argv"] and "all" in build["argv"]
+    assert data["options"]["mpi"] and "--mpi" in build["argv"]       # parallel is the default (re-test 7, 2026-11-12)
+
+
+def test_one_core_is_asked_for(tmp_path, conda, capsys):
+    args = installcli._parser().parse_args(["plan", "telemac", "--native", "--one-core", "--folder", str(tmp_path),
+                                            "--json"])
+    assert installcli._native_windows(args, "install.plan", None, _NoWsl()) == 0
+    data = json.loads(capsys.readouterr().out)["data"]
+    names = [step["name"] for step in data["steps"]]
+    assert not data["options"]["mpi"] and "Prepare MS-MPI" not in names and "Compile METIS" not in names
+    assert data["outputs"]["solvers.telemac.setup_script"].endswith("pysource.win.bat")
+
+
+def test_mpi_and_one_core_exclude_each_other(tmp_path, conda):
+    from axqua.core.errors import ConfigError
+
+    args = installcli._parser().parse_args(["plan", "telemac", "--mpi", "--one-core", "--folder", str(tmp_path)])
+    with pytest.raises(ConfigError, match="exclude each other"):
+        installcli._native_windows(args, "install.plan", None, _NoWsl())
 
 
 def test_the_wizard_can_ask_for_the_build_in_windows_where_wsl_exists(tmp_path, conda, capsys):
