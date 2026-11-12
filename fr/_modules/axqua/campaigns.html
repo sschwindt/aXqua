@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/campaigns.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a05d8fbb"></script>
+      <script src="../../_static/documentation_options.js?v=cfac9b6f"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -360,11 +360,7 @@
 <span class="sd">``id, x, y, z`` read by position, then ``&lt;QTY&gt;_DATA`` / ``&lt;QTY&gt;_ERROR`` read by</span>
 <span class="sd">name).</span>
 
-<span class="sd">Per vertical it keeps the measurement nearest **0.6 x depth** (the standard</span>
-<span class="sd">depth-averaged-velocity proxy that TELEMAC-2D ``SCALAR VELOCITY`` =</span>
-<span class="sd">sqrt(u^2+v^2) is compared to) and forms the target from the **horizontal**</span>
-<span class="sd">components only. ``WATER DEPTH`` (the vertical's total depth) is carried</span>
-<span class="sd">alongside.</span>
+<span class="sd">Per vertical it takes the velocity at **0.6 of the depth above the riverbed**, read off a logarithmic profile fitted to the vertical's readings (the ``log-profile`` rule of :func:`axqua.ground_truth.select_profile_rows`), which TELEMAC-2D ``SCALAR VELOCITY`` = sqrt(U^2+V^2) is compared to, and forms the target from the **horizontal** components only. ``WATER DEPTH`` (the vertical's total depth) is carried alongside.</span>
 
 <span class="sd">Three source layouts are handled (``kind`` on :class:`~axqua.config`-level</span>
 <span class="sd">flow specs, or the ``compile_*`` helpers directly):</span>
@@ -379,7 +375,7 @@
 <span class="sd">  0.2/0.6/0.8 profiles.</span>
 <span class="sd">* ``points`` - a point layer with one point per reading, as the corrected campaign</span>
 <span class="sd">  layers of 2026-10 are (via :func:`axqua.ground_truth.read_points`); the readings</span>
-<span class="sd">  of a vertical are reduced by a profile rule, the depth average by default.</span>
+<span class="sd">  of a vertical are reduced by a profile rule, ``log-profile`` by default.</span>
 
 <span class="sd">The per-point velocity error propagates the FlowTracker component errors and is</span>
 <span class="sd">floored (``vel_err_floor``). Raise the floor for a campaign that is not an</span>
@@ -445,9 +441,21 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_pick_relative_depth</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""The profile sub-vertical whose relative depth is nearest ``target``."""</span>
-    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"pct"</span><span class="p">]</span> <span class="o">-</span> <span class="n">target</span><span class="p">))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_at_profile_height</span><span class="p">(</span><span class="n">verticals</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Per vertical, one reading at 0.6 of the depth above the bed.</span>
+
+<span class="sd">    *verticals* maps a vertical to its readings (``pct`` is the FlowTracker</span>
+<span class="sd">    ``% Depth``, measured from the surface, then ``h``, ``u``, ``v``, ``u_err``,</span>
+<span class="sd">    ``v_err``). The rule ``log-profile`` of</span>
+<span class="sd">    :func:`axqua.ground_truth.select_profile_rows` fits each vertical.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.ground_truth</span><span class="w"> </span><span class="kn">import</span> <span class="n">select_profile_rows</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"pct"</span><span class="p">},</span>
+                           <span class="s2">"pct_depth"</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">"pct"</span><span class="p">],</span> <span class="s2">"_vertical"</span><span class="p">:</span> <span class="n">key</span><span class="p">}</span>
+                          <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">readings</span> <span class="ow">in</span> <span class="n">verticals</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">readings</span><span class="p">])</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">select_profile_rows</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s2">"log-profile"</span><span class="p">,</span> <span class="n">group_key</span><span class="o">=</span><span class="s2">"_vertical"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="s2">"_vertical"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">out</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s2">"records"</span><span class="p">)))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_num</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
@@ -487,7 +495,7 @@
 <a class="viewcode-back" href="../../code/workflow.html#axqua.campaigns.compile_transect">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compile_transect</span><span class="p">(</span><span class="n">values_xlsx</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">positions_gpkg</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">sheet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"KB15"</span><span class="p">,</span>
                      <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
-                     <span class="n">target_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"tr"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+                     <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"tr"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Taped cross-section: values from the xlsx, positions from a point gpkg.</span>
 
 <span class="sd">    ``Station`` is ``&lt;vertical&gt;-&lt;sub&gt;``; positions come from ``positions_gpkg``</span>
@@ -529,7 +537,7 @@
     <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">positions_gpkg</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: verticals </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2"> have no position"</span><span class="p">)</span>
 
-    <span class="n">rows</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_pick_relative_depth</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">target_depth</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">verticals</span><span class="o">.</span><span class="n">items</span><span class="p">())}</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">_at_profile_height</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">verticals</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
     <span class="k">return</span> <span class="n">assemble_velocity_csv</span><span class="p">(</span>
         <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span> <span class="p">[</span><span class="n">pos</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
         <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"u"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s2">"v"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
@@ -542,7 +550,7 @@
 <a class="viewcode-back" href="../../code/workflow.html#axqua.campaigns.compile_inline">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compile_inline</span><span class="p">(</span><span class="n">values_xlsx</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">sheet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"KB15"</span><span class="p">,</span>
                    <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
-                   <span class="n">target_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"in"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+                   <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"in"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Verticals with inline EPSG coordinates on every row and 0.2/0.6/0.8 profiles."""</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">read_xlsx_sheet</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">values_xlsx</span><span class="p">),</span> <span class="n">sheet</span><span class="o">=</span><span class="n">sheet</span><span class="p">)</span>
     <span class="n">hidx</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">_header_map</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
@@ -574,7 +582,7 @@
     <span class="k">if</span> <span class="n">bad</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">values_xlsx</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: verticals </span><span class="si">{</span><span class="n">bad</span><span class="si">}</span><span class="s2"> carry no inline coordinates"</span><span class="p">)</span>
 
-    <span class="n">rows</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_pick_relative_depth</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">"profile"</span><span class="p">],</span> <span class="n">target_depth</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">_at_profile_height</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">g</span><span class="p">[</span><span class="s2">"profile"</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
     <span class="k">return</span> <span class="n">assemble_velocity_csv</span><span class="p">(</span>
         <span class="p">[</span><span class="n">groups</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">"x"</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span> <span class="p">[</span><span class="n">groups</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">"y"</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
         <span class="p">[</span><span class="n">groups</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s2">"z"</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
@@ -588,7 +596,7 @@
 <div class="viewcode-block" id="compile_points">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.campaigns.compile_points">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compile_points</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">crs_epsg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">vel_err_floor</span><span class="o">=</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
-                   <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"pt"</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"depth-average"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+                   <span class="n">label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"pt"</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"log-profile"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""A point layer with one point per reading -&gt; one calibration point per vertical.</span>
 
 <span class="sd">    The layer carries no component errors, so every point gets ``vel_err_floor``. It</span>

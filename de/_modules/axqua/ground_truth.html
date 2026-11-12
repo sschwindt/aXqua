@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/ground_truth.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -557,7 +557,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">read_flowtracker</span><span class="p">(</span><span class="n">xlsx</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">crs_epsg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                      <span class="n">join_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ID"</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">sheet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"single"</span><span class="p">,</span>
+                     <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"log-profile"</span><span class="p">,</span>
                      <span class="n">group_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Join FlowTracker values to their DGPS positions -&gt; tidy hydraulics table.</span>
 
@@ -625,7 +625,7 @@
     <span class="c1"># but each must still resolve to exactly ONE position. Relaxing the left side</span>
     <span class="c1"># too would let a duplicated position silently multiply the targets.</span>
     <span class="n">merged</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">"ID"</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"inner"</span><span class="p">,</span>
-                       <span class="n">validate</span><span class="o">=</span><span class="s2">"one_to_one"</span> <span class="k">if</span> <span class="n">profile</span> <span class="o">==</span> <span class="s2">"single"</span>
+                       <span class="n">validate</span><span class="o">=</span><span class="s2">"one_to_one"</span> <span class="k">if</span> <span class="n">profile</span> <span class="ow">in</span> <span class="n">ONE_ROW_RULES</span>
                        <span class="k">else</span> <span class="s2">"one_to_many"</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merged</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
         <span class="n">missing</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">"ID"</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="s2">"ID"</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()))</span>
@@ -749,12 +749,12 @@
     <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"flowtracker"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">read_flowtracker</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">src</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">crs_epsg</span><span class="p">,</span> <span class="n">src</span><span class="o">.</span><span class="n">join_key</span><span class="p">,</span>
                                 <span class="n">sheet</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">"sheet"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                                <span class="n">profile</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">"profile"</span><span class="p">,</span> <span class="s2">"single"</span><span class="p">),</span>
+                                <span class="n">profile</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">"profile"</span><span class="p">,</span> <span class="s2">"log-profile"</span><span class="p">),</span>
                                 <span class="n">group_key</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">"group_key"</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"points"</span><span class="p">:</span>
         <span class="n">layer</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">positions</span> <span class="ow">or</span> <span class="n">src</span><span class="o">.</span><span class="n">values</span>
         <span class="k">return</span> <span class="n">select_point_profiles</span><span class="p">(</span><span class="n">read_points</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">crs_epsg</span><span class="p">),</span>
-                                     <span class="nb">getattr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">"profile"</span><span class="p">,</span> <span class="s2">"single"</span><span class="p">),</span>
+                                     <span class="nb">getattr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">"profile"</span><span class="p">,</span> <span class="s2">"log-profile"</span><span class="p">),</span>
                                      <span class="n">group_key</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">"group_key"</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown ground_truth source kind: </span><span class="si">{</span><span class="n">src</span><span class="o">.</span><span class="n">kind</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
 
@@ -767,7 +767,7 @@
 
 <div class="viewcode-block" id="select_point_profiles">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.ground_truth.select_point_profiles">[Doku]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">select_point_profiles</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"single"</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_point_profiles</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"log-profile"</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">group_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Apply a profile rule to a point layer that holds several readings per vertical.</span>
 
@@ -775,7 +775,7 @@
 <span class="sd">    points on top of each other where a vertical was sampled at 0.2, 0.6 and 0.8 of</span>
 <span class="sd">    the depth. A depth-averaged model has one value there, so the readings of a</span>
 <span class="sd">    vertical are reduced by the same rules as a FlowTracker workbook</span>
-<span class="sd">    (:func:`select_profile_rows`) - by default the reading nearest 0.6 of the depth.</span>
+<span class="sd">    (:func:`select_profile_rows`), by default ``log-profile``: the velocity at 0.6 of the depth above the bed, read off a logarithmic profile.</span>
 
 <span class="sd">    The vertical is named by *group_key* where the layer has such a column, and</span>
 <span class="sd">    otherwise by the position itself. A layer with one reading per position comes</span>
@@ -871,10 +871,25 @@
 <span class="c1"># --------------------------------------------------------------------------- #</span>
 <span class="c1"># Where in the water column a measurement sits</span>
 <span class="c1"># --------------------------------------------------------------------------- #</span>
-<span class="c1">#: Height above the bed, as a fraction of the column, of the conventional</span>
-<span class="c1">#: "0.6 depth" point. **0.6 is measured DOWN FROM THE SURFACE** (that is the</span>
-<span class="c1">#: FlowTracker/USGS convention), so the probe sits at 0.4 of the depth ABOVE the</span>
-<span class="c1">#: bed. Getting this backwards misplaces every target by 0.2*h.</span>
+<span class="c1">#: Height above the bed, as a fraction of the water depth, at which the velocity of</span>
+<span class="c1">#: a vertical is compared with a depth-averaged (2D) model: **0.6 of the depth above</span>
+<span class="c1">#: the riverbed** (the user's rule of 2026-11-11, which replaces the "0.6 of the depth</span>
+<span class="c1">#: below the surface" of the FlowTracker manual). Where a vertical has several</span>
+<span class="c1">#: readings, the ``log-profile`` rule reads the velocity at this height off a</span>
+<span class="c1">#: logarithmic profile fitted to them. On a logarithmic profile this velocity is</span>
+<span class="c1">#: approximately 10 % above the depth average (KB15 surveys, median of 36 fits).</span>
+<span class="n">PROFILE_HEIGHT</span> <span class="o">=</span> <span class="mf">0.6</span>
+
+<span class="c1">#: Height above the bed, as a fraction of the column, assumed for a reading whose</span>
+<span class="c1">#: height the data do not give (no MeasD, % Depth or label): 0.4, where a crew that</span>
+<span class="c1">#: follows the FlowTracker manual holds the probe (0.6 of the depth below the</span>
+<span class="c1">#: surface; the single readings of August 2026 on KB15 sit at a median 0.35 h). This</span>
+<span class="c1">#: is where the reading was taken, not where it is compared (:data:`PROFILE_HEIGHT`);</span>
+<span class="c1">#: the ``log-profile`` rule moves it there. A *recorded* measurement depth (MeasD,</span>
+<span class="c1">#: ``Meas. Depth``, ``% Depth``) counts DOWN FROM THE SURFACE, as a FlowTracker</span>
+<span class="c1">#: records it: in the KB15 surveys of 2025 and 2026, the reading with the smallest</span>
+<span class="c1">#: MeasD is the fastest in 39 of the 50 verticals with several readings. Getting</span>
+<span class="c1">#: this backwards misplaces every target by 0.2 h.</span>
 <span class="n">DEFAULT_RELATIVE_HEIGHT</span> <span class="o">=</span> <span class="mf">0.4</span>
 
 
@@ -923,7 +938,7 @@
     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
         <span class="s2">"no MeasD/</span><span class="si">%%</span><span class="s2">Depth/label in the ground truth, so the measurement height "</span>
         <span class="s2">"is unknown for all </span><span class="si">%d</span><span class="s2"> point(s); assuming </span><span class="si">%.2f</span><span class="s2"> of the depth above the "</span>
-        <span class="s2">"bed (the 0.6-depth convention, which is measured from the SURFACE). "</span>
+        <span class="s2">"bed, where the FlowTracker manual places the probe. "</span>
         <span class="s2">"Carry MeasD + FinalD to place targets from the data instead."</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">default</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"default </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">"</span></div>
 
@@ -938,7 +953,10 @@
 <span class="c1">#: Weights of the USGS three-point rule, in the order of :data:`_USGS_DEPTHS`.</span>
 <span class="n">_USGS_WEIGHTS</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 
-<span class="n">PROFILE_RULES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"single"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">,</span> <span class="s2">"drop-lowest"</span><span class="p">,</span> <span class="s2">"depth-average"</span><span class="p">)</span>
+<span class="n">PROFILE_RULES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"single"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">,</span> <span class="s2">"drop-lowest"</span><span class="p">,</span> <span class="s2">"depth-average"</span><span class="p">,</span> <span class="s2">"log-profile"</span><span class="p">)</span>
+
+<span class="c1">#: The rules that leave one row per vertical.</span>
+<span class="n">ONE_ROW_RULES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"single"</span><span class="p">,</span> <span class="s2">"depth-average"</span><span class="p">,</span> <span class="s2">"log-profile"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_height_above_bed</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
@@ -963,9 +981,9 @@
 <span class="sd">    property, so it is named explicitly:</span>
 
 <span class="sd">    ``single``</span>
-<span class="sd">        one row per vertical - the reading nearest the conventional 0.6 depth.</span>
-<span class="sd">        **The default, and a no-op when there is already one row per vertical**,</span>
-<span class="sd">        so every existing config keeps its present behavior.</span>
+<span class="sd">        one row per vertical - the reading nearest :data:`PROFILE_HEIGHT` (0.6 of</span>
+<span class="sd">        the depth above the bed; of two equally near, the lower). A no-op when</span>
+<span class="sd">        there is already one row per vertical.</span>
 <span class="sd">    ``all``</span>
 <span class="sd">        every reading, one target each.</span>
 <span class="sd">    ``drop-lowest``</span>
@@ -979,6 +997,11 @@
 <span class="sd">        velocity ``(u_0.2 + 2*u_0.6 + u_0.8) / 4`` where three readings allow it,</span>
 <span class="sd">        else the plain mean. This is the quantity a depth-averaged 2D model</span>
 <span class="sd">        actually predicts.</span>
+<span class="sd">    ``log-profile``</span>
+<span class="sd">        one row per vertical carrying the velocity at :data:`PROFILE_HEIGHT` (0.6</span>
+<span class="sd">        of the depth above the bed), read off a logarithmic profile</span>
+<span class="sd">        ``u = a ln z + b`` fitted to the vertical's readings at their recorded</span>
+<span class="sd">        heights where they span that height (:func:`_log_profile`); the fit is never extrapolated. Any other vertical is represented by its reading nearest that height and moved there along the log law, with the roughness length of its own fit or the median of the survey. The default of a ground-truth source (``GroundTruthSource.profile``).</span>
 
 <span class="sd">    The lowest reading is found by **height above the bed**, never by row order:</span>
 <span class="sd">    the readings of one vertical arrive in whatever order they were entered</span>
@@ -1003,10 +1026,9 @@
         <span class="n">rank</span> <span class="o">=</span> <span class="n">work</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">group_key</span><span class="p">)[</span><span class="s2">"_f"</span><span class="p">]</span><span class="o">.</span><span class="n">rank</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">"first"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">work</span><span class="p">[(</span><span class="n">sizes</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">rank</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)]</span>
     <span class="k">elif</span> <span class="n">rule</span> <span class="o">==</span> <span class="s2">"single"</span><span class="p">:</span>
-        <span class="c1"># nearest the 0.6-depth convention == 0.4 of the column above the bed</span>
-        <span class="n">order</span> <span class="o">=</span> <span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="s2">"_f"</span><span class="p">]</span> <span class="o">-</span> <span class="n">DEFAULT_RELATIVE_HEIGHT</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
-        <span class="n">keep</span> <span class="o">=</span> <span class="n">order</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">group_key</span><span class="p">])</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s2">"min"</span><span class="p">)</span> <span class="o">==</span> <span class="n">order</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">_nearest_profile_height</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="n">group_key</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rule</span> <span class="o">==</span> <span class="s2">"log-profile"</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">_log_profile</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="n">group_key</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>                                                  <span class="c1"># depth-average</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">_depth_average</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="n">group_key</span><span class="p">)</span>
 
@@ -1017,6 +1039,189 @@
                  <span class="n">work</span><span class="p">[</span><span class="n">group_key</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s2">"_f"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_nearest_profile_height</span><span class="p">(</span><span class="n">work</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">group_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The reading of each vertical nearest :data:`PROFILE_HEIGHT` above the bed.</span>
+
+<span class="sd">    Of two readings equally near, the lower one is taken.</span>
+<span class="sd">    """</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="s2">"_f"</span><span class="p">]</span> <span class="o">-</span> <span class="n">PROFILE_HEIGHT</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">order</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">group_key</span><span class="p">])</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s2">"min"</span><span class="p">)</span> <span class="o">==</span> <span class="n">order</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"_f"</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">sort_index</span><span class="p">())</span>
+
+
+<span class="c1">#: A reading is moved along the log law only where it stands at least e roughness</span>
+<span class="c1">#: lengths above the bed (ln(z/z0) &gt;= 1). Closer to the bed the law does not hold,</span>
+<span class="c1">#: and the factor ln(z*/z0) / ln(z/z0) would grow without bound.</span>
+<span class="n">_MIN_LOG_ARGUMENT</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+<span class="c1">#: The height suffix of a point label (``q47-3-1501-0.93h``), as relative_height reads it.</span>
+<span class="n">_LABEL_HEIGHT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"-[0-9.]+h$"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_profile</span><span class="p">(</span><span class="n">work</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">group_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Collapse each vertical to its velocity at :data:`PROFILE_HEIGHT` above the bed.</span>
+
+<span class="sd">    The readings of a vertical stand at the heights ``z = f h`` above the bed that</span>
+<span class="sd">    :func:`relative_height` derives from the data (MeasD and the total depth). Where</span>
+<span class="sd">    they span ``z* = PROFILE_HEIGHT h`` and their speed grows with height, so that the</span>
+<span class="sd">    fit ``a ln z + b`` of the speed has ``a &gt; 0`` and a roughness length</span>
+<span class="sd">    ``z0 = exp(-b/a)`` below the lowest reading, each velocity component is fitted by</span>
+<span class="sd">    least squares with ``a ln z + b`` (the logarithmic law of the wall</span>
+<span class="sd">    ``u = (u*/kappa) ln(z/z0)`` when the direction does not change over the column)</span>
+<span class="sd">    and evaluated at ``z*``. With two readings the fit passes through both; with three</span>
+<span class="sd">    or more it averages out the scatter, which then enters the error of the component</span>
+<span class="sd">    in quadrature with the mean error of the readings. Fitting the components rather</span>
+<span class="sd">    than the speed keeps the direction of the flow at that height (see</span>
+<span class="sd">    :func:`_depth_average` on why).</span>
+
+<span class="sd">    The fit is never extrapolated. Every other vertical (one reading, readings at one</span>
+<span class="sd">    height, readings all above or all below ``z*``, or a speed that does not grow</span>
+<span class="sd">    with height) is represented by its reading nearest ``z*``, with repeat readings</span>
+<span class="sd">    at that height averaged, and moved to ``z*`` along the log law: the components</span>
+<span class="sd">    and their errors are scaled by ``ln(z*/z0) / ln(z/z0)``, with the ``z0`` of the</span>
+<span class="sd">    vertical's own fit where it has a valid one and otherwise the median ``z0`` of the</span>
+<span class="sd">    valid fits of the survey. Without a ``z0``, or where the reading stands closer</span>
+<span class="sd">    than e ``z0`` to the bed, the reading is kept as measured.</span>
+
+<span class="sd">    Every other column (TKE, the standard deviations, z, the point name) comes from</span>
+<span class="sd">    the reading nearest ``z*``. The rows that come out stand at ``z*``: ``h_meas``,</span>
+<span class="sd">    ``pct_depth``, ``f`` and the height suffix of a ``label`` are set accordingly, so</span>
+<span class="sd">    that a later placement reads the height they now represent.</span>
+<span class="sd">    """</span>
+    <span class="n">comps</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">comps</span> <span class="ow">or</span> <span class="s2">"h"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"profile rule 'log-profile' needs the velocity components and the "</span>
+                    <span class="s2">"total water depth of each reading; taking the reading nearest "</span>
+                    <span class="s2">"</span><span class="si">%.1f</span><span class="s2"> of the depth above the bed instead"</span><span class="p">,</span> <span class="n">PROFILE_HEIGHT</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_nearest_profile_height</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="n">group_key</span><span class="p">)</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="s2">"h"</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="n">work</span><span class="p">[</span><span class="s2">"_f"</span><span class="p">]</span> <span class="o">*</span> <span class="n">depth</span>
+    <span class="n">numeric</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comps</span> <span class="ow">or</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">{</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">_err"</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">comps</span><span class="p">}}</span>
+    <span class="n">errors</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_err"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comps</span> <span class="k">if</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_err"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+    <span class="n">percent</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"pct_depth"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span>
+        <span class="n">work</span><span class="p">[</span><span class="s2">"pct_depth"</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
+    <span class="n">label_height</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"-</span><span class="si">{</span><span class="mf">1.0</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">PROFILE_HEIGHT</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">h"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">at_target</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The placement columns of a row that now stands at PROFILE_HEIGHT."""</span>
+        <span class="n">moved</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"_f"</span><span class="p">:</span> <span class="n">PROFILE_HEIGHT</span><span class="p">}</span>
+        <span class="k">if</span> <span class="s2">"f"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">moved</span><span class="p">[</span><span class="s2">"f"</span><span class="p">]</span> <span class="o">=</span> <span class="n">PROFILE_HEIGHT</span>
+        <span class="k">if</span> <span class="s2">"h_meas"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">moved</span><span class="p">[</span><span class="s2">"h_meas"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">PROFILE_HEIGHT</span><span class="p">)</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="k">if</span> <span class="s2">"pct_depth"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">moved</span><span class="p">[</span><span class="s2">"pct_depth"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">PROFILE_HEIGHT</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">100.0</span> <span class="k">if</span> <span class="n">percent</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"label"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">work</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s2">"label"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">_LABEL_HEIGHT</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">label</span><span class="p">):</span>
+                <span class="n">moved</span><span class="p">[</span><span class="s2">"label"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_LABEL_HEIGHT</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">label_height</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">moved</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">combined</span><span class="p">(</span><span class="n">mean_error</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scatter</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A reading error and a scatter in quadrature, NaN where neither is known."""</span>
+        <span class="k">if</span> <span class="n">mean_error</span> <span class="o">==</span> <span class="n">mean_error</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">mean_error</span><span class="p">,</span> <span class="n">scatter</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">scatter</span> <span class="k">if</span> <span class="n">scatter</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="c1"># one template row per vertical (the reading nearest z*, which keeps the other</span>
+    <span class="c1"># columns and their types), and the values that replace its own</span>
+    <span class="n">template</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">update</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">nearest</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">log_z0</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fitted</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">grp</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">group_key</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">height</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">grp</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">usable</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comps</span><span class="p">:</span>
+            <span class="n">usable</span> <span class="o">&amp;=</span> <span class="n">numeric</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">grp</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
+        <span class="n">g</span><span class="p">,</span> <span class="n">zg</span> <span class="o">=</span> <span class="n">grp</span><span class="p">[</span><span class="n">usable</span><span class="p">],</span> <span class="n">z</span><span class="p">[</span><span class="n">usable</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">template</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">grp</span><span class="p">[</span><span class="s2">"_f"</span><span class="p">]</span> <span class="o">-</span> <span class="n">PROFILE_HEIGHT</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+            <span class="k">continue</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">depth</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">PROFILE_HEIGHT</span> <span class="o">*</span> <span class="n">h</span>
+        <span class="c1"># the reading(s) nearest z*; of two heights equally near, the lower</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="p">(</span><span class="n">zg</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">zg</span><span class="p">[</span><span class="n">distance</span> <span class="o">==</span> <span class="n">distance</span><span class="o">.</span><span class="n">min</span><span class="p">()]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">at</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">zg</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span> <span class="o">==</span> <span class="n">level</span><span class="p">]</span>
+        <span class="n">template</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">own</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">zg</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">lnz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">zg</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+            <span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">lnz</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">lnz</span><span class="p">)])</span>
+            <span class="n">speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">numeric</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comps</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="s2">"w"</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">speed</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="o">-</span><span class="n">b</span> <span class="o">/</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">lnz</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
+                <span class="n">own</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span> <span class="o">/</span> <span class="n">a</span>
+                <span class="n">log_z0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">own</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">own</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">zg</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">target</span> <span class="o">&lt;=</span> <span class="n">zg</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="n">at_target</span><span class="p">(</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comps</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">numeric</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                    <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="n">new</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+                    <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_err"</span>
+                    <span class="k">if</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+                        <span class="n">resid</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">lnz</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+                        <span class="n">scatter</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">resid</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)))</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="mf">0.0</span>
+                        <span class="n">reading</span> <span class="o">=</span> <span class="n">numeric</span><span class="p">[</span><span class="n">err</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+                        <span class="n">mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">reading</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="k">if</span> <span class="n">reading</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                        <span class="n">new</span><span class="p">[</span><span class="n">err</span><span class="p">]</span> <span class="o">=</span> <span class="n">combined</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">scatter</span><span class="p">)</span>
+                <span class="n">update</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span>
+                <span class="n">fitted</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comps</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">numeric</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">at</span><span class="p">]</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_err"</span>
+            <span class="k">if</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+                <span class="n">reading</span> <span class="o">=</span> <span class="n">numeric</span><span class="p">[</span><span class="n">err</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">at</span><span class="p">]</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">reading</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="k">if</span> <span class="n">reading</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">err</span><span class="p">]</span> <span class="o">=</span> <span class="n">combined</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">nearest</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">at</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">h</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">level</span><span class="p">),</span> <span class="n">values</span><span class="p">,</span> <span class="n">own</span><span class="p">)</span>
+
+    <span class="n">survey</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">log_z0</span><span class="p">))</span> <span class="k">if</span> <span class="n">log_z0</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">moved</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">own</span><span class="p">)</span> <span class="ow">in</span> <span class="n">nearest</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">log_z0_here</span> <span class="o">=</span> <span class="n">own</span> <span class="k">if</span> <span class="n">own</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">survey</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">log_z0_here</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">z0</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_z0_here</span><span class="p">))</span>
+            <span class="n">lever</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">z</span> <span class="o">/</span> <span class="n">z0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">lever</span> <span class="o">&gt;=</span> <span class="n">_MIN_LOG_ARGUMENT</span> <span class="ow">and</span> <span class="n">PROFILE_HEIGHT</span> <span class="o">*</span> <span class="n">h</span> <span class="o">&gt;</span> <span class="n">z0</span><span class="p">:</span>
+                <span class="n">factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">PROFILE_HEIGHT</span> <span class="o">*</span> <span class="n">h</span> <span class="o">/</span> <span class="n">z0</span><span class="p">)</span> <span class="o">/</span> <span class="n">lever</span>
+                <span class="n">new</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">v</span> <span class="o">*</span> <span class="n">factor</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+                <span class="n">new</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">at_target</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+                <span class="n">moved</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">update</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"profile rule 'log-profile': velocity at </span><span class="si">%.1f</span><span class="s2"> of the depth above the bed "</span>
+             <span class="s2">"from a logarithmic fit for </span><span class="si">%d</span><span class="s2"> vertical(s); </span><span class="si">%d</span><span class="s2"> reading(s) moved there along "</span>
+             <span class="s2">"the log law (z0 of the vertical's own fit, else the survey median </span><span class="si">%s</span><span class="s2"> from "</span>
+             <span class="s2">"</span><span class="si">%d</span><span class="s2"> fit(s)), </span><span class="si">%d</span><span class="s2"> kept as measured"</span><span class="p">,</span>
+             <span class="n">PROFILE_HEIGHT</span><span class="p">,</span> <span class="n">fitted</span><span class="p">,</span> <span class="n">moved</span><span class="p">,</span>
+             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">survey</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> m"</span> <span class="k">if</span> <span class="n">survey</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"unknown"</span><span class="p">,</span>
+             <span class="nb">len</span><span class="p">(</span><span class="n">log_z0</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">template</span><span class="p">)</span> <span class="o">-</span> <span class="n">fitted</span> <span class="o">-</span> <span class="n">moved</span><span class="p">)</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">work</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">changed</span> <span class="o">=</span> <span class="p">{</span><span class="n">column</span> <span class="k">for</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">new</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="s2">"f"</span><span class="p">,</span> <span class="s2">"h_meas"</span><span class="p">,</span> <span class="s2">"pct_depth"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">column</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_err"</span><span class="p">):</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">column</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">new</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">template</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">out</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_depth_average</span><span class="p">(</span><span class="n">work</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">group_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>

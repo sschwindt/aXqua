@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/code/telemac.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a05d8fbb"></script>
+      <script src="../_static/documentation_options.js?v=cfac9b6f"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -782,6 +782,34 @@ See <a class="reference internal" href="core.html#axqua.core.geodata.read_roughn
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.mesh.roughness_zone_frame">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.mesh.</span></span><span class="sig-name descname"><span class="pre">roughness_zone_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/mesh.html#roughness_zone_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.mesh.roughness_zone_frame" title="Lien vers cette définition"></a></dt>
+<dd><p>The roughness zones of the case as a GeoDataFrame <code class="docutils literal notranslate"><span class="pre">zone_id,</span> <span class="pre">geometry</span></code> in the
+case CRS (<code class="docutils literal notranslate"><span class="pre">geodata.roughness_zones</span></code>, id field <code class="docutils literal notranslate"><span class="pre">mesh.roughness_zone_field</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.mesh.zone_of_points">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.mesh.</span></span><span class="sig-name descname"><span class="pre">zone_of_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zones</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/mesh.html#zone_of_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.mesh.zone_of_points" title="Lien vers cette définition"></a></dt>
+<dd><p>Roughness zone id of each point: the polygon it lies in, else the nearest one.</p>
+<p>The rule the mesh nodes get their <code class="docutils literal notranslate"><span class="pre">FRIC_ID</span></code> by, so that a measurement point is
+counted in the zone whose roughness acts on it in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>epsg</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.mesh.interpolate_roughness">
 <span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.mesh.</span></span><span class="sig-name descname"><span class="pre">interpolate_roughness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/mesh.html#interpolate_roughness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.mesh.interpolate_roughness" title="Lien vers cette définition"></a></dt>
 <dd><p>Map the roughness zones onto the mesh: friction zone id + roughness value.</p>
@@ -1411,6 +1439,14 @@ coefficient column of this table during calibration.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">.cas</span></code> is assembled from a small set of building blocks plus user overrides
 so the case is reproducible and the prescribed boundary values stay consistent
 with the liquid-boundary numbering from stage 3.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.steering.COLEBROOK_WHITE_MDEF">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">COLEBROOK_WHITE_MDEF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.02</span></span><a class="headerlink" href="#axqua.solvers.telemac.steering.COLEBROOK_WHITE_MDEF" title="Lien vers cette définition"></a></dt>
+<dd><p>Manning value a Colebrook-White row carries in its Mdef column (TELEMAC’s default of
+MANNING DEFAULT VALUE FOR COLEBROOK-WHITE LAW); friction_read.f reads that column
+for COWH rows only, and a row without it fails to read.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.steering.FlowScale">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.steering.</span></span><span class="sig-name descname"><span class="pre">FlowScale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/steering.html#FlowScale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.steering.FlowScale" title="Lien vers cette définition"></a></dt>

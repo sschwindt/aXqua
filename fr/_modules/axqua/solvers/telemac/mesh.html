@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/mesh.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=a05d8fbb"></script>
+      <script src="../../../../_static/documentation_options.js?v=cfac9b6f"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -1418,6 +1418,47 @@
 
 
 
+<div class="viewcode-block" id="roughness_zone_frame">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.mesh.roughness_zone_frame">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">roughness_zone_frame</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The roughness zones of the case as a GeoDataFrame ``zone_id, geometry`` in the</span>
+<span class="sd">    case CRS (``geodata.roughness_zones``, id field ``mesh.roughness_zone_field``)."""</span>
+    <span class="n">zones</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span><span class="o">.</span><span class="n">roughness_zones</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">zones</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">zones</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
+        <span class="n">zones</span> <span class="o">=</span> <span class="n">zones</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">zones</span><span class="o">.</span><span class="n">columns</span>
+                  <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">roughness_zone_field</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"roughness_zones </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_zones</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> has no "</span>
+            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">roughness_zone_field</span><span class="si">}</span><span class="s2">' column (has </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">zones</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">zones</span><span class="p">[[</span><span class="n">field</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="s2">"zone_id"</span><span class="p">})</span></div>
+
+
+
+<div class="viewcode-block" id="zone_of_points">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.mesh.zone_of_points">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">zone_of_points</span><span class="p">(</span><span class="n">zones</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">epsg</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Roughness zone id of each point: the polygon it lies in, else the nearest one.</span>
+
+<span class="sd">    The rule the mesh nodes get their ``FRIC_ID`` by, so that a measurement point is</span>
+<span class="sd">    counted in the zone whose roughness acts on it in the model.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
+                                                       <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)),</span>
+                           <span class="n">crs</span><span class="o">=</span><span class="sa">f</span><span class="s2">"EPSG:</span><span class="si">{</span><span class="n">epsg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">joined</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">zones</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+    <span class="c1"># a point on a shared edge can match &gt;1 polygon; keep the first per point</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">joined</span><span class="p">[</span><span class="o">~</span><span class="n">joined</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()][</span><span class="s2">"zone_id"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ids</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="interpolate_roughness">
 <a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.mesh.interpolate_roughness">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">interpolate_roughness</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mesh</span><span class="p">:</span>
@@ -1431,33 +1472,14 @@
 <span class="sd">    The matching ``geodata.roughness_table`` value (e.g. a Nikuradse k_s) is stored</span>
 <span class="sd">    in ``mesh.roughness`` (BOTTOM FRICTION); HydroBayesCal later perturbs it.</span>
 <span class="sd">    """</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
-
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_zones</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"interpolate_roughness needs geodata.roughness_zones "</span>
                          <span class="s2">"and geodata.roughness_table to be set"</span><span class="p">)</span>
     <span class="n">table</span> <span class="o">=</span> <span class="n">read_roughness_table</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_table</span><span class="p">))</span>
-
-    <span class="n">zones</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span><span class="o">.</span><span class="n">roughness_zones</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">zones</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">zones</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
-        <span class="n">zones</span> <span class="o">=</span> <span class="n">zones</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
-    <span class="n">field</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">zones</span><span class="o">.</span><span class="n">columns</span>
-                  <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">roughness_zone_field</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"roughness_zones </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_zones</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> has no "</span>
-            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">roughness_zone_field</span><span class="si">}</span><span class="s2">' column (has </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">zones</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
-        <span class="p">)</span>
-    <span class="n">zones</span> <span class="o">=</span> <span class="n">zones</span><span class="p">[[</span><span class="n">field</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="s2">"zone_id"</span><span class="p">})</span>
+    <span class="n">zones</span> <span class="o">=</span> <span class="n">roughness_zone_frame</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_zone_of</span><span class="p">(</span><span class="n">xs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ys</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">pts</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
-            <span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">),</span> <span class="n">crs</span><span class="o">=</span><span class="sa">f</span><span class="s2">"EPSG:</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="si">}</span><span class="s2">"</span>
-        <span class="p">)</span>
-        <span class="n">joined</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin_nearest</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">zones</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">"left"</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
-        <span class="c1"># a point on a shared edge can match &gt;1 polygon; keep the first per point</span>
-        <span class="n">ids</span> <span class="o">=</span> <span class="n">joined</span><span class="p">[</span><span class="o">~</span><span class="n">joined</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()][</span><span class="s2">"zone_id"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">ids</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">zone_of_points</span><span class="p">(</span><span class="n">zones</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
 
     <span class="n">node_zone</span> <span class="o">=</span> <span class="n">_zone_of</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
     <span class="n">cx</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">triangles</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>

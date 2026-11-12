@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/jobs/submit.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../../../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -413,8 +413,11 @@
 
     <span class="c1"># Process count, most specific wins, and the *resolved* number is frozen - so a job</span>
     <span class="c1"># rerun a year later uses what it actually used, not what the profile says today.</span>
+    <span class="c1"># A count among the options of the job (the plugin's MPI processes, 0 meaning unset) wins in the executor, so it is the one recorded: job.json said the case's 8 for a run on 4 (the Windows test computer, 2026-11-11).</span>
+    <span class="n">job_options</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">options</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="n">asked</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">job_options</span><span class="p">,</span> <span class="s2">"ncsize"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">job_options</span><span class="p">,</span> <span class="s2">"n_processors"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">configured</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"n_processors"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="n">mpi</span> <span class="o">=</span> <span class="n">np</span> <span class="ow">or</span> <span class="n">profile</span><span class="o">.</span><span class="n">mpi_processes</span> <span class="ow">or</span> <span class="n">configured</span> <span class="ow">or</span> <span class="mi">1</span>
+    <span class="n">mpi</span> <span class="o">=</span> <span class="n">asked</span> <span class="ow">or</span> <span class="n">np</span> <span class="ow">or</span> <span class="n">profile</span><span class="o">.</span><span class="n">mpi_processes</span> <span class="ow">or</span> <span class="n">configured</span> <span class="ow">or</span> <span class="mi">1</span>
 
     <span class="n">env</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">solver_environment</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">JobSpec</span><span class="p">(</span>
@@ -445,7 +448,7 @@
                             <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">working_root</span> <span class="k">else</span> <span class="kc">None</span><span class="p">),</span>
         <span class="n">workspace</span><span class="o">=</span><span class="n">Workspace</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s2">"mode"</span><span class="p">:</span> <span class="n">workspace</span> <span class="ow">or</span> <span class="n">meta</span><span class="o">.</span><span class="n">workspace_default</span><span class="p">,</span>
                                        <span class="s2">"source_job"</span><span class="p">:</span> <span class="n">source_job</span><span class="p">}),</span>
-        <span class="n">options</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">options</span> <span class="ow">or</span> <span class="p">{}),</span>
+        <span class="n">options</span><span class="o">=</span><span class="n">job_options</span><span class="p">,</span>
         <span class="n">launcher</span><span class="o">=</span><span class="p">{</span><span class="s2">"requested"</span><span class="p">:</span> <span class="n">launcher</span> <span class="ow">or</span> <span class="s2">"auto"</span><span class="p">},</span>
     <span class="p">)</span></div>
 

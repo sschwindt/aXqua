@@ -142,7 +142,7 @@ VisIt serves two purposes: the interactive inspection of results, as with ParaVi
    * - ``free-surface``
      - The water surface, colored by the flow velocity. For a model in the mode ``rigid-lid``, the figure states that the water surface was prescribed and not computed.
    * - ``velocity-plan``
-     - The flow velocity in a horizontal section at the relative depth at which point velocity measurements in rivers are usually taken (0.6 of the water depth).
+     - The flow velocity in a horizontal section at the relative height at which the velocity of a measurement vertical is compared (0.6 of the water depth above the bed).
    * - ``profiles``
      - Vertical velocity profiles at the measurement points, together with the measured values and their error bars.
 

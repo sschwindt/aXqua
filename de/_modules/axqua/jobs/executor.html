@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/jobs/executor.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../../../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -401,9 +401,8 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"CancelToken"</span><span class="p">,</span> <span class="s2">"ExecutionContext"</span><span class="p">,</span> <span class="s2">"JobCancelled"</span><span class="p">,</span> <span class="s2">"execute"</span><span class="p">]</span>
 
-<span class="c1">#: How often the cancel token re-reads the request file. A stat per second is free and</span>
-<span class="c1">#: makes cancellation feel immediate without polling anything expensive.</span>
-<span class="n">CANCEL_POLL_INTERVAL</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="c1">#: How often the cancel token re-reads the request file: a stat is free, and a running solver asks this often (:data:`axqua.env.STOP_POLL_SECONDS`), so a cancel is noticed within a quarter second instead of a second.</span>
+<span class="n">CANCEL_POLL_INTERVAL</span> <span class="o">=</span> <span class="mf">0.25</span>
 
 
 <div class="viewcode-block" id="JobCancelled">
@@ -721,7 +720,7 @@
 
 <span class="c1">#: Loggers whose warnings the user has to see, not only find in the log: the plugin</span>
 <span class="c1">#: shows the ``warnings`` of the result manifest when the results are loaded.</span>
-<span class="n">SURFACED_LOGGERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"axqua.near_boundary"</span><span class="p">,)</span>
+<span class="n">SURFACED_LOGGERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"axqua.near_boundary"</span><span class="p">,</span> <span class="s2">"axqua.calibration_zones"</span><span class="p">)</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">_Collector</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">):</span>
@@ -760,7 +759,8 @@
 <span class="sd">    """</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"ncsize"</span><span class="p">,</span> <span class="s2">"n_processors"</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># 0 too: it is the plugin's "as set for the case", which submit resolved and recorded (review of 2026-11-12: TELEMAC took 0 as unset and ran on the environment's count)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">mpi_processes</span>
     <span class="k">return</span> <span class="n">kwargs</span>
 

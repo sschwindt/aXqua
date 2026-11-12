@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/config.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a05d8fbb"></script>
+      <script src="../../_static/documentation_options.js?v=cfac9b6f"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -543,7 +543,7 @@
 
 <span class="c1">#: Valid ``GroundTruthSource.profile`` rules. Must stay in step with</span>
 <span class="c1">#: :data:`axqua.ground_truth.PROFILE_RULES` (fenced by a test).</span>
-<span class="n">PROFILE_RULES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"single"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">,</span> <span class="s2">"drop-lowest"</span><span class="p">,</span> <span class="s2">"depth-average"</span><span class="p">)</span>
+<span class="n">PROFILE_RULES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"single"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">,</span> <span class="s2">"drop-lowest"</span><span class="p">,</span> <span class="s2">"depth-average"</span><span class="p">,</span> <span class="s2">"log-profile"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="GroundTruthSource">
@@ -567,13 +567,15 @@
 
     <span class="c1">#: Worksheet to read the values from. ``None`` keeps the historic behavior</span>
     <span class="c1">#: (the first sheet, one row per vertical). Name a per-reading profile sheet</span>
-    <span class="c1">#: to use any ``profile`` rule other than ``single``.</span>
+    <span class="c1">#: to give the ``profile`` rule several readings per vertical.</span>
     <span class="n">sheet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1">#: Which reading of a multi-depth vertical becomes a target - see</span>
-    <span class="c1">#: :func:`axqua.ground_truth.select_profile_rows`. ``single`` is the default</span>
-    <span class="c1">#: and reproduces the previous behavior exactly.</span>
-    <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"single"</span>
+    <span class="c1">#: :func:`axqua.ground_truth.select_profile_rows`. The default ``log-profile``</span>
+    <span class="c1">#: reads the velocity at 0.6 of the depth above the bed off a logarithmic</span>
+    <span class="c1">#: profile fitted to the readings of each vertical (the user's rule of</span>
+    <span class="c1">#: 2026-11-11); a vertical with one reading at that height is kept as it is.</span>
+    <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"log-profile"</span>
 
     <span class="c1">#: Column identifying the vertical a reading belongs to, for the profile</span>
     <span class="c1">#: rules. Defaults to ``join_key``.</span>

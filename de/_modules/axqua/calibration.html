@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/calibration.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -733,15 +733,18 @@
 <div class="viewcode-block" id="emit_hbc_config">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.emit_hbc_config">[Doku]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">calibration_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                    <span class="n">complete_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+                    <span class="n">complete_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">parameters</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Emit a HydroBayesCal ``config_Telemac.py`` for the produced case.</span>
 
 <span class="sd">    *complete_bal_mode* False runs the initial simulations only; *only_bal_mode* True</span>
 <span class="sd">    (with *complete_bal_mode*) continues from the saved initial simulations with the</span>
-<span class="sd">    active learning (HydroBayesCal's two execution switches).</span>
+<span class="sd">    active learning (HydroBayesCal's two execution switches). *parameters* are the</span>
+<span class="sd">    ones to calibrate (default :func:`telemac_parameters`; a calibration passes those of</span>
+<span class="sd">    its zone plan, :func:`axqua.calibration_zones.zone_plan`).</span>
 <span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span>
-    <span class="n">parameters</span> <span class="o">=</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="n">ranges</span> <span class="o">=</span> <span class="p">[[</span><span class="n">p</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">max</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="c1"># which case HydroBayesCal drives: the built steady 2D case by default, or the</span>

@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/code/workflow.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -906,7 +906,7 @@ own column names and returns one row per <em>reading</em>, keyed by the same <co
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.ground_truth.read_flowtracker">
-<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">read_flowtracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xlsx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs_epsg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ID'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#read_flowtracker"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.ground_truth.read_flowtracker" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">read_flowtracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xlsx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs_epsg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ID'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log-profile'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#read_flowtracker"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.ground_truth.read_flowtracker" title="Link to this definition"></a></dt>
 <dd><p>Join FlowTracker values to their DGPS positions -&gt; tidy hydraulics table.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameter<span class="colon">:</span></dt>
@@ -974,13 +974,13 @@ position exactly; the tolerance only absorbs coordinate rounding.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.ground_truth.select_point_profiles">
-<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">select_point_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#select_point_profiles"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.ground_truth.select_point_profiles" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">select_point_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log-profile'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#select_point_profiles"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.ground_truth.select_point_profiles" title="Link to this definition"></a></dt>
 <dd><p>Apply a profile rule to a point layer that holds several readings per vertical.</p>
 <p>A layer exported from a FlowTracker campaign has one point per <em>reading</em>: three
 points on top of each other where a vertical was sampled at 0.2, 0.6 and 0.8 of
 the depth. A depth-averaged model has one value there, so the readings of a
 vertical are reduced by the same rules as a FlowTracker workbook
-(<a class="reference internal" href="#axqua.ground_truth.select_profile_rows" title="axqua.ground_truth.select_profile_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">select_profile_rows()</span></code></a>) - by default the reading nearest 0.6 of the depth.</p>
+(<a class="reference internal" href="#axqua.ground_truth.select_profile_rows" title="axqua.ground_truth.select_profile_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">select_profile_rows()</span></code></a>), by default <code class="docutils literal notranslate"><span class="pre">log-profile</span></code>: the velocity at 0.6 of the depth above the bed, read off a logarithmic profile.</p>
 <p>The vertical is named by <em>group_key</em> where the layer has such a column, and
 otherwise by the position itself. A layer with one reading per position comes
 back unchanged, which is every layer this function did not exist for.</p>
@@ -1049,12 +1049,30 @@ quantity columns absent from a given dataset are simply not present
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="axqua.ground_truth.PROFILE_HEIGHT">
+<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">PROFILE_HEIGHT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.6</span></span><a class="headerlink" href="#axqua.ground_truth.PROFILE_HEIGHT" title="Link to this definition"></a></dt>
+<dd><p>Height above the bed, as a fraction of the water depth, at which the velocity of
+a vertical is compared with a depth-averaged (2D) model: <strong>0.6 of the depth above
+the riverbed</strong> (the user’s rule of 2026-11-11, which replaces the „0.6 of the depth
+below the surface“ of the FlowTracker manual). Where a vertical has several
+readings, the <code class="docutils literal notranslate"><span class="pre">log-profile</span></code> rule reads the velocity at this height off a
+logarithmic profile fitted to them. On a logarithmic profile this velocity is
+approximately 10 % above the depth average (KB15 surveys, median of 36 fits).</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="axqua.ground_truth.DEFAULT_RELATIVE_HEIGHT">
 <span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_RELATIVE_HEIGHT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.4</span></span><a class="headerlink" href="#axqua.ground_truth.DEFAULT_RELATIVE_HEIGHT" title="Link to this definition"></a></dt>
-<dd><p>Height above the bed, as a fraction of the column, of the conventional
-„0.6 depth“ point. <strong>0.6 is measured DOWN FROM THE SURFACE</strong> (that is the
-FlowTracker/USGS convention), so the probe sits at 0.4 of the depth ABOVE the
-bed. Getting this backwards misplaces every target by 0.2*h.</p>
+<dd><p>Height above the bed, as a fraction of the column, assumed for a reading whose
+height the data do not give (no MeasD, % Depth or label): 0.4, where a crew that
+follows the FlowTracker manual holds the probe (0.6 of the depth below the
+surface; the single readings of August 2026 on KB15 sit at a median 0.35 h). This
+is where the reading was taken, not where it is compared (<a class="reference internal" href="#axqua.ground_truth.PROFILE_HEIGHT" title="axqua.ground_truth.PROFILE_HEIGHT"><code class="xref py py-data docutils literal notranslate"><span class="pre">PROFILE_HEIGHT</span></code></a>);
+the <code class="docutils literal notranslate"><span class="pre">log-profile</span></code> rule moves it there. A <em>recorded</em> measurement depth (MeasD,
+<code class="docutils literal notranslate"><span class="pre">Meas.</span> <span class="pre">Depth</span></code>, <code class="docutils literal notranslate"><span class="pre">%</span> <span class="pre">Depth</span></code>) counts DOWN FROM THE SURFACE, as a FlowTracker
+records it: in the KB15 surveys of 2025 and 2026, the reading with the smallest
+MeasD is the fastest in 39 of the 50 verticals with several readings. Getting
+this backwards misplaces every target by 0.2 h.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1084,6 +1102,12 @@ implicit. First hit wins:</p>
 </dl>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.ground_truth.ONE_ROW_RULES">
+<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">ONE_ROW_RULES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('single',</span> <span class="pre">'depth-average',</span> <span class="pre">'log-profile')</span></span><a class="headerlink" href="#axqua.ground_truth.ONE_ROW_RULES" title="Link to this definition"></a></dt>
+<dd><p>The rules that leave one row per vertical.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.ground_truth.select_profile_rows">
 <span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">select_profile_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ID'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#select_profile_rows"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.ground_truth.select_profile_rows" title="Link to this definition"></a></dt>
@@ -1092,9 +1116,9 @@ implicit. First hit wins:</p>
 of them a calibration should see is a modeling decision, not a data
 property, so it is named explicitly:</p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">single</span></code></dt><dd><p>one row per vertical - the reading nearest the conventional 0.6 depth.
-<strong>The default, and a no-op when there is already one row per vertical</strong>,
-so every existing config keeps its present behavior.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">single</span></code></dt><dd><p>one row per vertical - the reading nearest <a class="reference internal" href="#axqua.ground_truth.PROFILE_HEIGHT" title="axqua.ground_truth.PROFILE_HEIGHT"><code class="xref py py-data docutils literal notranslate"><span class="pre">PROFILE_HEIGHT</span></code></a> (0.6 of
+the depth above the bed; of two equally near, the lower). A no-op when
+there is already one row per vertical.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">all</span></code></dt><dd><p>every reading, one target each.</p>
 </dd>
@@ -1108,6 +1132,11 @@ than a result.</p>
 velocity <code class="docutils literal notranslate"><span class="pre">(u_0.2</span> <span class="pre">+</span> <span class="pre">2*u_0.6</span> <span class="pre">+</span> <span class="pre">u_0.8)</span> <span class="pre">/</span> <span class="pre">4</span></code> where three readings allow it,
 else the plain mean. This is the quantity a depth-averaged 2D model
 actually predicts.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">log-profile</span></code></dt><dd><p>one row per vertical carrying the velocity at <a class="reference internal" href="#axqua.ground_truth.PROFILE_HEIGHT" title="axqua.ground_truth.PROFILE_HEIGHT"><code class="xref py py-data docutils literal notranslate"><span class="pre">PROFILE_HEIGHT</span></code></a> (0.6
+of the depth above the bed), read off a logarithmic profile
+<code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">ln</span> <span class="pre">z</span> <span class="pre">+</span> <span class="pre">b</span></code> fitted to the vertical’s readings at their recorded
+heights where they span that height (<code class="xref py py-func docutils literal notranslate"><span class="pre">_log_profile()</span></code>); the fit is never extrapolated. Any other vertical is represented by its reading nearest that height and moved there along the log law, with the roughness length of its own fit or the median of the survey. The default of a ground-truth source (<code class="docutils literal notranslate"><span class="pre">GroundTruthSource.profile</span></code>).</p>
 </dd>
 </dl>
 <p>The lowest reading is found by <strong>height above the bed</strong>, never by row order:
@@ -4060,11 +4089,13 @@ rewriting a <code class="docutils literal notranslate"><span class="pre">.cas</s
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.calibration.emit_hbc_config">
-<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">emit_hbc_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_csv</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#emit_hbc_config"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.calibration.emit_hbc_config" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">emit_hbc_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_csv</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#emit_hbc_config"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.calibration.emit_hbc_config" title="Link to this definition"></a></dt>
 <dd><p>Emit a HydroBayesCal <code class="docutils literal notranslate"><span class="pre">config_Telemac.py</span></code> for the produced case.</p>
 <p><em>complete_bal_mode</em> False runs the initial simulations only; <em>only_bal_mode</em> True
 (with <em>complete_bal_mode</em>) continues from the saved initial simulations with the
-active learning (HydroBayesCal’s two execution switches).</p>
+active learning (HydroBayesCal’s two execution switches). <em>parameters</em> are the
+ones to calibrate (default <a class="reference internal" href="#axqua.calibration.telemac_parameters" title="axqua.calibration.telemac_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">telemac_parameters()</span></code></a>; a calibration passes those of
+its zone plan, <code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.calibration_zones.zone_plan()</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameter<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4072,6 +4103,7 @@ active learning (HydroBayesCal’s two execution switches).</p>
 <li><p><strong>calibration_csv</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>complete_bal_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>only_bal_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
@@ -4180,8 +4212,8 @@ to need, before HydroBayesCal became a dependency of axqua itself.</p>
 <dt class="sig sig-object py" id="axqua.bayescal.build_velocity_csv">
 <span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">build_velocity_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#build_velocity_csv"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.bayescal.build_velocity_csv" title="Link to this definition"></a></dt>
 <dd><p>Compile the configured ground truth and write the calibration-points CSV.</p>
-<p>The velocity target is the horizontal FlowTracker speed (0.6-depth proxy for
-the depth-averaged velocity) with propagated, floored error; water depth is
+<p>The velocity target is the horizontal FlowTracker speed at 0.6 of the depth
+above the riverbed (profile rule <code class="docutils literal notranslate"><span class="pre">log-profile</span></code>) with propagated, floored error; water depth is
 carried alongside. Reads <code class="docutils literal notranslate"><span class="pre">ground_truth.sources</span></code> via
 <a class="reference internal" href="#axqua.ground_truth.compile_ground_truth" title="axqua.ground_truth.compile_ground_truth"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.ground_truth.compile_ground_truth()</span></code></a>.</p>
 <p>With <em>positional</em>, a declared <code class="docutils literal notranslate"><span class="pre">ground_truth.position_quality</span></code> (or
@@ -4569,9 +4601,10 @@ at the prior extremes before trusting a short hotstart duration.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.bayescal.emit_multiflow_config">
-<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">emit_multiflow_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_paths</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cpus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adaptive_init_runs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#emit_multiflow_config"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.bayescal.emit_multiflow_config" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">emit_multiflow_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_paths</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cpus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adaptive_init_runs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#emit_multiflow_config"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.bayescal.emit_multiflow_config" title="Link to this definition"></a></dt>
 <dd><p>Write <code class="docutils literal notranslate"><span class="pre">config_Telemac_multiflow.py</span></code> (standard blocks + a <code class="docutils literal notranslate"><span class="pre">multiflow</span></code>
-block of per-flow steering/CSV entries).</p>
+block of per-flow steering/CSV entries). <em>parameters</em> as in
+<a class="reference internal" href="#axqua.calibration.emit_hbc_config" title="axqua.calibration.emit_hbc_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.calibration.emit_hbc_config()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameter<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4587,6 +4620,7 @@ block of per-flow steering/CSV entries).</p>
 <li><p><strong>only_bal_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>prior_samples</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>adaptive_init_runs</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
@@ -4912,6 +4946,48 @@ run of the case is active, unless <em>force</em>. Returns the driver exit code (
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.report">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#report"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.bayescal.report" title="Link to this definition"></a></dt>
+<dd><p>Write the calibration report of <em>folder</em> (<code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.calibration_report</span></code>);
+a failure is a warning, never a failed calibration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.settle_zone_plan">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">settle_zone_plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#settle_zone_plan"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.bayescal.settle_zone_plan" title="Link to this definition"></a></dt>
+<dd><p>The parameters a calibration varies, after the zone check, written down.</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.calibration_zones.zone_plan()</span></code> leaves out the roughness zones without a
+calibration point and lowers the largest ks of zones shallower than it; the plan
+is printed, its warnings logged, and written as <code class="docutils literal notranslate"><span class="pre">zone-plan.json</span></code> into <em>folder</em>.
+A <em>resume</em> continues the initial simulations of an earlier calibration, which were
+run with the parameters of that calibration: a plan that names other parameters or
+other ranges is refused.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>resume</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <p id="module-axqua.campaigns">Multi-campaign FlowTracker -&gt; per-flow HydroBayesCal calibration-point CSVs.</p>
 <p>A <strong>multi-discharge</strong> calibration compares one model against velocity ground
 truth from several field campaigns, each measured at a different steady
@@ -4919,11 +4995,7 @@ discharge. This module turns each campaign’s FlowTracker2 export into a
 calibration-points CSV in the HydroBayesCal schema (first four columns
 <code class="docutils literal notranslate"><span class="pre">id,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z</span></code> read by position, then <code class="docutils literal notranslate"><span class="pre">&lt;QTY&gt;_DATA</span></code> / <code class="docutils literal notranslate"><span class="pre">&lt;QTY&gt;_ERROR</span></code> read by
 name).</p>
-<p>Per vertical it keeps the measurement nearest <strong>0.6 x depth</strong> (the standard
-depth-averaged-velocity proxy that TELEMAC-2D <code class="docutils literal notranslate"><span class="pre">SCALAR</span> <span class="pre">VELOCITY</span></code> =
-sqrt(u^2+v^2) is compared to) and forms the target from the <strong>horizontal</strong>
-components only. <code class="docutils literal notranslate"><span class="pre">WATER</span> <span class="pre">DEPTH</span></code> (the vertical’s total depth) is carried
-alongside.</p>
+<p>Per vertical it takes the velocity at <strong>0.6 of the depth above the riverbed</strong>, read off a logarithmic profile fitted to the vertical’s readings (the <code class="docutils literal notranslate"><span class="pre">log-profile</span></code> rule of <a class="reference internal" href="#axqua.ground_truth.select_profile_rows" title="axqua.ground_truth.select_profile_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.ground_truth.select_profile_rows()</span></code></a>), which TELEMAC-2D <code class="docutils literal notranslate"><span class="pre">SCALAR</span> <span class="pre">VELOCITY</span></code> = sqrt(U^2+V^2) is compared to, and forms the target from the <strong>horizontal</strong> components only. <code class="docutils literal notranslate"><span class="pre">WATER</span> <span class="pre">DEPTH</span></code> (the vertical’s total depth) is carried alongside.</p>
 <p>Three source layouts are handled (<code class="docutils literal notranslate"><span class="pre">kind</span></code> on <a class="reference internal" href="configuration.html#module-axqua.config" title="axqua.config"><code class="xref py py-class docutils literal notranslate"><span class="pre">config</span></code></a>-level
 flow specs, or the <code class="docutils literal notranslate"><span class="pre">compile_*</span></code> helpers directly):</p>
 <ul class="simple">
@@ -4937,7 +5009,7 @@ positions come from a companion point GeoPackage keyed by vertical number.</p></
 0.2/0.6/0.8 profiles.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">points</span></code> - a point layer with one point per reading, as the corrected campaign
 layers of 2026-10 are (via <a class="reference internal" href="#axqua.ground_truth.read_points" title="axqua.ground_truth.read_points"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.ground_truth.read_points()</span></code></a>); the readings
-of a vertical are reduced by a profile rule, the depth average by default.</p></li>
+of a vertical are reduced by a profile rule, <code class="docutils literal notranslate"><span class="pre">log-profile</span></code> by default.</p></li>
 </ul>
 <p>The per-point velocity error propagates the FlowTracker component errors and is
 floored (<code class="docutils literal notranslate"><span class="pre">vel_err_floor</span></code>). Raise the floor for a campaign that is not an
@@ -4984,7 +5056,7 @@ cross-section), so it informs but does not dominate the joint likelihood
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.campaigns.compile_transect">
-<span class="sig-prename descclassname"><span class="pre">axqua.campaigns.</span></span><span class="sig-name descname"><span class="pre">compile_transect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values_xlsx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions_gpkg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'KB15'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tr'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/campaigns.html#compile_transect"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.campaigns.compile_transect" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.campaigns.</span></span><span class="sig-name descname"><span class="pre">compile_transect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values_xlsx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions_gpkg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'KB15'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tr'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/campaigns.html#compile_transect"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.campaigns.compile_transect" title="Link to this definition"></a></dt>
 <dd><p>Taped cross-section: values from the xlsx, positions from a point gpkg.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Station</span></code> is <code class="docutils literal notranslate"><span class="pre">&lt;vertical&gt;-&lt;sub&gt;</span></code>; positions come from <code class="docutils literal notranslate"><span class="pre">positions_gpkg</span></code>
 whose <code class="docutils literal notranslate"><span class="pre">Point</span></code> attribute is the (integer) vertical number.</p>
@@ -4995,7 +5067,6 @@ whose <code class="docutils literal notranslate"><span class="pre">Point</span><
 <li><p><strong>positions_gpkg</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
 <li><p><strong>sheet</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
 <li><p><strong>vel_err_floor</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>)</p></li>
-<li><p><strong>target_depth</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>)</p></li>
 <li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
 </ul>
 </dd>
@@ -5007,7 +5078,7 @@ whose <code class="docutils literal notranslate"><span class="pre">Point</span><
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.campaigns.compile_inline">
-<span class="sig-prename descclassname"><span class="pre">axqua.campaigns.</span></span><span class="sig-name descname"><span class="pre">compile_inline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values_xlsx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'KB15'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'in'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/campaigns.html#compile_inline"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.campaigns.compile_inline" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.campaigns.</span></span><span class="sig-name descname"><span class="pre">compile_inline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values_xlsx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'KB15'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'in'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/campaigns.html#compile_inline"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.campaigns.compile_inline" title="Link to this definition"></a></dt>
 <dd><p>Verticals with inline EPSG coordinates on every row and 0.2/0.6/0.8 profiles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameter<span class="colon">:</span></dt>
@@ -5015,7 +5086,6 @@ whose <code class="docutils literal notranslate"><span class="pre">Point</span><
 <li><p><strong>values_xlsx</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
 <li><p><strong>sheet</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
 <li><p><strong>vel_err_floor</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>)</p></li>
-<li><p><strong>target_depth</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>)</p></li>
 <li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
 </ul>
 </dd>
@@ -5027,7 +5097,7 @@ whose <code class="docutils literal notranslate"><span class="pre">Point</span><
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.campaigns.compile_points">
-<span class="sig-prename descclassname"><span class="pre">axqua.campaigns.</span></span><span class="sig-name descname"><span class="pre">compile_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs_epsg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'depth-average'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/campaigns.html#compile_points"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.campaigns.compile_points" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.campaigns.</span></span><span class="sig-name descname"><span class="pre">compile_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crs_epsg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log-profile'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/campaigns.html#compile_points"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.campaigns.compile_points" title="Link to this definition"></a></dt>
 <dd><p>A point layer with one point per reading -&gt; one calibration point per vertical.</p>
 <p>The layer carries no component errors, so every point gets <code class="docutils literal notranslate"><span class="pre">vel_err_floor</span></code>. It
 carries no elevation either, so <code class="docutils literal notranslate"><span class="pre">z</span></code> is 0, which the 2D calibration ignores.</p>
@@ -5079,17 +5149,18 @@ this module: locating HydroBayesCal, staging a driver out of it with the patches
 axqua needs, and running that driver inside the right solver environment.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="axqua.hbc.HBC_MINIMUM">
-<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">HBC_MINIMUM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'1.12.2'</span></span><a class="headerlink" href="#axqua.hbc.HBC_MINIMUM" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">HBC_MINIMUM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'1.13.0'</span></span><a class="headerlink" href="#axqua.hbc.HBC_MINIMUM" title="Link to this definition"></a></dt>
 <dd><p>Oldest HydroBayesCal that aXqua runs a calibration with; the same floor as the
 <code class="docutils literal notranslate"><span class="pre">calibration</span></code> extra in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> (a test keeps the two equal). 1.12.1
 starts the Sobol design at the first point of the sequence, so that a design of
 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the
-scikit-learn emulator (<code class="docutils literal notranslate"><span class="pre">gp_library:</span> <span class="pre">skl</span></code>) run with TELEMAC.</p>
+scikit-learn emulator (<code class="docutils literal notranslate"><span class="pre">gp_library:</span> <span class="pre">skl</span></code>) run with TELEMAC; 1.13.0 reads the
+per-parameter posterior peaks over bootstrap resamples, which aXqua applies.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.hbc.hbc_too_old">
-<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">hbc_too_old</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">installed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1.12.2'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/hbc.html#hbc_too_old"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.hbc.hbc_too_old" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">hbc_too_old</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">installed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1.13.0'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/hbc.html#hbc_too_old"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.hbc.hbc_too_old" title="Link to this definition"></a></dt>
 <dd><p>Whether <em>installed</em> is below <em>minimum</em>; an unreadable version passes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameter<span class="colon">:</span></dt>
@@ -5571,8 +5642,10 @@ prescribed discharges and water levels of the situation, the names of its own re
 and friction files, and the calibrated values. Mesh, bed, numerical settings and
 initial state are untouched, so a difference between model and measurement cannot come
 from a model that was built differently.</p>
-<p>The calibrated values are the <strong>joint posterior maximum</strong> of the newest calibration
-(<a class="reference internal" href="#axqua.validation.calibrated_parameters" title="axqua.validation.calibrated_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibrated_parameters()</span></code></a>), read from what HydroBayesCal saved. They are written
+<p>The calibrated values are the <strong>per-parameter posterior maxima</strong> of the newest
+calibration (<a class="reference internal" href="#axqua.validation.calibrated_parameters" title="axqua.validation.calibrated_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibrated_parameters()</span></code></a>): the peak of each parameter’s own posterior,
+read from what HydroBayesCal saved (<code class="docutils literal notranslate"><span class="pre">marginal_optima</span></code>, since HydroBayesCal 1.13.0 its
+calibrated set as well). They are written
 into copies of the files HydroBayesCal changed during the calibration, by the same
 rules: <code class="docutils literal notranslate"><span class="pre">zone&lt;N&gt;</span></code> is the coefficient of friction zone N in the friction table,
 <code class="docutils literal notranslate"><span class="pre">f.&lt;NAME&gt;</span></code> a constant in the user Fortran file, and any other name a keyword of the
@@ -5583,7 +5656,7 @@ own triangles. A point outside the mesh has no model value; it is counted and le
 of the statistics.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.validation.CalibratedSet">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">CalibratedSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'joint</span> <span class="pre">posterior</span> <span class="pre">maximum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#CalibratedSet"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.validation.CalibratedSet" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">CalibratedSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per-parameter</span> <span class="pre">posterior</span> <span class="pre">maximum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#CalibratedSet"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.validation.CalibratedSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The parameter values a calibration ended with.</p>
 <dl class="field-list simple">
@@ -5613,7 +5686,7 @@ of the statistics.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="axqua.validation.CalibratedSet.estimate">
-<span class="sig-name descname"><span class="pre">estimate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'joint</span> <span class="pre">posterior</span> <span class="pre">maximum'</span></span><a class="headerlink" href="#axqua.validation.CalibratedSet.estimate" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'per-parameter</span> <span class="pre">posterior</span> <span class="pre">maximum'</span></span><a class="headerlink" href="#axqua.validation.CalibratedSet.estimate" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -5799,10 +5872,13 @@ discharges of another situation: number, inflow or outflow, calibrated discharge
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.validation.calibrated_parameters">
 <span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">calibrated_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#calibrated_parameters"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.validation.calibrated_parameters" title="Link to this definition"></a></dt>
-<dd><p>The joint posterior maximum of the newest calibration of this case.</p>
-<p>HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.
-An older HydroBayesCal that did not save the joint maximum gives the mean of the
-posterior sample instead, and <a class="reference internal" href="#axqua.validation.CalibratedSet.estimate" title="axqua.validation.CalibratedSet.estimate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CalibratedSet.estimate</span></code></a> says so.</p>
+<dd><p>The per-parameter posterior maxima of the newest calibration of this case.</p>
+<p>The peak of each parameter’s own posterior (<code class="docutils literal notranslate"><span class="pre">marginal_optima</span></code> of the last
+iteration), as HydroBayesCal 1.13.0 reports the calibrated set; the user’s decision
+of 2026-11-11, since a roughness zone is read and reported per zone. A result without
+finite peaks gives the joint posterior maximum, and one without that the mean of the
+posterior sample; <a class="reference internal" href="#axqua.validation.CalibratedSet.estimate" title="axqua.validation.CalibratedSet.estimate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CalibratedSet.estimate</span></code></a> says which.
+HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#axqua.validation.CalibratedSet" title="axqua.validation.CalibratedSet"><em>CalibratedSet</em></a></p>

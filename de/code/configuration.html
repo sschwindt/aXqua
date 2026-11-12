@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/code/configuration.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -533,14 +533,14 @@ the computer: an editor of the case checks this and not that.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="axqua.config.PROFILE_RULES">
-<span class="sig-prename descclassname"><span class="pre">axqua.config.</span></span><span class="sig-name descname"><span class="pre">PROFILE_RULES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('single',</span> <span class="pre">'all',</span> <span class="pre">'drop-lowest',</span> <span class="pre">'depth-average')</span></span><a class="headerlink" href="#axqua.config.PROFILE_RULES" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.config.</span></span><span class="sig-name descname"><span class="pre">PROFILE_RULES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('single',</span> <span class="pre">'all',</span> <span class="pre">'drop-lowest',</span> <span class="pre">'depth-average',</span> <span class="pre">'log-profile')</span></span><a class="headerlink" href="#axqua.config.PROFILE_RULES" title="Link to this definition"></a></dt>
 <dd><p>Valid <code class="docutils literal notranslate"><span class="pre">GroundTruthSource.profile</span></code> rules. Must stay in step with
 <code class="xref py py-data docutils literal notranslate"><span class="pre">axqua.ground_truth.PROFILE_RULES</span></code> (fenced by a test).</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.config.GroundTruthSource">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.config.</span></span><span class="sig-name descname"><span class="pre">GroundTruthSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flowtracker'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/config.html#GroundTruthSource"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.config.GroundTruthSource" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.config.</span></span><span class="sig-name descname"><span class="pre">GroundTruthSource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flowtracker'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ID'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sheet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log-profile'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/config.html#GroundTruthSource"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.config.GroundTruthSource" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>One raw ground-truth source to compile into the tidy measurements table.</p>
 <p>Measured values and their positions usually live in separate files: the
@@ -592,15 +592,17 @@ tab the source contributes to the tidy table (<code class="docutils literal notr
 <span class="sig-name descname"><span class="pre">sheet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#axqua.config.GroundTruthSource.sheet" title="Link to this definition"></a></dt>
 <dd><p>Worksheet to read the values from. <code class="docutils literal notranslate"><span class="pre">None</span></code> keeps the historic behavior
 (the first sheet, one row per vertical). Name a per-reading profile sheet
-to use any <code class="docutils literal notranslate"><span class="pre">profile</span></code> rule other than <code class="docutils literal notranslate"><span class="pre">single</span></code>.</p>
+to give the <code class="docutils literal notranslate"><span class="pre">profile</span></code> rule several readings per vertical.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="axqua.config.GroundTruthSource.profile">
-<span class="sig-name descname"><span class="pre">profile</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'single'</span></span><a class="headerlink" href="#axqua.config.GroundTruthSource.profile" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">profile</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'log-profile'</span></span><a class="headerlink" href="#axqua.config.GroundTruthSource.profile" title="Link to this definition"></a></dt>
 <dd><p>Which reading of a multi-depth vertical becomes a target - see
-<a class="reference internal" href="workflow.html#axqua.ground_truth.select_profile_rows" title="axqua.ground_truth.select_profile_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.ground_truth.select_profile_rows()</span></code></a>. <code class="docutils literal notranslate"><span class="pre">single</span></code> is the default
-and reproduces the previous behavior exactly.</p>
+<a class="reference internal" href="workflow.html#axqua.ground_truth.select_profile_rows" title="axqua.ground_truth.select_profile_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.ground_truth.select_profile_rows()</span></code></a>. The default <code class="docutils literal notranslate"><span class="pre">log-profile</span></code>
+reads the velocity at 0.6 of the depth above the bed off a logarithmic
+profile fitted to the readings of each vertical (the user’s rule of
+2026-11-11); a vertical with one reading at that height is kept as it is.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -6448,7 +6450,7 @@ line (each passed to the callback as it arrives, so a long solver run is
 not silent) instead of being buffered until the end; the full output is
 still returned in <code class="docutils literal notranslate"><span class="pre">CompletedProcess.stdout</span></code>. Without it, output is
 captured quietly as before.</p>
-<p><em>should_stop</em> is polled between output lines and, once it returns true, the
+<p><em>should_stop</em> is polled after every output line and, while the command prints nothing, every quarter second; once it returns true, the
 whole <strong>process group</strong> is terminated - not just the child. That distinction is
 the point: the child is a shell or TELEMAC’s launcher, and the ranks that matter
 are its grandchildren, so signalling the child alone leaves orphan <code class="docutils literal notranslate"><span class="pre">mpirun</span></code>
@@ -6474,6 +6476,12 @@ hands over an already-captured solver environment instead of sourcing it again.<
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.env.STOP_POLL_SECONDS">
+<span class="sig-prename descclassname"><span class="pre">axqua.env.</span></span><span class="sig-name descname"><span class="pre">STOP_POLL_SECONDS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.25</span></span><a class="headerlink" href="#axqua.env.STOP_POLL_SECONDS" title="Link to this definition"></a></dt>
+<dd><p>How often a running command that prints nothing is asked whether it should stop. A job’s cancel token reads its request file at the same interval (<code class="xref py py-data docutils literal notranslate"><span class="pre">axqua.jobs.executor.CANCEL_POLL_INTERVAL</span></code>).</p>
 </dd></dl>
 
 <dl class="py function">

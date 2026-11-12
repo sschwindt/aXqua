@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/validation.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=28d163b9"></script>
+      <script src="../../_static/documentation_options.js?v=4720776d"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -368,8 +368,10 @@
 <span class="sd">initial state are untouched, so a difference between model and measurement cannot come</span>
 <span class="sd">from a model that was built differently.</span>
 
-<span class="sd">The calibrated values are the **joint posterior maximum** of the newest calibration</span>
-<span class="sd">(:func:`calibrated_parameters`), read from what HydroBayesCal saved. They are written</span>
+<span class="sd">The calibrated values are the **per-parameter posterior maxima** of the newest</span>
+<span class="sd">calibration (:func:`calibrated_parameters`): the peak of each parameter's own posterior,</span>
+<span class="sd">read from what HydroBayesCal saved (``marginal_optima``, since HydroBayesCal 1.13.0 its</span>
+<span class="sd">calibrated set as well). They are written</span>
 <span class="sd">into copies of the files HydroBayesCal changed during the calibration, by the same</span>
 <span class="sd">rules: ``zone&lt;N&gt;`` is the coefficient of friction zone N in the friction table,</span>
 <span class="sd">``f.&lt;NAME&gt;`` a constant in the user Fortran file, and any other name a keyword of the</span>
@@ -457,7 +459,7 @@
     <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Path</span>
-    <span class="n">estimate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"joint posterior maximum"</span>
+    <span class="n">estimate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"per-parameter posterior maximum"</span>
 
 <div class="viewcode-block" id="CalibratedSet.as_dict">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.validation.CalibratedSet.as_dict">[docs]</a>
@@ -470,11 +472,14 @@
 <div class="viewcode-block" id="calibrated_parameters">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.validation.calibrated_parameters">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calibrated_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CalibratedSet</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""The joint posterior maximum of the newest calibration of this case.</span>
+<span class="w">    </span><span class="sd">"""The per-parameter posterior maxima of the newest calibration of this case.</span>
 
+<span class="sd">    The peak of each parameter's own posterior (``marginal_optima`` of the last</span>
+<span class="sd">    iteration), as HydroBayesCal 1.13.0 reports the calibrated set; the user's decision</span>
+<span class="sd">    of 2026-11-11, since a roughness zone is read and reported per zone. A result without</span>
+<span class="sd">    finite peaks gives the joint posterior maximum, and one without that the mean of the</span>
+<span class="sd">    posterior sample; :attr:`CalibratedSet.estimate` says which.</span>
 <span class="sd">    HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.</span>
-<span class="sd">    An older HydroBayesCal that did not save the joint maximum gives the mean of the</span>
-<span class="sd">    posterior sample instead, and :attr:`CalibratedSet.estimate` says so.</span>
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
 
@@ -497,12 +502,16 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>          <span class="c1"># nosec B301 - written by the calibration</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"calibration_parameters"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]]</span>
-    <span class="n">optimum</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"joint_optimum"</span><span class="p">)</span>
-    <span class="n">optimum</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">optimum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">optimum</span>
-    <span class="n">estimate</span> <span class="o">=</span> <span class="s2">"joint posterior maximum"</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">optimum</span><span class="p">)</span> <span class="ow">and</span> <span class="n">optimum</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">optimum</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">values</span><span class="p">,</span> <span class="n">estimate</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"marginal_optima"</span><span class="p">,</span> <span class="s2">"per-parameter posterior maximum"</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s2">"joint_optimum"</span><span class="p">,</span> <span class="s2">"joint posterior maximum"</span><span class="p">)):</span>
+        <span class="n">stored</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">stored</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">stored</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">stored</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stored</span><span class="p">)</span> <span class="ow">and</span> <span class="n">stored</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">stored</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">values</span><span class="p">,</span> <span class="n">estimate</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">label</span>
+                <span class="k">break</span>
     <span class="c1"># HydroBayesCal writes NaN as the joint maximum when too few prior samples survive</span>
     <span class="c1"># the likelihood to estimate a density (one, on the example of 2026-10-15, whose</span>
     <span class="c1"># model was 37 % too slow at every point). A NaN would be written into the</span>

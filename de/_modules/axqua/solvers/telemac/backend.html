@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/backend.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../../../../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -753,6 +753,8 @@
                 <span class="n">component</span><span class="o">=</span><span class="s2">"hydrobayescal"</span><span class="p">,</span>
                 <span class="n">return_code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="p">)</span>
+        <span class="k">if</span> <span class="n">ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">prepare_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">flows</span><span class="p">:</span>
+            <span class="n">_record_calibration_report</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">code</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_validation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">situation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
@@ -1024,6 +1026,25 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.convergence</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_study_report</span>
 
     <span class="n">write_study_report</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">stem</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">readme</span><span class="o">=</span><span class="n">readme</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_record_calibration_report</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Put the calibration report (:mod:`axqua.calibration_report`) into the manifest."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">bayescal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">FOLDER</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">MULTIFLOW</span> <span class="k">if</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">calibration_situations</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+              <span class="k">else</span> <span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">"Calibration: posterior of each parameter"</span><span class="p">,</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"posteriors.png"</span><span class="p">,</span>
+               <span class="n">kind</span><span class="o">=</span><span class="s2">"figure"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">"Calibration: roughness zones and their ks"</span><span class="p">,</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"roughness-zones.png"</span><span class="p">,</span>
+               <span class="n">kind</span><span class="o">=</span><span class="s2">"figure"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">"Calibration: evidence and relative entropy"</span><span class="p">,</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"evidence.png"</span><span class="p">,</span>
+               <span class="n">kind</span><span class="o">=</span><span class="s2">"figure"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">"Calibration: summary"</span><span class="p">,</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"calibration-report.json"</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"file"</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="s2">"Calibrated roughness zones"</span><span class="p">,</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"roughness-zones-calibrated.gpkg"</span><span class="p">,</span>
+               <span class="n">kind</span><span class="o">=</span><span class="s2">"vector"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s2">"graduated"</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="s2">"ks_cm"</span><span class="p">,</span> <span class="n">label_field</span><span class="o">=</span><span class="s2">"label"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_calibration_progress</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">):</span>

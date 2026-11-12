@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/hbc.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=55aeb8b3"></script>
+      <script src="../../_static/documentation_options.js?v=3a5fac67"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -394,8 +394,9 @@
 <span class="c1">#: ``calibration`` extra in ``pyproject.toml`` (a test keeps the two equal). 1.12.1</span>
 <span class="c1">#: starts the Sobol design at the first point of the sequence, so that a design of</span>
 <span class="c1">#: 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the</span>
-<span class="c1">#: scikit-learn emulator (``gp_library: skl``) run with TELEMAC.</span>
-<span class="n">HBC_MINIMUM</span> <span class="o">=</span> <span class="s2">"1.12.2"</span>
+<span class="c1">#: scikit-learn emulator (``gp_library: skl``) run with TELEMAC; 1.13.0 reads the</span>
+<span class="c1">#: per-parameter posterior peaks over bootstrap resamples, which aXqua applies.</span>
+<span class="n">HBC_MINIMUM</span> <span class="o">=</span> <span class="s2">"1.13.0"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -450,7 +451,9 @@
             <span class="sa">f</span><span class="s2">"The installed HydroBayesCal </span><span class="si">{</span><span class="n">installed</span><span class="si">}</span><span class="s2"> is too old: aXqua needs "</span>
             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">HBC_MINIMUM</span><span class="si">}</span><span class="s2"> or newer. Before 1.12.1, a Sobol initial design never "</span>
             <span class="s2">"tried the lowest part of each parameter range, and before 1.12.2 the "</span>
-            <span class="s2">"scikit-learn emulator failed with TELEMAC. Upgrade it in the "</span>
+            <span class="s2">"scikit-learn emulator failed with TELEMAC; before 1.13.0 the "</span>
+            <span class="s2">"per-parameter peak of a flat posterior depended on where its histogram "</span>
+            <span class="s2">"bins started, and aXqua reports those peaks. Upgrade it in the "</span>
             <span class="s2">"environment of aXqua:</span><span class="se">\n</span><span class="s2">"</span>
             <span class="s2">"    pip install -U hydrobayescal"</span>
         <span class="p">)</span>

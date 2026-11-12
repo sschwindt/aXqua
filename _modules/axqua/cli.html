@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/cli.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=28d163b9"></script>
+      <script src="../../_static/documentation_options.js?v=4720776d"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -393,7 +393,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span><span class="p">,</span> <span class="n">pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobcli</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_args</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.logsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_logging</span>
@@ -801,6 +801,9 @@
             <span class="n">cfg</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"config OK: case '</span><span class="si">%s</span><span class="s2">', model_dir=</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
             <span class="k">return</span> <span class="mi">0</span>
+        <span class="c1"># here, not at the top: the pipeline brings NumPy and pandas, which made every command slow to start, `axqua cancel` from QGIS among them (3 s on the Windows test computer, 2026-11-11)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">pipeline</span>
+
         <span class="n">art</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
             <span class="n">cfg</span><span class="p">,</span> <span class="n">validate_env</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_validate_env</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">dry_run</span>
         <span class="p">)</span>
@@ -964,6 +967,12 @@
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">casecli</span><span class="p">,</span> <span class="n">name</span><span class="p">)(</span><span class="n">argv</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_calibration</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua calibration`` - which zones a calibration would vary (:mod:`axqua.calibrationcli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">calibrationcli</span>
+    <span class="k">return</span> <span class="n">calibrationcli</span><span class="o">.</span><span class="n">run_calibration</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_run_validation</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""``axqua validation`` - what a case has for one (:mod:`axqua.validationcli`)."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">validationcli</span>
@@ -1113,6 +1122,7 @@
     <span class="s2">"profile"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_profile</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"install"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_install</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"export"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_export</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"calibration"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_calibration</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"validation"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_validation</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"example"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_example</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"hydrology"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_hydrology</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
@@ -1151,11 +1161,21 @@
 
 <span class="sd">    An existing path is a case configuration - the historic meaning, which keeps every</span>
 <span class="sd">    script and doc snippet written against it working, with a notice pointing at the new</span>
-<span class="sd">    spelling. Anything matching the job-id grammar is a job. Neither can be mistaken for</span>
-<span class="sd">    the other, so there is no guess here, only a rule.</span>
+<span class="sd">    spelling - unless it is a job folder (a folder named like a job id) or the</span>
+<span class="sd">    ``job.json`` inside one. Anything matching the job-id grammar is a job. Neither can</span>
+<span class="sd">    be mistaken for the other, so there is no guess here, only a rule.</span>
 <span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs</span><span class="w"> </span><span class="kn">import</span> <span class="n">ids</span>
+
     <span class="n">first</span> <span class="o">=</span> <span class="n">_first_positional</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">first</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">first</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="k">if</span> <span class="n">first</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="c1"># a job folder is a job, also before its job.json is written: the Windows MPI test</span>
+    <span class="c1"># passed one and got "unrecognized arguments: --job-root" from the case form</span>
+    <span class="c1"># (2026-11-11). A job.json elsewhere is a submit plan, not a job record.</span>
+    <span class="n">is_job</span> <span class="o">=</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">ids</span><span class="o">.</span><span class="n">is_job_id</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"job.json"</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">ids</span><span class="o">.</span><span class="n">is_job_id</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_job</span><span class="p">:</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
             <span class="s2">"'axqua status &lt;config&gt;' now also accepts a job id; the case form is "</span>
             <span class="s2">"spelled 'axqua case-status &lt;config&gt;'. Both work."</span><span class="p">)</span>
