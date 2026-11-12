@@ -338,6 +338,13 @@ def test_mpi_is_a_choice_of_the_build_in_windows_only(tmp_path):
     assert recipes.Options.from_dict({"mpi": 1, "native": True}).mpi is True
 
 
+def test_one_core_is_a_choice_of_the_build_in_windows_only(monkeypatch, capsys):
+    """Review of 2026-11-12: on Linux --one-core was ignored, and a parallel TELEMAC was built."""
+    monkeypatch.setattr(installcli.os, "name", "posix")
+    assert installcli.run_install(["plan", "telemac", "--one-core", "--json"]) != 0
+    assert "--one-core is a choice of TELEMAC built on Windows" in capsys.readouterr().out
+
+
 def test_on_windows_mpi_means_the_parallel_build_in_windows(tmp_path, conda, capsys):
     args = installcli._parser().parse_args(["plan", "telemac", "--mpi", "--folder", str(tmp_path), "--json"])
     assert args.mpi and not args.native

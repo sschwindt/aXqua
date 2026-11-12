@@ -48,9 +48,8 @@ log = logging.getLogger("axqua.jobs.executor")
 
 __all__ = ["CancelToken", "ExecutionContext", "JobCancelled", "execute"]
 
-#: How often the cancel token re-reads the request file. A stat per second is free and
-#: makes cancellation feel immediate without polling anything expensive.
-CANCEL_POLL_INTERVAL = 1.0
+#: How often the cancel token re-reads the request file: a stat is free, and a running solver asks this often (:data:`axqua.env.STOP_POLL_SECONDS`), so a cancel is noticed within a quarter second instead of a second.
+CANCEL_POLL_INTERVAL = 0.25
 
 
 class JobCancelled(Exception):
@@ -371,7 +370,8 @@ def _with_processes(spec: JobSpec, options: dict[str, Any]) -> dict[str, Any]:
     """
     kwargs = dict(options)
     for key in ("ncsize", "n_processors"):
-        if key in kwargs and kwargs[key] is None:
+        # 0 too: it is the plugin's "as set for the case", which submit resolved and recorded (review of 2026-11-12: TELEMAC took 0 as unset and ran on the environment's count)
+        if key in kwargs and not kwargs[key]:
             kwargs[key] = spec.resources.mpi_processes
     return kwargs
 

@@ -749,25 +749,32 @@ class RunnerClient:
         """``{host, targets: [{target, title, installed, running, last}], ...}``."""
         return self.call(["install", "overview"], timeout=60).data or {}
 
+    def _version(self) -> str | None:
+        """The version of the aXqua this client runs, or ``None`` where it is not found (the call then says why)."""
+        try:
+            return self.info.version
+        except (RunnerError, OSError):
+            return None
+
     def install_plan(self, target: str, options: dict | None = None) -> dict:
         """What installing *target* would do, and what is missing. Changes nothing.
 
         The first call downloads the installer scripts (2 MB), hence the long limit.
         """
-        return self.call(["install", "plan", target, *install_flags(options)],
+        return self.call(["install", "plan", target, *install_flags(options, self._version())],
                          timeout=300).data or {}
 
     def install_packages(self, target: str, options: dict | None = None, *,
                          elevate: bool = False) -> dict:
         """The system packages *target* needs. With *elevate*, the missing ones are
         installed, and the desktop asks for the administrator password."""
-        args = ["install", "packages", target, *install_flags(options)]
+        args = ["install", "packages", target, *install_flags(options, self._version())]
         return self.call(args + (["--elevate"] if elevate else []),
                          timeout=3600 if elevate else 300).data or {}
 
     def install_start(self, target: str, options: dict | None = None) -> dict:
         """Start the installation as a process of its own; returns its status."""
-        return self.call(["install", "start", target, *install_flags(options)],
+        return self.call(["install", "start", target, *install_flags(options, self._version())],
                          timeout=300).data or {}
 
     def install_status(self, ident: str, *, tail: int = 0) -> dict:
@@ -792,12 +799,33 @@ _INSTALL_VALUES = (("folder", "--folder"), ("tag", "--tag"), ("salome", "--salom
 #: The values of the installation wizard's ``route`` that build TELEMAC in Windows itself: on one core, or in parallel (``--mpi``).
 NATIVE_ROUTES = ("windows", "windows-mpi")
 
+#: The first aXqua whose ``--native`` builds TELEMAC in parallel and which knows ``--one-core``; an older one builds on one core with ``--native`` alone and refuses the flag.
+ONE_CORE_SINCE = (1, 3, 5)
 
-def install_flags(options: dict | None) -> list[str]:
+
+def _version_parts(version: str | None, count: int) -> tuple[int, ...] | None:
+    """The first *count* numbers of *version*, or ``None`` where it does not start with them (a git describe string, a local build)."""
+    parts = []
+    for piece in str(version or "").split(".")[:count]:
+        digits = ""
+        for char in piece:
+            if not char.isdigit():
+                break
+            digits += char
+        if not digits:
+            return None
+        parts.append(int(digits))
+    return tuple(parts) if len(parts) == count else None
+
+
+def install_flags(options: dict | None, version: str | None = None) -> list[str]:
     """The command-line form of the choices made in an installation wizard.
 
     An empty value sends no flag, so that aXqua applies its own default. The switches
-    are sent only where they differ from the default, for the same reason.
+    are sent only where they differ from the default, for the same reason, with one
+    exception: the build of TELEMAC in Windows itself, whose default became the parallel
+    build in aXqua 1.3.5. Both of its builds are named, ``--one-core`` only to an aXqua
+    that knows it (*version*, the aXqua the plugin runs; an unknown one is taken as new).
     """
     options = options or {}
     flags: list[str] = []
@@ -825,8 +853,10 @@ def install_flags(options: dict | None) -> list[str]:
     # TELEMAC on Windows: built in Windows itself (on one core or in parallel), and which modules
     if options.get("route") in NATIVE_ROUTES:
         flags.append("--native")
-        # both said out loud: the parallel build is aXqua's default since 2026-11-12, and --mpi keeps it so for an older aXqua
-        flags.append("--mpi" if options.get("route") == "windows-mpi" else "--one-core")
+        if options.get("route") == "windows-mpi":
+            flags.append("--mpi")
+        elif (_version_parts(version, 3) or ONE_CORE_SINCE) >= ONE_CORE_SINCE:
+            flags.append("--one-core")              # before 1.3.5, --native alone is the one-core build
         if options.get("modules") == "all":
             flags += ["--modules", "all"]
     return flags

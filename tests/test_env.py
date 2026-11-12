@@ -250,3 +250,39 @@ def test_the_lines_are_handed_over_on_the_calling_thread(tmp_path):
                 on_line=lambda line: threads.add(threading.get_ident()),
                 should_stop=lambda: False)
     assert threads == {threading.get_ident()}
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="bash command lines")
+def test_a_reader_that_runs_ahead_waits_and_loses_nothing(tmp_path, monkeypatch):
+    """Review of 2026-11-12: an unbounded queue let a fast solver fill the memory of a slow caller instead of waiting on its pipe."""
+    import time
+
+    from axqua import env as env_mod
+
+    monkeypatch.setattr(env_mod, "_READ_AHEAD", 5)
+    lines: list[str] = []
+
+    def slow(line):
+        time.sleep(0.001)
+        lines.append(line)
+
+    _shell(tmp_path).run("for i in $(seq 1 300); do echo $i; done", cwd=tmp_path, on_line=slow,
+                         should_stop=lambda: False)
+    assert lines == [str(i) for i in range(1, 301)]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="bash command lines")
+def test_a_callback_that_raises_ends_the_command(tmp_path, monkeypatch):
+    """Review of 2026-11-12: the reader went on draining the pipe of a solver nobody waited for."""
+    from axqua import env as env_mod
+
+    ended = []
+    real = env_mod._terminate_tree
+    monkeypatch.setattr(env_mod, "_terminate_tree", lambda proc, grace: (ended.append(proc.pid), real(proc, grace=1)))
+
+    def broken(line):
+        raise OSError("disk full")
+
+    with pytest.raises(OSError, match="disk full"):
+        _shell(tmp_path).run("echo first; sleep 30", cwd=tmp_path, on_line=broken, should_stop=lambda: False)
+    assert len(ended) == 1

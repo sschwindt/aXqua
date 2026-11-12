@@ -598,6 +598,15 @@ def test_the_count_of_the_options_is_the_one_recorded(fake_case):
     assert submit_mod.build_spec(fake_case, JobKind.STEADY_RUN).resources.mpi_processes == 8
 
 
+def test_a_count_of_0_runs_the_count_that_is_recorded(fake_case):
+    """Review of 2026-11-12: job.json said 2 for --np 2 --option ncsize=0, while the executor passed 0 on and TELEMAC ran on the environment's count."""
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, np=2, options={"ncsize": 0})
+    assert spec.resources.mpi_processes == 2
+    assert executor._with_processes(spec, spec.options.as_kwargs())["ncsize"] == 2
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, np=2, options={"ncsize": 4})
+    assert executor._with_processes(spec, spec.options.as_kwargs())["ncsize"] == 4
+
+
 def test_a_count_asked_for_with_the_job_is_refused_by_a_telemac_without_mpi(fake_case,
                                                                             monkeypatch):
     from axqua.core import errors, installation

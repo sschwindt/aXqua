@@ -148,6 +148,12 @@ def run_install(argv: list[str]) -> int:
 
         if os.name == "nt" and args.action in WINDOWS_TO_WSL:
             return _on_windows(args, argv, command)
+        if args.one_core:
+            # as --mpi, a choice of TELEMAC built on Windows only (axqua.install.mpi_native_only); ignored, it would build the parallel TELEMAC the user did not ask for
+            from axqua.core.errors import ConfigError
+            raise ConfigError("--one-core is a choice of TELEMAC built on Windows itself", subject="install.one_core",
+                              remedy="TELEMAC on Linux and inside WSL is built for parallel runs; leave out --one-core, "
+                                     "and run a job on one process with --np 1 (MPI processes 1 in the plugin).")
 
         if args.action == "run":
             return runner.execute(Path(args.target or "."))

@@ -142,15 +142,18 @@ class ShellRuntime:
         return result
 
 
-#: How often a running command that prints nothing is asked whether it should stop.
+#: How often a running command that prints nothing is asked whether it should stop. A job's cancel token reads its request file at the same interval (:data:`axqua.jobs.executor.CANCEL_POLL_INTERVAL`).
 STOP_POLL_SECONDS = 0.25
+
+#: Lines read ahead of the caller at most: a full queue holds the reader, and with it the command, which then waits on its pipe as it did before the reader was a thread.
+_READ_AHEAD = 10_000
 
 
 def _stream(proc: subprocess.Popen, keep: Callable[[str], None],
             should_stop: Callable[[], bool] | None, *, grace: float) -> bool:
     """Hand every output line of *proc* to *keep* until the pipe ends; whether *should_stop* ended it.
 
-    Without *should_stop* the lines are read here. With it, a thread reads them and this loop also asks *should_stop* while the command is silent: asked only after a line, a cancel waited for the next one, and a parallel TELEMAC prints in bursts (6 s after the request on the Windows test computer, 2026-11-11). *keep* runs on the calling thread either way.
+    Without *should_stop* the lines are read here. With it, a thread reads them and this loop also asks *should_stop* while the command is silent: asked only after a line, a cancel waited for the next one, and a parallel TELEMAC prints in bursts (6 s after the request on the Windows test computer, 2026-11-11). *keep* runs on the calling thread either way. When *keep* or *should_stop* raises, the tree of *proc* is ended before the exception goes on: the reader would otherwise drain the pipe of a solver nobody waits for.
     """
     pipe = proc.stdout
     if should_stop is None:
@@ -164,13 +167,24 @@ def _stream(proc: subprocess.Popen, keep: Callable[[str], None],
                 pass
         return False
 
-    lines: queue.Queue = queue.Queue()
+    lines: queue.Queue = queue.Queue(maxsize=_READ_AHEAD)
+    done = threading.Event()
+
+    def hand_over(item) -> bool:
+        while not done.is_set():
+            try:
+                lines.put(item, timeout=STOP_POLL_SECONDS)
+                return True
+            except queue.Full:
+                continue
+        return False
 
     def read() -> None:
         # the thread owns the pipe: closing it from the other thread while a read waits on it can block on Windows
         try:
             for line in pipe:
-                lines.put(line)
+                if not hand_over(line):
+                    return
         except (OSError, ValueError):  # pragma: no cover - the pipe went away
             pass
         finally:
@@ -178,31 +192,40 @@ def _stream(proc: subprocess.Popen, keep: Callable[[str], None],
                 pipe.close()
             except OSError:  # pragma: no cover
                 pass
-            lines.put(None)
+            hand_over(None)
 
     reader = threading.Thread(target=read, name="axqua-output", daemon=True)
     reader.start()
-    while True:
-        try:
-            line = lines.get(timeout=STOP_POLL_SECONDS)
-        except queue.Empty:
-            line = ""
-        if line is None:
-            return False
-        if line:
-            keep(line)
-        if should_stop():
+    stopped = False
+    try:
+        while True:
+            try:
+                line = lines.get(timeout=STOP_POLL_SECONDS)
+            except queue.Empty:
+                line = ""
+            if line is None:
+                return False
+            if line:
+                keep(line)
+            if should_stop():
+                stopped = True
+                _terminate_tree(proc, grace=grace)
+                # the last lines the tree wrote before it ended; a process that still holds the pipe must not hold up the cancel
+                reader.join(timeout=0.5)
+                while True:
+                    try:
+                        rest = lines.get_nowait()
+                    except queue.Empty:
+                        break
+                    if rest is not None:
+                        keep(rest)
+                return True
+    except BaseException:
+        if not stopped and proc.poll() is None:
             _terminate_tree(proc, grace=grace)
-            # the last lines the tree wrote before it ended; a grandchild that still holds the pipe must not hold up the cancel
-            reader.join(timeout=2.0)
-            while True:
-                try:
-                    rest = lines.get_nowait()
-                except queue.Empty:
-                    break
-                if rest is not None:
-                    keep(rest)
-            return True
+        raise
+    finally:
+        done.set()
 
 
 def cmd_line(parts: list[str]) -> str:

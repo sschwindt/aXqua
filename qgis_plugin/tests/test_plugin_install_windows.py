@@ -85,3 +85,13 @@ def test_other_programs_and_other_systems_have_no_such_rows(qgis_app):
     linux = {"host": {"system": "linux", "supported": True}, "targets": []}
     assert "route" not in install_wizard.InstallWizard(_Client(), "telemac", linux)._widgets
     assert "route" not in install_wizard.InstallWizard(_Client(), "openfoam", _overview())._widgets
+
+
+@pytest.mark.parametrize("version, sent", [
+    ("1.3.4", False), ("1.2.0", False), ("1.3.5", True), ("1.4.0", True),
+    ("1.3.5.dev3+gbfa74a1", True), (None, True), ("local", True)])
+def test_one_core_is_named_only_to_an_axqua_that_knows_it(version, sent):
+    """Review of 2026-11-12: an aXqua before 1.3.5 refuses --one-core, and builds on one core with --native alone."""
+    flags = install_flags({"route": "windows"}, version)
+    assert "--native" in flags and ("--one-core" in flags) is sent and "--mpi" not in flags
+    assert "--mpi" in install_flags({"route": "windows-mpi"}, version)
