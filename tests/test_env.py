@@ -211,12 +211,17 @@ def test_a_silent_run_is_cancelled_without_waiting_for_its_next_line(tmp_path):
 
     runtime = _shell(tmp_path)
     lines: list[str] = []
-    start = time.monotonic()
-    asked = start + 0.5
+    seen: list[float] = []
+
+    def keep(line: str) -> None:
+        lines.append(line)
+        seen.append(time.monotonic())
+
+    # the cancel comes 0.5 s after the first line, while the command is silent; a fixed time after the start raced a slow runner, which had not printed the line yet (CI, 2026-11-12)
     proc = runtime.run("echo started; sleep 30; echo never", cwd=tmp_path, check=True,
-                       on_line=lines.append, should_stop=lambda: time.monotonic() > asked,
+                       on_line=keep, should_stop=lambda: bool(seen) and time.monotonic() > seen[0] + 0.5,
                        grace=5)
-    assert time.monotonic() - start < 5
+    assert seen and time.monotonic() - seen[0] < 5
     assert lines == ["started"]
     assert proc.returncode != 0                       # stopped, not raised
 
