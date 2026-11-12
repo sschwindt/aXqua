@@ -586,6 +586,18 @@ def test_a_named_profile_without_a_count_leaves_it_to_the_case(fake_case):
     assert submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, profile=named).resources.mpi_processes == 4
 
 
+def test_the_count_of_the_options_is_the_one_recorded(fake_case):
+    """The plugin's MPI processes 4 ran on 4 while job.json said the case's 8 (the Windows test computer, 2026-11-11)."""
+    fake_case.telemac.n_processors = 8
+    spec = submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, options={"ncsize": 4})
+    assert spec.resources.mpi_processes == 4 and spec.options.ncsize == 4
+    assert submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, np=2,
+                                 options={"ncsize": 4}).resources.mpi_processes == 4
+    assert submit_mod.build_spec(fake_case, JobKind.STEADY_RUN, np=2,
+                                 options={"ncsize": 0}).resources.mpi_processes == 2
+    assert submit_mod.build_spec(fake_case, JobKind.STEADY_RUN).resources.mpi_processes == 8
+
+
 def test_a_count_asked_for_with_the_job_is_refused_by_a_telemac_without_mpi(fake_case,
                                                                             monkeypatch):
     from axqua.core import errors, installation

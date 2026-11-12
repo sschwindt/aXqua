@@ -194,3 +194,59 @@ def test_a_cancel_on_windows_ends_the_whole_tree_of_the_run(monkeypatch, as_wind
     env_mod._terminate_tree(proc, grace=1)
     assert seen == [["taskkill", "/PID", "4242", "/T", "/F"]]
     assert proc.waited and not proc.killed
+
+
+def _shell(tmp_path):
+    from axqua.env import ShellRuntime
+
+    script = tmp_path / "setup.sh"
+    script.write_text("true\n")
+    return ShellRuntime(script)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="bash command lines")
+def test_a_silent_run_is_cancelled_without_waiting_for_its_next_line(tmp_path):
+    """The cancel was noticed only after a line of output, and a parallel TELEMAC prints in bursts: its tree ended 6 s after the request (the Windows test computer, 2026-11-11)."""
+    import time
+
+    runtime = _shell(tmp_path)
+    lines: list[str] = []
+    start = time.monotonic()
+    asked = start + 0.5
+    proc = runtime.run("echo started; sleep 30; echo never", cwd=tmp_path, check=True,
+                       on_line=lines.append, should_stop=lambda: time.monotonic() > asked,
+                       grace=5)
+    assert time.monotonic() - start < 5
+    assert lines == ["started"]
+    assert proc.returncode != 0                       # stopped, not raised
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="bash command lines")
+def test_a_cancellable_run_keeps_every_line_in_order(tmp_path):
+    runtime = _shell(tmp_path)
+    lines: list[str] = []
+    proc = runtime.run("for i in $(seq 1 500); do echo line $i; done; sleep 0.4; echo end",
+                       cwd=tmp_path, on_line=lines.append, should_stop=lambda: False)
+    assert lines == [f"line {i}" for i in range(1, 501)] + ["end"]
+    assert proc.stdout.splitlines() == lines and proc.returncode == 0
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="bash command lines")
+def test_a_failing_cancellable_run_still_raises(tmp_path):
+    runtime = _shell(tmp_path)
+    with pytest.raises(subprocess.CalledProcessError):
+        runtime.run("echo x; exit 3", cwd=tmp_path, on_line=lambda line: None,
+                    should_stop=lambda: False)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="bash command lines")
+def test_the_lines_are_handed_over_on_the_calling_thread(tmp_path):
+    """The callbacks write the job's logs and progress; they stay on the thread that started the run."""
+    import threading
+
+    runtime = _shell(tmp_path)
+    threads = set()
+    runtime.run("echo a; echo b", cwd=tmp_path,
+                on_line=lambda line: threads.add(threading.get_ident()),
+                should_stop=lambda: False)
+    assert threads == {threading.get_ident()}

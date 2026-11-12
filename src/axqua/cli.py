@@ -41,7 +41,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from axqua import __version__, pipeline
+from axqua import __version__
 from axqua.config import load_config
 from axqua.jobcli import parse_args
 from axqua.logsetup import setup_logging
@@ -449,6 +449,9 @@ def _run_build(argv: list[str] | None) -> int:
             cfg.validate()
             log.info("config OK: case '%s', model_dir=%s", cfg.name, cfg.model_dir)
             return 0
+        # here, not at the top: the pipeline brings NumPy and pandas, which made every command slow to start, `axqua cancel` from QGIS among them (3 s on the Windows test computer, 2026-11-11)
+        from axqua import pipeline
+
         art = pipeline.run(
             cfg, validate_env=not args.no_validate_env, dry_run=args.dry_run
         )

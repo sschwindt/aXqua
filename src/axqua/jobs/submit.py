@@ -58,8 +58,13 @@ def build_spec(cfg: Any, kind: str | JobKind, *, profile: profiles.Profile | Non
 
     # Process count, most specific wins, and the *resolved* number is frozen - so a job
     # rerun a year later uses what it actually used, not what the profile says today.
+    # A count among the options of the job (the plugin's MPI processes) wins in the
+    # executor, so it is the one recorded: job.json said the case's 8 for a run on 4
+    # (the Windows test computer, 2026-11-11).
+    job_options = meta.options.from_dict(options or {})
+    asked = getattr(job_options, "ncsize", None) or getattr(job_options, "n_processors", None)
     configured = getattr(getattr(cfg, meta.solver, None), "n_processors", None)
-    mpi = np or profile.mpi_processes or configured or 1
+    mpi = asked or np or profile.mpi_processes or configured or 1
 
     env = profile.solver_environment()
     return JobSpec(
@@ -90,7 +95,7 @@ def build_spec(cfg: Any, kind: str | JobKind, *, profile: profiles.Profile | Non
                             if profile.working_root else None),
         workspace=Workspace.from_dict({"mode": workspace or meta.workspace_default,
                                        "source_job": source_job}),
-        options=meta.options.from_dict(options or {}),
+        options=job_options,
         launcher={"requested": launcher or "auto"},
     )
 

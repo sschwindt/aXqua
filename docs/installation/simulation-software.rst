@@ -137,8 +137,10 @@ for example ``/opt/telemac/telemac-mascaret/configs/pysource.debian12.sh``. A TE
 * The wizard built TELEMAC v9.1.1 with TELEMAC-2D on one core in about 15 minutes, and a steady simulation of the Isar example case started on that build and was cancelled from the job list.
 * A one-core build prepared by hand from the same version of the source code (a first direct download had failed) ran the steady simulation of the Isar example case to its end in 58 minutes.
 * A parallel build prepared by hand with the commands that the wizard now runs for *parallel runs (MPI)* gave the same results on one and on four processes for TELEMAC's reference cases of TELEMAC-2D and TELEMAC-3D, and on one and two processes for TELEMAC-3D with GAIA. aXqua ran a short steady simulation of the Isar example case on it with four processes from a terminal.
+* The *Setup Wizard* built TELEMAC-2D with GAIA for *parallel runs (MPI)* in 16 minutes, of which the download of the compilers took 4 minutes and the compilation 9 minutes. No dialog of the firewall or of a security program appeared. A steady simulation of the Isar example case started from QGIS with four processes took 23 minutes, against 58 minutes on one core, and its result holds the whole mesh. A second one, cancelled from QGIS, left no process of TELEMAC or MS-MPI behind.
+* With *All modules, also TELEMAC-3D*, the parallel build compiled TELEMAC-3D in 12 minutes.
 
-The parallel build from the wizard itself, a parallel job started and cancelled from QGIS, the hydrology mode and the calibration with HydroBayesCal have not been tested on Windows yet.
+A 3D simulation through aXqua, the hydrology mode and the calibration with HydroBayesCal have not been tested on Windows yet.
 
 Click *Setup Wizard...* in the row of TELEMAC on the *Configuration* tab, and select *Install TELEMAC*. When aXqua already knows a TELEMAC on this computer, it asks whether to install it again: answer *Yes*, and keep *Install it again in a new folder* on the *Settings* tab to leave the existing TELEMAC as it is. On Windows, the *Settings* tab then has the setting *Build TELEMAC*:
 
@@ -168,7 +170,7 @@ In a new folder, the *Check* tab lists five steps for the one-core build and sev
 #. Parallel build only: *Prepare MS-MPI* downloads MS-MPI, makes the files the GNU Fortran compiler needs of it, and runs the test on two processes.
 #. Parallel build only: *Compile METIS*, the library that TELEMAC's program PARTEL uses to divide the mesh among the processes.
 #. *Configure the build* with CMake and MinGW Makefiles, without MED and MUMPS, and without MPI for the one-core build.
-#. *Compile TELEMAC*. TELEMAC-2D took 10 minutes with 8 processes on the test computer; all modules with MPI took 10 minutes too. The number of processes that compile TELEMAC has nothing to do with the number of processes a simulation runs on.
+#. *Compile TELEMAC*. TELEMAC-2D took 10 minutes with 8 processes on the test computer; all modules with MPI took 12 minutes. The number of processes that compile TELEMAC has nothing to do with the number of processes a simulation runs on.
 #. *Write the environment script* ``telemac-mascaret\configs\pysource.win.bat`` (``pysource.win-mpi.bat`` for the parallel build). It only sets variables and changes nothing on the computer. aXqua then enters it in the profile, as at the end of every installation, unless *Enter the installation in the profile of this computer* is cleared (``--no-bind`` in a terminal). The *Configuration* tab then shows it in the row of TELEMAC.
 
 The installation goes on when the wizard or QGIS is closed. After QGIS is opened again, the button in the row of TELEMAC reads *Show the installation...* and opens the wizard on its *Installation* tab. In a terminal, ``axqua install status telemac --tail 20`` shows the step and the last lines of the log. The log, ``install.log`` in ``%LOCALAPPDATA%\axqua\installs\<installation>``, gives the start and the duration of each step.

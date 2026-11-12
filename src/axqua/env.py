@@ -16,10 +16,12 @@ the OpenFOAM ones.
 from __future__ import annotations
 
 import os
+import queue
 import shlex
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 from typing import Callable
 
@@ -69,7 +71,7 @@ class ShellRuntime:
         still returned in ``CompletedProcess.stdout``. Without it, output is
         captured quietly as before.
 
-        *should_stop* is polled between output lines and, once it returns true, the
+        *should_stop* is polled after every output line and, while the command prints nothing, every quarter second; once it returns true, the
         whole **process group** is terminated - not just the child. That distinction is
         the point: the child is a shell or TELEMAC's launcher, and the ranks that matter
         are its grandchildren, so signalling the child alone leaves orphan ``mpirun``
@@ -120,23 +122,15 @@ class ShellRuntime:
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **popen_kwargs,
         )
         captured: list[str] = []
-        stopped = False
         assert proc.stdout is not None
-        try:
-            for line in proc.stdout:
-                if in_wsl:
-                    line = line.replace("\x00", "")
-                captured.append(line)
-                on_line(line.rstrip("\n"))
-                if should_stop is not None and should_stop():
-                    stopped = True
-                    _terminate_tree(proc, grace=grace)
-                    break
-        finally:
-            try:
-                proc.stdout.close()
-            except OSError:  # pragma: no cover
-                pass
+
+        def keep(line: str) -> None:
+            if in_wsl:
+                line = line.replace("\x00", "")
+            captured.append(line)
+            on_line(line.rstrip("\n"))
+
+        stopped = _stream(proc, keep, should_stop, grace=grace)
         returncode = proc.wait()
         result = subprocess.CompletedProcess(
             args, returncode, stdout="".join(captured), stderr="",
@@ -146,6 +140,69 @@ class ShellRuntime:
                 returncode, args, output=result.stdout,
             )
         return result
+
+
+#: How often a running command that prints nothing is asked whether it should stop.
+STOP_POLL_SECONDS = 0.25
+
+
+def _stream(proc: subprocess.Popen, keep: Callable[[str], None],
+            should_stop: Callable[[], bool] | None, *, grace: float) -> bool:
+    """Hand every output line of *proc* to *keep* until the pipe ends; whether *should_stop* ended it.
+
+    Without *should_stop* the lines are read here. With it, a thread reads them and this loop also asks *should_stop* while the command is silent: asked only after a line, a cancel waited for the next one, and a parallel TELEMAC prints in bursts (6 s after the request on the Windows test computer, 2026-11-11). *keep* runs on the calling thread either way.
+    """
+    pipe = proc.stdout
+    if should_stop is None:
+        try:
+            for line in pipe:
+                keep(line)
+        finally:
+            try:
+                pipe.close()
+            except OSError:  # pragma: no cover
+                pass
+        return False
+
+    lines: queue.Queue = queue.Queue()
+
+    def read() -> None:
+        # the thread owns the pipe: closing it from the other thread while a read waits on it can block on Windows
+        try:
+            for line in pipe:
+                lines.put(line)
+        except (OSError, ValueError):  # pragma: no cover - the pipe went away
+            pass
+        finally:
+            try:
+                pipe.close()
+            except OSError:  # pragma: no cover
+                pass
+            lines.put(None)
+
+    reader = threading.Thread(target=read, name="axqua-output", daemon=True)
+    reader.start()
+    while True:
+        try:
+            line = lines.get(timeout=STOP_POLL_SECONDS)
+        except queue.Empty:
+            line = ""
+        if line is None:
+            return False
+        if line:
+            keep(line)
+        if should_stop():
+            _terminate_tree(proc, grace=grace)
+            # the last lines the tree wrote before it ended; a grandchild that still holds the pipe must not hold up the cancel
+            reader.join(timeout=2.0)
+            while True:
+                try:
+                    rest = lines.get_nowait()
+                except queue.Empty:
+                    break
+                if rest is not None:
+                    keep(rest)
+            return True
 
 
 def cmd_line(parts: list[str]) -> str:

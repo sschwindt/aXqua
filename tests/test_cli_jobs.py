@@ -9,6 +9,8 @@ a subprocess - that a submitted job outlives the shell that submitted it - is in
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 
 import pytest
 
@@ -521,3 +523,12 @@ def test_a_profile_derived_from_the_case_config_needs_no_profiles_file(fake_case
     profile = from_config(fake_case, "telemac")
     assert profile.solver == "telemac"
     assert profile.validate().ok
+
+
+def test_the_cli_starts_without_numpy_or_pandas():
+    """`axqua cancel` from QGIS loaded the whole pipeline first: 3 s before the request was written (the Windows test computer, 2026-11-11)."""
+    code = ("import sys, axqua.cli, axqua.jobcli; "
+            "print(sorted(m for m in ('numpy', 'pandas') if m in sys.modules))")
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                         check=True).stdout.strip()
+    assert out == "[]"
