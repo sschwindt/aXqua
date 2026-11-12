@@ -35,3 +35,62 @@ Config: `geodata.structures` (the layer) plus a `structures:` block for the attr
 **`find_case_file(folder)`** is what the template scripts call instead of naming their case file. One `*.axq-case` is the answer; several raise and name them (a silent pick would run a different model than the user thinks); none falls back to `case-config.yml`. The example cases name their file explicitly, because isar-2025 has five variants. **`cases/munich-vsf/` and `cases/slot-flume/` are NOT converted** - the second workstation runs from them (issue #5); they keep `case-config*.yml` until it confirms.
 
 **What an editor of a case needs is three verbs and one table** (`casecli.py`): `axqua schema` (the field table of `core/schema_meta.py`), `axqua case read|write|new`, and `axqua check` (`core/casecheck.py`). `Config.validate()` is now `for _, step in self.checks(): step()` - the same steps in the same order, as a list of `(what about, step)` - so that the check can run every one of them and report one finding per block instead of only the first failure; steps marked `machine` (`telemac.validate_installation`, the three `environment.validate`) are skipped there, because where TELEMAC is installed is the profile's finding, not the case's. `TelemacEnv.validate` was split into `validate_installation` + `validate_choice` for that reason. The check never raises, whatever the file holds, and `case write` saves first and checks afterwards. Every code either check can emit has an anchor in `docs/troubleshooting/` (`test_every_code_..._is_explained_in_the_documentation`).
+
+## The config schema: round-tripping, classification, and typed errors
+
+**`dump_config(cfg, path)` (`config.py`) is the counterpart of `load_config`**, and exists because anything that *edits* a case - a form in the planned QGIS plugin, a migration, a scripted sweep - has to put the result back. It goes through the dataclass rather than rewriting the YAML text, which **loses comments but cannot produce a config that will not load**; a comment that survives an edit it no longer describes is worse than no comment, and the annotated prose lives in `cases/case-template/case-config.yml`. Paths are written **relative to where the file will live** (`base=`), so `axqua migrate -o elsewhere/case.yml` does not silently break every relative data path, while a path outside the case tree (a solver install) stays absolute. Guarded by a parametrized round-trip test over **all ten** case configs in the repo: `load(dump(cfg))` is field-by-field identical.
+
+**`axqua migrate <config> [-o out | --in-place]`** writes a config back in the current schema - loading already applies every compatibility mapping, so this just makes the file say what aXqua actually read and stops the deprecation warnings. `--in-place` keeps a `.bak`. `--to-case` derives the name of the new file and does not write over a file of that name that exists (it may have been edited since; naming it with `-o` replaces it). For a config that is a case file already the derived name is the file itself, so it is rewritten as `--in-place` does, and neither writes machine settings into a case file.
+
+**`core/schema.py` states which settings are shared intent and which name a solver keyword** - as *data*, because a form-based editor cannot guess. The rule: a fact about the reach or the modeling goal is `SHARED` (geodata, boundaries, friction, ground truth, structures, `mesh.channel_size`, `hydrodynamics.duration`); a knob of one code belongs to that code (`mesh.growth_ratio` is BAMG's, `hydrodynamics.implicitation` is Telemac2d's, `openfoam.max_courant` is interFoam's). Only the genuinely mixed blocks (`mesh`, `hydrodynamics`) are spelled out field by field, and only their SHARED entries - so "is this shared?" has to be answered deliberately. An unknown key classifies as SHARED, which fails safe for a form (showing a setting on the reach page is a smaller mistake than hiding it behind a solver the user has not enabled). Two tests keep the table from drifting away from the dataclasses it describes. **The fields have deliberately NOT been moved.** The plan folded `openfoam.cell_size` into `mesh.channel_size`, but `openfoam.cell_size_factor` now expresses the OpenFOAM lattice *relative to* the 2D channel size - the same shared-intent link, without pretending the two numbers are the same quantity (a per-zone anisotropic target edge length vs a uniform Cartesian spacing). The rest would be pure renaming: no behavior change, every case config touched, the artifact regression baseline invalidated. `LEGACY_KEYS` is the mechanism for doing it later without breaking a config - it maps dotted old key to new, is applied at load, and emits **one aggregated** warning rather than a per-key wall of text. Note `project.results_dir` maps to `calibration_dir`, **not** `model_dir`: the old single "results" folder is where the HydroBayesCal artifacts land.
+
+**`core/errors.py`** gives failures a **stable machine-readable `code`**, an optional `subject` (the config key or layer the failure is about) and an optional `remedy`. Not decoration: a job record has to store a failure that survives serialization, a plugin has to put a message next to the field that caused it, and a batch has to decide what is worth retrying. Deliberately **five categories, one level deep** - `ConfigError` (fix the YAML), `GeodataError` (fix the data), `EnvironmentError` (fix the install), `SolverError` (read the listing), `MeshError` (change resolution) - because mirroring the module layout would produce thirty classes that callers catch by their base anyway. `ErrorRecord.from_exception` turns *any* exception into a JSON-safe record, labeling an unanticipated one `axqua.unexpected` rather than mislabeling it. Additive: existing `ValueError`s keep working.
+
+## Package structure: solver-agnostic core + pluggable backends
+
+aXqua is structured so TELEMAC and OpenFOAM are **two backends behind one case
+description**, rather than one tool with a second bolted on.
+
+**Two rules, enforced by tests rather than intent** (`tests/test_capabilities.py`): nothing in `core` imports a solver, and the OpenFOAM backend never reaches into the TELEMAC backend. Both are checked by reading the source, so they hold even for imports that only happen inside a function. OpenFOAM *is* hotstarted from a TELEMAC result, but it reads it through the shared SERAFIN codec in the core - which is exactly why `selafin` sits there.
+
+**Every historic import path still works.** `axqua/mesh.py`, `steering.py`, `pipeline.py` (14 of them) plus `selafin.py` and `openfoam.py` are **shims that alias through `sys.modules`**, not re-export modules: `axqua.mesh is axqua.solvers.telemac.mesh` is literally true. Re-exporting would have silently dropped every private name (tests import `mesh._parse_decimal`) and broken identity checks; aliasing means there is exactly one module object and no second surface to keep in step. Parametrized over all 16 in the tests.
+
+**Both `solvers/*/__init__.py` resolve attributes lazily** (PEP 562), like the top-level package. Not decoration: each backend's `spec.py` is read by `axqua status` to build a capability table, and importing `axqua.solvers.telemac.spec` runs the package `__init__` first - so eager imports there would drag gmsh and numpy into a question that should cost nothing. Measured: `import axqua` 6 ms / 64 modules, a capability listing 30 ms with **zero** heavy modules.
+
+**Capabilities and the `MODEL=` marker files (`axqua/core/capabilities.py`).** Every
+case carries one marker per solver at its top level - `MODEL=TELEMAC_ENABLED`,
+`MODEL=OPENFOAM_DISABLED` - whose **name** says whether *the case* declares that solver
+(`cfg.declared_blocks`, so the filename means the same on any machine) and whose **body**
+is a strictly parseable status table: `#` comments, `key = value` header, then fixed-width
+rows after `[capabilities]`. Each capability is reported on **three axes**, kept apart
+because they have three different fixes: `implemented` (does aXqua support it *for
+this solver* - `yes` / `no` = not yet / `n/a` = category error, e.g. OpenFOAM has no
+depth-averaged mode while its morphodynamics is merely unbuilt), `configured` (does this
+case ask for it, from the config alone), and `built`/`run` (do the artifacts exist - pure
+path checks, never a parse, so a status report is fast and cannot fail). Unanswerable
+cells render `-`, never a confident `no`. The files are **generated and gitignored**
+(`cases/*/MODEL=*`, with `cases/case-template/MODEL=*` committed as the documented
+example): they report the *currently available* setup, which is local state like
+`axqua-case/`. Refreshed by `pipeline.run`, by `openfoam.build_case` and by
+`axqua status <config> [--check-env] [--full]`; `refresh_markers` never raises, since
+a succeeded build must not report failure because a status file could not be written.
+
+**The solver registry (`axqua/core/registry.py`).** A backend is described by a
+`BackendSpec` - name, title, config key, the capability support matrix, and the
+`built`/`run` path predicates - which is **metadata only**, deliberately separate from the
+`SolverBackend` implementation that builds and runs. The spec modules
+(`axqua/solvers/{telemac,openfoam}/spec.py`) are import-light by contract: they use
+the standard library plus attribute access on a `Config`, and nothing else. That is what
+lets `axqua status` - and, later, a QGIS plugin running inside the QGIS Python process
+- answer "what can this case do?" without importing gmsh, rasterio, pandas or a solver.
+Backends are discovered through the `axqua.solvers` entry-point group, with a
+hard-coded built-in list as a fallback for source checkouts that predate the group, so
+"add your own" and "use ours" are the same mechanism.
+
+**`axqua/__init__.py` resolves attributes lazily (PEP 562).** `import axqua` went
+from 505 ms / 652 modules to **21 ms / 64 modules**, and a capability listing imports
+**zero** heavy modules - measured, and asserted in `tests/test_capabilities.py` from a
+subprocess so the rest of the suite's imports cannot mask a regression. The public API is
+unchanged (`from axqua import build_mesh` still works); `__all__` is written out
+literally because linters and IDEs read it statically, and a test keeps it in step with
+the `_EXPORTS` map.
