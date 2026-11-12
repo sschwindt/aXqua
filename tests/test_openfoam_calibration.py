@@ -544,16 +544,18 @@ def test_analyse_takes_the_mode_from_the_config(tmp_path, monkeypatch):
 # model-relative target placement
 # --------------------------------------------------------------------------- #
 def test_relative_height_reads_the_flowtracker_convention():
-    """'0.6 depth' is measured DOWN FROM THE SURFACE, so the probe sits at 0.4*h
-    ABOVE the bed. The real KB15 vertical 1501: MeasD 0.401 of FinalD 0.742."""
+    """A recorded MeasD counts DOWN FROM THE SURFACE. The real KB15 vertical 1501:
+    MeasD 0.401 of FinalD 0.742, so the probe stood 0.46 h above the bed."""
     from axqua.ground_truth import DEFAULT_RELATIVE_HEIGHT, relative_height
 
     f, source = relative_height(pd.DataFrame({"h": [0.742], "h_meas": [0.401]}))
     assert f.iloc[0] == pytest.approx(0.4596, abs=1e-4)
     assert float(f.iloc[0] * 0.742) == pytest.approx(0.341, abs=1e-3)  # the height
     assert "MeasD" in source
-    # the fallback is 0.4, not 0.6 - the surface-vs-bed convention
-    assert DEFAULT_RELATIVE_HEIGHT == 0.4
+    # without a recorded depth: 0.6 of the depth above the bed (2026-11-12)
+    assert DEFAULT_RELATIVE_HEIGHT == 0.6
+    from axqua.postproc.profiles import MEASUREMENT_FRACTION
+    assert MEASUREMENT_FRACTION == DEFAULT_RELATIVE_HEIGHT
 
 
 def test_measd_and_finald_no_longer_collide():

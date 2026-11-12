@@ -320,14 +320,27 @@ def test_log_profile_rewrites_the_height_of_a_label():
     assert out.loc[0, "u"] == pytest.approx(_log_law(0.48), rel=1e-3)
 
 
-def test_a_reading_without_a_recorded_depth_stands_where_the_manual_puts_the_probe():
-    """0.6 of the depth below the surface is 0.4 above the bed; log-profile moves it."""
+def test_a_reading_without_a_recorded_depth_stands_at_0_6_h_above_the_bed():
+    """The user's decision of 2026-11-12: such a reading is used as it is, not moved."""
     from axqua.ground_truth import DEFAULT_RELATIVE_HEIGHT
-    assert DEFAULT_RELATIVE_HEIGHT == 0.4
+    assert DEFAULT_RELATIVE_HEIGHT == 0.6
     df = _log_frame()
     unknown = pd.DataFrame({"ID": [4], "h": [0.5], "h_meas": [np.nan],
                             "u": [_log_law(0.2)], "v": [0.0],
                             "u_err": [0.02], "v_err": [0.02]})
     out = select_profile_rows(pd.concat([df, unknown], ignore_index=True),
                               "log-profile").set_index("ID")
-    assert out.loc[4, "u"] == pytest.approx(_log_law(0.3))
+    assert out.loc[4, "u"] == pytest.approx(_log_law(0.2))
+
+
+def test_a_vertical_whose_readings_record_different_depths_stands_at_0_6_h():
+    """KB15 September 2025: a repeat reading recorded 0.639 m, the others 0.670 m. The
+    first depth decided z* while the row kept 0.670 m, so it stood at 0.62 h."""
+    from axqua.ground_truth import relative_height
+    df = pd.DataFrame({"ID": [1, 1, 1, 1], "h": [0.639, 0.670, 0.670, 0.670],
+                       "h_meas": [0.591, 0.621, 0.409, 0.200],
+                       "u": [0.004, 0.30, 0.289, 0.286], "v": [0.0] * 4})
+    out = select_profile_rows(df, "log-profile")
+    assert len(out) == 1
+    assert out.loc[0, "h"] == pytest.approx(0.670)
+    assert relative_height(out)[0].iloc[0] == pytest.approx(0.6)

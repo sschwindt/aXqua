@@ -493,24 +493,23 @@ def write_tidy(tables: dict[str, pd.DataFrame], path: Path) -> Path:
 # --------------------------------------------------------------------------- #
 #: Height above the bed, as a fraction of the water depth, at which the velocity of
 #: a vertical is compared with a depth-averaged (2D) model: **0.6 of the depth above
-#: the riverbed** (the user's rule of 2026-11-11, which replaces the "0.6 of the depth
-#: below the surface" of the FlowTracker manual). Where a vertical has several
+#: the riverbed** (the user's rule of 2026-11-11 and 2026-11-12; never 0.6 of the depth
+#: below the surface). Where a vertical has several
 #: readings, the ``log-profile`` rule reads the velocity at this height off a
 #: logarithmic profile fitted to them. On a logarithmic profile this velocity is
 #: approximately 10 % above the depth average (KB15 surveys, median of 36 fits).
 PROFILE_HEIGHT = 0.6
 
 #: Height above the bed, as a fraction of the column, assumed for a reading whose
-#: height the data do not give (no MeasD, % Depth or label): 0.4, where a crew that
-#: follows the FlowTracker manual holds the probe (0.6 of the depth below the
-#: surface; the single readings of August 2026 on KB15 sit at a median 0.35 h). This
-#: is where the reading was taken, not where it is compared (:data:`PROFILE_HEIGHT`);
-#: the ``log-profile`` rule moves it there. A *recorded* measurement depth (MeasD,
+#: height the data do not give (no MeasD, % Depth or label): 0.6 of the water depth
+#: above the riverbed, the comparison height itself (:data:`PROFILE_HEIGHT`; the
+#: user's decision of 2026-11-12), so such a reading is used as it is and never
+#: moved along a profile. It was 0.4 until then. A *recorded* measurement depth (MeasD,
 #: ``Meas. Depth``, ``% Depth``) counts DOWN FROM THE SURFACE, as a FlowTracker
 #: records it: in the KB15 surveys of 2025 and 2026, the reading with the smallest
 #: MeasD is the fastest in 39 of the 50 verticals with several readings. Getting
 #: this backwards misplaces every target by 0.2 h.
-DEFAULT_RELATIVE_HEIGHT = 0.4
+DEFAULT_RELATIVE_HEIGHT = PROFILE_HEIGHT
 
 
 def relative_height(df: pd.DataFrame, *,
@@ -556,7 +555,7 @@ def relative_height(df: pd.DataFrame, *,
     log.warning(
         "no MeasD/%%Depth/label in the ground truth, so the measurement height "
         "is unknown for all %d point(s); assuming %.2f of the depth above the "
-        "bed, where the FlowTracker manual places the probe. "
+        "riverbed, the height at which velocities are compared. "
         "Carry MeasD + FinalD to place targets from the data instead.", n, default)
     return pd.Series(np.full(n, float(default)), index=df.index), f"default {default}"
 
@@ -702,7 +701,9 @@ def _log_profile(work: pd.DataFrame, group_key: str) -> pd.DataFrame:
     than e ``z0`` to the bed, the reading is kept as measured.
 
     Every other column (TKE, the standard deviations, z, the point name) comes from
-    the reading nearest ``z*``. The rows that come out stand at ``z*``: ``h_meas``,
+    the reading nearest ``z*``. ``z* = PROFILE_HEIGHT h`` with ``h`` the median water
+    depth of the vertical's readings, and each reading stands at its own recorded
+    height. The rows that come out stand at ``z*``: ``h`` (that median depth), ``h_meas``,
     ``pct_depth``, ``f`` and the height suffix of a ``label`` are set accordingly, so
     that a later placement reads the height they now represent.
     """
@@ -724,7 +725,7 @@ def _log_profile(work: pd.DataFrame, group_key: str) -> pd.DataFrame:
 
     def at_target(index, h: float) -> dict:
         """The placement columns of a row that now stands at PROFILE_HEIGHT."""
-        moved = {"_f": PROFILE_HEIGHT}
+        moved = {"_f": PROFILE_HEIGHT, "h": h}
         if "f" in work.columns:
             moved["f"] = PROFILE_HEIGHT
         if "h_meas" in work.columns:
@@ -759,7 +760,10 @@ def _log_profile(work: pd.DataFrame, group_key: str) -> pd.DataFrame:
         if g.empty:
             template[key] = (grp["_f"] - PROFILE_HEIGHT).abs().idxmin()
             continue
-        h = float(depth.loc[g.index].iloc[0])
+        # one depth per vertical: the median of its readings (a repeat reading may
+        # record another depth; the first one decided until 2026-11-12, and the row
+        # then stood at 0.62 h instead of 0.6 h)
+        h = float(depth.loc[g.index].median())
         target = PROFILE_HEIGHT * h
         # the reading(s) nearest z*; of two heights equally near, the lower
         distance = (zg - target).abs().round(9)
@@ -830,7 +834,7 @@ def _log_profile(work: pd.DataFrame, group_key: str) -> pd.DataFrame:
     out = work.loc[list(template.values())].copy()
     changed = {column for new in update.values() for column in new}
     for column in changed:
-        if column in ("u", "v", "w", "f", "h_meas", "pct_depth") or column.endswith("_err"):
+        if column in ("u", "v", "w", "f", "h", "h_meas", "pct_depth") or column.endswith("_err"):
             out[column] = pd.to_numeric(out[column], errors="coerce").astype(float)
     for key, new in update.items():
         for column, value in new.items():

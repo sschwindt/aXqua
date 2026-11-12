@@ -152,6 +152,14 @@ def build_velocity_csv(cfg: Config, *, vel_err_floor: float = campaigns.VELOCITY
     writes last and HydroBayesCal reads, left that term out without a word.
     """
     compile_ground_truth(cfg)
+    if not cfg.ground_truth_path.is_file():
+        from axqua.core.errors import ConfigError
+        raise ConfigError(
+            "the case has no measurement points to calibrate against: it names no "
+            f"measurement file, and {cfg.ground_truth_path} does not exist",
+            subject="ground_truth.sources",
+            remedy="Add the velocity survey under Measurement files in the case editor "
+                   "(ground_truth.sources in the case file), or a calibration situation.")
     tables = read_tidy(cfg.ground_truth_path)
     if "hydraulics" not in tables:
         raise SystemExit(f"no 'hydraulics' tab in {cfg.ground_truth_path}; check "

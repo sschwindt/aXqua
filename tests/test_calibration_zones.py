@@ -140,3 +140,20 @@ def test_the_plan_reaches_the_hydrobayescal_config(tmp_path):
         CalibrationParameter(name="zone1", min=0.01, max=0.19)])
     text = Path(path).read_text()
     assert "'parameters': ['zone1']" in text and "[[0.01, 0.19]]" in text
+
+
+def test_a_case_without_measurement_points_is_refused_by_name(tmp_path):
+    """Before 1.3.6 the zone check (and the job) failed on the missing ground-truth.xlsx."""
+    from axqua.calibrationcli import describe
+    from axqua.core.errors import ConfigError
+
+    cfg = _case(tmp_path)
+    cfg.ground_truth.sources = []
+    cfg.ground_truth.measurements = None
+    cfg.ground_truth.targets = None
+    cfg.calibration.situations = []
+    assert not cfg.ground_truth_path.is_file()
+    with pytest.raises(ConfigError) as caught:
+        describe(cfg)
+    assert caught.value.subject == "ground_truth.sources"
+    assert "Measurement files" in caught.value.remedy

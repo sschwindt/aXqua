@@ -23,12 +23,11 @@ import pandas as pd
 log = logging.getLogger("axqua")
 
 #: Fallback height above the BED, as a fraction of the depth, when the ground truth
-#: does not say where the probe sat. **The "0.6 depth" convention measures DOWN FROM
-#: THE SURFACE** (verified on this dataset: MeasD/FinalD has median 0.59), so the
-#: probe is at 0.4 of the depth ABOVE the bed. This constant was 0.6 and documented
-#: as "from the BED", which placed every comparison 0.2*h too high. Prefer the
-#: per-row value from ground_truth.relative_height, which reads MeasD/FinalD.
-MEASUREMENT_FRACTION = 0.4
+#: does not say where the probe sat: 0.6 of the water depth above the riverbed, as
+#: ``ground_truth.DEFAULT_RELATIVE_HEIGHT`` (the user's decision of 2026-11-12; it was
+#: 0.4 until then). A recorded MeasD/FinalD counts DOWN FROM THE SURFACE and wins: the
+#: per-row value comes from ground_truth.relative_height.
+MEASUREMENT_FRACTION = 0.6
 
 
 def read_curve(path: Path) -> tuple[np.ndarray, np.ndarray]:
@@ -101,7 +100,7 @@ def compare(cfg, curves_dir: Path, out_dir: Path) -> list[Path]:
         depth = float(df["h"].iloc[point]) if "h" in df else float(distance.max() or 1.0)
         measured = float(speed.iloc[point])
         # per-row height above the bed when MeasD/FinalD are carried, else the
-        # documented fallback - never a bare 0.6, which is measured from the surface
+        # documented fallback (0.6 of the depth above the bed)
         f_row = float(fractions.iloc[point]) if fractions is not None \
             else MEASUREMENT_FRACTION
 
