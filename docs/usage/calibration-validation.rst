@@ -31,7 +31,7 @@ In this way, a few dozen model runs are sufficient where a direct Bayesian calib
 Ground truth data setup
 -----------------------
 
-Field measurements are called ground truth. aXqua accepts them in a workbook with a fixed structure, which is called the calibration target template. Create it for a case with:
+Field measurements are called ground truth. Where the measurements have not been taken yet, the :ref:`survey planner <help-survey-planner>` at the end of this section determines where the calibration needs them. aXqua accepts measurements in a workbook with a fixed structure, which is called the calibration target template. Create it for a case with:
 
 .. code-block:: text
 
@@ -97,6 +97,109 @@ The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate r
 The velocity magnitude that is compared with the model is computed from the horizontal components. The velocity of each measurement vertical is compared at 0.6 of the water depth above the riverbed. Where a layer contains several readings at one position, below and above that height, aXqua fits a logarithmic velocity profile to the readings at their measured heights and reads the velocity at 0.6 of the water depth above the riverbed off this profile. The profile is not extended beyond the readings: any other vertical (a single reading, readings all below or all above that height, or a velocity that does not grow with height) is represented by its reading nearest that height, which is moved there along a logarithmic profile with the roughness length of its own readings, or else with the median roughness length of the same survey. The measurement depth of a reading (*Meas. Depth* of a FlowTracker) counts down from the water surface. A reading without a recorded depth is taken to stand at 0.6 of the water depth above the riverbed and is used as it is. Points outside the model outline are left out of the calibration, and so are points less than 15 mesh nodes from an inflow or outflow line: there, the flow is what the boundary prescribes, not what the river does. aXqua names these points and the boundary they are close to in a warning, which the plugin shows when the results of the job are loaded, together with the remedy: *Increase ROI beyond the concerned liquid boundary.* A model outline that reaches further upstream or downstream than the measurements keeps them away from the boundaries. In the plugin, the files are entered in the case settings (*Open case settings...* on the *Case Setup* tab), page *Calibration and validation*, in the table *Measurement files* of the frame *Measurements*. *Add file...* adds a point layer or a table, and the column *Use for* assigns each file to the calibration or to the validation. A file for the validation needs the name of its flow situation and its discharge (:ref:`validation situation <validation-setup>`).
 
 Velocity measurements with a SonTek FlowTracker2 are transferred into the ``hydraulics`` sheet with the script ``extract_flowtracker.py``, which aXqua places next to the workbook. Note that the velocity fluctuation is the standard deviation of the velocity samples. It is not the column ``VxErr`` of the instrument export, which is the standard error of the mean velocity.
+
+.. _help-survey-planner:
+
+**The survey planner.** Calibration can only determine a parameter where a measurement responds to it. A roughness zone without a measurement point is therefore not calibrated (:ref:`calibration-setup`), and a turbulence parameter is constrained by measurements in shear zones, not in the uniform flow of the main channel. The survey planner answers two questions before the field work: where does the calibration need measurements, and how long does the survey take? It places the measurements in the flow field of the model, so it requires a built case and a steady simulation at the discharge that is expected on the survey day (:ref:`help-hydraulics`). Open it with *Survey planner...* on the tab *Calibration & validation*. Its window has eight tabs, which can be visited in any order:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Tab
+     - Content
+   * - *Survey*
+     - The kinds of survey to plan, the calibration parameters with the rule that places their measurements, the number of measurements per parameter, and the result file to plan with (the steady run of the case unless another file is named).
+   * - *Access*
+     - The points where the surveyors reach and leave the river. *Set points on the map* creates ``survey-plan.gpkg`` with the layer ``access_points``, adds the layer to the map, and starts editing it. Click on the map to set a point and select its role: ``access`` (start and end of a wading survey, put-in of the kayaks), ``leave`` (take-out of the kayaks), or ``takeoff`` (take-off point of the drone, if it is not the access point). *Save the points* ends the editing.
+   * - *Ground-based*, *Airborne*, *Kayak*, *Temperature*
+     - The assumptions of each kind of survey, with the defaults described below. Every value can be changed.
+   * - *Time and weather*
+     - The survey day and the start of the working day (both optional), the longest working day, and the breaks. *Look up* reads sunrise, sunset, the weather forecast and what is known about the network coverage at the reach, and suggests a start time.
+   * - *Plan*
+     - *Plan the survey* computes the plan, adds its layers to the map, and lists the maps and factsheets, which open with a click.
+
+The planner reads the calibration parameters from the case file and suggests a placement rule for each. It also lists every roughness zone of the zone map that the calibration does not name. Such a zone is selected if the case declares no calibration parameter yet, and is listed without being selected otherwise. Parameters that the case does not declare yet can be added with *Add parameter...*:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Rule
+     - Where the measurements are placed
+   * - *inside a roughness zone*
+     - Inside one roughness zone, spread over the water depths and velocities that occur in it. This is the rule of every roughness parameter that belongs to a zone.
+   * - *over the wetted model*
+     - Spread over the wetted model, for a parameter that acts on the whole reach.
+   * - *in shear zones*
+     - Where the velocity changes most across the flow, such as the edges of recirculation zones. This is the rule of turbulence parameters.
+   * - *in bends*
+     - Where the streamlines curve most.
+   * - *along the banks*
+     - Along the banks, close to the wetted edge.
+   * - *in shallow margins*
+     - In the shallow margins that fall dry at a lower discharge.
+
+No measurement is placed closer than 15 mesh nodes to an inflow or outflow boundary, because the flow there is prescribed by the boundary condition and not computed by the model. Six measurements are planned per parameter by default.
+
+**Ground-based velocimetry.** A surveyor wades from the access point to each measurement vertical with a velocity probe, for example a SonTek FlowTracker2, and returns to the access point at the end of the day. The planner places verticals only in water that can be waded, orders the verticals into a short round, and routes the walk on the mesh of the model with the following defaults:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - Assumption
+     - Default
+   * - Wadeable water
+     - Not deeper than 1.2 m. Up to a depth of 0.6 m not faster than 2 m/s, up to 0.9 m not faster than 1.4 m/s, and up to 1.2 m not faster than 1 m/s.
+   * - Walking speed
+     - 3 km/h on land and 1.5 km/h in the water with the current. Against the current 1 km/h in water deeper than 0.3 m, 0.5 km/h in water deeper than 0.5 m, and 0.1 km/h in water deeper than 0.8 m.
+   * - Time at a vertical
+     - 60 s for the water depth, and for every measured depth 40 s to set the probe to its height and 60 s of velocity averaging.
+   * - Measured depths
+     - One depth in water shallower than 0.3 m (at 0.6 of the water depth above the riverbed), two depths from 0.3 m (0.2 and 0.8), and three depths from 0.5 m (0.2, 0.6 and 0.8). The map shows the three kinds of verticals with different symbols.
+   * - Pressure sensor
+     - The pressure sensor of the probe is adjusted to the atmospheric pressure at the start and every 4 h. The map shows where.
+   * - Positions
+     - A second surveyor records the position of every vertical with a DGPS rover while the velocity is measured. The DGPS therefore delays the survey only where it loses its data reception.
+   * - Surveyors
+     - One surveyor with a probe. With more surveyors, every surveyor gets a walk path of their own, and the DGPS surveyor gets a separate path that visits their verticals. At most three probes per DGPS rover are recommended.
+   * - Working day
+     - 8 h at most, with a break of 10 min every 2 h and of 30 min every 4 h. A survey that does not fit into one day continues on the next day from the access point.
+
+**Airborne velocimetry.** A camera drone hovers above the river and films tracers on the water surface. Particle tracking or particle image velocimetry (PTV or PIV) with `pXv <https://pxv.readthedocs.io/>`_ turns each video into the surface velocity of the filmed area, so one hover position replaces many verticals, also where the water is too deep or too fast to wade. The planner assumes a DJI camera drone with the camera pointing straight down and plans the hover positions, the flight height above the water surface (40 m by default, 120 m at most), the heading of the frame, the duration of each video (180 s), the route, and the battery changes. The factsheet lists the coordinates of every hover position, the flight settings, the size of the frame on the water, the size of a tracer in pixels, and hints on ground control points and on the calibration panel for the lens correction. Note that the video shows the velocity of the water surface, which is larger than the depth-averaged velocity of a 2D model.
+
+**Kayak drifter velocimetry.** A kayak that is not paddled drifts at the velocity of the water surface. A DGPS rover on the kayak that logs a position every 5 s therefore records the surface velocity along the drift line: only the horizontal position and the distance between two consecutive positions matter (Barker et al. 2018). The planner needs an access point and a leave point. It traces drift lines through the flow field of the model, computes the duration of a float from the modeled velocity, and marks patches faster than 3 m/s, which are to be avoided. Two kayakers are the default for safety reasons; a single kayaker floats the reach twice. A break of 10 min is planned every 2 h, and only a DGPS that loses its connection delays a float. The method is efficient for long reaches, but it requires a pick-up at the leave point and the transport of the kayaks. Velocities measured at a few points with an ADV or an ADCP relate the surface velocity to the depth-averaged velocity and support the validation.
+
+**Water temperature.** The planner sorts the wetted reach into four kinds of water: slow or fast (limit 0.2 m/s) and shallow or deep (limit 0.3 m). Slow, shallow water warms up in the sun within an hour, while deep, fast water carries the temperature of the river upstream, so every kind of water that occurs gets at least one point. The points are either fixed loggers that stay in the river or the readings of a mobile probe that is carried from point to point.
+
+**Time, weather and network coverage.** Without a start time, the timetable of a plan starts at 00:00 and states durations. With the survey day and *Look up*, the planner computes sunrise and sunset for the reach, reads the weather forecast from `Open-Meteo <https://open-meteo.com/>`_, and suggests a start time that keeps the working day within daylight and out of rain and strong wind. For the network coverage it names the coverage map of the national regulator and the real-time correction services of the DGPS for Germany, Switzerland, France, Austria, Italy, the Netherlands, the Czech Republic, Denmark, Sweden, Canada, China and the United States. In Switzerland it also reads the coverage model of the Federal Office of Communications at the reach, and everywhere it counts the mobile masts that OpenStreetMap shows within 5 km. Neither is a measurement of the reception on the river, so every factsheet states where its information comes from and asks the surveyors to check the coverage before the survey. The check box for the look-up can be cleared on a computer without internet access; the plan then contains sunrise and sunset only.
+
+**The plan.** *Plan the survey* writes the folder ``axqua-case/calibration-validation/survey-plan/``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - File
+     - Content
+   * - ``survey-plan.gpkg``
+     - The layers that QGIS shows: the access points, the verticals (``flowtracker_points``), the walk paths with their direction (``walk_paths``), breaks, pressure adjustments and battery changes (``survey_events``), the hover positions, frames and route of the drone, the drift lines of the kayaks with the patches to avoid, and the temperature points with the four kinds of water.
+   * - ``survey-map-<kind>.pdf`` and ``.png``
+     - One map per kind of survey on an A4 sheet.
+   * - ``survey-factsheet-<kind>.odt``
+     - One page per kind of survey for the field: the plan in numbers, the timetable with start, breaks and end, sunrise, sunset and weather, the network coverage, the assumptions, and hints for the field work.
+   * - ``survey-plan.json`` and ``survey-settings.json``
+     - Every number of the plan, and the assumptions it is based on. The wizard starts with the assumptions of the last plan.
+
+The access points are kept when a survey is planned again; all other layers are replaced. A kind of survey that cannot be planned, for example a kayak survey without a leave point, does not stop the others and is listed with its reason. The same plan is available in the terminal:
+
+.. code-block:: text
+
+   axqua survey init <case-file>
+   axqua survey plan <case-file> --kinds ground,kayak --date 2026-06-15 --start 08:00
+
+The plan holds for the discharge of the simulation it was computed with. Run the steady simulation again if the discharge on the survey day differs considerably, and move a vertical in the field where the water is deeper or faster than planned. After the survey, the measured values and positions are entered as ground truth as described above.
 
 .. _calibration-setup:
 
@@ -312,6 +415,8 @@ The `HydroBayesCal documentation <https://hydrobayescal.readthedocs.io>`_ descri
 
 References
 ~~~~~~~~~~
+
+Barker, J. R., Pasternack, G. B., Bratovich, P. M., Massa, D. A., Wyrick, J. R., and Johnson, T. R. (2018). "Kayak drifter surface velocity observation for 2D hydraulic model validation." *River Research and Applications*, 34(2), 124-134. `doi:10.1002/rra.3238 <https://doi.org/10.1002/rra.3238>`_
 
 Mouris, K., Acuña Espinoza, E., Schwindt, S., Mohammadi, F., Haun, S., Wieprecht, S., and Oladyshkin, S. (2023). "Stability criteria for Bayesian calibration of reservoir sedimentation models." *Modeling Earth Systems and Environment*, 9, 3643-3661. `doi:10.1007/s40808-023-01712-7 <https://doi.org/10.1007/s40808-023-01712-7>`_
 

@@ -96,6 +96,8 @@ Preparing and checking a case:
      - Show the number of cells of the OpenFOAM mesh without building it.
    * - ``axqua targets <case-file>``
      - Create the workbook for field measurements.
+   * - ``axqua survey plan <case-file>``
+     - Plan a field survey in the flow field of the steady run and write the folder ``survey-plan`` with the layers, maps and factsheets (:ref:`survey planner <help-survey-planner>`). ``--kinds ground,airborne,kayak,temperature`` selects the kinds of survey, ``--date`` and ``--start`` set the survey day and the start time, and ``--offline`` plans without looking up weather and network coverage. ``axqua survey init`` creates the layer of the access points, ``axqua survey info`` shows the settings and what the plan would use, and ``axqua survey conditions`` shows daylight, weather and network coverage.
    * - ``axqua check-gt <case-file>``
      - Compare the elevations of the measurement points with the terrain model.
    * - ``axqua postproc <case-file>``

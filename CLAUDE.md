@@ -39,6 +39,10 @@ Documented in `src/axqua/solvers/openfoam/CLAUDE.md`. Morphodynamics with OpenFO
 
 The mesh-convergence study (`axqua/convergence.py`, r = 1.3 four-mesh ladder, GCI verdict, resumable and auto-refining) is documented in `src/axqua/solvers/telemac/CLAUDE.md`; read it before changing the study.
 
+## The survey planner: where to measure before a calibration (`axqua/survey/`, `axqua survey`)
+
+Documented in `src/axqua/survey/CLAUDE.md` (the four kinds of survey, parameters and their rules, the walk on a directed graph, the working day and the lookups, the one-page factsheet, `survey-plan.gpkg`, the snapshots shared with the plugin tests); the window of the plugin in `qgis_plugin/CLAUDE.md`. A plan rests on the result of a steady run and is written to `axqua-case/calibration-validation/survey-plan/`. **No test reaches the internet**, heights of a velocity reading count from the riverbed, and `survey/outlines.py` is written by `scripts/build_country_outlines.py`, never by hand.
+
 ## Post-processing with VisIt (`axqua/postproc/`)
 
 Documented in `src/axqua/postproc/CLAUDE.md`, which also covers `axqua export`: TELEMAC results as VTK for ParaView and VisIt (neither reads SERAFIN). Two things there concern more than the export. **A TELEMAC result stores its coordinates in single precision**, which at a UTM northing is a spacing of 0.5 m: 14 % of the cells of the isar-2025 baseline mesh have no area in the coordinates of its own `r2d.slf`. Fields are right, the mesh in the file is not, so anything spatial takes x and y from `geometry.slf` (the export, `axqua.validation` and, since 2026-11-02, the mesh and vertical convergence studies do; the wetting report and QGIS drawing the result still read the stored ones). And `core.selafin.SelafinFile` reads one frame at a time where `read_slf` loads all of them.

@@ -621,6 +621,12 @@ def _run_calibration(argv: list[str]) -> int:
     return calibrationcli.run_calibration(argv)
 
 
+def _run_survey(argv: list[str]) -> int:
+    """``axqua survey`` - plan the field survey a calibration needs (:mod:`axqua.surveycli`)."""
+    from axqua import surveycli
+    return surveycli.run_survey(argv)
+
+
 def _run_validation(argv: list[str]) -> int:
     """``axqua validation`` - what a case has for one (:mod:`axqua.validationcli`)."""
     from axqua import validationcli
@@ -772,6 +778,7 @@ _DISPATCH = {
     "export": lambda argv: _run_export(argv),
     "calibration": lambda argv: _run_calibration(argv),
     "validation": lambda argv: _run_validation(argv),
+    "survey": lambda argv: _run_survey(argv),
     "example": lambda argv: _run_example(argv),
     "hydrology": lambda argv: _run_hydrology(argv),
     "schema": lambda argv: _case_cli("run_schema", argv),

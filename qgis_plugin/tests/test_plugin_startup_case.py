@@ -58,8 +58,9 @@ def panel(qgis_app, monkeypatch, tmp_path):
         queued.append((title, kwargs.get("on_success")))
 
     # every module that imported run_async by name answers to the test
+    real = tasks.run_async                              # kept: the task module is one of these modules, and once it is replaced no later module would match
     for module in list(sys.modules.values()):
-        if getattr(module, "__name__", "").startswith("axqua_plugin") and getattr(module, "run_async", None) is tasks.run_async:
+        if getattr(module, "__name__", "").startswith("axqua_plugin") and getattr(module, "run_async", None) is real:
             monkeypatch.setattr(module, "run_async", queue)
     monkeypatch.setattr(tasks, "run_async", queue)
     monkeypatch.setattr(configuration_tab.help_pages, "ask", lambda client: None)

@@ -37,6 +37,7 @@ import os
 import shutil
 import subprocess  # nosec B404
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
@@ -729,6 +730,39 @@ class RunnerClient:
             if options.get(name):
                 args += [f"--{name}", str(options[name])]
         return self.call(args, timeout=900).data or {}
+
+    # -- the survey planner ---------------------------------------------------------
+    def survey_info(self, case: str | os.PathLike) -> dict:
+        """``{settings, parameters, kinds, rules, roles, folder, gpkg, access, layers, crs_epsg, result, result_exists, last_plan, ...}``: what the Survey planner shows before anything is planned."""
+        return self.call(["survey", "info", str(case)], timeout=300).data or {}
+
+    def survey_init(self, case: str | os.PathLike) -> dict:
+        """Create ``survey-plan.gpkg`` with the layer of the access points; ``{gpkg, layer, created, roles, crs_epsg, access}``."""
+        return self.call(["survey", "init", str(case)], timeout=300).data or {}
+
+    def survey_conditions(self, case: str | os.PathLike, settings: dict | None = None, *, offline: bool = False) -> dict:
+        """``{days, timezone, suggestion, coverage, notes, sources}``: daylight, weather and network coverage at the reach."""
+        return self._survey("conditions", case, settings, offline, 600)
+
+    def survey_plan(self, case: str | os.PathLike, settings: dict | None = None, *, offline: bool = False) -> dict:
+        """Plan the survey; ``{folder, gpkg, layers, plans, skipped, files, notes, ...}``. A reach of some kilometers takes minutes."""
+        return self._survey("plan", case, settings, offline, 7200)
+
+    def _survey(self, action: str, case, settings: dict | None, offline: bool, timeout: float) -> dict:
+        """The settings travel as a JSON file: they are a document, not a handful of options."""
+        args = ["survey", action, str(case)] + (["--offline"] if offline else [])
+        if settings is None:
+            return self.call(args, timeout=timeout).data or {}
+        handle, name = tempfile.mkstemp(prefix="axqua-survey-", suffix=".json")
+        try:
+            with os.fdopen(handle, "w", encoding="utf-8") as stream:
+                json.dump(settings, stream)
+            return self.call(args + ["--settings", name], timeout=timeout).data or {}
+        finally:
+            try:
+                os.unlink(name)
+            except OSError:
+                pass
 
     # -- results for ParaView and VisIt -------------------------------------------
     def export_list(self, case: str | os.PathLike) -> dict:

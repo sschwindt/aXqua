@@ -103,6 +103,7 @@ WINDOWS: dict[str, tuple[str, str]] = {
     "cleanup": ("troubleshooting/tips-logfiles", "help-cleanup"),
     "hydrology-wizard": ("usage/hydrology-simulations", "help-hydrology-wizard"),
     "sediment-wizard": ("usage/hydrology-simulations", "help-sediment-wizard"),
+    "survey-wizard": ("usage/calibration-validation", "help-survey-planner"),
 }
 
 #: Where a capability nobody has placed is shown: with the simulations of its solver.

@@ -36,6 +36,7 @@ from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from .case_editor import stored_path
 from .section_pages import SectionPage
+from .survey_box import SurveyBox
 
 INTRO = ("A validation compares the calibrated model with measurements of another "
          "flow situation, for example another discharge. All data of the case under "
@@ -358,17 +359,22 @@ class ValidationBox(QGroupBox):
 
 
 class CalibrationPage(SectionPage):
-    """The *Calibration & validation* tab: the calibration, and below it the
-    validation with data of another situation."""
+    """The *Calibration & validation* tab: the survey planner, the calibration, and
+    below it the validation with data of another situation."""
 
     def __init__(self, context, section_key: str, sub_key: str = "", **kwargs) -> None:
         super().__init__(context, section_key, sub_key, **kwargs)
+        # the order of the work: plan the survey, calibrate, validate
+        self.survey = SurveyBox(context)
+        self._layout.insertWidget(self._first_box, self.survey)
+        self._first_box += 1
         self.validation = ValidationBox(context)
         # above the stretch that keeps the boxes at the top
         self._layout.insertWidget(self._layout.count() - 1, self.validation)
 
     def apply(self, case_view) -> None:
         super().apply(case_view)
+        self.survey.setVisible(case_view is not None)
         self.validation.setVisible(case_view is not None)
         # the boxes of the capabilities are inserted from the top; keep this one last
         self._layout.removeWidget(self.validation)

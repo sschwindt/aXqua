@@ -87,6 +87,7 @@ HELP_LABELS = [
     "help-postprocessing-visit", "help-batch", "help-hydrology",
     "help-hydrology-wizard",
     "help-sediment-wizard",
+    "help-survey-planner",        # the survey planner, the user's order of 2026-11-14
 ]
 
 
