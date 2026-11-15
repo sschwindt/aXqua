@@ -99,7 +99,10 @@ def case_needs(cfg, settings: SurveySettings) -> list[ParameterNeed]:
             known = by_name[wish.name]
             known.use, known.points = wish.use, max(int(wish.points), 0)
             if wish.rule in _RULES and known.rule != "zone":
-                known.rule = wish.rule
+                if wish.rule != "zone":
+                    known.rule = wish.rule
+                elif wish.zone is not None:          # a zone rule without a zone number says nothing: the rule stays
+                    known.rule, known.zone = "zone", int(wish.zone)
         else:
             rule, zone, note = guess_rule(wish.name)
             if wish.rule in _RULES and rule != "zone":

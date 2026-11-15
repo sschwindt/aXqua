@@ -97,6 +97,27 @@ def test_settings_say_what_is_wrong_with_them():
     assert "no kind of survey is chosen" in SurveySettings.from_dict({"kinds": []}).problems()
 
 
+def test_every_number_a_plan_divides_by_is_checked():
+    wrong = SurveySettings.from_dict({"airborne": {"fps": 0, "width_px": 0, "height_px": -1, "cruise_speed": 0, "battery_minutes": 0, "hfov_deg": 180, "overlap": 1.0}, "ground": {"max_depth": 0}})
+    text = "; ".join(wrong.problems())
+    for part in ("the frame rate of the video", "the width of the video", "the height of the video", "the cruise speed of the drone", "the flight time of a battery", "the largest wading depth"):
+        assert f"{part} must be larger than zero" in text
+    assert "the field of view of the video lies between 0 and 180 degrees" in text and "the overlap of the video frames lies between 0 and 1" in text
+
+
+@pytest.mark.parametrize("ground, said", [
+    ({"speed_against_current": [0.3, 1.0]}, "the walking speeds against the current are pairs"),
+    ({"speed_against_current": [[0.3, "slow"]]}, "the walking speeds against the current are pairs"),
+    ({"speed_against_current": [[0.3, 0.0]]}, "the walking speeds against the current must be larger than zero"),
+    ({"velocity_limits": [[0.6]]}, "the velocity limits of wading are pairs"),
+    ({"velocity_limits": []}, "the velocity limits of wading are pairs"),
+    ({"heights_two": [0.2, "x"]}, "the heights of the readings at two depths are numbers between 0 and 1"),
+    ({"heights_one": [1.2]}, "the heights of the readings at one depth are numbers between 0 and 1"),
+])
+def test_a_list_of_the_wrong_shape_is_a_problem_and_no_crash(ground, said):
+    assert any(said in text for text in SurveySettings.from_dict({"ground": ground}).problems())
+
+
 def test_a_clock_time_is_read_in_both_spellings():
     assert clock_minutes("07:30") == 450.0 and clock_minutes("07h30m") == 450.0 and clock_minutes("0:00") == 0.0
     assert clock_minutes("24:00") is None and clock_minutes("half past seven") is None
@@ -343,6 +364,22 @@ def test_the_rules_choose_their_water(flow):
     assert not straight.any()                                                     # a straight channel has no bend
 
 
+def test_a_wall_of_the_model_is_a_bank():
+    """A channel that is wet from wall to wall has banks too: its walls, not its inflow and its outflow."""
+    walled = channel_flow()
+    walled.depth = np.full_like(walled.depth, 0.5)
+    edge = walled.wet_edge_distance()
+    wall = (np.abs(walled.y - Y0) < 0.1) | (np.abs(walled.y - (Y0 + survey_case.HEIGHT)) < 0.1)
+    inside = walled.hops > 0
+    assert (walled.outline_nodes() == (wall | ~inside)).all()
+    assert (edge[wall & inside] == 0).all() and int(edge.max()) == 15            # 30 m to the middle on a mesh of 2 m
+    middle = np.abs(walled.y - (Y0 + survey_case.HEIGHT / 2)) < 0.1
+    assert (edge[middle & (walled.hops == 0)] == 15).all()                       # the inflow is no bank
+    allowed = placement.reachable_mask(walled, 0.05)
+    banks, _ = placement.rule_mask(walled, ParameterNeed("p", "banks"), allowed)
+    assert banks.any() and np.abs(walled.y[banks] - (Y0 + survey_case.HEIGHT / 2)).min() > 20.0
+
+
 def test_a_zone_shallower_than_its_largest_roughness_is_remarked(flow):
     allowed = placement.reachable_mask(flow, 0.05)
     deep, remark = placement.rule_mask(flow, ParameterNeed("zone1", "zone", 1, 6, limits=[0.02, 0.3]), allowed)
@@ -476,6 +513,26 @@ def test_a_tour_is_cut_and_dealt_without_losing_a_site():
     assert max(sizes) - min(sizes) <= 2
 
 
+def test_a_stretch_of_the_tour_is_as_long_as_its_team_is_large():
+    seconds = np.full((41, 41), 30.0)
+    service = np.full(41, 200.0)
+    order = list(range(1, 41))
+    three, one = walk.split_tour(seconds, order, service, [3, 1])
+    assert three + one == order and (len(three), len(one)) == (30, 10)
+    assert [len(part) for part in walk.split_tour(seconds, order, service, [1, 1])] == [20, 20]
+    assert [len(part) for part in walk.split_tour(seconds, order, service, [3, 3, 2])] == [15, 15, 10]
+    assert walk.split_tour(seconds, order, service, [0, 0]) == walk.split_tour(seconds, order, service, 2)      # weights that say nothing
+    assert walk.split_tour(seconds, [5], service, [3, 1]) == [[5]]
+
+
+def test_a_grid_without_ground_to_walk_on_is_said(flow):
+    grid = walk.build_grid(flow, GroundSettings(), [ACCESS])
+    grid.passable[:] = False
+    with pytest.raises(SurveyError, match="no ground of the reach can be walked on or waded") as caught:
+        grid.nearest_passable(*ACCESS)
+    assert "lower discharge" in caught.value.remedy
+
+
 def test_the_length_of_a_line():
     assert walk.length([(0, 0), (3, 4), (3, 10)]) == 11.0 and walk.length([(1, 1)]) == 0.0
 
@@ -570,6 +627,9 @@ def test_several_surveyors_share_the_verticals_and_the_rover_has_a_path_of_its_o
     four = plan_ground(flow, day_settings(surveyors=4), zone_needs(), ACCESS)
     assert four["summary"]["dgps_rovers"] == 2                                    # at most three surveyors per rover
     assert {p["number"] for p in four["paths"] if p["who"] == "DGPS"} == {1, 2}
+    # the team of three takes three quarters of the verticals, not half of them: the fourth surveyor would work alone for twice as long
+    counts = [sum(1 for p in four["points"] if p["surveyor"] == who) for who in (1, 2, 3, 4)]
+    assert sum(counts) == 12 and counts[3] <= 4 and sum(counts[:3]) >= 8 and max(counts) - min(counts) <= 2
 
 
 def test_more_surveyors_than_verticals_is_said(flow):
@@ -643,6 +703,30 @@ def test_more_flight_time_than_a_battery_holds_needs_a_second_battery(flow):
     settings = SurveySettings.from_dict({"airborne": {"battery_minutes": 8.0, "stations_per_parameter": 4}})
     plan = plan_airborne(flow, settings, zone_needs(), ACCESS)
     assert plan["summary"]["batteries"] >= 2 and {s["battery"] for s in plan["stations"]} == set(range(1, plan["summary"]["batteries"] + 1))
+
+
+def test_a_station_that_one_battery_cannot_reach_is_warned_of(flow):
+    settings = SurveySettings.from_dict({"airborne": {"battery_minutes": 2.0}})          # the hover alone takes three minutes
+    plan = plan_airborne(flow, settings, zone_needs(), ACCESS)
+    assert len([text for text in plan["warnings"] if "more than one battery holds (2 min)" in text]) == len(plan["stations"])
+    assert not any("more than one battery holds" in text for text in plan_airborne(flow, SurveySettings(), zone_needs(), ACCESS)["warnings"])
+
+
+def test_the_drone_does_not_fly_after_the_end_of_the_day(flow):
+    """Ten minutes of daylight hold two stations of about four minutes; the battery would last for all of them."""
+    sun = [{"date": f"2026-06-{20 + day}", "sunrise": 300.0, "sunset": 490.0} for day in range(8)]
+    settings = SurveySettings.from_dict({"airborne": {"stations_per_parameter": 3, "battery_minutes": 60.0}, "time": {"date": "2026-06-20", "start": "08:00"}})
+    plan = plan_airborne(flow, settings, zone_needs(), ACCESS, sun=sun)
+    stations = plan["stations"]
+    assert len(stations) >= 4 and max(s["day"] for s in stations) >= 2
+    assert all(s["end_min"] <= 490.0 + 1e-6 for s in stations)
+    for day in {s["day"] for s in stations}:
+        assert min(s["start_min"] for s in stations if s["day"] == day) >= 480.0
+    days = max(s["day"] for s in stations)
+    assert plan["summary"]["days"] == days and len([row for row in plan["timeline"] if row["what"] == "End of the day"]) == days - 1
+    assert all(clock_minutes(row["end"]) <= 490.0 for row in plan["timeline"] if row["kind"] == "hover")
+    whole = plan_airborne(flow, SurveySettings.from_dict({"airborne": {"stations_per_parameter": 3, "battery_minutes": 60.0}, "time": {"date": "2026-06-20", "start": "08:00"}}), zone_needs(), ACCESS)
+    assert {s["day"] for s in whole["stations"]} == {1} and whole["summary"]["batteries"] == 1
 
 
 # --------------------------------------------------------------------------- #

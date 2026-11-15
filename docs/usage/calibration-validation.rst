@@ -136,13 +136,13 @@ The planner reads the calibration parameters from the case file and suggests a p
    * - *in bends*
      - Where the streamlines curve most.
    * - *along the banks*
-     - Along the banks, close to the wetted edge.
+     - Along the banks, close to the wetted edge. A solid wall of the model counts as a bank where the water reaches it.
    * - *in shallow margins*
      - In the shallow margins that fall dry at a lower discharge.
 
 No measurement is placed closer than 15 mesh nodes to an inflow or outflow boundary, because the flow there is prescribed by the boundary condition and not computed by the model. Six measurements are planned per parameter by default.
 
-**Ground-based velocimetry.** A surveyor wades from the access point to each measurement vertical with a velocity probe, for example a SonTek FlowTracker2, and returns to the access point at the end of the day. The planner places verticals only in water that can be waded, orders the verticals into a short round, and routes the walk on the mesh of the model with the following defaults:
+**Ground-based velocimetry.** A surveyor wades from the access point to each measurement vertical with a velocity probe, for example a SonTek FlowTracker2, and returns to the access point at the end of the day. The planner places verticals only in water that can be waded, orders the verticals into a short round, and routes the walk on a grid of the water depths and flow velocities of the result, on which ground outside the model counts as dry land. The defaults are:
 
 .. list-table::
    :header-rows: 1
@@ -173,7 +173,7 @@ No measurement is placed closer than 15 mesh nodes to an inflow or outflow bound
 
 **Water temperature.** The planner sorts the wetted reach into four kinds of water: slow or fast (limit 0.2 m/s) and shallow or deep (limit 0.3 m). Slow, shallow water warms up in the sun within an hour, while deep, fast water carries the temperature of the river upstream, so every kind of water that occurs gets at least one point. The points are either fixed loggers that stay in the river or the readings of a mobile probe that is carried from point to point.
 
-**Time, weather and network coverage.** Without a start time, the timetable of a plan starts at 00:00 and states durations. With the survey day and *Look up*, the planner computes sunrise and sunset for the reach, reads the weather forecast from `Open-Meteo <https://open-meteo.com/>`_, and suggests a start time that keeps the working day within daylight and out of rain and strong wind. For the network coverage it names the coverage map of the national regulator and the real-time correction services of the DGPS for Germany, Switzerland, France, Austria, Italy, the Netherlands, the Czech Republic, Denmark, Sweden, Canada, China and the United States. In Switzerland it also reads the coverage model of the Federal Office of Communications at the reach, and everywhere it counts the mobile masts that OpenStreetMap shows within 5 km. Neither is a measurement of the reception on the river, so every factsheet states where its information comes from and asks the surveyors to check the coverage before the survey. The check box for the look-up can be cleared on a computer without internet access; the plan then contains sunrise and sunset only.
+**Time, weather and network coverage.** Without a start time, the timetable of a plan starts at 00:00 and states durations. With the survey day and *Look up*, the planner computes sunrise and sunset for the reach, reads the weather forecast from `Open-Meteo <https://open-meteo.com/>`_, and suggests a start time that keeps the working day within daylight and out of rain and strong wind. With a survey day and a start time, the working day ends at sunset at the latest, and a start time after sunset is refused unless *End before sunset when the day is known* is cleared. For the network coverage it names the coverage map of the national regulator and the real-time correction services of the DGPS for Germany, Switzerland, France, Austria, Italy, the Netherlands, the Czech Republic, Denmark, Sweden, Canada, China and the United States. In Switzerland it also reads the coverage model of the Federal Office of Communications at the reach, and everywhere it counts the mobile masts that OpenStreetMap shows within 5 km. Neither is a measurement of the reception on the river, so every factsheet states where its information comes from and asks the surveyors to check the coverage before the survey. The check box for the look-up can be cleared on a computer without internet access; the plan then contains sunrise and sunset only.
 
 **The plan.** *Plan the survey* writes the folder ``axqua-case/calibration-validation/survey-plan/``:
 
@@ -192,7 +192,7 @@ No measurement is placed closer than 15 mesh nodes to an inflow or outflow bound
    * - ``survey-plan.json`` and ``survey-settings.json``
      - Every number of the plan, and the assumptions it is based on. The wizard starts with the assumptions of the last plan.
 
-The access points are kept when a survey is planned again; all other layers are replaced. A kind of survey that cannot be planned, for example a kayak survey without a leave point, does not stop the others and is listed with its reason. The same plan is available in the terminal:
+The access points are kept when a survey is planned again; all other layers are replaced. The layers are replaced only after the maps and factsheets of the new plan have been drawn, so a plan that fails leaves the previous plan in place. A kind of survey that cannot be planned, for example a kayak survey without a leave point, does not stop the others and is listed with its reason. The same plan is available in the terminal:
 
 .. code-block:: text
 

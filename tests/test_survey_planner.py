@@ -133,6 +133,62 @@ def test_a_second_plan_replaces_the_first_and_keeps_the_points_the_user_set(case
     assert sorted(p.name for p in folder.glob("survey-map-*")) == ["survey-map-kayak.pdf", "survey-map-kayak.png"]
 
 
+def test_a_plan_that_fails_on_the_way_leaves_the_plan_before_it_whole(case, monkeypatch):
+    """The layers are replaced when the maps and the factsheets of the new plan exist, not before."""
+    import geopandas as gpd
+
+    cfg = load(case)
+    survey_case.set_points(cfg, access=survey_case.ACCESS, leave=survey_case.LEAVE)
+    first = planner.make_plan(cfg, SurveySettings.from_dict({"kinds": ["ground", "kayak"]}), online=False)
+    folder, gpkg = Path(first["folder"]), Path(first["gpkg"])
+    before = {path.name: path.read_bytes() for path in folder.iterdir() if path.is_file() and path.suffix != ".gpkg"}
+    verticals = len(gpd.read_file(gpkg, layer="flowtracker_points"))
+    assert verticals > 6 and len(before) == 8                                     # two maps in two formats, two factsheets, two JSON files
+
+    def full(*args, **kwargs):
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(factsheet, "write_factsheet", full)
+    with pytest.raises(SurveyError, match="could not be written: .*No space left on device"):
+        planner.make_plan(cfg, SurveySettings.from_dict({"kinds": ["ground"], "points_per_parameter": 2}), online=False)
+    assert {path.name: path.read_bytes() for path in folder.iterdir() if path.is_file() and path.suffix != ".gpkg"} == before
+    assert len(gpd.read_file(gpkg, layer="flowtracker_points")) == verticals and len(gpd.read_file(gpkg, layer="kayak_tracks")) == 2
+    assert [path.name for path in folder.iterdir() if path.is_dir()] == []          # the draft of the plan that failed is gone
+    assert planner.saved_settings(cfg).kinds == ["ground", "kayak"]
+
+
+def test_a_file_that_cannot_be_replaced_stops_the_plan_before_the_layers(case, monkeypatch):
+    """In Windows a factsheet that is open in a text program cannot be replaced; the plan before it stays whole then, too."""
+    import geopandas as gpd
+
+    cfg = load(case)
+    survey_case.set_points(cfg, access=survey_case.ACCESS)
+    first = planner.make_plan(cfg, SurveySettings.from_dict({"kinds": ["ground"]}), online=False)
+    sheet = Path(first["files"]["ground"]["factsheet"])
+    assert planner._writable(sheet) and planner._writable(sheet.with_name("not-there.odt")) and not planner._writable(sheet.parent)
+    monkeypatch.setattr(planner, "_writable", lambda path: Path(path).name != sheet.name)
+    with pytest.raises(SurveyError, match="survey-factsheet-ground.odt of the earlier plan cannot be replaced") as caught:
+        planner.make_plan(cfg, SurveySettings.from_dict({"kinds": ["ground"], "points_per_parameter": 2}), online=False)
+    assert "Close the factsheet" in caught.value.remedy
+    assert len(gpd.read_file(first["gpkg"], layer="flowtracker_points")) == first["layers"]["flowtracker_points"]
+
+
+def test_a_draft_that_a_stopped_plan_left_behind_is_removed_by_the_next(case):
+    import os
+    import time
+
+    cfg = load(case)
+    survey_case.set_points(cfg, access=survey_case.ACCESS)
+    folder = planner.folder(cfg)
+    old, young = folder / (planner.DRAFT_PREFIX + "old"), folder / (planner.DRAFT_PREFIX + "young")
+    for left in (old, young):
+        left.mkdir(parents=True)
+        (left / "survey-map-ground.png").write_bytes(b"half a map")
+    os.utime(old, (time.time() - 7200.0, time.time() - 7200.0))
+    planner.make_plan(cfg, SurveySettings.from_dict({"kinds": ["ground"]}), online=False)
+    assert not old.exists() and young.is_dir()                                     # an hour is longer than a plan takes; a younger one may be at work
+
+
 # --------------------------------------------------------------------------- #
 # what the wizard is told before a plan
 # --------------------------------------------------------------------------- #
@@ -160,6 +216,19 @@ def test_a_case_without_calibration_parameters_offers_its_roughness_zones(tmp_pa
     # what the user changed in the wizard is kept
     changed = SurveySettings.from_dict({"parameters": [{"name": "zone2", "use": False, "points": 9}]})
     assert [(n.name, n.use, n.points) for n in placement.case_needs(cfg, changed)] == [("zone1", True, 6), ("zone2", False, 9)]
+
+
+def test_a_parameter_of_the_case_is_tied_to_a_zone_with_the_number_of_the_zone(tmp_path):
+    cfg = load(survey_case.write_case(tmp_path))
+    tied = SurveySettings.from_dict({"parameters": [{"name": "VELOCITY DIFFUSIVITY", "rule": "zone", "zone": 2}]})
+    need = placement.case_needs(cfg, tied)[2]
+    assert (need.name, need.rule, need.zone) == ("VELOCITY DIFFUSIVITY", "zone", 2)
+    untied = SurveySettings.from_dict({"parameters": [{"name": "VELOCITY DIFFUSIVITY", "rule": "zone"}]})
+    need = placement.case_needs(cfg, untied)[2]
+    assert (need.rule, need.zone) == ("shear", None)                               # a zone rule without a zone would place nothing
+    banks = SurveySettings.from_dict({"parameters": [{"name": "VELOCITY DIFFUSIVITY", "rule": "banks", "zone": 2}, {"name": "zone1", "rule": "banks"}]})
+    needs = placement.case_needs(cfg, banks)
+    assert (needs[2].rule, needs[2].zone) == ("banks", None) and (needs[0].rule, needs[0].zone) == ("zone", 1)      # a roughness zone keeps its rule
 
 
 def test_a_zone_the_calibration_does_not_name_is_offered_and_not_selected(tmp_path):
@@ -234,9 +303,12 @@ def test_a_factsheet_is_an_open_document_in_arial_10_with_narrow_margins(planned
             assert f'fo:margin-{side}="1.27cm"' in styles
         assert 'style:font-name="Arial"' in styles and 'fo:font-size="10pt"' in styles
         assert "Survey plan:" in content and "Sunrise" in content and "—" not in content
+        assert "below the surface" not in content                                  # heights count from the riverbed, the user's rule
     ground = zipfile.ZipFile(result["files"]["ground"]["factsheet"]).read("content.xml").decode()
     for needed in ("Start at the access point", "Pressure adjustment", "DGPS", "Back at the access point", "survey-map-ground.pdf"):
         assert needed in ground
+    temperature = zipfile.ZipFile(result["files"]["temperature"]["factsheet"]).read("content.xml").decode()
+    assert "note its height above the riverbed and the water depth there" in temperature
     kayak = zipfile.ZipFile(result["files"]["kayak"]["factsheet"]).read("content.xml").decode()
     assert "Barker" in kayak and "every 5 s" in kayak
 
@@ -304,6 +376,18 @@ def test_settings_that_make_no_sense_are_refused_before_anything_is_read(tmp_pat
         planner.make_plan(cfg, SurveySettings.from_dict({"ground": {"surveyors": 0}}), online=False)
 
 
+def test_a_day_that_starts_after_sunset_is_refused_with_what_to_do(case):
+    cfg = load(case)
+    survey_case.set_points(cfg, access=survey_case.ACCESS)
+    late = {"kinds": ["ground"], "time": {"date": "2026-06-20", "start": "22:30"}}
+    with pytest.raises(SurveyError, match=r"the working day starts at 22:30, and the sun sets at \d\d:\d\d on 2026-06-20") as caught:
+        planner.make_plan(cfg, SurveySettings.from_dict(late), online=False)
+    assert "Start earlier" in caught.value.remedy and "End before sunset" in caught.value.remedy
+    assert not (planner.folder(cfg) / planner.PLAN_JSON).exists()
+    late["time"]["use_daylight"] = False
+    assert planner.make_plan(cfg, SurveySettings.from_dict(late), online=False)["plans"]["ground"]["summary"]["per_day"][0]["start"] == "22:30"
+
+
 def test_a_plan_needs_the_result_of_a_steady_run(tmp_path):
     cfg = load(survey_case.write_case(tmp_path, result=False))
     with pytest.raises(SurveyError, match="there is no simulation result to plan with") as caught:
@@ -333,6 +417,32 @@ def test_the_field_reads_the_mesh_of_the_geometry_and_the_last_frame(case):
     assert set(flow.zone.tolist()) == {1, 2} or set(flow.zone.tolist()) == {0, 1, 2}
     assert int(flow.hops.min()) == 0 and int(flow.hops.max()) == 50                 # nodes from the inflow and the outflow
     assert Path(flow.source).name == "r2d.slf"
+
+
+def test_the_zone_of_a_node_is_the_one_the_build_wrote_into_the_geometry(case, monkeypatch):
+    """The geometry holds the zone that acts in the model; looking every wet node up in the zone map took half a minute on the Isar."""
+    import numpy as np
+
+    from axqua.core import selafin
+    from axqua.solvers.telemac import mesh
+
+    cfg = load(case)
+    x, y, ikle, depth, u, bed = survey_case.channel()
+    looked_up = load_field(cfg)                                                    # the geometry of the test case holds no zones
+    wet = looked_up.wet
+    assert set(looked_up.zone[wet].tolist()) == {1, 2} and not looked_up.zone[~wet].any()
+    stored = np.where(y < survey_case.Y0 + survey_case.HEIGHT / 2, 2, 1)           # split along the channel, as the zone map is not
+    geometry = Path(cfg.model_path(cfg.geometry_slf))
+    selafin.write_geometry(geometry, x, y, ikle, np.zeros(x.size, dtype=int), bottom=bed, friction_id=stored)
+    lookups = []
+    real = mesh.zone_of_points
+    monkeypatch.setattr(mesh, "zone_of_points", lambda *args, **kwargs: lookups.append(1) or real(*args, **kwargs))
+    flow = load_field(cfg)
+    assert (flow.zone[wet] == stored[wet]).all() and not flow.zone[~wet].any() and lookups == []
+    # numbers that are no zones of the zone map come from somewhere else: the map decides
+    selafin.write_geometry(geometry, x, y, ikle, np.zeros(x.size, dtype=int), bottom=bed, friction_id=np.full(x.size, 7))
+    flow = load_field(cfg)
+    assert (flow.zone == looked_up.zone).all() and lookups == [1]
 
 
 def test_cleaning_up_never_offers_the_survey_plan(planned):

@@ -621,6 +621,27 @@ def test_a_plan_that_fails_says_why(planner):
     assert window.plan_text.toPlainText() == "Not planned: Ground-based velocimetry (wading): no access point is set. Set one on the tab Access."
 
 
+def test_a_plan_that_fails_leaves_the_plan_before_on_the_map(planner, project, tmp_path):
+    from axqua_plugin.core.runner_client import RunnerError
+    from axqua_plugin.gui import survey_layers
+
+    gpkg = write_gpkg(tmp_path / "survey-plan" / "survey-plan.gpkg", access=[("access", (X0 + 60.0, Y0 + 1.0))])
+    window, client = planner(gpkg=gpkg)
+    client.plan_answer = answer_of(gpkg)
+    window.plan()
+    before = sorted(survey_layers.shown_plan(gpkg))
+    assert len(before) == 9
+    client.fail["plan"] = RunnerError("The survey cannot be planned: the working day starts at 22:00, and the sun sets at 21:17.")
+    window.plan()
+    assert sorted(survey_layers.shown_plan(gpkg)) == before, "the layers of the plan before are back on the map"
+    assert window.status.text() == "The survey could not be planned. The map shows the plan before." and "sun sets at 21:17" in window.plan_text.toPlainText()
+    assert survey_layers.show_plan({"gpkg": str(gpkg)}, names=["flowtracker_points", "no_such_layer"])[0].name() == "Velocity verticals"
+    # without a plan on the map nothing is put there
+    survey_layers.remove_plan(gpkg)
+    window.plan()
+    assert survey_layers.shown_plan(gpkg) == [] and window.status.text() == "The survey could not be planned."
+
+
 def test_the_last_plan_of_the_case_is_offered_again(planner, tmp_path):
     folder = tmp_path / "survey-plan"
     folder.mkdir()

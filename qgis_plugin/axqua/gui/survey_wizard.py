@@ -103,6 +103,7 @@ class SurveyWizard(QDialog):
         self.widgets: dict[str, tuple] = {}      # dotted key -> (field, widget)
         self.kind_boxes: dict[str, QCheckBox] = {}
         self.planning = False
+        self._shown_before: list[str] = []      # the plan layers that were on the map when a plan started
         self.setWindowTitle(f"Survey planner: {self.case.name}")
         self.resize(980, 780)
         self._build()
@@ -648,6 +649,7 @@ class SurveyWizard(QDialog):
             self.tabs.setCurrentIndex(1)
             self.status.setText(f"The access points could not be saved: {wrong}")
             return
+        self._shown_before = survey_layers.shown_plan(gpkg) if gpkg else []
         if gpkg:
             survey_layers.remove_plan(gpkg)          # the library replaces these layers in the file
         client, case, offline = self.client, self.case, not settings.get("online", True)
@@ -664,6 +666,11 @@ class SurveyWizard(QDialog):
         text = user_text(exc)
         self.plan_text.setPlainText(text)
         self.status.setText("The survey could not be planned.")
+        gpkg, before = self.info.get("gpkg"), self._shown_before
+        if gpkg and before:                          # the plan before is still in the file: its layers come back
+            survey_layers.show_plan({"gpkg": gpkg}, names=before)
+            self.status.setText("The survey could not be planned. The map shows the plan before.")
+        self._shown_before = []
 
     def show_plan(self, answer: dict) -> None:
         self.planning = False

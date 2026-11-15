@@ -233,19 +233,26 @@ def remove_plan(gpkg: str | Path) -> int:
     return len(ids)
 
 
-def show_plan(answer: dict) -> list:
-    """Add the layers of a plan that hold something, styled; returns them in drawing order."""
+def shown_plan(gpkg: str | Path) -> list[str]:
+    """The names of the plan layers of *gpkg* that are on the map."""
+    plan = {name for name, _kind, _title in survey.PLAN_LAYERS}
+    return [name for name in open_layers(gpkg) if name in plan]
+
+
+def show_plan(answer: dict, names=None) -> list:
+    """Add the layers of a plan that hold something, styled; returns them in drawing order. With *names*, the layers of these names are added as far as the file holds something in them: the way back to the plan before, when a new plan failed."""
     from qgis.core import QgsProject, QgsVectorLayer
 
     gpkg = answer.get("gpkg")
     if not gpkg or not Path(gpkg).is_file():
         return []
     remove_plan(gpkg)
+    wanted = survey.layers_to_load(answer) if names is None else [(name, title) for name, _kind, title in survey.PLAN_LAYERS if name in set(names)]
     group = _group()
     added = []
-    for name, title in survey.layers_to_load(answer):
+    for name, title in wanted:
         layer = QgsVectorLayer(survey.layer_uri(gpkg, name), title, "ogr")
-        if not layer.isValid():
+        if not layer.isValid() or (names is not None and layer.featureCount() < 1):
             continue
         style(layer, name)
         QgsProject.instance().addMapLayer(layer, False)

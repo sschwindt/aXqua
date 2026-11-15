@@ -116,14 +116,31 @@ class FlowField:
         weight = np.where(weight > 0, weight, 1.0)
         return sx / weight, sy / weight
 
+    def outline_nodes(self) -> np.ndarray:
+        """Whether a node lies on the outline of the mesh: on an edge that belongs to one triangle only."""
+        if "outline" not in self._cache:
+            t, n = self.triangles.astype(np.int64), len(self.x)
+            a = np.concatenate([t[:, 0], t[:, 1], t[:, 2]])
+            b = np.concatenate([t[:, 1], t[:, 2], t[:, 0]])
+            keys, counts = np.unique(np.minimum(a, b) * n + np.maximum(a, b), return_counts=True)
+            single = keys[counts == 1]
+            out = np.zeros(n, dtype=bool)
+            out[single // n] = True
+            out[single % n] = True
+            self._cache["outline"] = out
+        return self._cache["outline"]
+
     def wet_edge_distance(self) -> np.ndarray:
-        """How many mesh nodes every wet node lies from the nearest dry node or solid boundary (0 at the edge)."""
+        """How many mesh nodes every wet node lies from the nearest dry node or solid boundary (0 at the edge). A wall of the model is a bank like a dry bar is: without it a channel that is wet from wall to wall would have no banks. The inflow and the outflow are not banks."""
         if "edge_hops" not in self._cache:
             adjacency = self.neighbors()
             wet = self.wet
             hops = np.full(len(self.x), -1, dtype=int)
             dry_neighbors = adjacency.dot((~wet).astype(np.int32))
-            front = np.flatnonzero(wet & (dry_neighbors > 0))
+            wall = self.outline_nodes()
+            if self.hops is not None:
+                wall = wall & (np.asarray(self.hops) != 0)
+            front = np.flatnonzero(wet & ((dry_neighbors > 0) | wall))
             hops[front] = 0
             level = 0
             while len(front):
@@ -173,7 +190,7 @@ def load_field(cfg, result: str = "") -> FlowField:
     triangles = np.asarray(geo["ikle"], dtype=int)[:, :3]
     out = FlowField(x=np.asarray(geo["x"], dtype=float), y=np.asarray(geo["y"], dtype=float), triangles=triangles, depth=depth, u=np.nan_to_num(frame[names["VELOCITY U"]].astype(float)), v=np.nan_to_num(frame[names["VELOCITY V"]].astype(float)), bed=bed, wet_depth=float(cfg.wet_depth), source=str(path), time=float(slf.times[-1]))
     out.hops = _boundary_hops(cfg, geometry, len(out.x))
-    out.zone = _node_zones(cfg, out)
+    out.zone = _node_zones(cfg, out, {str(name).strip().upper(): values for name, values in (geo.get("values") or {}).items()})
     return out
 
 
@@ -187,16 +204,27 @@ def _boundary_hops(cfg, geometry: Path, n: int) -> np.ndarray:
     return np.asarray(hops, dtype=int)
 
 
-def _node_zones(cfg, flow: FlowField) -> np.ndarray:
-    """The roughness zone of every wet node; zero where the case has no zones or the node is dry."""
+def _node_zones(cfg, flow: FlowField, built: dict | None = None) -> np.ndarray:
+    """The roughness zone of every wet node; zero where the case has no zones or the node is dry.
+
+    The build writes the zone of every node into the geometry (``FRIC_ID``) where the case has a zone map and a roughness table, and that is what acts in the model. It is read from there; looking every wet node up in the zone map gives the same numbers and took half a minute on the Isar (55,000 wet nodes), at every plan and every look at the weather.
+    """
     zones = np.zeros(len(flow.x), dtype=int)
     if cfg.geodata.roughness_zones is None:
         return zones
-    from axqua.solvers.telemac.mesh import roughness_zone_frame, zone_of_points
+    from axqua.solvers.telemac import mesh
 
     wet = np.flatnonzero(flow.wet)
-    if len(wet):
-        zones[wet] = zone_of_points(roughness_zone_frame(cfg), flow.x[wet], flow.y[wet], cfg.crs_epsg)
+    if not len(wet):
+        return zones
+    frame = mesh.roughness_zone_frame(cfg)
+    stored = (built or {}).get("FRIC_ID")
+    if stored is not None and cfg.geodata.roughness_table is not None and len(stored) == len(zones):
+        ids = np.rint(np.asarray(stored, dtype=float)[wet]).astype(int)
+        if set(np.unique(ids).tolist()) <= {int(z) for z in frame["zone_id"]}:      # a geometry of another origin may hold other numbers
+            zones[wet] = ids
+            return zones
+    zones[wet] = mesh.zone_of_points(frame, flow.x[wet], flow.y[wet], cfg.crs_epsg)
     return zones
 
 

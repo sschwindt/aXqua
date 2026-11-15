@@ -18,7 +18,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from axqua.survey.field import FlowField
+from axqua.survey.field import FlowField, SurveyError
 from axqua.survey.settings import GroundSettings
 
 #: Slower than this the water has no direction that matters for walking [m/s].
@@ -54,6 +54,8 @@ class WalkGrid:
         if self.passable.flat[index]:
             return index
         cells = np.flatnonzero(self.passable.ravel())
+        if not len(cells):
+            raise SurveyError("no ground of the reach can be walked on or waded: all of it is water deeper or faster than the wading limits", remedy="Plan at a lower discharge, raise the wading limits, or choose an airborne or a kayak survey.")
         cx, cy = self.center(cells)
         return int(cells[np.argmin(np.hypot(cx - x, cy - y))])
 
@@ -223,11 +225,16 @@ def order_sites(seconds: np.ndarray, sites, start: int = 0, *, passes: int = 25)
     return order
 
 
-def split_tour(seconds: np.ndarray, order, service, parts: int, start: int = 0) -> list[list[int]]:
-    """Cut the tour *order* into *parts* runs of about equal work (walking to a site plus *service* there), one per surveyor."""
-    parts = max(1, min(int(parts), len(order)))
+def split_tour(seconds: np.ndarray, order, service, parts, start: int = 0) -> list[list[int]]:
+    """Cut the tour *order* into runs of work (walking to a site plus *service* there). *parts* is their number, for runs of about equal work, or one weight per run: teams of three and of one surveyor get three quarters and one quarter of the work."""
+    weights = [1.0] * max(1, int(parts)) if np.isscalar(parts) else [max(float(w), 0.0) for w in parts]
+    weights = weights[:max(1, len(order))] or [1.0]
+    if sum(weights) <= 0:
+        weights = [1.0] * len(weights)
+    parts = len(weights)
     if parts == 1:
         return [list(order)]
+    share = np.cumsum(weights) / float(sum(weights))
     load, here = [], start
     for site in order:
         load.append(seconds[here, site] + service[site])
@@ -237,7 +244,7 @@ def split_tour(seconds: np.ndarray, order, service, parts: int, start: int = 0) 
     for site, work in zip(order, load):
         remaining_sites = len(order) - sum(len(p) for p in out) - len(current)
         remaining_parts = parts - len(out)
-        if current and len(out) < parts - 1 and (done + 0.5 * work >= total * (len(out) + 1) / parts or remaining_sites <= remaining_parts - 1):
+        if current and len(out) < parts - 1 and (done + 0.5 * work >= total * share[len(out)] or remaining_sites <= remaining_parts - 1):
             out.append(current)
             current = []
         current.append(site)

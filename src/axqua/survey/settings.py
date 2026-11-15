@@ -198,11 +198,24 @@ class SurveySettings:
             out.append("a ground-based survey needs at least one surveyor")
         if not g.depth_two_points <= g.depth_three_points:
             out.append("the depth from which three depths are measured lies below the one for two depths")
-        for value, text in ((g.speed_land, "the walking speed on land"), (g.speed_with_current, "the walking speed with the current"), (self.time.day_hours, "the working day"), (self.airborne.altitude, "the flight altitude"), (self.airborne.hover_seconds, "the hover time"), (self.kayak.log_interval, "the DGPS interval of the kayak")):
+        for value, text in ((g.speed_land, "the walking speed on land"), (g.speed_with_current, "the walking speed with the current"), (self.time.day_hours, "the working day"), (self.airborne.altitude, "the flight altitude"), (self.airborne.hover_seconds, "the hover time"), (self.kayak.log_interval, "the DGPS interval of the kayak"),
+                            (self.airborne.fps, "the frame rate of the video"), (self.airborne.width_px, "the width of the video"), (self.airborne.height_px, "the height of the video"), (self.airborne.cruise_speed, "the cruise speed of the drone"), (self.airborne.battery_minutes, "the flight time of a battery"), (g.max_depth, "the largest wading depth")):
             if not value > 0:
                 out.append(f"{text} must be larger than zero")
-        if any(float(speed) <= 0 for _, speed in g.speed_against_current):
+        if not 0 < self.airborne.hfov_deg < 180:
+            out.append("the field of view of the video lies between 0 and 180 degrees")
+        if not 0 <= self.airborne.overlap < 1:
+            out.append("the overlap of the video frames lies between 0 and 1")
+        against, limits = _pairs(g.speed_against_current), _pairs(g.velocity_limits)
+        if against is None:
+            out.append("the walking speeds against the current are pairs of a depth [m] and a speed [km/h], such as [[0.3, 1.0], [0.5, 0.5]]")
+        elif any(speed <= 0 for _, speed in against):
             out.append("the walking speeds against the current must be larger than zero")
+        if limits is None or not limits:
+            out.append("the velocity limits of wading are pairs of a depth [m] and a velocity [m/s], such as [[0.6, 2.0], [0.9, 1.4]]")
+        for name, values in (("one depth", g.heights_one), ("two depths", g.heights_two), ("three depths", g.heights_three)):
+            if _numbers(values) is None:
+                out.append(f"the heights of the readings at {name} are numbers between 0 and 1")
         if self.kayak.kayakers < 1:
             out.append("a kayak survey needs at least one kayaker")
         if self.temperature.method not in ("loggers", "probe"):
@@ -213,6 +226,22 @@ class SurveySettings:
         if self.time.start and clock_minutes(self.time.start) is None:
             out.append(f"the start time {self.time.start!r} is not of the form HH:MM")
         return out
+
+
+def _pairs(value) -> list | None:
+    """*value* as a list of number pairs, or None where it is not one."""
+    try:
+        return [(float(a), float(b)) for a, b in value]
+    except (TypeError, ValueError):
+        return None
+
+
+def _numbers(value) -> list | None:
+    try:
+        out = [float(v) for v in value]
+    except (TypeError, ValueError):
+        return None
+    return out if out and all(0 < v < 1 for v in out) else None
 
 
 def _date(text: str):

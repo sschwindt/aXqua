@@ -149,7 +149,7 @@ def plan_airborne(flow: FlowField, settings: SurveySettings, needs, takeoff=None
     stations, route, events = [], [], []
     window = day_window(settings.time, sun, 0)
     breaks = Breaks(settings.time, window.start)
-    now, here, battery, used_minutes, day = window.start, 0, 1, 0.0, 0
+    now, here, battery, used_minutes, day, flown_today = window.start, 0, 1, 0.0, 0, 0
     hover = (a.hover_seconds + SETTLE_SECONDS) / 60.0
     events.append({"kind": "start", "start": now, "end": now, "day": day, "what": "Take-off point: lens calibration, ground control points, battery 1"})
 
@@ -160,15 +160,18 @@ def plan_airborne(flow: FlowField, settings: SurveySettings, needs, takeoff=None
 
     for number, site in enumerate(order, start=1):
         there, back = seconds[here, site] / 60.0, seconds[site, 0] / 60.0
-        if used_minutes > 0 and used_minutes + there + hover + back > a.battery_minutes:
+        low = used_minutes > 0 and used_minutes + there + hover + back > a.battery_minutes
+        late = flown_today > 0 and now + there + hover + back > window.end      # the day ends although the battery would last
+        if low or late:
             home = leg(here, 0, "return", now)
             now += home
             pause, kind = breaks.due(now)
             swap = max(BATTERY_SWAP_MINUTES, pause)
             battery += 1
-            if now + swap + 2 * back + hover > window.end and len(stations):
+            if late or (now + swap + 2 * back + hover > window.end and flown_today > 0):
                 events.append({"kind": "end", "start": now, "end": now, "day": day, "what": "End of the day"})
                 day += 1
+                flown_today = 0
                 window = day_window(settings.time, sun, day)
                 breaks = Breaks(settings.time, window.start)
                 now = window.start
@@ -180,6 +183,8 @@ def plan_airborne(flow: FlowField, settings: SurveySettings, needs, takeoff=None
                     breaks.taken(now, kind)
             here, used_minutes = 0, 0.0
             there = seconds[0, site] / 60.0
+        if used_minutes == 0 and there + hover + back > a.battery_minutes:
+            warnings.append(f"station {number}: the flight there, the hover and the flight back take {there + hover + back:.0f} min, more than one battery holds ({a.battery_minutes:g} min); move the take-off point closer or shorten the hover")
         now += leg(here, site, "flight", now)
         cx, cy, ex, ey, along_side, across_side = spots[site - 1]
         members = frames[chosen[site - 1]][0]
@@ -204,6 +209,7 @@ def plan_airborne(flow: FlowField, settings: SurveySettings, needs, takeoff=None
         })
         now += hover
         used_minutes += there + hover
+        flown_today += 1
         here = site
     now += leg(here, 0, "return", now)
     events.append({"kind": "end", "start": now, "end": now, "day": day, "what": "Landed; check the videos before leaving"})

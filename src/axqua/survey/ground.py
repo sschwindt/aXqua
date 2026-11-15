@@ -61,7 +61,7 @@ def plan_ground(flow: FlowField, settings: SurveySettings, needs, access, *, sun
     surveyors, per = max(1, int(g.surveyors)), max(1, int(g.surveyors_per_dgps))
     runs, team_of = [], {}
     sizes = [min(per, surveyors - first) for first in range(0, surveyors, per)]
-    stretches = walk.split_tour(router.seconds, order, service, len(sizes))
+    stretches = walk.split_tour(router.seconds, order, service, sizes)     # the work of a stretch in proportion to its team
     for team, (stretch, size) in enumerate(zip(stretches, sizes), start=1):
         for run in walk.deal_tour(router.seconds, stretch, service, size):
             runs.append(run)

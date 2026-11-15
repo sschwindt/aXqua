@@ -573,7 +573,7 @@ def _temperature(sheet: Sheet, plan: dict, context: dict, level: int) -> None:
     _warnings(sheet, plan, level)
     _hints(sheet, [
         "Slow, shallow water warms in the sun within an hour, while deep, fast water carries the temperature of the river upstream: measure both kinds on the same day, and note the time of every reading.",
-        ("Shade every logger from direct sun (a white tube open to the flow), fix it to a stone or a steel bar, and note its depth below the surface." if loggers else "Hold the probe in flowing water upstream of your legs and wait until the reading is steady."),
+        ("Shade every logger from direct sun (a white tube open to the flow), fix it to a stone or a steel bar, and note its height above the riverbed and the water depth there." if loggers else "Hold the probe in flowing water upstream of your legs and wait until the reading is steady."),
         ("Set all loggers to the same clock and the same interval, and leave them together in a bucket of water for an hour before and after the campaign to compare them." if loggers else "Compare the probe with a reference thermometer before and after the round."),
         "A slow, deep pool can be stratified or fed by groundwater: measure near the bed and near the surface there.",
         "Record the position of every point with the DGPS, and take a photo of the place.",

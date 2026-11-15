@@ -17,6 +17,10 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import os
+import shutil
+import tempfile
+import time
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +29,7 @@ from axqua.survey import conditions as conditions_module
 from axqua.survey.field import FlowField, SurveyError, load_field, result_path
 from axqua.survey.output import ACCESS_LAYER, GPKG_NAME, LAYERS, ROLES, draw_map, ensure_access_layer, read_access, write_layers
 from axqua.survey.placement import case_needs
+from axqua.survey.schedule import day_window, fmt_clock
 from axqua.survey.settings import KIND_TITLES, KINDS, RULES, ParameterNeed, SurveySettings
 
 log = logging.getLogger("axqua")
@@ -32,6 +37,8 @@ log = logging.getLogger("axqua")
 FOLDER = "survey-plan"
 PLAN_JSON = "survey-plan.json"
 SETTINGS_JSON = "survey-settings.json"
+#: How the folder starts into which a plan is drawn before it takes the place of the plan before it.
+DRAFT_PREFIX = ".draft-"
 #: Keys of a plan that hold geometry or working data; ``survey-plan.gpkg`` keeps the geometry.
 _HEAVY = ("coords", "polygon", "geometry", "grid")
 #: What a plan must hold to be worth a map and a factsheet, by kind of survey.
@@ -188,6 +195,17 @@ def _plan_kind(kind: str, cfg, flow: FlowField, settings: SurveySettings, needs,
     return plan_temperature(flow, settings, access["access"], sun=sun)
 
 
+def _writable(path: Path) -> bool:
+    """Whether the file *path* can be replaced: it does not exist, or it opens for writing (a file that another program holds open in Windows does not)."""
+    try:
+        with open(path, "r+b"):
+            return True
+    except FileNotFoundError:
+        return True
+    except OSError:
+        return False
+
+
 def _remove(path: Path) -> None:
     try:
         path.unlink()
@@ -218,6 +236,9 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
     notes += access["notes"]
     found = conditions_module.look_up(cfg, flow, settings, online=online)
     sun = conditions_module.sun_of(found)
+    first = day_window(settings.time, sun, 0)
+    if first.limit == "sunset" and first.end <= first.start:      # no kind of survey can be planned into a day without minutes
+        raise SurveyError(f"the working day starts at {fmt_clock(first.start)}, and the sun sets at {fmt_clock(first.sunset)}{' on ' + first.date if first.date else ''}: no daylight is left to measure in", remedy="Start earlier, or plan without the end of the day at sunset (setting time.use_daylight; in the plugin, End before sunset when the day is known).")
 
     plans: dict[str, dict] = {}
     skipped: dict[str, dict] = {}
@@ -240,27 +261,51 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
         remedy = next((entry["remedy"] for entry in skipped.values() if entry["remedy"]), None)
         raise SurveyError(f"no survey could be planned ({reasons})", remedy=remedy)
 
-    counts = write_layers(gpkg, cfg.crs_epsg, plans)
     made = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     name = str(case_name or "")
     context = {"settings": settings, "conditions": found, "case": name, "version": __version__, "made": made, "source": Path(flow.source).name, "time": flow.time, "gpkg": GPKG_NAME, "epsg": cfg.crs_epsg}
     files: dict[str, dict] = {}
-    for kind in KINDS:
-        map_png, sheet = out_dir / f"survey-map-{kind}.png", out_dir / f"survey-factsheet-{kind}.odt"
-        if kind not in plans:                        # nothing of an earlier plan stays beside a plan it does not belong to
-            for path in (map_png, map_png.with_suffix(".pdf"), sheet):
-                _remove(path)
-            continue
+    # The maps and the factsheets are drawn into a folder of their own first, and the layers are replaced only when all of them exist:
+    # a plan that fails on the way leaves the plan before it as it was, with layers, maps and factsheets that belong together.
+    try:
+        for left in out_dir.glob(DRAFT_PREFIX + "*"):          # of a plan that was stopped on the way
+            if left.is_dir() and time.time() - left.stat().st_mtime > 3600.0:
+                shutil.rmtree(left, ignore_errors=True)
+        draft = Path(tempfile.mkdtemp(prefix=DRAFT_PREFIX, dir=out_dir))
+    except OSError as exc:
+        raise SurveyError(f"the folder of the survey plan cannot be written to: {exc}", subject=str(out_dir), remedy="Check the access rights of the folder, then plan again.") from exc
+    try:
+        names = {kind: (f"survey-map-{kind}.png", f"survey-map-{kind}.pdf", f"survey-factsheet-{kind}.odt") for kind in KINDS}
+        for kind in KINDS:
+            if kind not in plans:
+                continue
+            map_name, pdf_name, sheet_name = names[kind]
+            try:
+                draw_map(flow, kind, plans[kind], draft / map_name, access=access, subtitle=", ".join(text for text in (name, found.get("date") or "") if text), epsg=cfg.crs_epsg)
+                written = write_factsheet(draft / sheet_name, kind, plans[kind], dict(context, map=pdf_name))
+            except OSError as exc:
+                raise SurveyError(f"the map or the factsheet of the plan could not be written: {exc}", subject=str(out_dir), remedy="Check the free space and the access rights of the folder, then plan again.") from exc
+            files[kind] = {"map": str(out_dir / map_name), "map_pdf": str(out_dir / pdf_name), "factsheet": str(out_dir / sheet_name), "factsheet_level": written["level"]}
+            if not written["fits"]:
+                notes.append(f"{KIND_TITLES[kind]}: the factsheet may run onto a second page; shorten the survey or plan fewer working days")
+            elif written["level"] > 0:
+                notes.append(f"{KIND_TITLES[kind]}: the factsheet leaves out detail to stay on one page; {PLAN_JSON} and the layers of {GPKG_NAME} hold all of it")
+        locked = [target.name for kind in plans for target in (out_dir / n for n in names[kind]) if not _writable(target)]
+        if locked:                                   # Windows: a factsheet that is open in a text program cannot be replaced
+            raise SurveyError(f"{', '.join(locked)} of the earlier plan cannot be replaced: {'it is' if len(locked) == 1 else 'they are'} open in another program or write-protected", subject=str(out_dir), remedy="Close the factsheet and the map of the earlier plan in other programs, then plan again.")
+        counts = write_layers(gpkg, cfg.crs_epsg, plans)
         try:
-            draw_map(flow, kind, plans[kind], map_png, access=access, subtitle=", ".join(text for text in (name, found.get("date") or "") if text), epsg=cfg.crs_epsg)
-            written = write_factsheet(sheet, kind, plans[kind], dict(context, map=map_png.with_suffix(".pdf").name))
+            for kind in plans:
+                for n in names[kind]:
+                    os.replace(draft / n, out_dir / n)
         except OSError as exc:
             raise SurveyError(f"the map or the factsheet of the plan could not be written: {exc}", subject=str(out_dir), remedy="Close the factsheet and the map of the earlier plan in other programs, then plan again.") from exc
-        files[kind] = {"map": str(map_png), "map_pdf": str(map_png.with_suffix(".pdf")), "factsheet": written["path"], "factsheet_level": written["level"]}
-        if not written["fits"]:
-            notes.append(f"{KIND_TITLES[kind]}: the factsheet may run onto a second page; shorten the survey or plan fewer working days")
-        elif written["level"] > 0:
-            notes.append(f"{KIND_TITLES[kind]}: the factsheet leaves out detail to stay on one page; {PLAN_JSON} and the layers of {GPKG_NAME} hold all of it")
+        for kind in KINDS:
+            if kind not in plans:                    # nothing of an earlier plan stays beside a plan it does not belong to
+                for n in names[kind]:
+                    _remove(out_dir / n)
+    finally:
+        shutil.rmtree(draft, ignore_errors=True)
 
     result = {
         "axqua": __version__,
@@ -282,9 +327,13 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
         "notes": notes,
     }
     result = plain(result)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / PLAN_JSON).write_text(json.dumps(result, indent=1), encoding="utf-8")
-    (out_dir / SETTINGS_JSON).write_text(json.dumps(plain(settings.as_dict()), indent=1), encoding="utf-8")
+    try:
+        for target, content in ((out_dir / PLAN_JSON, result), (out_dir / SETTINGS_JSON, plain(settings.as_dict()))):
+            part = target.with_name(target.name + ".part")
+            part.write_text(json.dumps(content, indent=1), encoding="utf-8")
+            os.replace(part, target)
+    except OSError as exc:
+        raise SurveyError(f"{PLAN_JSON} could not be written: {exc}", subject=str(out_dir), remedy="Check the free space and the access rights of the folder, then plan again.") from exc
     result["json"] = str(out_dir / PLAN_JSON)
     return result
 
