@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/code/workflow.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=4720776d"></script>
+      <script src="../_static/documentation_options.js?v=9172181d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -4052,7 +4052,8 @@ bounds; there the config’s <code class="docutils literal notranslate"><span cl
 <p>Precedence, later wins on a name collision: config <code class="docutils literal notranslate"><span class="pre">calibration.parameters</span></code>
 &lt; the roughness table’s <code class="docutils literal notranslate"><span class="pre">zone&lt;N&gt;</span></code> rows (<code class="docutils literal notranslate"><span class="pre">geodata.roughness_table</span></code> with the
 bounds schema) &lt; the <code class="docutils literal notranslate"><span class="pre">parameters</span></code> tab of the filled calibration-target
-template. The roughness table outranks the config because it is where the
+template, and <code class="docutils literal notranslate"><span class="pre">calibration.outflow_offset</span></code> as the parameter
+<code class="docutils literal notranslate"><span class="pre">f.OUTFLOW_OFFSET</span></code>. The roughness table outranks the config because it is where the
 zonation itself is defined - adding a zone there must not require editing the
 parameter list in two files - while the spreadsheet stays the live override.</p>
 <dl class="field-list simple">
@@ -4081,6 +4082,23 @@ rewriting a <code class="docutils literal notranslate"><span class="pre">.cas</s
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.calibration.fortran_file_of">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">fortran_file_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#fortran_file_of"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.fortran_file_of" title="Link to this definition"></a></dt>
+<dd><p>The file of the user Fortran folder HydroBayesCal rewrites for the <code class="docutils literal notranslate"><span class="pre">f.</span></code>
+parameters <em>names</em>: <code class="docutils literal notranslate"><span class="pre">user_sl.f</span></code> for the outflow offset
+(<code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.solvers.telemac.outflow_offset</span></code>), <code class="docutils literal notranslate"><span class="pre">user_rain.f</span></code> for a gain-lose
+reach, else None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4391,6 +4409,25 @@ simulations an earlier calibration saved. Returns the driver exit code (0 when
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.ready_outflow_offset">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">ready_outflow_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steering_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#ready_outflow_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.ready_outflow_offset" title="Link to this definition"></a></dt>
+<dd><p>Prepare the case for a calibration of the outflow level, when <em>parameters</em> hold it.</p>
+<p>Writes <code class="docutils literal notranslate"><span class="pre">user_sl.f</span></code> (offset 0) into the user Fortran folder and names that folder
+in each of <em>steering_files</em> (names in the model folder) that does not name it yet
+(<code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.solvers.telemac.outflow_offset</span></code>). With the offset 0 the routine
+changes nothing, so a steady run of the case that compiles it afterwards keeps the
+level of the rating. Returns whether the offset is calibrated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>

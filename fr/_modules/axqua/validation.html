@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/validation.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=cfac9b6f"></script>
+      <script src="../../_static/documentation_options.js?v=19fef41f"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -748,6 +748,8 @@
     <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"RESULTS FILE"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
 
     <span class="c1"># ---- the calibrated values -----------------------------------------------------</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span> <span class="k">as</span> <span class="n">offset</span>
+
     <span class="n">zones</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
              <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"zone"</span><span class="p">)}</span>
     <span class="n">constants</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
@@ -776,6 +778,13 @@
         <span class="n">friction_path</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.tbl"</span>
         <span class="n">friction_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">new_table</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
         <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"FRICTION DATA FILE"</span><span class="p">,</span> <span class="n">friction_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">offset</span><span class="o">.</span><span class="n">VARIABLE</span> <span class="ow">in</span> <span class="n">constants</span><span class="p">:</span>
+        <span class="c1"># the calibrated outflow level: the routine that adds it, in the folder the</span>
+        <span class="c1"># steering file names (a case without user Fortran gets the folder)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">offset</span><span class="o">.</span><span class="n">with_fortran_folder</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">_keyword</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"FORTRAN FILE"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">offset</span><span class="o">.</span><span class="n">FILE</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">offset</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="n">folder</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">constants</span><span class="p">:</span>
         <span class="n">folder</span> <span class="o">=</span> <span class="n">_keyword</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"FORTRAN FILE"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">folder</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>

@@ -228,6 +228,15 @@ The ``calibration`` block of the case file defines what is calibrated against wh
 
 Select wide but physically plausible limits. If the posterior of a parameter accumulates at one of its limits, the true value probably lies outside the range, and the calibration has to be repeated with a wider range.
 
+**The outflow level as a calibration parameter.** The outflow level comes from the rating of the outflow cross-section (``outflow_condition: stage_discharge``) or is prescribed (``elevation``). Where the water level of the reach is held up by a control that the terrain model does not resolve, or by one downstream of the model, that level is too low, and no roughness within its range raises the water level at the measurement points. ``outflow_offset`` adds the outflow level to the calibration parameters as an offset in meters to the level of the rating. Every situation keeps the level of the rating at its own discharge, and one offset is calibrated for all situations, as one roughness is:
+
+.. code-block:: yaml
+
+   calibration:
+     outflow_offset: [0.0, 2.0]   # range of the offset above the rating level [m]
+
+aXqua writes the TELEMAC routine ``user_sl.f`` into the user Fortran folder of the case. TELEMAC-2D calls it with every prescribed water level, and it adds the offset, raised linearly from 0 over the first 600 s of a run so that a run from the steady result does not start with a step at the outlet. HydroBayesCal sets the offset of each run in that file (parameter ``f.OUTFLOW_OFFSET``), and the validation runs with the calibrated offset. On the Inn reach KB15, the water level in the main channel at the September 2025 points was 0.45 m below the measured one at the level of the rating; an outflow level 1.31 m higher brought it to within 1 cm, while the water level over the patch upstream did not change. The offset is not yet available for TELEMAC-3D, for the outflow condition ``normal_depth`` and for outflow lines without a prescribed level (``free``).
+
 **Which roughness zones are calibrated.** Before a calibration starts, aXqua counts the calibration points in each roughness zone that the roughness table calibrates (the points that the calibration uses, without those outside the model or near an inflow or outflow line). A point counts in the zone whose roughness the mesh gives it. Two rules follow from these counts:
 
 * A zone **without a calibration point** is not calibrated. The measurements contain no information about its roughness, so its posterior would stay as wide as its prior, and the reported value would be a number that the data do not support. The zone keeps the value of the built model, the middle of its range.
