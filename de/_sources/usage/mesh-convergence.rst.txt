@@ -5,6 +5,24 @@ Mesh convergence
 
 Every numerical result depends to some degree on the mesh on which it was computed. A mesh convergence study measures this dependence: it repeats the same simulation on meshes of different resolution and compares the results. The study answers two questions. How large is the uncertainty of the results that stems from the mesh? And which is the coarsest, and therefore fastest, mesh that is accurate enough?
 
+.. admonition:: Watch the TELEMAC-2D dry run setup on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/5v8pTF9U4uM"
+          title="aXqua Mesh Convergence: How Much Does the Cell Size Matter?"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/5v8pTF9U4uM>`_.
+
 Run the study after the first TELEMAC dry run has shown that the model works (:ref:`hydraulics-dry-runs`), and before the calibration.
 
 .. _mesh-study-setup:
@@ -34,7 +52,7 @@ The study follows the procedure of Celik et al. (2008). It uses a sequence of fo
      - case values divided by 1.69
      - used for the convergence criterion
 
-Each mesh is run at the constant discharge of the case until the flow is steady. All runs start with a pre-wetted channel, to save the time for filling the reach (:ref:`case-initialization`). aXqua then reads the water depth and the flow velocity at fixed points and compares them between the meshes. A steady discharge does not make every part of the flow steady: eddies can form behind bars, and below the inflow the flow can oscillate because each mesh spreads the discharge over other boundary nodes. aXqua therefore takes the mean of each value over the second half of each run and reports how much it fluctuates in time. A change between two meshes that is not larger than this fluctuation cannot be settled by a finer mesh. The study needs no measurements: without them, the points are 40 positions along the channel centerline. When the case has measurement layers (:ref:`calibration-ground-truth`), their positions are used instead, because that is where the calibration will compare the model with the river; the measured values play no role in the study. No point lies close to the inflow or the outflow line, because the flow there reflects how each mesh prescribes the boundary rather than the river, and a model is never evaluated close to its boundaries. The points keep four flow adaptation lengths :math:`h/(2 c_f)` (Struiksma et al. 1985) from both lines, where :math:`h` is the flow depth of the case and :math:`c_f = (\kappa / \ln(12 h / k_s))^2` the friction coefficient of the channel bed. On a 0.9 m deep gravel-bed reach with :math:`k_s` = 0.155 m, this is 190 m; there, the inflow changed the velocity from mesh to mesh by up to 0.75 m/s 15 m below the inflow line, and the effect faded within 150 to 200 m. On a short reach, the distance is limited to a quarter of the centerline. Measurement positions less than 15 mesh nodes from an inflow or outflow line are left out with a warning, as in the calibration (:ref:`calibration-ground-truth`); when this leaves fewer than three, the study uses the centerline. The verdict depends on where the points are: points in shallow water near bars and wet edges change more under refinement than points in the main channel.
+Each mesh is run at the constant discharge of the case until the flow is steady. All runs start with a pre-wetted channel, to save the time for filling the reach (:ref:`case-initialization`). aXqua then reads the water depth and the flow velocity at fixed points and compares them between the meshes. A steady discharge does not make every part of the flow steady: eddies can form behind bars, and below the inflow the flow can oscillate because each mesh spreads the discharge over other boundary nodes. aXqua therefore takes the mean of each value over the second half of each run and reports how much it fluctuates in time. A change between two meshes that is not larger than this fluctuation cannot be settled by a finer mesh. The study needs no measurements: without them, the points are 40 positions along the channel centerline. When the case has measurement layers (:ref:`calibration-ground-truth`), their positions are used instead, because that is where the calibration will compare the model with the river; the measured values play no role in the study. No point lies close to the inflow or the outflow line, because the flow there reflects how each mesh prescribes the boundary rather than the river, and a model is never evaluated close to its boundaries. The points keep four flow adaptation lengths :math:`h/(2 c_f)` (Struiksma et al. 1985) from both lines, where :math:`h` is the water depth of the case and :math:`c_f = (\kappa / \ln(12 h / k_s))^2` the friction coefficient of the channel bed. On a 0.9 m deep gravel-bed reach with :math:`k_s` = 0.155 m, this is 190 m; there, the inflow changed the velocity from mesh to mesh by up to 0.75 m/s 15 m below the inflow line, and the effect faded within 150 to 200 m. On a short reach, the distance is limited to a quarter of the centerline. Measurement positions less than 15 mesh nodes from an inflow or outflow line are left out with a warning, as in the calibration (:ref:`calibration-ground-truth`); when this leaves fewer than three, the study uses the centerline. The verdict depends on where the points are: points in shallow water near bars and wet edges change more under refinement than points in the main channel.
 
 The following options can be changed:
 

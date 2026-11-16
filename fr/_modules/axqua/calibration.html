@@ -658,22 +658,17 @@
 <span class="sd">    Precedence, later wins on a name collision: config ``calibration.parameters``</span>
 <span class="sd">    &lt; the roughness table's ``zone&lt;N&gt;`` rows (``geodata.roughness_table`` with the</span>
 <span class="sd">    bounds schema) &lt; the ``parameters`` tab of the filled calibration-target</span>
-<span class="sd">    template, and ``calibration.outflow_offset`` as the parameter</span>
-<span class="sd">    ``f.OUTFLOW_OFFSET``. The roughness table outranks the config because it is where the</span>
+<span class="sd">    template. The roughness table outranks the config because it is where the</span>
 <span class="sd">    zonation itself is defined - adding a zone there must not require editing the</span>
 <span class="sd">    parameter list in two files - while the spreadsheet stays the live override.</span>
 <span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">targets</span> <span class="k">as</span> <span class="n">targets_mod</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
 
     <span class="n">by_name</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">roughness_zone_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
         <span class="n">by_name</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">targets_mod</span><span class="o">.</span><span class="n">read_target_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
         <span class="n">by_name</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
-    <span class="n">offset</span> <span class="o">=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">parameter</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">by_name</span><span class="p">[</span><span class="n">offset</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">offset</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">by_name</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
 
 
@@ -705,20 +700,6 @@
                  <span class="s2">"the OpenFOAM calibration)"</span><span class="p">,</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">drop</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">keep</span></div>
 
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">fortran_file_of</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""The file of the user Fortran folder HydroBayesCal rewrites for the ``f.``</span>
-<span class="sd">    parameters *names*: ``user_sl.f`` for the outflow offset</span>
-<span class="sd">    (:mod:`axqua.solvers.telemac.outflow_offset`), ``user_rain.f`` for a gain-lose</span>
-<span class="sd">    reach, else None."""</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
-
-    <span class="k">if</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">calibrated</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">FILE</span>
-    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">implementation</span> <span class="o">==</span> <span class="s2">"fortran"</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">"user_rain.f"</span>
-    <span class="k">return</span> <span class="kc">None</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_refuse_continued_keywords</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">control_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -782,7 +763,9 @@
     <span class="c1"># line in it for any calibration parameter prefixed `f.` - which is how the</span>
     <span class="c1"># gain-lose conductivity (`f.HMP_KF`) is calibrated. Only meaningful when a</span>
     <span class="c1"># gain-lose reach actually generated the routine.</span>
-    <span class="n">fortran_file</span> <span class="o">=</span> <span class="n">fortran_file_of</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="n">fortran_file</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"user_rain.f"</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span>
+                        <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">implementation</span> <span class="o">==</span> <span class="s2">"fortran"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">pylist</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">q</span><span class="p">:</span>
