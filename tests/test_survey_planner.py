@@ -263,6 +263,15 @@ def test_a_case_without_calibration_parameters_offers_its_roughness_zones(tmp_pa
     assert [(n.name, n.use, n.points) for n in placement.case_needs(cfg, changed)] == [("zone1", True, 6), ("zone2", False, 9)]
 
 
+def test_the_outflow_level_needs_no_points_and_leaves_the_zones_selected(tmp_path):
+    """Review of 2026-11-16: calibration.outflow_offset made f.OUTFLOW_OFFSET a parameter of the case, which took 6 points everywhere and unticked every zone of the map."""
+    cfg = load(survey_case.write_case(tmp_path, calibration=False))
+    cfg.calibration.outflow_offset = [0.0, 2.0]
+    needs = placement.case_needs(cfg, SurveySettings())
+    assert [(n.name, n.use) for n in needs] == [("f.OUTFLOW_OFFSET", False), ("zone1", True), ("zone2", True)]
+    assert needs[0].note == placement.OUTFLOW_NOTE and "no points of its own" in needs[0].note
+
+
 def test_a_parameter_of_the_case_is_tied_to_a_zone_with_the_number_of_the_zone(tmp_path):
     cfg = load(survey_case.write_case(tmp_path))
     tied = SurveySettings.from_dict({"parameters": [{"name": "VELOCITY DIFFUSIVITY", "rule": "zone", "zone": 2}]})

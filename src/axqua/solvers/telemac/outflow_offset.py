@@ -16,7 +16,17 @@ water level over the patch upstream did not change.
 The offset is raised linearly from 0 over the first ``RAMP`` seconds of a run. A run
 starts from the steady result at the level of the rating, and a step of a meter at the
 outlet sends a surge up the reach: in the trial the water level rose 1.3 m above its
-final value 300 s after a step of 1.6 m.
+final value 300 s after a step of 1.6 m. A run that applies the offset therefore lasts
+the ramp longer (:func:`axqua.bayescal.calibration_hotstart_duration`), and never less
+than ``MIN_DURATION``, the ramp and as long again for the reach to settle
+(:func:`with_duration`): a run that ended during the ramp would tie each sampled offset
+to the water levels of a smaller one.
+
+HydroBayesCal rewrites ``<model_dir>/user_fortran/user_sl.f`` whatever the case names
+(``control_telemac.py``), so the case's user Fortran folder has to be ``user_fortran``
+and every steering file of a calibration run has to name it (:func:`check`,
+:func:`with_fortran_folder`). The built steering file of the case is never changed:
+a calibration that would run it gets a copy (:func:`axqua.bayescal.ready_outflow_offset`).
 
 How it reaches TELEMAC: TELEMAC-2D calls ``USER_SL`` with every prescribed level it
 reads from ``PRESCRIBED ELEVATIONS`` (``sl.f``), only for boundaries that prescribe a
@@ -32,6 +42,7 @@ Not available yet: TELEMAC-3D, a level from TELEMAC's own Z(Q) curve
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 #: Fortran variable that holds the offset, and HydroBayesCal's name of the parameter.
@@ -43,6 +54,12 @@ FILE = "user_sl.f"
 LEVEL_KINDS = ("fixed", "rating")
 #: Seconds over which the offset rises from 0 to its value.
 RAMP = 600.0
+#: The shortest run that applies the offset [s]: the ramp, and as long again for the reach to settle at the new level.
+MIN_DURATION = 2.0 * RAMP
+#: The folder HydroBayesCal rewrites the routine in, in the model folder.
+FOLDER = "user_fortran"
+#: The first line of the routine aXqua writes, by which it knows its own file.
+MARK = "!     aXqua generated: the outflow level as a calibration parameter"
 
 
 def _dbl(value: float) -> str:
@@ -53,7 +70,7 @@ def _dbl(value: float) -> str:
 def source(offset: float = 0.0) -> str:
     """Fixed-form Fortran of ``USER_SL`` that adds *offset* [m] to every prescribed level."""
     lines = [
-        "!     aXqua generated: the outflow level as a calibration parameter",
+        MARK,
         "!     Written by aXqua (axqua.solvers.telemac.outflow_offset) for",
         "!     TELEMAC-2D v9. SL (sl.f) calls USER_SL with the level of",
         "!     PRESCRIBED ELEVATIONS for every liquid boundary that prescribes",
@@ -154,17 +171,84 @@ def check(cfg) -> None:
             remedy="Remove calibration.outflow_offset or the gain-lose reach.")
 
 
-def prepare(cfg) -> Path:
-    """Check the case and write ``user_sl.f`` with offset 0 into its user Fortran folder."""
+def folder_name(value) -> str:
+    """A folder as a steering file or the case names it, without quotes, ``./`` and a trailing slash."""
+    text = str(value).strip().strip("'\"").strip().replace("\\", "/")
+    return "/".join(part for part in text.split("/") if part not in ("", "."))
+
+
+def own_routines(folder: Path) -> list[str]:
+    """The files in *folder* that define ``USER_SL`` and are not the routine aXqua writes."""
+    found = []
+    for path in sorted(Path(folder).glob("*.[fF]*")) if Path(folder).is_dir() else []:
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if path.name == FILE and text.startswith(MARK):
+            continue
+        if re.search(r"^\s+SUBROUTINE\s+USER_SL\b", text, flags=re.M | re.I):
+            found.append(path.name)
+    return found
+
+
+def check_folder(cfg, model_dir=None) -> None:
+    """Refuse a case whose user Fortran folder HydroBayesCal does not rewrite, or which holds a ``USER_SL`` of its own."""
+    from axqua.core.errors import ConfigError
+
+    if folder_name(cfg.user_fortran_dir) != FOLDER:
+        raise ConfigError(
+            f"the user Fortran folder of the case is {cfg.user_fortran_dir!r}, but "
+            f"HydroBayesCal rewrites the routine of the outflow level in {FOLDER}/{FILE}",
+            subject="user_fortran_dir",
+            remedy=f"Name the folder {FOLDER} (user_fortran_dir), or remove "
+                   "calibration.outflow_offset.")
+    folder = Path(model_dir or cfg.model_dir) / FOLDER
+    mine = own_routines(folder)
+    if mine:
+        raise ConfigError(
+            f"{folder} holds a routine USER_SL of the case ({', '.join(mine)}), which "
+            "the calibration of the outflow level would replace",
+            subject="calibration.outflow_offset",
+            remedy="Remove calibration.outflow_offset, or move the routine out of the "
+                   "folder.")
+
+
+def prepare(cfg, model_dir=None) -> Path:
+    """Check the case and write ``user_sl.f`` with offset 0 into ``user_fortran`` of *model_dir* (the case's model folder by default)."""
     check(cfg)
-    return write(Path(cfg.model_dir) / cfg.user_fortran_dir)
+    check_folder(cfg, model_dir)
+    return write(Path(model_dir or cfg.model_dir) / FOLDER)
 
 
 def with_fortran_folder(cfg, text: str) -> str:
-    """*text* of a steering file that names the user Fortran folder."""
-    from axqua.solvers.telemac.steering import set_keyword
+    """*text* of a steering file that names ``user_fortran``; a steering file that names another folder or file is refused, because TELEMAC would not compile the routine HydroBayesCal rewrites."""
+    from axqua.core.errors import ConfigError
+    from axqua.solvers.telemac.steering import keyword_spans, set_keyword
 
-    if any(line.strip().upper().startswith("FORTRAN FILE")
-           for line in text.splitlines()):
-        return text
-    return set_keyword(text, "FORTRAN FILE", f"'{cfg.user_fortran_dir}'", append=True)
+    for name, _first, _stop, value in keyword_spans(text.splitlines()):
+        if name != "FORTRAN FILE":
+            continue
+        if folder_name(value) == FOLDER:
+            return text
+        raise ConfigError(
+            f"the steering file names {value.strip()} in FORTRAN FILE, but the routine "
+            f"of the outflow level is compiled only from the folder {FOLDER}",
+            subject="FORTRAN FILE",
+            remedy=f"Put the user routines of the case into the folder {FOLDER} and "
+                   "name it in FORTRAN FILE, or remove calibration.outflow_offset.")
+    return set_keyword(text, "FORTRAN FILE", f"'{FOLDER}'", append=True)
+
+
+def with_duration(text: str, minimum: float = MIN_DURATION) -> tuple[str, float | None]:
+    """*text* of a steering file whose ``DURATION`` is at least *minimum* [s], and the shorter duration it had (None when it was long enough or names none)."""
+    from axqua.solvers.telemac.steering import keyword_spans, set_keyword
+
+    for name, _first, _stop, value in keyword_spans(text.splitlines()):
+        if name != "DURATION":
+            continue
+        try:
+            current = float(value.strip().rstrip(";").replace("D", "E").replace("d", "e"))
+        except ValueError:
+            return text, None
+        if current >= minimum:
+            return text, None
+        return set_keyword(text, "DURATION", f"{minimum:g}"), current
+    return text, None

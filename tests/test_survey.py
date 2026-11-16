@@ -499,6 +499,52 @@ def test_dry_ground_is_walked_on_along_the_wetted_edge_only(flow):
     # a wider strip is a setting
     wide = walk.build_grid(flow, GroundSettings(bank_strip=6.0), sites)
     assert (wide.passable & ~wide.water).sum() > 3 * land.sum()
+    assert (grid.strip_walked, wide.strip_walked) == (1.0, 6.0)
+
+
+def test_a_coarse_raster_walks_a_wider_strip_and_says_so(flow):
+    """Review of 2026-11-16: on a reach long enough for cells of 3 m the strip is one ring of them, and the factsheet named the 1 m asked for."""
+    from axqua.survey import factsheet
+
+    sites = [(X0 + 40.0, Y0 - 10.0)]
+    grid = walk.build_grid(flow, GroundSettings(), sites, min_cell=3.0)
+    assert grid.cell == 3.0 and grid.strip_walked == 3.0 and "strip of 3 m" in walk.link_warnings(grid)[0]
+    away = __import__("scipy.ndimage", fromlist=["x"]).distance_transform_edt(~grid.water) * grid.cell
+    land = grid.passable & ~grid.water
+    land.flat[grid.cell_of(*sites[0])] = False
+    assert land.any() and away[land].max() <= grid.strip_walked + 0.5 * grid.cell  # one ring of cells, the corners of the ring on the diagonal, no more
+    context = {"settings": SurveySettings()}
+    assert factsheet._land(context, {"bank_strip": 3.0, "cell": 3.0}) == "On land the walk keeps within 3 m of the wetted edge (the walking raster of this reach has cells of 3 m, wider than the 1 m asked for)."
+    assert factsheet._land(context, {"bank_strip": 1.0, "cell": 1.0}) == factsheet._land(context) == "On land the walk keeps within 1 m of the wetted edge."
+
+
+def test_the_steps_of_the_walking_graph_are_those_of_the_full_raster(flow):
+    """Review of 2026-11-16: the steps are computed for the passable pairs only; the times must be those the full-raster computation gave."""
+    ground = GroundSettings()
+    grid = walk.build_grid(flow, ground, [ACCESS])
+    ny, nx, cell = grid.ny, grid.nx, grid.cell
+    water, u, v, passable = grid.water, grid.u, grid.v, grid.passable
+    v_land, v_with, v_against = ground.speed_land * walk.KMH, ground.speed_with_current * walk.KMH, walk.against_speed(ground, grid.depth)
+    expected = {}
+    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+        a = (slice(max(0, -dy), ny - max(0, dy)), slice(max(0, -dx), nx - max(0, dx)))
+        b = (slice(max(0, dy), ny - max(0, -dy)), slice(max(0, dx), nx - max(0, -dx)))
+        ok = passable[a] & passable[b]
+        if abs(dx) + abs(dy) == 2:
+            ok &= passable[a[0], b[1]] & passable[b[0], a[1]]
+        both = water[a] & water[b]
+        fu = np.where(both, 0.5 * (u[a] + u[b]), np.where(water[b], u[b], u[a]))
+        fv = np.where(both, 0.5 * (v[a] + v[b]), np.where(water[b], v[b], v[a]))
+        fs = np.hypot(fu, fv)
+        cosine = np.where(fs > walk.STILL, (dx * fu + dy * fv) / (np.hypot(dx, dy) * np.where(fs > walk.STILL, fs, 1.0)), 1.0)
+        slow = np.where(both, np.minimum(v_against[a], v_against[b]), np.where(water[b], v_against[b], v_against[a]))
+        pace = np.where(water[a] | water[b], np.where(cosine >= 0, v_with, v_with + (slow - v_with) * (-cosine)), v_land)
+        index = np.arange(nx * ny).reshape(ny, nx)
+        for i, j, t in zip(index[a][ok], index[b][ok], (cell * np.hypot(dx, dy) / pace)[ok]):
+            expected[(int(grid.node_of[i]), int(grid.node_of[j]))] = float(t)
+    graph = grid.graph.tocoo()
+    found = {(int(i), int(j)): float(t) for i, j, t in zip(graph.row, graph.col, graph.data)}
+    assert found.keys() == expected.keys() and all(found[k] == pytest.approx(expected[k], rel=1e-12) for k in expected)
 
 
 def test_a_point_close_to_the_strip_is_joined_without_a_warning(flow):

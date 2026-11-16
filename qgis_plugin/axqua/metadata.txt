@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.4.0
+version=1.4.1
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,29 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.4.0
+changelog=1.4.1
+    - Calibration of the outflow level: the calibration at several
+      discharges ('flows' of run_Bayes_cal_multiflow.py) now applies the
+      offset; before, every run kept the offset 0.
+    - The built steering file of the case is no longer changed by a
+      calibration of the outflow level: the runs get a copy
+      (calibration2d-offset.cas). A rebuild after a cancelled calibration
+      no longer keeps the last offset the calibration had tried.
+    - A run that applies the outflow offset lasts long enough for the
+      offset to rise over 600 s and the reach to settle: a calibration
+      run from the steady result lasts 600 s longer, and none lasts less
+      than 1200 s.
+    - The outflow offset is refused with a clear message where TELEMAC
+      would not compile its routine (a user Fortran folder other than
+      user_fortran, or a USER_SL of the case's own).
+    - The validation starts from calibration.control_file where the
+      calibration ran that file, as the calibration did.
+    - Survey planner: the outflow offset needs no points of its own and
+      leaves the roughness zones selected; the factsheet states the strip
+      along the wetted edge that the plan walked, which on a long reach is
+      wider than 1 m; the walking graph needs much less memory.
+    - A release whose run was lost at GitHub is started again once.
+    1.4.0
     - New: the Survey planner (tab Calibration and validation). From the
       result of a steady run, the roughness zones and the calibration
       parameters of the case, it says where to measure before a

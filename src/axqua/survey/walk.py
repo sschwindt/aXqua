@@ -48,6 +48,7 @@ class WalkGrid:
     nodes: np.ndarray           # the cells of the graph
     node_of: np.ndarray         # the row of a cell in the graph, -1 for a cell that cannot be walked on
     strip: float = 0.0          # the width of the bank strip that was asked for [m]
+    strip_walked: float = 0.0   # the width the raster walks on: whole cells, at least one ring of them [m]
     links: list = field(default_factory=list)    # (x, y, length [m]) of the sites joined to the walkable ground by a straight line
 
     def cell_of(self, x: float, y: float) -> int:
@@ -119,9 +120,11 @@ def build_grid(flow: FlowField, ground: GroundSettings, sites_xy, *, walkable=No
     wet_here = (flow.x >= x0) & (flow.x < x0 + nx * cell) & (flow.y >= y0) & (flow.y < y0 + ny * cell) & wet
     node_cell[((flow.y[wet_here] - y0) // cell).astype(int), ((flow.x[wet_here] - x0) // cell).astype(int)] = True
     strip = float(ground.bank_strip)
+    rings = max(int(np.floor(strip / cell + 0.5)), 1)          # the rings of cells around the water that the strip covers
+    reach = (rings + 0.5) * cell                               # between the centers: max(strip + 0.5 cell, 1.5 cell), counted in whole cells
     away = distance_transform_edt(~water) * cell if water.any() else np.full((ny, nx), np.inf)
-    on_land = ~water & ((away <= max(strip + 0.5 * cell, 1.5 * cell)) | node_cell)
-    on_land &= ~_river_goes_on(flow, on_land & ~inside, gx, gy, 2.0 * max(strip + 0.5 * cell, 1.5 * cell) + flow.edge_length)
+    on_land = ~water & ((away <= reach) | node_cell)
+    on_land &= ~_river_goes_on(flow, on_land & ~inside, gx, gy, 2.0 * reach + flow.edge_length)
     if walkable is not None:
         import shapely
 
@@ -134,6 +137,8 @@ def build_grid(flow: FlowField, ground: GroundSettings, sites_xy, *, walkable=No
     v_land, v_with = ground.speed_land * KMH, ground.speed_with_current * KMH
     v_against = against_speed(ground, depth)
     index = np.arange(nx * ny).reshape(ny, nx)
+    # Each step is computed for the pairs of cells that can be walked on and no others: a raster of millions of cells holds a few percent of them.
+    is_water, fu_all, fv_all, against_all = water.ravel(), u.ravel(), v.ravel(), np.broadcast_to(v_against, (ny, nx)).ravel()
     rows, cols, times = [], [], []
     for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
         a = (slice(max(0, -dy), ny - max(0, dy)), slice(max(0, -dx), nx - max(0, dx)))
@@ -143,18 +148,19 @@ def build_grid(flow: FlowField, ground: GroundSettings, sites_xy, *, walkable=No
             # no cutting the corner of water that cannot be waded
             ok &= passable[a[0], b[1]] & passable[b[0], a[1]]
         length = cell * float(np.hypot(dx, dy))
-        in_water = water[a] | water[b]
-        both = water[a] & water[b]
-        fu = np.where(both, 0.5 * (u[a] + u[b]), np.where(water[b], u[b], u[a]))
-        fv = np.where(both, 0.5 * (v[a] + v[b]), np.where(water[b], v[b], v[a]))
+        ia, ib = index[a][ok], index[b][ok]
+        wa, wb = is_water[ia], is_water[ib]
+        both = wa & wb
+        fu = np.where(both, 0.5 * (fu_all[ia] + fu_all[ib]), np.where(wb, fu_all[ib], fu_all[ia]))
+        fv = np.where(both, 0.5 * (fv_all[ia] + fv_all[ib]), np.where(wb, fv_all[ib], fv_all[ia]))
         fs = np.hypot(fu, fv)
         cosine = np.where(fs > STILL, (dx * fu + dy * fv) / (np.hypot(dx, dy) * np.where(fs > STILL, fs, 1.0)), 1.0)
-        slow = np.where(water[a] & water[b], np.minimum(v_against[a], v_against[b]), np.where(water[b], v_against[b], v_against[a]))
+        slow = np.where(both, np.minimum(against_all[ia], against_all[ib]), np.where(wb, against_all[ib], against_all[ia]))
         wading = np.where(cosine >= 0, v_with, v_with + (slow - v_with) * (-cosine))
-        pace = np.where(in_water, wading, v_land)
-        rows.append(index[a][ok])
-        cols.append(index[b][ok])
-        times.append((length / pace)[ok])
+        pace = np.where(wa | wb, wading, v_land)
+        rows.append(ia)
+        cols.append(ib)
+        times.append(length / pace)
     rows, cols, times = np.concatenate(rows), np.concatenate(cols), np.concatenate(times)
     # The graph holds the cells that can be walked on and the cells of the sites, which may lie on ground that cannot.
     site_cells = [int(np.clip((y - y0) // cell, 0, ny - 1)) * nx + int(np.clip((x - x0) // cell, 0, nx - 1)) for x, y in sites_xy]
@@ -185,7 +191,7 @@ def build_grid(flow: FlowField, ground: GroundSettings, sites_xy, *, walkable=No
             extra[2].extend((seconds, seconds))
             links.append((float(x), float(y), float(distance[nearest])))
     graph = coo_matrix((np.concatenate([times, extra[2]]), (np.concatenate([rows, extra[0]]).astype(np.int64), np.concatenate([cols, extra[1]]).astype(np.int64))), shape=(count, count)).tocsr()
-    return WalkGrid(x0=float(x0), y0=float(y0), cell=float(cell), nx=nx, ny=ny, depth=depth, u=u, v=v, water=water, passable=passable, graph=graph, nodes=nodes, node_of=node_of, strip=strip, links=links)
+    return WalkGrid(x0=float(x0), y0=float(y0), cell=float(cell), nx=nx, ny=ny, depth=depth, u=u, v=v, water=water, passable=passable, graph=graph, nodes=nodes, node_of=node_of, strip=strip, strip_walked=rings * cell, links=links)
 
 
 def _river_goes_on(flow: FlowField, cells: np.ndarray, gx: np.ndarray, gy: np.ndarray, reach: float) -> np.ndarray:
@@ -213,7 +219,7 @@ def _river_goes_on(flow: FlowField, cells: np.ndarray, gx: np.ndarray, gy: np.nd
 
 def link_warnings(grid: WalkGrid, what: str = "the access point") -> list[str]:
     """What to say about a site that only a straight line joins to the ground that can be walked on."""
-    return [f"{what} lies {distance:.0f} m from ground the plan can walk on (the strip of {grid.strip:g} m along the wetted edge and the walkable areas): the plan takes the straight line between them; draw a walkable area where the way there is another"
+    return [f"{what} lies {distance:.0f} m from ground the plan can walk on (the strip of {grid.strip_walked or grid.strip:g} m along the wetted edge and the walkable areas): the plan takes the straight line between them; draw a walkable area where the way there is another"
             for _x, _y, distance in grid.links if distance > LONG_LINK]
 
 

@@ -129,6 +129,8 @@ def plan_temperature(flow: FlowField, settings: SurveySettings, access=None, *, 
         "walking_minutes": round(total(("walk", "return")), 1), "working_minutes": round(total(("measure",)), 1), "break_minutes": round(total(("break", "long break")), 1),
         "walk_length": round(sum(p["length"] for p in paths)), "not_on_foot": int(sum(r["reach"] != "wading" for r in rows)),
     }
+    if grid is not None:
+        summary.update(bank_strip=grid.strip_walked, cell=grid.cell)
     return {"points": rows, "patches": patches, "paths": paths, "events": marks, "timeline": timeline, "warnings": warnings, "summary": summary}
 
 

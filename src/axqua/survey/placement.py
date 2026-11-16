@@ -28,6 +28,7 @@ BANK_NODES = (1, 3)
 MARGIN_DEPTH = 0.15
 
 ZONE_NOTE = "a roughness zone of the zone map that the calibration of the case does not name yet"
+OUTFLOW_NOTE = "the outflow level: the water depths read at every vertical the other parameters place inform it, so it needs no points of its own"
 SEDIMENT_NOTE = "a sediment parameter: velocities and depths say little about it; survey grain sizes and the fine sediment of the riverbed for it"
 
 
@@ -82,15 +83,19 @@ def case_needs(cfg, settings: SurveySettings) -> list[ParameterNeed]:
         parameters = list(telemac_parameters(cfg))
     except Exception:                                # noqa: BLE001 - a case without a calibration block
         parameters = []
+    from axqua.solvers.telemac.outflow_offset import NAME as OUTFLOW
+
     for p in parameters:
-        rule, zone, note = guess_rule(p.name)
+        rule, zone, note = ("everywhere", None, OUTFLOW_NOTE) if str(p.name).strip() == OUTFLOW else guess_rule(p.name)
         declared.append(ParameterNeed(name=str(p.name), rule=rule, zone=zone, points=settings.points_per_parameter, use=not note, declared=True, note=note))
         limits[str(p.name)] = (float(p.min), float(p.max))
     named = {need.zone for need in declared if need.rule == "zone"}
+    # The zones of the map are selected where the case declares nothing the points are placed for: the outflow level is no such parameter (review of 2026-11-16).
+    placed_for = [p for p in parameters if str(p.name).strip() != OUTFLOW]
     for zone, span in map_zones(cfg).items():
         if zone in named:
             continue
-        declared.append(ParameterNeed(name=f"zone{zone}", rule="zone", zone=zone, points=settings.points_per_parameter, use=not parameters, declared=True, note=ZONE_NOTE))
+        declared.append(ParameterNeed(name=f"zone{zone}", rule="zone", zone=zone, points=settings.points_per_parameter, use=not placed_for, declared=True, note=ZONE_NOTE))
         if span is not None:
             limits[f"zone{zone}"] = span
     by_name = {need.name: need for need in declared}

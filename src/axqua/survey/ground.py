@@ -120,7 +120,7 @@ def plan_ground(flow: FlowField, settings: SurveySettings, needs, access, *, sun
             x, y = sites[event["site"]]
             marks.append({"kind": "pressure adjustment" if event["kind"] == "pressure" else event["kind"], "surveyor": event["surveyor"], "day": event["day"] + 1, "at": "access" if event["site"] == 0 else label_of.get(event["site"], ""), "start": fmt_clock(event["start"]), "end": fmt_clock(event["end"]), "minutes": round(event["end"] - event["start"], 1), "x": x, "y": y})
 
-    return {"points": rows, "paths": paths, "events": marks, "timeline": _timeline(events, label_of), "warnings": warnings, "summary": _summary(events, rows, paths, runs, dgps, settings, sun), "grid": grid, "access": (ax, ay)}
+    return {"points": rows, "paths": paths, "events": marks, "timeline": _timeline(events, label_of), "warnings": warnings, "summary": {**_summary(events, rows, paths, runs, dgps, settings, sun), "bank_strip": grid.strip_walked, "cell": grid.cell}, "grid": grid, "access": (ax, ay)}
 
 
 def timetable(router, run, service, settings: SurveySettings, sun, surveyor: int, warnings: list, *, pressure_interval_h: float = 0.0, pressure_minutes: float = 0.0) -> list[dict]:

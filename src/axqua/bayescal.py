@@ -314,6 +314,8 @@ def _away_from_liquid_boundaries(cfg: Config, points: pd.DataFrame) -> pd.DataFr
 
 #: The steering file of calibration runs that start from the steady result.
 CALIBRATION_HOTSTART_CAS = "calibration2d.cas"
+#: The steering file of calibration runs that apply the outflow offset, when they would otherwise run the built steady case or a control file of the user's: neither is changed.
+CALIBRATION_OFFSET_CAS = "calibration2d-offset.cas"
 #: Simulated time of such a run, in residence times of the reach (wetted volume over
 #: discharge). Measured on the finest Inn KB15 mesh (2026-11-08; 133,500 m3 at
 #: 54.3 m3/s, a residence time of 2,460 s), continuing from the steady result with
@@ -386,7 +388,7 @@ def calibration_hotstart_duration(cfg: Config) -> float:
 
     ``calibration.hotstart_duration`` when given. Otherwise the run lasts
     :data:`HOTSTART_RESIDENCE_TIMES` residence times of the reach, rounded up to
-    100 s: the residence time is the volume of water in the converged result over the
+    100 s, plus the ramp of the outflow offset when the case calibrates it: the residence time is the volume of water in the converged result over the
     discharge, the time in which the reach exchanges its water once. A changed
     roughness changes the stored volume, and the flow has settled once that change
     has passed the outflow.
@@ -419,8 +421,14 @@ def calibration_hotstart_duration(cfg: Config) -> float:
                         - (x[ikle[:, 2]] - x[ikle[:, 0]]) * (y[ikle[:, 1]] - y[ikle[:, 0]]))
     volume = float((area * h[ikle].mean(axis=1)).sum())
     residence = volume / discharge
-    return float(max(HOTSTART_MIN_DURATION,
-                     np.ceil(HOTSTART_RESIDENCE_TIMES * residence / 100.0) * 100.0))
+    settle = float(max(HOTSTART_MIN_DURATION,
+                       np.ceil(HOTSTART_RESIDENCE_TIMES * residence / 100.0) * 100.0))
+    if cfg.calibration.outflow_offset is not None:
+        # the outflow offset rises over its ramp first, and the reach settles after it
+        from axqua.solvers.telemac.outflow_offset import RAMP
+
+        settle += RAMP
+    return settle
 
 
 def write_calibration_hotstart(cfg: Config) -> str:
@@ -508,13 +516,22 @@ def run_single_flow_calibration(
               f"{table['SCALAR VELOCITY_DATA'].max():.3f}")
 
     ensure_graphic_output(cfg.model_path(cfg.cas_file))
+    written = False
     if cfg.calibration.hotstart:
         if cfg.calibration.control_file:
             log.warning("calibration.hotstart is ignored: calibration.control_file "
                         "names the steering file (%s)", cfg.calibration.control_file)
         else:
             cfg.calibration.control_file = write_calibration_hotstart(cfg)
-    ready_outflow_offset(cfg, parameters, [cfg.calibration.control_file or cfg.cas_file])
+            written = True
+    # the built case and a control file of the user's are not changed: the runs get a copy
+    used = ready_outflow_offset(cfg, parameters, [cfg.calibration.control_file or cfg.cas_file],
+                                copy=not written)
+    if used:
+        cfg.calibration.control_file = used[0]
+        if prepare_only:
+            print(f"  a calibration run by hand leaves its last offset in "
+                  f"{cfg.model_path('user_fortran')}/user_sl.f; aXqua's own runs put 0 back")
 
     def emit(complete: bool, only_bal: bool) -> Path:
         return emit_hbc_config(cfg, csv, complete_bal_mode=complete,
@@ -532,28 +549,46 @@ def run_single_flow_calibration(
     return code
 
 
-def ready_outflow_offset(cfg: Config, parameters, steering_files) -> bool:
-    """Prepare the case for a calibration of the outflow level, when *parameters* hold it.
+def ready_outflow_offset(cfg: Config, parameters, steering_files, *, model_dir=None,
+                         copy: bool = False, settle: bool = True) -> list[str]:
+    """Prepare the runs of a calibration of the outflow level, when *parameters* hold it.
 
-    Writes ``user_sl.f`` (offset 0) into the user Fortran folder and names that folder
-    in each of *steering_files* (names in the model folder) that does not name it yet
-    (:mod:`axqua.solvers.telemac.outflow_offset`). With the offset 0 the routine
-    changes nothing, so a steady run of the case that compiles it afterwards keeps the
-    level of the rating. Returns whether the offset is calibrated.
+    Writes ``user_sl.f`` (offset 0) into ``user_fortran`` of *model_dir* (the case's
+    model folder by default), names that folder in each of *steering_files* (names in
+    that folder) and, with *settle*, lengthens a run that would end before the offset
+    has risen and the reach has settled (:mod:`axqua.solvers.telemac.outflow_offset`).
+    With *copy* the one steering file is left as it is and the runs get
+    :data:`CALIBRATION_OFFSET_CAS`: the built case and a control file of the user's
+    are never changed. Call it before :func:`case_as_built` takes its copy, so that a
+    calibration hands the routine back with the offset 0. Returns the names of the
+    steering files the runs use, or ``[]`` when the offset is not calibrated.
     """
     from axqua.solvers.telemac import outflow_offset
 
     if not outflow_offset.calibrated(p.name for p in parameters):
-        return False
-    path = outflow_offset.prepare(cfg)
+        return []
+    if copy and len(steering_files) != 1:
+        raise ValueError("a copy is made of one steering file")
+    folder = Path(model_dir or cfg.model_dir)
+    path = outflow_offset.prepare(cfg, folder)
+    used = []
     for name in steering_files:
-        cas = cfg.model_path(name)
-        text = cas.read_text()
+        text = (folder / name).read_text()
         new = outflow_offset.with_fortran_folder(cfg, text)
-        if new != text:
-            cas.write_text(new)
-    print(f"outflow level offset {cfg.calibration.outflow_offset} m -> {path}")
-    return True
+        if settle:
+            new, short = outflow_offset.with_duration(new)
+            if short is not None:
+                log.warning("%s: DURATION %g s ends before the outflow offset has risen "
+                            "over %g s and the reach has settled; the runs last %g s",
+                            name, short, outflow_offset.RAMP, outflow_offset.MIN_DURATION)
+        if copy:
+            name = CALIBRATION_OFFSET_CAS
+        if copy or new != text:
+            (folder / name).write_text(new)
+        used.append(name)
+    print(f"outflow level offset {cfg.calibration.outflow_offset} m -> {path}"
+          + (f" (runs: {', '.join(used)})" if copy else ""))
+    return used
 
 
 #: Folder in the calibration directory that holds the files of the built case while a
@@ -569,7 +604,7 @@ def _rewritten_by_the_driver(cfg: Config) -> list[str]:
     if getattr(cfg.calibration, "outflow_offset", None) is not None:
         from axqua.solvers.telemac import outflow_offset
 
-        names.append(f"{cfg.user_fortran_dir}/{outflow_offset.FILE}")
+        names.append(f"{outflow_offset.FOLDER}/{outflow_offset.FILE}")
     if cfg.morphodynamics.enabled:
         names.append(cfg.gaia_cas)
     return [str(name) for name in names if name]
@@ -639,6 +674,16 @@ def discard_as_built(cfg: Config) -> bool:
     keep = cfg.calibration_path(AS_BUILT)
     if not keep.is_dir():
         return False
+    # The routine of the outflow offset is no file of the build, so the build does not
+    # write it anew: it goes back the way the calibration found it, or a killed
+    # calibration would leave its last sampled offset in the folder of the case.
+    from axqua.solvers.telemac import outflow_offset
+
+    routine = Path(outflow_offset.FOLDER) / outflow_offset.FILE
+    if (keep / routine).is_file():
+        target = Path(cfg.model_dir) / routine
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(keep / routine, target)
     shutil.rmtree(keep, ignore_errors=True)
     return True
 
@@ -1147,6 +1192,12 @@ def run_multiflow_smoke(cfg: Config, flows: list[FlowSpec], multiflow_dir: Path,
     for f in flows:
         write_flow_cas(cfg, base_cas, f, smoke, duration=30.0, dest_dir=model,
                        listing=50, graphic=50)
+    # the outflow offset in the copied model folder; the plumbing test keeps its 30 s
+    from axqua.calibration import telemac_parameters
+
+    ready_outflow_offset(cfg, telemac_parameters(cfg),
+                         [f"steady2d-{f.name}.cas" for f in flows], model_dir=model,
+                         settle=False)
     config_path = emit_multiflow_config(
         cfg, smoke, model, flows, csv_paths, n_cpus=2, init_runs=init_runs,
         max_runs=init_runs, complete_bal_mode=False,
@@ -1206,6 +1257,10 @@ def run_multiflow_calibration(
     print("per-flow steering files:")
     for f in flows:
         write_flow_cas(cfg, base_cas, f, multiflow_dir)
+    from axqua.calibration import telemac_parameters
+
+    parameters = telemac_parameters(cfg)
+    ready_outflow_offset(cfg, parameters, [f"steady2d-{f.name}.cas" for f in flows])
 
     resume = launch_mode == "resume"
     if resume:
@@ -1217,7 +1272,7 @@ def run_multiflow_calibration(
     config_path = emit_multiflow_config(
         cfg, multiflow_dir, cfg.model_dir, flows, csv_paths,
         n_cpus=cfg.telemac.n_processors, init_runs=cfg.calibration.init_runs,
-        max_runs=cfg.calibration.max_runs, only_bal_mode=resume)
+        max_runs=cfg.calibration.max_runs, only_bal_mode=resume, parameters=parameters)
     print(f"multiflow config -> {config_path}"
           + (" (only_bal_mode: reusing completed initial designs)" if resume else ""))
     driver = stage_driver(multiflow_dir, "bal_telemac_multiflow.py",

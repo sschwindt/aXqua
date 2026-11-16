@@ -81,6 +81,9 @@ def test_a_run_lasts_the_residence_time_of_the_reach(cfg):
     expected = max(bayescal.HOTSTART_MIN_DURATION,
                    np.ceil(bayescal.HOTSTART_RESIDENCE_TIMES * 10000.0 / 100) * 100)
     assert bayescal.calibration_hotstart_duration(cfg) == pytest.approx(expected)
+    # review of 2026-11-16: a run that calibrates the outflow level lasts its ramp longer
+    cfg.calibration.outflow_offset = [0.0, 2.0]
+    assert bayescal.calibration_hotstart_duration(cfg) == pytest.approx(expected + 600.0)
 
 
 def test_a_given_duration_wins(cfg):

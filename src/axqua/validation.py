@@ -17,7 +17,8 @@ untouched, so a difference between model and measurement cannot come from a mode
 that was built differently. It starts the way the calibration runs started: from the
 dry or pre-wetted start of the built case, or, with ``calibration.hotstart``, from the
 steady result for 1.2 residence times at the discharge of the situation
-(:func:`axqua.bayescal.situation_start`).
+(:func:`axqua.bayescal.situation_start`), or from ``calibration.control_file`` where
+the calibration at the discharge of the case ran that file (:func:`calibration_start`).
 
 The calibrated values are the **per-parameter posterior maxima** of the newest
 calibration (:func:`calibrated_parameters`): the peak of each parameter's own posterior,
@@ -253,6 +254,33 @@ def _keyword(text: str, key: str) -> str | None:
     return found.group(1).strip().strip("'\"") if found else None
 
 
+def calibration_start(cfg, situation, name: str, results: str) -> str:
+    """The steering text the validation run starts from: the one the calibration runs started from.
+
+    A calibration at several discharges (``calibration.situations``) starts each run as
+    :func:`axqua.bayescal.situation_start` does. The calibration at the discharge of the
+    case runs ``calibration.control_file`` when the case names one, and then ignores
+    ``calibration.hotstart``; the validation does the same (review of 2026-11-16: it
+    used the hotstart while the calibration had run the control file).
+    """
+    from axqua import bayescal
+
+    control = cfg.calibration.control_file
+    if control and not bayescal.calibration_situations(cfg):
+        path = cfg.model_path(control)
+        if not path.is_file():
+            from axqua.core.errors import ConfigError
+
+            raise ConfigError(f"calibration.control_file {control} is missing in "
+                              f"{cfg.model_dir}", subject="calibration.control_file",
+                              remedy="Name the steering file the calibration ran.")
+        text = path.read_text(encoding="utf-8")
+        if situation.duration:
+            text = bayescal._patch_cas(text, "DURATION", f"{float(situation.duration)}")
+        return text
+    return bayescal.situation_start(cfg, situation, name, results)
+
+
 def run_duration(setup) -> float | None:
     """The simulated time [s] of a validation run, from its steering file."""
     value = _keyword(setup.cas.read_text(encoding="utf-8"), "DURATION")
@@ -357,9 +385,7 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
     tag = slug(situation.name)
     model = Path(cfg.model_dir)
     results = f"{Path(cfg.results_slf).stem}-validation-{tag}.slf"
-    # the start of the calibration runs: the built case, or with calibration.hotstart
-    # its continuation from the steady result
-    text = bayescal.situation_start(cfg, situation, f"validation-{tag}.cas", results)
+    text = calibration_start(cfg, situation, f"validation-{tag}.cas", results)
     notes: list[str] = []
 
     # ---- the boundary values of the situation --------------------------------------
@@ -401,11 +427,18 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
         text = bayescal._patch_cas(text, "FRICTION DATA FILE", friction_path.name)
     if offset.VARIABLE in constants:
         # the calibrated outflow level: the routine that adds it, in the folder the
-        # steering file names (a case without user Fortran gets the folder)
+        # calibration compiled it from (a case without user Fortran gets the folder),
+        # and a run long enough for the offset to rise and the reach to settle
+        offset.check_folder(cfg)
         text = offset.with_fortran_folder(cfg, text)
         folder = _keyword(text, "FORTRAN FILE")
         if not (model / folder / offset.FILE).is_file():
             offset.write(model / folder)
+        text, short = offset.with_duration(text)
+        if short is not None:
+            notes.append(f"DURATION {short:g} s ended before the outflow offset had risen "
+                         f"over {offset.RAMP:g} s and the reach had settled; the run "
+                         f"lasts {offset.MIN_DURATION:g} s")
     if constants:
         folder = _keyword(text, "FORTRAN FILE")
         if not folder or not (model / folder).is_dir():
