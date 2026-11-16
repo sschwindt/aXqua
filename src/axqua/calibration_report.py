@@ -103,7 +103,13 @@ def _verdict(zone_info: dict | None, flags, reduction) -> str:
     return ", ".join(parts)
 
 
-def _value_text(value: float, zone: bool) -> str:
+#: Title and axis label of parameters that are not a roughness zone.
+LABELS = {"f.OUTFLOW_OFFSET": ("Outflow level", "offset above the rating level (m)")}
+
+
+def _value_text(value: float, zone: bool, name: str = "") -> str:
+    if name in LABELS:
+        return f"{value:+.2f} m"
     if not zone:
         return f"{value:.4g}"
     cm = 100 * value
@@ -213,18 +219,19 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
             ax.axvline(v, color=INK, lw=2, zorder=3)
             right = v > lo + 0.6 * (hi - lo)
             ax.text(v + (-1 if right else 1) * 0.015 * (hi - lo), top * 0.93,
-                    "calibrated: " + _value_text(value, zone),
+                    "calibrated: " + _value_text(value, zone, entry["name"]),
                     ha="right" if right else "left", va="top", fontweight="bold",
                     color=INK, zorder=4)
         ax.set_xlim(lo, hi)
         ax.set_ylim(0, top)
         ax.set_yticks([])
-        ax.set_xlabel("ks (cm)" if zone else entry["name"])
+        ax.set_xlabel("ks (cm)" if zone else LABELS.get(entry["name"], ("", entry["name"]))[1])
         for side in ("top", "right", "left"):
             ax.spines[side].set_visible(False)
         ax.grid(axis="x", color=GRID, lw=0.8)
         ax.set_axisbelow(True)
-        title = f"Zone {entry['zone']}" if zone else entry["name"]
+        title = (f"Zone {entry['zone']}" if zone
+                 else LABELS.get(entry["name"], (entry["name"],))[0])
         # the verdict wraps within its panel (a long one ran into the next panel)
         verdict = textwrap.wrap(entry["verdict"], 72) or [""]
         ax.set_title(title, loc="left", fontsize=14, fontweight="bold",
@@ -438,5 +445,5 @@ def write_report(cfg, folder: Path) -> dict:
     for entry in summary["parameters"]:
         if entry["value"] is not None:
             log.info("calibrated %s = %s (%s)", entry["name"],
-                     _value_text(entry["value"], entry["zone"] is not None), entry["verdict"])
+                     _value_text(entry["value"], entry["zone"] is not None, entry["name"]), entry["verdict"])
     return written

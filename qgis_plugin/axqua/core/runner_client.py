@@ -734,11 +734,11 @@ class RunnerClient:
     # -- the survey planner ---------------------------------------------------------
     def survey_info(self, case: str | os.PathLike) -> dict:
         """``{settings, parameters, kinds, rules, roles, folder, gpkg, access, layers, crs_epsg, result, result_exists, last_plan, ...}``: what the Survey planner shows before anything is planned."""
-        return self.call(["survey", "info", str(case)], timeout=300).data or {}
+        return self._survey_call(["survey", "info", str(case)], 300)
 
     def survey_init(self, case: str | os.PathLike) -> dict:
         """Create ``survey-plan.gpkg`` with the layer of the access points; ``{gpkg, layer, created, roles, crs_epsg, access}``."""
-        return self.call(["survey", "init", str(case)], timeout=300).data or {}
+        return self._survey_call(["survey", "init", str(case)], 300)
 
     def survey_conditions(self, case: str | os.PathLike, settings: dict | None = None, *, offline: bool = False) -> dict:
         """``{days, timezone, suggestion, coverage, notes, sources}``: daylight, weather and network coverage at the reach."""
@@ -752,17 +752,33 @@ class RunnerClient:
         """The settings travel as a JSON file: they are a document, not a handful of options."""
         args = ["survey", action, str(case)] + (["--offline"] if offline else [])
         if settings is None:
-            return self.call(args, timeout=timeout).data or {}
+            return self._survey_call(args, timeout)
         handle, name = tempfile.mkstemp(prefix="axqua-survey-", suffix=".json")
         try:
             with os.fdopen(handle, "w", encoding="utf-8") as stream:
                 json.dump(settings, stream)
-            return self.call(args + ["--settings", name], timeout=timeout).data or {}
+            return self._survey_call(args + ["--settings", name], timeout)
         finally:
             try:
                 os.unlink(name)
             except OSError:
                 pass
+
+    def _survey_call(self, args: list[str], timeout: float) -> dict:
+        """One call of ``axqua survey``. The plugin is updated in QGIS and the program with pip, so a new plugin can meet an aXqua from before the Survey planner; that one answers that it could not understand the arguments, which tells a user nothing."""
+        try:
+            return self.call(args, timeout=timeout).data or {}
+        except RunnerError as exc:
+            if exc.subject != "arguments":
+                raise
+            try:
+                version = self._version()
+            except AttributeError:                                # a client that never looked for its aXqua
+                version = None
+            raise RunnerError(
+                f"the Survey planner needs aXqua {SURVEY_SINCE} or newer, and the aXqua this plugin runs{f' ({version})' if version else ''} does not know it",
+                code=exc.code, subject=exc.subject, returncode=exc.returncode, stderr=exc.stderr,
+                remedy="Upgrade it with 'pip install --upgrade axqua' in its Python environment, then restart QGIS.") from exc
 
     # -- results for ParaView and VisIt -------------------------------------------
     def export_list(self, case: str | os.PathLike) -> dict:
@@ -835,6 +851,9 @@ NATIVE_ROUTES = ("windows", "windows-mpi")
 
 #: The first aXqua whose ``--native`` builds TELEMAC in parallel and which knows ``--one-core``; an older one builds on one core with ``--native`` alone and refuses the flag.
 ONE_CORE_SINCE = (1, 3, 5)
+
+#: The first aXqua with ``axqua survey`` (the Survey planner of the tab Calibration and validation).
+SURVEY_SINCE = "1.4.0"
 
 
 def _version_parts(version: str | None, count: int) -> tuple[int, ...] | None:

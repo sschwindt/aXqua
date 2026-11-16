@@ -410,6 +410,13 @@ CURATED: dict[str, dict[str, Any]] = {
              "decide the calibration. The errors of a survey and calibration target that the best "
              "initial simulation misses by more than their errors are then widened to "
              "that misfit. none: every point keeps its measurement error."),
+    "calibration.outflow_offset": _c(
+        "Range of the outflow level offset", "yaml", "m",
+        help="[min, max]: the calibration varies the outflow level by an offset in this "
+             "range, added to the level of the rating at the discharge of every "
+             "situation. For a water level held up by a control that the terrain model "
+             "does not resolve or that lies downstream of the model. Leave empty to "
+             "keep the level of the rating."),
     "openfoam.mode": _c("Free surface", "choice", choices=("vof", "rigid-lid")),
     "openfoam.outflow_boundary": _c(
         "Outflow boundary", "choice", choices=("level", "rating-curve"),

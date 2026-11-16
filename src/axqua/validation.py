@@ -369,6 +369,8 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
     text = bayescal._patch_cas(text, "RESULTS FILE", results)
 
     # ---- the calibrated values -----------------------------------------------------
+    from axqua.solvers.telemac import outflow_offset as offset
+
     zones = {name: value for name, value in parameters.items()
              if name.lower().startswith("zone")}
     constants = {name[2:].strip(): value for name, value in parameters.items()
@@ -397,6 +399,13 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
         friction_path = model / f"{Path(table).stem}-validation-{tag}.tbl"
         friction_path.write_text(new_table, encoding="utf-8")
         text = bayescal._patch_cas(text, "FRICTION DATA FILE", friction_path.name)
+    if offset.VARIABLE in constants:
+        # the calibrated outflow level: the routine that adds it, in the folder the
+        # steering file names (a case without user Fortran gets the folder)
+        text = offset.with_fortran_folder(cfg, text)
+        folder = _keyword(text, "FORTRAN FILE")
+        if not (model / folder / offset.FILE).is_file():
+            offset.write(model / folder)
     if constants:
         folder = _keyword(text, "FORTRAN FILE")
         if not folder or not (model / folder).is_dir():

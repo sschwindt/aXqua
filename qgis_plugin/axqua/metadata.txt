@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.3.5
+version=1.4.0
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,36 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.3.5
+changelog=1.4.0
+    - New: the Survey planner (tab Calibration and validation). From the
+      result of a steady run, the roughness zones and the calibration
+      parameters of the case, it says where to measure before a
+      calibration and plans the day in the field. Four kinds of survey,
+      alone or together: velocity by wading (verticals at one, two or
+      three depths counted from the riverbed), surface velocity from
+      drone video, kayak drifters, and water temperature.
+    - A plan is written to survey-plan.gpkg, with a map (PNG and PDF) and
+      a factsheet of one A4 page (.odt) per kind: points, order, walk
+      paths, timetable, daylight, weather and mobile coverage. No point
+      lies closer than 15 mesh nodes to an inflow or an outflow.
+      'axqua survey' does the same in a terminal.
+    - The walk follows the water: wading against the current is slower
+      than with it, water that is too deep or too fast is not entered,
+      and dry ground is walked on only within 1 m of the wetted edge or
+      inside the walkable areas that the user draws on the map. The
+      access points are set on the map as well.
+    - The Survey planner needs aXqua 1.4.0 as the program too:
+      'pip install --upgrade axqua'.
+    - A velocity reading without a recorded depth stands at 0.6 of the
+      water depth above the riverbed. The 0.6 height of a vertical is
+      taken from the median depth of its readings.
+    - A calibration of a case without measurement points stops with a
+      message that names the remedy.
+    - A validation run of a case with calibration.hotstart starts from
+      the steady result, the way its calibration runs started.
+    - Calibration report: a long verdict wraps within its panel, and the
+      axis of the parameter sets shows whole numbers.
+    1.3.5
     - TELEMAC built in Windows itself is built for parallel runs (MPI) by
       default; the one-core build stays a choice of the Setup Wizard
       (--one-core in a terminal).

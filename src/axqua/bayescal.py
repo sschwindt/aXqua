@@ -514,6 +514,7 @@ def run_single_flow_calibration(
                         "names the steering file (%s)", cfg.calibration.control_file)
         else:
             cfg.calibration.control_file = write_calibration_hotstart(cfg)
+    ready_outflow_offset(cfg, parameters, [cfg.calibration.control_file or cfg.cas_file])
 
     def emit(complete: bool, only_bal: bool) -> Path:
         return emit_hbc_config(cfg, csv, complete_bal_mode=complete,
@@ -531,6 +532,30 @@ def run_single_flow_calibration(
     return code
 
 
+def ready_outflow_offset(cfg: Config, parameters, steering_files) -> bool:
+    """Prepare the case for a calibration of the outflow level, when *parameters* hold it.
+
+    Writes ``user_sl.f`` (offset 0) into the user Fortran folder and names that folder
+    in each of *steering_files* (names in the model folder) that does not name it yet
+    (:mod:`axqua.solvers.telemac.outflow_offset`). With the offset 0 the routine
+    changes nothing, so a steady run of the case that compiles it afterwards keeps the
+    level of the rating. Returns whether the offset is calibrated.
+    """
+    from axqua.solvers.telemac import outflow_offset
+
+    if not outflow_offset.calibrated(p.name for p in parameters):
+        return False
+    path = outflow_offset.prepare(cfg)
+    for name in steering_files:
+        cas = cfg.model_path(name)
+        text = cas.read_text()
+        new = outflow_offset.with_fortran_folder(cfg, text)
+        if new != text:
+            cas.write_text(new)
+    print(f"outflow level offset {cfg.calibration.outflow_offset} m -> {path}")
+    return True
+
+
 #: Folder in the calibration directory that holds the files of the built case while a
 #: calibration rewrites them.
 AS_BUILT = "case-as-built"
@@ -541,6 +566,10 @@ def _rewritten_by_the_driver(cfg: Config) -> list[str]:
     names = [cfg.calibration.control_file or cfg.cas_file, cfg.friction_tbl]
     if cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran":
         names.append("user_fortran/user_rain.f")
+    if getattr(cfg.calibration, "outflow_offset", None) is not None:
+        from axqua.solvers.telemac import outflow_offset
+
+        names.append(f"{cfg.user_fortran_dir}/{outflow_offset.FILE}")
     if cfg.morphodynamics.enabled:
         names.append(cfg.gaia_cas)
     return [str(name) for name in names if name]
@@ -738,6 +767,7 @@ def emit_multiflow_config(cfg: Config, out_dir: Path, model_dir: Path,
     block of per-flow steering/CSV entries). *parameters* as in
     :func:`axqua.calibration.emit_hbc_config`."""
     from axqua.calibration import telemac_parameters
+    from axqua.solvers.telemac import outflow_offset
 
     c = cfg.calibration
     # the merged parameters, not c.parameters: the roughness table's calibrated zones
@@ -746,6 +776,9 @@ def emit_multiflow_config(cfg: Config, out_dir: Path, model_dir: Path,
     parameters = telemac_parameters(cfg) if parameters is None else list(parameters)
     params = [p.name for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
+    # the Fortran file HydroBayesCal rewrites: only the outflow offset's here (a
+    # gain-lose kf is not calibrated at several discharges yet)
+    fortran_file = outflow_offset.FILE if outflow_offset.calibrated(params) else None
     prior = prior_samples if prior_samples is not None else getattr(
         c, "prior_samples", 5000)
     adaptive = bool(getattr(c, "adaptive_init_runs", True)
@@ -785,7 +818,7 @@ hydrodynamic_simulation = {{
     'results_filename_base': {f"r2d-{flows[0].name}"!r},
     'control_file': {f"steady2d-{flows[0].name}.cas"!r},
     'friction_file': {cfg.friction_tbl!r},
-    'fortran_file': None,
+    'fortran_file': {fortran_file!r},
 }}
 
 morphodynamic_simulation = {{
@@ -1406,6 +1439,7 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
         tables.append(table)
         print(f"  {situation.name}: Q = {q:g} m3/s, {len(table)} points -> {cas}")
     parameters = settle_zone_plan(cfg, tables, folder, resume=resume)
+    ready_outflow_offset(cfg, parameters, [f"steady2d-{tag}.cas" for tag in tags])
 
     def emit(complete: bool, only_bal: bool) -> Path:
         return emit_multiflow_config(

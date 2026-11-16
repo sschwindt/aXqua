@@ -1811,6 +1811,12 @@ class Calibration:
     # learning runs with these errors. For a model that cannot reproduce part of the measurements,
     # such as a water level held up by a riffle the terrain model does not resolve.
     structural_error: str = "none"
+    # The outflow level as a calibration parameter: a range [min, max] in m of an offset
+    # added to the level every situation gets from the rating at its own discharge (or
+    # to boundaries.prescribed_elevation), one offset for all situations. For a reach
+    # whose water level is held up by a control the terrain model does not resolve or
+    # that lies downstream of the model (axqua.solvers.telemac.outflow_offset).
+    outflow_offset: list[float] | None = None
 
     @classmethod
     def from_dict(cls, d: dict[str, Any], cfg_dir: Path | None = None) -> "Calibration":

@@ -294,17 +294,22 @@ def merged_parameters(cfg: Config) -> list:
     Precedence, later wins on a name collision: config ``calibration.parameters``
     < the roughness table's ``zone<N>`` rows (``geodata.roughness_table`` with the
     bounds schema) < the ``parameters`` tab of the filled calibration-target
-    template. The roughness table outranks the config because it is where the
+    template, and ``calibration.outflow_offset`` as the parameter
+    ``f.OUTFLOW_OFFSET``. The roughness table outranks the config because it is where the
     zonation itself is defined - adding a zone there must not require editing the
     parameter list in two files - while the spreadsheet stays the live override.
     """
     from axqua import targets as targets_mod
+    from axqua.solvers.telemac import outflow_offset
 
     by_name = {p.name: p for p in cfg.calibration.parameters}
     for p in roughness_zone_parameters(cfg):
         by_name[p.name] = p
     for p in targets_mod.read_target_parameters(cfg):
         by_name[p.name] = p
+    offset = outflow_offset.parameter(cfg)
+    if offset is not None:
+        by_name[offset.name] = offset
     return list(by_name.values())
 
 
@@ -332,6 +337,20 @@ def telemac_parameters(cfg: Config) -> list:
         log.info("not TELEMAC calibration parameters, skipped: %s (they belong to "
                  "the OpenFOAM calibration)", ", ".join(sorted(drop)))
     return keep
+
+
+def fortran_file_of(cfg: Config, names) -> str | None:
+    """The file of the user Fortran folder HydroBayesCal rewrites for the ``f.``
+    parameters *names*: ``user_sl.f`` for the outflow offset
+    (:mod:`axqua.solvers.telemac.outflow_offset`), ``user_rain.f`` for a gain-lose
+    reach, else None."""
+    from axqua.solvers.telemac import outflow_offset
+
+    if outflow_offset.calibrated(names):
+        return outflow_offset.FILE
+    if cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran":
+        return "user_rain.f"
+    return None
 
 
 def _refuse_continued_keywords(cfg: Config, names: list[str], control_file: str) -> None:
@@ -393,9 +412,7 @@ def emit_hbc_config(cfg: Config, calibration_csv: Path | None, *,
     # line in it for any calibration parameter prefixed `f.` - which is how the
     # gain-lose conductivity (`f.HMP_KF`) is calibrated. Only meaningful when a
     # gain-lose reach actually generated the routine.
-    fortran_file = ("user_rain.f"
-                    if (cfg.gain_lose.active
-                        and cfg.gain_lose.implementation == "fortran") else None)
+    fortran_file = fortran_file_of(cfg, params)
 
     def pylist(items, q=True):
         if q:

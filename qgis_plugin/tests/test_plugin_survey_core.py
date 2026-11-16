@@ -222,6 +222,32 @@ def test_the_calls_to_axqua_survey(monkeypatch):
     assert not sent[2]["file"].exists() and not sent[3]["file"].exists()           # the settings file is removed after the call
 
 
+def test_an_axqua_from_before_the_survey_planner_is_told_to_upgrade(monkeypatch):
+    """The plugin is updated in QGIS, the program with pip: aXqua 1.3.5 answers 'axqua survey' with "the arguments could not be understood"."""
+    def call(self, args, **kwargs):
+        raise runner_client.RunnerError("axqua: the arguments could not be understood", code="axqua.config", subject="arguments", remedy="Run 'axqua --help' to see the accepted flags; argparse's own message is on stderr.")
+
+    client = runner_client.RunnerClient.__new__(runner_client.RunnerClient)
+    monkeypatch.setattr(runner_client.RunnerClient, "call", call)
+    monkeypatch.setattr(runner_client.RunnerClient, "_version", lambda self: "1.3.5")
+    for ask in (lambda: client.survey_info("reach.axq-case"), lambda: client.survey_init("reach.axq-case"), lambda: client.survey_plan("reach.axq-case", {"kinds": ["ground"]}), lambda: client.survey_conditions("reach.axq-case")):
+        with pytest.raises(runner_client.RunnerError) as caught:
+            ask()
+        assert "needs aXqua 1.4.0 or newer" in caught.value.message and "(1.3.5)" in caught.value.message
+        assert "pip install --upgrade axqua" in caught.value.remedy and "--help" not in caught.value.remedy
+
+
+def test_another_failure_of_the_survey_planner_keeps_its_own_words(monkeypatch):
+    def call(self, args, **kwargs):
+        raise runner_client.RunnerError("the case has no steady result", code="axqua.survey", subject="result", remedy="Run the steady simulation.")
+
+    client = runner_client.RunnerClient.__new__(runner_client.RunnerClient)
+    monkeypatch.setattr(runner_client.RunnerClient, "call", call)
+    with pytest.raises(runner_client.RunnerError) as caught:
+        client.survey_info("reach.axq-case")
+    assert caught.value.message == "the case has no steady result" and caught.value.remedy == "Run the steady simulation."
+
+
 def test_the_settings_file_is_removed_when_the_call_fails(monkeypatch):
     seen = []
 
