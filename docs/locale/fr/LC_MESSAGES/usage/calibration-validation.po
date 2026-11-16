@@ -67,9 +67,9 @@ msgstr "De cette façon, quelques dizaines de modèles sont suffisants où un ca
 msgid "Ground truth data setup"
 msgstr "Vérité terrain configuration des données"
 
-# machine translation: argos a7a21d7e5903
-msgid "Field measurements are called ground truth. aXqua accepts them in a workbook with a fixed structure, which is called the calibration target template. Create it for a case with:"
-msgstr "Les mesures de terrain sont appelées vérité terrain. aXqua les accepte dans un cahier avec une structure fixe, qui s'appelle le modèle cible de calage. Créez-le pour un cas avec :"
+# machine translation: argos 8aeceeb62917
+msgid "Field measurements are called ground truth. Where the measurements have not been taken yet, the :ref:`survey planner <help-survey-planner>` at the end of this section determines where the calibration needs them. aXqua accepts measurements in a workbook with a fixed structure, which is called the calibration target template. Create it for a case with:"
+msgstr "Les mesures de terrain sont appelées vérité terrain. Lorsque les mesures n'ont pas encore été prises, le :ref:`planificateur d'enquête <help-survey-planner>` à la fin de cette section détermine où le calage en a besoin. aXqua accepte les mesures dans un cahier de travail avec une structure fixe, qui s'appelle le modèle cible de calage. Créez-le pour un cas avec :"
 
 # machine translation: argos f96a87a2b467
 msgid "The command writes the workbook ``calibration-target-data.xlsx`` into ``user-sources/ground-truth/``. Its sheets are:"
@@ -162,6 +162,214 @@ msgstr "L'amplitude de la vitesse comparée au modèle est calculée à partir d
 # machine translation: argos fbe98ea670c0
 msgid "Velocity measurements with a SonTek FlowTracker2 are transferred into the ``hydraulics`` sheet with the script ``extract_flowtracker.py``, which aXqua places next to the workbook. Note that the velocity fluctuation is the standard deviation of the velocity samples. It is not the column ``VxErr`` of the instrument export, which is the standard error of the mean velocity."
 msgstr "Les mesures de vélocité avec un SonTek FlowTracker2 sont transférées dans la feuille ``hydraulics`` avec le script ``extract_flowtracker.py``, qui aXqua place à côté du cahier de travail. Notez que la fluctuation de vitesse est l'écart type des échantillons de vitesse. Ce n'est pas la colonne ``VxErr`` de l'exportation de l'instrument, qui est l'erreur standard de la vitesse moyenne."
+
+# machine translation: argos e57c37687171
+msgid "**The survey planner.** Calibration can only determine a parameter where a measurement responds to it. A roughness zone without a measurement point is therefore not calibrated (:ref:`calibration-setup`), and a turbulence parameter is constrained by measurements in shear zones, not in the uniform flow of the main channel. The survey planner answers two questions before the field work: where does the calibration need measurements, and how long does the survey take? It places the measurements in the flow field of the model, so it requires a built case and a steady simulation at the discharge that is expected on the survey day (:ref:`help-hydraulics`). Open it with *Survey planner...* on the tab *Calibration & validation*. Its window has eight tabs, which can be visited in any order:"
+msgstr "**Le planificateur d'enquête.** calage ne peut déterminer qu'un paramètre où une mesure y répond. Une zone de rugosité sans point de mesure n'est donc pas étalonnée (:ref:`calibration-setup`), et un paramètre de turbulence est limité par des mesures dans les zones de cisaillement, pas dans le débit uniforme du chenal principal. Le planificateur d'enquête répond à deux questions avant le travail sur le terrain : où le calage a-t-il besoin de mesures et combien de temps l'enquête prend-elle ? Il place les mesures dans le champ de débit du modèle, donc il nécessite un cas construit et une simulation en régime permanent au débit qui est attendu le jour de l'enquête (:ref:`help-hydraulics`). Ouvrez-le avec *Survey planner...* sur l'onglet *Calibration & validation*. Sa fenêtre a huit onglets, qui peuvent être visités dans n'importe quel ordre :"
+
+# machine translation: argos 048240838747
+msgid "Tab"
+msgstr "Tab"
+
+# machine translation: argos f72dacd19795
+msgid "The kinds of survey to plan, the calibration parameters with the rule that places their measurements, the number of measurements per parameter, and the result file to plan with (the steady run of the case unless another file is named)."
+msgstr "Les types d'arpentage à planifier, les paramètres de calage avec la règle qui place leurs mesures, le nombre de mesures par paramètre, et le fichier de résultat à planifier avec (l'exécution régulière du cas sauf si un autre fichier est nommé)."
+
+# machine translation: argos bfa7c3f466c4
+msgid "The points where the surveyors reach and leave the river. *Set points on the map* creates ``survey-plan.gpkg`` with the layer ``access_points``, adds the layer to the map, and starts editing it. Click on the map to set a point and select its role: ``access`` (start and end of a wading survey, put-in of the kayaks), ``leave`` (take-out of the kayaks), or ``takeoff`` (take-off point of the drone, if it is not the access point). *Save the points* ends the editing. *Draw areas on the map* and *Save the areas* do the same for the layer ``walkable_areas``, the polygons of dry ground that can be walked on (see ground-based velocimetry below)."
+msgstr "Les points où les arpenteurs tronçon et quitter la rivière. *Set points on the map* crée ``survey-plan.gpkg`` avec la couche ``access_points``, ajoute la couche à la carte, et commence à l'éditer. Cliquez sur la carte pour définir un point et sélectionnez son rôle : ``access`` (début et fin d'une enquête de déroutement, mise en place des kayaks), ``leave`` (départ des kayaks), ou ``takeoff`` (départ du drone, si ce n'est pas le point d'accès). *Save the points* termine le montage. *Draw areas on the map* et *Save the areas* faire la même chose pour la couche ``walkable_areas``, les polygones du sol sec sur lesquels on peut marcher (voir la vélocimétrie au sol ci-dessous)."
+
+# machine translation: argos ffd152c51457
+msgid "The assumptions of each kind of survey, with the defaults described below. Every value can be changed."
+msgstr "Les hypothèses de chaque type d'enquête, avec les défauts décrits ci-dessous. Chaque valeur peut être changée."
+
+# machine translation: argos d169e7f2b8d0
+msgid "The survey day and the start of the working day (both optional), the longest working day, and the breaks. *Look up* reads sunrise, sunset, the weather forecast and what is known about the network coverage at the reach, and suggests a start time."
+msgstr "Le jour de l'enquête et le début de la journée de travail (à la fois facultatif), la journée de travail la plus longue et les pauses. *Look up* lit le lever du soleil, le coucher du soleil, les prévisions météorologiques et ce que l'on sait sur la couverture du réseau au tronçon, et suggère une heure de départ."
+
+# machine translation: argos dc768af655c2
+msgid "*Plan the survey* computes the plan, adds its layers to the map, and lists the maps and factsheets, which open with a click."
+msgstr "*Plan the survey* calcule le plan, ajoute ses couches à la carte, et liste les cartes et fiches d'information, qui s'ouvrent en un clic."
+
+# machine translation: argos a5b41c6d30e5
+msgid "The planner reads the calibration parameters from the case file and suggests a placement rule for each. It also lists every roughness zone of the zone map that the calibration does not name. Such a zone is selected if the case declares no calibration parameter yet, and is listed without being selected otherwise. Parameters that the case does not declare yet can be added with *Add parameter...*:"
+msgstr "Le planificateur lit le paramètres de calage du fichier de cas et suggère une règle de placement pour chacun. Il énumère également chaque zone de rugosité de la carte de zone que le calage ne nomme pas. Une telle zone est sélectionnée si le cas déclare encore non paramètre de calage, et est listé sans être sélectionné autrement. Paramètres que le cas ne déclare pas encore peut être ajouté avec *Add parameter...*:"
+
+# machine translation: argos 710f957dff03
+msgid "Rule"
+msgstr "Règle"
+
+# machine translation: argos 57e59116f23f
+msgid "Where the measurements are placed"
+msgstr "Lorsque les mesures sont effectuées"
+
+# machine translation: argos 0d37b9d2ac2b
+msgid "Inside one roughness zone, spread over the water depths and velocities that occur in it. This is the rule of every roughness parameter that belongs to a zone."
+msgstr "À l'intérieur d'un zone de rugosité, répartis sur les hauteurs d'eau et les vitesses qui se produisent dedans. C'est la règle de chaque paramètre rugosité qui appartient à une zone."
+
+# machine translation: argos a3f7211edb8f
+msgid "Spread over the wetted model, for a parameter that acts on the whole reach."
+msgstr "Répartir sur le modèle mouillé, pour un paramètre qui agit sur l'ensemble du tronçon."
+
+# machine translation: argos c503d761f60e
+msgid "Where the velocity changes most across the flow, such as the edges of recirculation zones. This is the rule of turbulence parameters."
+msgstr "Lorsque la vitesse change le plus à travers le flux, comme les bords des zones de recirculation. C'est la règle des paramètres de turbulence."
+
+# machine translation: argos 2639fdedd479
+msgid "Where the streamlines curve most."
+msgstr "Là où la courbe de rationalisation le plus."
+
+# machine translation: argos 101a5e754d55
+msgid "Along the banks, close to the wetted edge. A solid wall of the model counts as a bank where the water reaches it."
+msgstr "Le long des berges, près du bord mouillé. Un mur solide du modèle compte comme une banque où l'eau atteint."
+
+# machine translation: argos 11b85c8e1ef2
+msgid "In the shallow margins that fall dry at a lower discharge."
+msgstr "Dans les marges peu profondes qui tombent à sec à un débit inférieur."
+
+# machine translation: argos c55cb3f7177d
+msgid "No measurement is placed closer than 15 mesh nodes to an inflow or outflow boundary, because the flow there is prescribed by the boundary condition and not computed by the model. Six measurements are planned per parameter by default."
+msgstr "Aucune mesure n'est placée plus près de 15 nœuds du maillage à un afflux ou frontière de sortie, car le débit y est prescrit par la condition aux limites et non calculé par le modèle. Six mesures sont prévues par paramètre par défaut."
+
+# machine translation: argos 41a9fa983267
+msgid "**Ground-based velocimetry.** A surveyor wades from the access point to each measurement vertical with a velocity probe, for example a SonTek FlowTracker2, and returns to the access point at the end of the day. The planner places verticals only in water that can be waded, orders the verticals into a short round, and routes the walk on a grid of 1 m cells with the water depths and flow velocities of the result. Terrain beside a river is often next to impassable (riparian forest, riprap, steep banks, private land), and the model contains no information about it. On dry ground, the walk therefore stays within a strip of 1 m along the wetted edge of the result, which is the wetted edge at the discharge of the survey day. This holds for gravel bars inside the model and for the banks outside it. Dry ground that can be walked on beyond the strip, such as a gravel bar, a path or a meadow, is drawn as a polygon in the layer ``walkable_areas`` (tab *Access*); the areas apply to dry ground only and do not carry the walk across water that cannot be waded. An access point that neither the strip nor an area connects to the water is joined to the nearest walkable ground by a straight line, and the plan issues a warning if this line is longer than 10 m, because nothing indicates that it can be walked. The strip ends at the inflow and outflow boundaries of the model, where the river continues, so the walk crosses the river only where the result shows wadeable water. The defaults are:"
+msgstr "**Vélocimétrie au sol.** Un arpenteur se déplace du point d'accès à chaque mesure verticale avec une sonde de vitesse, par exemple un SonTek FlowTracker2, et retourne au point d'accès à la fin de la journée. Le planificateur place des verticales seulement dans l'eau qui peut être balayée, ordonne les verticales dans un court tour, et fait marcher sur une grille de 1 m cellules avec le hauteurs d'eau et vitesses d'écoulement du résultat. Le terrain à côté d'une rivière est souvent à côté de l'impraticable (forêt riveraine, berges raides, terres privées), et le modèle ne contient aucune information à ce sujet. Sur terre sèche, la promenade reste donc dans une bande de 1 m le long du bord mouillé du résultat, qui est le bord mouillé à la débit de la journée de sondage. Cela vaut pour les barres de gravier à l'intérieur du modèle et pour les rives à l'extérieur. Le terrain sec qui peut être parcouru au-delà de la bande, comme une barre de gravier, un sentier ou une prairie, est dessiné comme un polygone dans le couche ``walkable_areas`` (tab *Access*) ; les zones s'appliquent uniquement au sol sec et ne portent pas la marche à travers l'eau qui ne peut pas être balayée. Un point d'accès que ni la bande ni une zone se connecte à l'eau est joint au sol le plus proche marchable par une ligne droite, et le plan émet un avertissement si cette ligne est plus de 10 m, parce que rien n'indique qu'il peut être marché. La bande se termine à l'entrée et frontières de sortie du modèle, où la rivière continue, de sorte que la promenade traverse la rivière seulement où le résultat montre l'eau wadeable. Les valeurs par défaut sont :"
+
+# machine translation: argos 68916fa76fda
+msgid "Assumption"
+msgstr "Hypothèse"
+
+# machine translation: argos 88488e99fcdc
+msgid "Default"
+msgstr "Par défaut"
+
+# machine translation: argos 79941ab0d345
+msgid "Wadeable water"
+msgstr "Eau Wadeable"
+
+# machine translation: argos fa3dca448466
+msgid "Not deeper than 1.2 m. Up to a depth of 0.6 m not faster than 2 m/s, up to 0.9 m not faster than 1.4 m/s, and up to 1.2 m not faster than 1 m/s."
+msgstr "Pas plus de 1,2 m. Jusqu'à une profondeur de 0,6 m pas plus de 2 m/s, jusqu'à 0,9 m pas plus de 1,4 m/s et jusqu'à 1,2 m pas plus de 1 m/s."
+
+# machine translation: argos 06e0b7cca848
+msgid "Walking speed"
+msgstr "Vitesse de marche"
+
+# machine translation: argos e27b17c13c1e
+msgid "3 km/h on land and 1.5 km/h in the water with the current. Against the current 1 km/h in water deeper than 0.3 m, 0.5 km/h in water deeper than 0.5 m, and 0.1 km/h in water deeper than 0.8 m."
+msgstr "3 km/h sur terre et 1,5 km/h dans l'eau avec le courant. Contre le courant de 1 km/h dans des eaux plus profondes que 0,3 m, 0,5 km/h dans des eaux plus profondes que 0,5 m et 0,1 km/h dans des eaux plus profondes que 0,8 m."
+
+# machine translation: argos fa279a5003cd
+msgid "Dry ground"
+msgstr "Sol sec"
+
+# machine translation: argos 1a54a6f279f9
+msgid "Walked on within 1 m of the wetted edge and inside the walkable areas, nowhere else. The width of the strip is the setting *On land, no farther from the wetted edge than* on the tab *Ground-based*."
+msgstr "Marcher à moins de 1 m du bord mouillé et à l'intérieur des zones piétonnes, nulle part ailleurs. La largeur de la bande est le réglage *On land, no farther from the wetted edge than* sur l'onglet *Ground-based*."
+
+# machine translation: argos c0f8f40c188d
+msgid "Time at a vertical"
+msgstr "Temps à une verticale"
+
+# machine translation: argos c913047efba5
+msgid "60 s for the water depth, and for every measured depth 40 s to set the probe to its height and 60 s of velocity averaging."
+msgstr "60 s pour la hauteur d'eau, et pour chaque profondeur mesurée 40 s pour régler la sonde à sa hauteur et 60 s de vitesse moyenne."
+
+# machine translation: argos 2078cbabb342
+msgid "Measured depths"
+msgstr "Profondeurs mesurées"
+
+# machine translation: argos 9708ab829500
+msgid "One depth in water shallower than 0.3 m (at 0.6 of the water depth above the riverbed), two depths from 0.3 m (0.2 and 0.8), and three depths from 0.5 m (0.2, 0.6 and 0.8). The map shows the three kinds of verticals with different symbols."
+msgstr "Une profondeur d'eau plus faible que 0,3 m (à 0,6 m de la hauteur d'eau au-dessus du lit de la rivière), deux profondeurs de 0,3 m (0,2 et 0,8) et trois profondeurs de 0,5 m (0,2, 0,6 et 0,8). La carte montre les trois types de verticales avec des symboles différents."
+
+# machine translation: argos d728c0aac4bb
+msgid "Pressure sensor"
+msgstr "Capteur de pression"
+
+# machine translation: argos 40063ee16e34
+msgid "The pressure sensor of the probe is adjusted to the atmospheric pressure at the start and every 4 h. The map shows where."
+msgstr "Le capteur de pression de la sonde est réglé à la pression atmosphérique au début et toutes les 4 h. La carte montre où."
+
+# machine translation: argos f375d1727e6d
+msgid "Positions"
+msgstr "Fonctions"
+
+# machine translation: argos eb03fdc95ac8
+msgid "A second surveyor records the position of every vertical with a DGPS rover while the velocity is measured. The DGPS therefore delays the survey only where it loses its data reception."
+msgstr "Un deuxième arpenteur enregistre la position de chaque verticale avec un rover DGPS pendant que la vitesse est mesurée. La DGPS ne retarde donc l'enquête que lorsqu'elle perd sa réception des données."
+
+# machine translation: argos 80bc246e1600
+msgid "Surveyors"
+msgstr "Enquêteurs"
+
+# machine translation: argos 46d8a528a880
+msgid "One surveyor with a probe. With more surveyors, every surveyor gets a walk path of their own, and the DGPS surveyor gets a separate path that visits their verticals. At most three probes per DGPS rover are recommended."
+msgstr "Un arpenteur avec une sonde. Avec plus d'arpenteurs, chaque arpenteur obtient son propre chemin de marche, et l'arpenteur DGPS obtient un chemin séparé qui visite ses verticales. Trois sondes au maximum par rover DGPS sont recommandées."
+
+# machine translation: argos c81d8a6e4a30
+msgid "Working day"
+msgstr "Jour ouvrable"
+
+# machine translation: argos 5c536ae34a95
+msgid "8 h at most, with a break of 10 min every 2 h and of 30 min every 4 h. A survey that does not fit into one day continues on the next day from the access point."
+msgstr "8 h au maximum, avec une pause de 10 min toutes les 2 h et de 30 min toutes les 4 h. Un sondage qui ne correspond pas à un jour se poursuit le lendemain à partir du point d'accès."
+
+# machine translation: argos 421a58c5935a
+msgid "**Airborne velocimetry.** A camera drone hovers above the river and films tracers on the water surface. Particle tracking or particle image velocimetry (PTV or PIV) with `pXv <https://pxv.readthedocs.io/>`_ turns each video into the surface velocity of the filmed area, so one hover position replaces many verticals, also where the water is too deep or too fast to wade. The planner assumes a DJI camera drone with the camera pointing straight down and plans the hover positions, the flight height above the water surface (40 m by default, 120 m at most), the heading of the frame, the duration of each video (180 s), the route, and the battery changes. The factsheet lists the coordinates of every hover position, the flight settings, the size of the frame on the water, the size of a tracer in pixels, and hints on ground control points and on the calibration panel for the lens correction. Note that the video shows the velocity of the water surface, which is larger than the depth-averaged velocity of a 2D model."
+msgstr "**Vélocimétrie aéroportée.** Un drone de caméra survole la rivière et filme des traceurs sur la surface libre. Le suivi des particules ou la vélocimétrie de l'image des particules (PTV ou PIV) avec `pXv <https://pxv.readthedocs.io/>`_ transforme chaque vidéo en vitesse de surface de la zone filmée, de sorte qu'une position de vol stationnaire remplace de nombreuses verticales, aussi là où l'eau est trop profonde ou trop rapide pour se déplacer. Le planificateur prend un drone de caméra DJI avec la caméra pointée tout droit vers le bas et planifie les positions de vol stationnaire, la hauteur de vol au-dessus de la surface libre (40 m par défaut, 120 m au plus), le cap du cadre, la durée de chaque vidéo (180 s), l'itinéraire, et la batterie change. La fiche d'information énumère les coordonnées de chaque position de vol stationnaire, les paramètres de vol, la taille du cadre sur l'eau, la taille d'un traceur en pixels et les indications sur les points de contrôle au sol et sur le panneau calage pour la correction de l'objectif. Notez que la vidéo montre la vitesse de la surface libre, qui est plus grande que la vitesse moyenne en profondeur d'un modèle 2D."
+
+# machine translation: argos fc882ec43ce6
+msgid "**Kayak drifter velocimetry.** A kayak that is not paddled drifts at the velocity of the water surface. A DGPS rover on the kayak that logs a position every 5 s therefore records the surface velocity along the drift line: only the horizontal position and the distance between two consecutive positions matter (Barker et al. 2018). The planner needs an access point and a leave point. It traces drift lines through the flow field of the model, computes the duration of a float from the modeled velocity, and marks patches faster than 3 m/s, which are to be avoided. Two kayakers are the default for safety reasons; a single kayaker floats the reach twice. A break of 10 min is planned every 2 h, and only a DGPS that loses its connection delays a float. The method is efficient for long reaches, but it requires a pick-up at the leave point and the transport of the kayaks. Velocities measured at a few points with an ADV or an ADCP relate the surface velocity to the depth-averaged velocity and support the validation."
+msgstr "**Vélocimétrie de la dériveuse kayak.** Un kayak qui n'est pas pagayé dérive à la vitesse de la surface libre. Un rover DGPS sur le kayak qui enregistre une position tous les 5 s enregistre donc la vitesse de surface le long de la ligne de dérive : seule la position horizontale et la distance entre deux positions consécutives comptent (Barker et al. 2018). Le planificateur a besoin d'un point d'accès et d'un point de départ. Il trace des lignes de dérive à travers le champ d'écoulement du modèle, calcule la durée d'un flotteur à partir de la vitesse modélisée, et marque des patchs plus rapides que 3 m/s, qui doivent être évités. Deux kayakistes sont par défaut pour des raisons de sécurité ; un seul kayakiste flotte le tronçon deux fois. Une pause de 10 min est prévue toutes les 2 h, et seul un DGPS qui perd sa connexion retarde un flotteur. La méthode est efficace pour les longs tronçons, mais elle nécessite un entraînement au point de départ et le transport des kayaks. Les vitesses mesurées à quelques points avec un ADV ou un ADCP relient la vitesse de surface à la vitesse moyenne de profondeur et supportent la validation."
+
+# machine translation: argos 9226f927bb96
+msgid "**Water temperature.** The planner sorts the wetted reach into four kinds of water: slow or fast (limit 0.2 m/s) and shallow or deep (limit 0.3 m). Slow, shallow water warms up in the sun within an hour, while deep, fast water carries the temperature of the river upstream, so every kind of water that occurs gets at least one point. The points are either fixed loggers that stay in the river or the readings of a mobile probe that is carried from point to point. The walk to the points follows the rules of the ground-based survey, including the strip along the wetted edge and the walkable areas."
+msgstr "**Température de l'eau.** Le planificateur trie le tronçon mouillé en quatre sortes d'eau : lente ou rapide (limite 0,2 m/s) et peu profonde ou profonde (limite 0,3 m). L'eau lente et peu profonde se réchauffe au soleil en une heure, tandis que l'eau profonde et rapide porte la température de la rivière en amont, de sorte que chaque type d'eau qui se produit obtient au moins un point. Les points sont soit des bûcherons fixes qui restent dans la rivière, soit les relevés d'une sonde mobile qui est portée de point en point. La marche jusqu'aux points suit les règles de l'étude au sol, y compris la bande le long du bord mouillé et les zones marchables."
+
+# machine translation: argos 465c1ba6eca2
+msgid "**Time, weather and network coverage.** Without a start time, the timetable of a plan starts at 00:00 and states durations. With the survey day and *Look up*, the planner computes sunrise and sunset for the reach, reads the weather forecast from `Open-Meteo <https://open-meteo.com/>`_, and suggests a start time that keeps the working day within daylight and out of rain and strong wind. With a survey day and a start time, the working day ends at sunset at the latest, and a start time after sunset is refused unless *End before sunset when the day is known* is cleared. For the network coverage it names the coverage map of the national regulator and the real-time correction services of the DGPS for Germany, Switzerland, France, Austria, Italy, the Netherlands, the Czech Republic, Denmark, Sweden, Canada, China and the United States. In Switzerland it also reads the coverage model of the Federal Office of Communications at the reach, and everywhere it counts the mobile masts that OpenStreetMap shows within 5 km. Neither is a measurement of the reception on the river, so every factsheet states where its information comes from and asks the surveyors to check the coverage before the survey. The check box for the look-up can be cleared on a computer without internet access; the plan then contains sunrise and sunset only."
+msgstr "**Heure, météo et couverture du réseau** Sans une heure de départ, le calendrier d'un plan commence à 00:00 et indique les durées. Avec le jour de l'enquête et *Look up*, le planificateur calcule le lever et le coucher du soleil pour le tronçon, lit les prévisions météorologiques de `Open-Meteo <https://open-meteo.com/>`_, et suggère une heure de départ qui garde la journée de travail en plein jour et hors de la pluie et du vent fort. Avec une journée d'enquête et une heure de début, la journée de travail se termine au plus tard au coucher du soleil, et une heure de début après le coucher du soleil est refusée à moins que *End before sunset when the day is known* ne soit effacé. Pour la couverture du réseau, il désigne la carte de couverture du régulateur national et les services de correction en temps réel de la DGPS pour l'Allemagne, la Suisse, la France, l'Autriche, l'Italie, les Pays-Bas, la République tchèque, le Danemark, la Suède, le Canada, la Chine et les États-Unis. En Suisse, elle lit également le modèle de couverture de l'Office fédéral des communications du tronçon, et partout elle compte les mâts mobiles qu'OpenStreetMap affiche à moins de 5 km. Il n'y a pas non plus de mesure de la réception sur la rivière, de sorte que chaque fiche d'information indique d'où proviennent ses informations et demande aux arpenteurs de vérifier la couverture avant l'enquête. La case à cocher pour la recherche peut être effacé sur un ordinateur sans accès à Internet ; le plan contient alors le lever et le coucher du soleil seulement."
+
+# machine translation: argos b0760f08d8cb
+msgid "**The plan.** *Plan the survey* writes the folder ``axqua-case/calibration-validation/survey-plan/``:"
+msgstr "**Le plan.** *Plan the survey* écrit le dossier ``axqua-case/calibration-validation/survey-plan/``:"
+
+# machine translation: argos 87d616a4ba25
+msgid "File"
+msgstr "Fichier"
+
+# machine translation: argos d0e629abf713
+msgid "The layers that QGIS shows: the access points, the walkable areas, the verticals (``flowtracker_points``), the walk paths with their direction (``walk_paths``), breaks, pressure adjustments and battery changes (``survey_events``), the hover positions, frames and route of the drone, the drift lines of the kayaks with the patches to avoid, and the temperature points with the four kinds of water."
+msgstr "Les couches que QGIS montre : les points d'accès, les zones marchables, les verticales (``flowtracker_points``), les chemins de randonnée avec leur direction (``walk_paths``), les pauses, les réglages de pression et les changements de batterie (``survey_events``), les positions de vol stationnaire, les cadres et l'itinéraire du drone, les lignes de dérive des kayaks avec les patchs à éviter, et les points de température avec les quatre types d'eau."
+
+# machine translation: argos 272a1d1de2fc
+msgid "``survey-map-<kind>.pdf`` and ``.png``"
+msgstr "``survey-map-<kind>.pdf`` et ``.png``"
+
+# machine translation: argos 96148b5fa1b5
+msgid "One map per kind of survey on an A4 sheet."
+msgstr "Une carte par type de relevé sur une feuille A4."
+
+# machine translation: argos 86f25c5d192f
+msgid "One page per kind of survey for the field: the plan in numbers, the timetable with start, breaks and end, sunrise, sunset and weather, the network coverage, the assumptions, and hints for the field work."
+msgstr "Une page par type d'enquête pour le terrain : le plan en nombre, le calendrier avec début, pauses et fin, le lever du soleil, coucher du soleil et la météo, la couverture réseau, les hypothèses, et des conseils pour le travail sur le terrain."
+
+# machine translation: argos 272a1d1de2fc
+msgid "``survey-plan.json`` and ``survey-settings.json``"
+msgstr "``survey-plan.json`` et ``survey-settings.json``"
+
+# machine translation: argos 9a70e26f53ba
+msgid "Every number of the plan, and the assumptions it is based on. The wizard starts with the assumptions of the last plan."
+msgstr "Chaque numéro du plan et les hypothèses sur lesquelles il repose. Le assistant commence par les hypothèses du dernier plan."
+
+# machine translation: argos 0a7a0d063406
+msgid "The access points and the walkable areas are kept when a survey is planned again; all other layers are replaced. The layers are replaced only after the maps and factsheets of the new plan have been drawn, so a plan that fails leaves the previous plan in place. A kind of survey that cannot be planned, for example a kayak survey without a leave point, does not stop the others and is listed with its reason. The same plan is available in the terminal:"
+msgstr "Les points d'accès et les zones à pied sont conservés lorsqu'un relevé est prévu à nouveau ; toutes les autres Coupes sont remplacées. Les couches ne sont remplacées qu'après avoir dressé les cartes et les fiches d'information du nouveau plan, de sorte qu'un plan qui échoue laisse le plan précédent en place. Une sorte d'enquête qui ne peut être planifiée, par exemple une enquête sur le kayak sans point de départ, n'arrête pas les autres et est énumérée avec sa raison. Le même plan est disponible à terminal:"
+
+# machine translation: argos 43a6276aa0d3
+msgid "The plan holds for the discharge of the simulation it was computed with. Run the steady simulation again if the discharge on the survey day differs considerably, and move a vertical in the field where the water is deeper or faster than planned. After the survey, the measured values and positions are entered as ground truth as described above."
+msgstr "Le plan tient pour le débit de la simulation avec laquelle il a été calculé. Exécutez de nouveau la simulation en régime permanent si le débit le jour de l'enquête diffère considérablement, et déplacez une verticale dans le champ où l'eau est plus profonde ou plus rapide que prévu. Après l'enquête, les valeurs et les positions mesurées sont entrées comme vérité terrain comme décrit ci-dessus."
 
 # machine translation: argos dcd1d0515b95
 msgid "Bayesian calibration & validation setup"
@@ -287,9 +495,9 @@ msgstr "HydroBayesCal effectue ses parcours dans le dossier du cas construit (``
 msgid "**Validation run.** After the calibration, click *Validate* in the box *Validation with data of another flow situation*, or submit the job in a terminal:"
 msgstr "**Variation.** Après le calage, cliquez sur *Validate* dans la boîte *Validation with data of another flow situation*, ou soumettez la tâche à terminal:"
 
-# machine translation: argos 3537bf16d8bd
-msgid "The validation runs the calibrated model with the boundary values of the validation situation. Its steering file is derived from that of the built case and differs only in the prescribed discharges and water levels, in the names of its own result files, and in the calibrated parameter values. The mesh and all other settings are those of the calibrated model, so that a difference between model and measurement cannot stem from a model that was built differently. The calibrated values are the per-parameter posterior maxima of the last calibration: for each parameter, the peak of its own posterior distribution. The files of the built case and the result of the steady simulation are not changed."
-msgstr "La validation exécute le modèle étalonné avec les valeurs frontière de la situation de validation. Son fichier de paramètres est dérivé de celui du built cas et ne diffère que dans les valeurs prescrites débits et niveaux d'eau, dans les noms de ses propres fichiers de résultats, et dans les paramètres calibrés. Le maillage et tous les autres paramètres sont ceux du modèle étalonné, de sorte qu'une différence entre le modèle et la mesure ne peut pas découler d'un modèle qui a été construit différemment. Les valeurs calibrées sont le paramètre distribution a posteriori maxima du dernier calage: pour chaque paramètre, le pic de son propre distribution a posteriori. Les fichiers de la compilation cas et le résultat de la simulation en régime permanent ne sont pas modifiés."
+# machine translation: argos 4ae94bd436bd
+msgid "The validation runs the calibrated model with the boundary values of the validation situation. Its steering file is derived from that of the built case and differs only in the prescribed discharges and water levels, in the names of its own result files, and in the calibrated parameter values. The mesh and all other settings are those of the calibrated model, so that a difference between model and measurement cannot stem from a model that was built differently. The run starts the way the calibration runs started: from the dry or pre-wetted start of the built case or, with ``hotstart: true``, from the steady result for 1.2 residence times at the discharge of the validation situation. The calibrated values are the per-parameter posterior maxima of the last calibration: for each parameter, the peak of its own posterior distribution. The files of the built case and the result of the steady simulation are not changed."
+msgstr "La validation exécute le modèle étalonné avec les valeurs frontière de la situation de validation. Son fichier de paramètres est dérivé de celui du cas construit et ne diffère que dans les débits et les Niveau D'eau prescrits, dans les noms de ses propres fichiers de résultats, et dans les valeurs des paramètres calibrés. Le maillage et tous les autres paramètres sont ceux du modèle étalonné, de sorte qu'une différence entre le modèle et la mesure ne peut pas découler d'un modèle qui a été construit différemment. L'exécution commence par la façon dont le calage a commencé : à partir du début sec ou préhumide du cas construit ou, avec ``hotstart: true``, à partir du résultat stable pour 1,2 temps de résidence au débit de la situation de validation. Les valeurs étalonnées sont les maxima de distribution a posteriori du dernier calage : pour chaque paramètre, le pic de sa propre distribution a posteriori. Les fichiers du cas construit et le résultat de la simulation en régime permanent ne sont pas modifiés."
 
 # machine translation: argos cdc266e2266b
 msgid "aXqua then reads the model at the validation points and writes three files into ``axqua-case/calibration-validation/validation/``: a table with the measured and the modeled value at each point (``validation-<name>.csv``), a summary (``validation-<name>.json``), and a figure of the modeled against the measured values (``validation-<name>.png``). Measurement points outside the model are counted and excluded, and points less than 15 mesh nodes from an inflow or outflow line are left out with the same warning as in the calibration."
@@ -334,10 +542,6 @@ msgstr "Analyse de la qualité"
 # machine translation: argos edd4c225e27f
 msgid "HydroBayesCal writes its results into the folder ``auto-saved-results-HydroBayesCal`` within ``axqua-case/calibration-validation/`` (``multiflow/`` for calibration situations). After a successful calibration, aXqua writes a report into the folder ``report`` next to it:"
 msgstr "HydroBayesCal écrit ses résultats dans le dossier ``auto-saved-results-HydroBayesCal`` à l'intérieur ``axqua-case/calibration-validation/`` (``multiflow/`` pour les situations calage). Après un calage réussi, aXqua écrit un rapport dans le dossier ``report`` à côté :"
-
-# machine translation: argos 87d616a4ba25
-msgid "File"
-msgstr "Fichier"
 
 # machine translation: argos 2b42a58d6ed5
 msgid "For each calibrated parameter, the prior (its range) and the posterior of the last iteration, with the calibrated value marked, and one line that states the number of calibration points in the zone and whether the posterior is narrow, not identifiable, or at a limit of its range."
