@@ -365,9 +365,12 @@
 <span class="sd">The validation run is **the calibrated model with other boundary values**. Its steering</span>
 <span class="sd">file is derived from the built steady case and differs in exactly these lines: the</span>
 <span class="sd">prescribed discharges and water levels of the situation, the names of its own result</span>
-<span class="sd">and friction files, and the calibrated values. Mesh, bed, numerical settings and</span>
-<span class="sd">initial state are untouched, so a difference between model and measurement cannot come</span>
-<span class="sd">from a model that was built differently.</span>
+<span class="sd">and friction files, and the calibrated values. Mesh, bed and numerical settings are</span>
+<span class="sd">untouched, so a difference between model and measurement cannot come from a model</span>
+<span class="sd">that was built differently. It starts the way the calibration runs started: from the</span>
+<span class="sd">dry or pre-wetted start of the built case, or, with ``calibration.hotstart``, from the</span>
+<span class="sd">steady result for 1.2 residence times at the discharge of the situation</span>
+<span class="sd">(:func:`axqua.bayescal.situation_start`).</span>
 
 <span class="sd">The calibrated values are the **per-parameter posterior maxima** of the newest</span>
 <span class="sd">calibration (:func:`calibrated_parameters`): the peak of each parameter's own posterior,</span>
@@ -621,6 +624,15 @@
     <span class="k">return</span> <span class="n">found</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"'</span><span class="se">\"</span><span class="s2">"</span><span class="p">)</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">run_duration</span><span class="p">(</span><span class="n">setup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The simulated time [s] of a validation run, from its steering file."""</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">_keyword</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">cas</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">),</span> <span class="s2">"DURATION"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
 <div class="viewcode-block" id="ValidationSetup">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.validation.ValidationSetup">[Doku]</a>
 <span class="nd">@dataclass</span>
@@ -723,17 +735,17 @@
                           <span class="n">remedy</span><span class="o">=</span><span class="s2">"Build the case first (tab Preprocessing)."</span><span class="p">)</span>
     <span class="n">tag</span> <span class="o">=</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.slf"</span>
+    <span class="c1"># the start of the calibration runs: the built case, or with calibration.hotstart</span>
+    <span class="c1"># its continuation from the steady result</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">situation_start</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.cas"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
     <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># ---- the boundary values of the situation --------------------------------------</span>
     <span class="n">text</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">notes</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span> <span class="o">=</span> <span class="n">with_boundaries_of</span><span class="p">(</span>
         <span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span><span class="p">)</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"TITLE"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> validation </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.slf"</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"RESULTS FILE"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"DURATION"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># ---- the calibrated values -----------------------------------------------------</span>
     <span class="n">zones</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>

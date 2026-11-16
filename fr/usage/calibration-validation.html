@@ -374,7 +374,7 @@
 </section>
 <section id="ground-truth-data-setup">
 <span id="calibration-ground-truth"></span><h2>Vérité terrain configuration des données<a class="headerlink" href="#ground-truth-data-setup" title="Lien vers cette rubrique"></a></h2>
-<p>Les mesures de terrain sont appelées vérité terrain. aXqua les accepte dans un cahier avec une structure fixe, qui s’appelle le modèle cible de calage. Créez-le pour un cas avec :</p>
+<p>Les mesures de terrain sont appelées vérité terrain. Lorsque les mesures n’ont pas encore été prises, le <a class="reference internal" href="#help-survey-planner"><span class="std std-ref">planificateur d’enquête</span></a> à la fin de cette section détermine où le calage en a besoin. aXqua accepte les mesures dans un cahier de travail avec une structure fixe, qui s’appelle le modèle cible de calage. Créez-le pour un cas avec :</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua targets &lt;case-file&gt;
 </pre></div>
 </div>
@@ -448,6 +448,145 @@
 </table>
 <p>L’amplitude de la vitesse comparée au modèle est calculée à partir des composantes horizontales. La vitesse de chaque mesure verticale est comparée à 0,6 de la hauteur d’eau au-dessus de la lit de la rivière. Où un couche contient plusieurs lectures à une position, en dessous et au-dessus de cette hauteur, aXqua adapte un profil de vitesse logarithmique aux lectures à leur hauteur mesurée et lit la vitesse à 0.6 de la hauteur d’eau au-dessus de la lit de la rivière hors de ce profil. Le profil n’est pas étendu au-delà des lectures : toute autre verticale (une lecture unique, des lectures toutes en dessous ou au-dessus de cette hauteur, ou une vitesse qui ne croît pas avec la hauteur) est représentée par sa lecture la plus proche de cette hauteur, qui est déplacée là le long d’un profil logarithmique avec la longueur rugosité de ses propres lectures, ou bien avec la longueur médiane rugosité de la même enquête. La profondeur de mesure d’une lecture (<em>Meas. Depth</em> d’un FlowTracker) est inférieure à celle d’un surface libre. Une lecture sans profondeur enregistrée est prise pour se tenir à 0.6 de la hauteur d’eau au-dessus de la lit de la rivière et est utilisée telle quelle. Les points situés à l’extérieur du contour du modèle sont exclus du calage, de même que les points situés à moins de 15 nœuds du maillage d’une ligne d’entrée ou de sortie : là, le flux est ce que le frontière prescrit, pas ce que la rivière fait. aXqua nomme ces points et le frontière ils sont proches d’un avertissement, que le extension montre lorsque les résultats du tâche sont chargés, ainsi que le remède : <em>Increase ROI beyond the concerned liquid boundary.</em> A contour du modèle que tronçons plus en amont ou en aval que les mesures les éloignent de la frontières. Dans l’onglet extension, les fichiers sont inscrits dans les paramètres cas (<em>Open case settings…</em> sur l’onglet <em>Case Setup</em>), page <em>Calibration and validation</em>, dans la table <em>Measurement files</em> du cadre <em>Measurements</em>. <em>Add file…</em> ajoute un couche de points ou une table, et la colonne <em>Use for</em> assigne chaque fichier à l’adresse calage ou à la validation. Un fichier pour la validation a besoin du nom de son situation d’écoulement et de son débit (<a class="reference internal" href="#validation-setup"><span class="std std-ref">situation de validation</span></a>).</p>
 <p>Les mesures de vélocité avec un SonTek FlowTracker2 sont transférées dans la feuille <code class="docutils literal notranslate"><span class="pre">hydraulics</span></code> avec le script <code class="docutils literal notranslate"><span class="pre">extract_flowtracker.py</span></code>, qui aXqua place à côté du cahier de travail. Notez que la fluctuation de vitesse est l’écart type des échantillons de vitesse. Ce n’est pas la colonne <code class="docutils literal notranslate"><span class="pre">VxErr</span></code> de l’exportation de l’instrument, qui est l’erreur standard de la vitesse moyenne.</p>
+<p id="help-survey-planner"><strong>Le planificateur d’enquête.</strong> calage ne peut déterminer qu’un paramètre où une mesure y répond. Une zone de rugosité sans point de mesure n’est donc pas étalonnée (<a class="reference internal" href="#calibration-setup"><span class="std std-ref">Calage bayésien &amp; configuration de validation</span></a>), et un paramètre de turbulence est limité par des mesures dans les zones de cisaillement, pas dans le débit uniforme du chenal principal. Le planificateur d’enquête répond à deux questions avant le travail sur le terrain : où le calage a-t-il besoin de mesures et combien de temps l’enquête prend-elle ? Il place les mesures dans le champ de débit du modèle, donc il nécessite un cas construit et une simulation en régime permanent au débit qui est attendu le jour de l’enquête (<a class="reference internal" href="hydraulic-simulations.html#help-hydraulics"><span class="std std-ref">Simulations hydrauliques</span></a>). Ouvrez-le avec <em>Survey planner…</em> sur l’onglet <em>Calibration &amp; validation</em>. Sa fenêtre a huit onglets, qui peuvent être visités dans n’importe quel ordre :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Tab</p></th>
+<th class="head"><p>Contenu</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>Survey</em></p></td>
+<td><p>Les types d’arpentage à planifier, les paramètres de calage avec la règle qui place leurs mesures, le nombre de mesures par paramètre, et le fichier de résultat à planifier avec (l’exécution régulière du cas sauf si un autre fichier est nommé).</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Access</em></p></td>
+<td><p>Les points où les arpenteurs tronçon et quitter la rivière. <em>Set points on the map</em> crée <code class="docutils literal notranslate"><span class="pre">survey-plan.gpkg</span></code> avec la couche <code class="docutils literal notranslate"><span class="pre">access_points</span></code>, ajoute la couche à la carte, et commence à l’éditer. Cliquez sur la carte pour définir un point et sélectionnez son rôle : <code class="docutils literal notranslate"><span class="pre">access</span></code> (début et fin d’une enquête de déroutement, mise en place des kayaks), <code class="docutils literal notranslate"><span class="pre">leave</span></code> (départ des kayaks), ou <code class="docutils literal notranslate"><span class="pre">takeoff</span></code> (départ du drone, si ce n’est pas le point d’accès). <em>Save the points</em> termine le montage. <em>Draw areas on the map</em> et <em>Save the areas</em> faire la même chose pour la couche <code class="docutils literal notranslate"><span class="pre">walkable_areas</span></code>, les polygones du sol sec sur lesquels on peut marcher (voir la vélocimétrie au sol ci-dessous).</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Ground-based</em>, <em>Airborne</em>, <em>Kayak</em>, <em>Temperature</em></p></td>
+<td><p>Les hypothèses de chaque type d’enquête, avec les défauts décrits ci-dessous. Chaque valeur peut être changée.</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Time and weather</em></p></td>
+<td><p>Le jour de l’enquête et le début de la journée de travail (à la fois facultatif), la journée de travail la plus longue et les pauses. <em>Look up</em> lit le lever du soleil, le coucher du soleil, les prévisions météorologiques et ce que l’on sait sur la couverture du réseau au tronçon, et suggère une heure de départ.</p></td>
+</tr>
+<tr class="row-even"><td><p><em>Plan</em></p></td>
+<td><p><em>Plan the survey</em> calcule le plan, ajoute ses couches à la carte, et liste les cartes et fiches d’information, qui s’ouvrent en un clic.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Le planificateur lit le paramètres de calage du fichier de cas et suggère une règle de placement pour chacun. Il énumère également chaque zone de rugosité de la carte de zone que le calage ne nomme pas. Une telle zone est sélectionnée si le cas déclare encore non paramètre de calage, et est listé sans être sélectionné autrement. Paramètres que le cas ne déclare pas encore peut être ajouté avec <em>Add parameter…</em>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 74.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Règle</p></th>
+<th class="head"><p>Lorsque les mesures sont effectuées</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>inside a roughness zone</em></p></td>
+<td><p>À l’intérieur d’un zone de rugosité, répartis sur les hauteurs d’eau et les vitesses qui se produisent dedans. C’est la règle de chaque paramètre rugosité qui appartient à une zone.</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>over the wetted model</em></p></td>
+<td><p>Répartir sur le modèle mouillé, pour un paramètre qui agit sur l’ensemble du tronçon.</p></td>
+</tr>
+<tr class="row-even"><td><p><em>in shear zones</em></p></td>
+<td><p>Lorsque la vitesse change le plus à travers le flux, comme les bords des zones de recirculation. C’est la règle des paramètres de turbulence.</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>in bends</em></p></td>
+<td><p>Là où la courbe de rationalisation le plus.</p></td>
+</tr>
+<tr class="row-even"><td><p><em>along the banks</em></p></td>
+<td><p>Le long des berges, près du bord mouillé. Un mur solide du modèle compte comme une banque où l’eau atteint.</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>in shallow margins</em></p></td>
+<td><p>Dans les marges peu profondes qui tombent à sec à un débit inférieur.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Aucune mesure n’est placée plus près de 15 nœuds du maillage à un afflux ou frontière de sortie, car le débit y est prescrit par la condition aux limites et non calculé par le modèle. Six mesures sont prévues par paramètre par défaut.</p>
+<p><strong>Vélocimétrie au sol.</strong> Un arpenteur se déplace du point d’accès à chaque mesure verticale avec une sonde de vitesse, par exemple un SonTek FlowTracker2, et retourne au point d’accès à la fin de la journée. Le planificateur place des verticales seulement dans l’eau qui peut être balayée, ordonne les verticales dans un court tour, et fait marcher sur une grille de 1 m cellules avec le hauteurs d’eau et vitesses d’écoulement du résultat. Le terrain à côté d’une rivière est souvent à côté de l’impraticable (forêt riveraine, berges raides, terres privées), et le modèle ne contient aucune information à ce sujet. Sur terre sèche, la promenade reste donc dans une bande de 1 m le long du bord mouillé du résultat, qui est le bord mouillé à la débit de la journée de sondage. Cela vaut pour les barres de gravier à l’intérieur du modèle et pour les rives à l’extérieur. Le terrain sec qui peut être parcouru au-delà de la bande, comme une barre de gravier, un sentier ou une prairie, est dessiné comme un polygone dans le couche <code class="docutils literal notranslate"><span class="pre">walkable_areas</span></code> (tab <em>Access</em>) ; les zones s’appliquent uniquement au sol sec et ne portent pas la marche à travers l’eau qui ne peut pas être balayée. Un point d’accès que ni la bande ni une zone se connecte à l’eau est joint au sol le plus proche marchable par une ligne droite, et le plan émet un avertissement si cette ligne est plus de 10 m, parce que rien n’indique qu’il peut être marché. La bande se termine à l’entrée et frontières de sortie du modèle, où la rivière continue, de sorte que la promenade traverse la rivière seulement où le résultat montre l’eau wadeable. Les valeurs par défaut sont :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 34.0%" />
+<col style="width: 66.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Hypothèse</p></th>
+<th class="head"><p>Par défaut</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Eau Wadeable</p></td>
+<td><p>Pas plus de 1,2 m. Jusqu’à une profondeur de 0,6 m pas plus de 2 m/s, jusqu’à 0,9 m pas plus de 1,4 m/s et jusqu’à 1,2 m pas plus de 1 m/s.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Vitesse de marche</p></td>
+<td><p>3 km/h sur terre et 1,5 km/h dans l’eau avec le courant. Contre le courant de 1 km/h dans des eaux plus profondes que 0,3 m, 0,5 km/h dans des eaux plus profondes que 0,5 m et 0,1 km/h dans des eaux plus profondes que 0,8 m.</p></td>
+</tr>
+<tr class="row-even"><td><p>Sol sec</p></td>
+<td><p>Marcher à moins de 1 m du bord mouillé et à l’intérieur des zones piétonnes, nulle part ailleurs. La largeur de la bande est le réglage <em>On land, no farther from the wetted edge than</em> sur l’onglet <em>Ground-based</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Temps à une verticale</p></td>
+<td><p>60 s pour la hauteur d’eau, et pour chaque profondeur mesurée 40 s pour régler la sonde à sa hauteur et 60 s de vitesse moyenne.</p></td>
+</tr>
+<tr class="row-even"><td><p>Profondeurs mesurées</p></td>
+<td><p>Une profondeur d’eau plus faible que 0,3 m (à 0,6 m de la hauteur d’eau au-dessus du lit de la rivière), deux profondeurs de 0,3 m (0,2 et 0,8) et trois profondeurs de 0,5 m (0,2, 0,6 et 0,8). La carte montre les trois types de verticales avec des symboles différents.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Capteur de pression</p></td>
+<td><p>Le capteur de pression de la sonde est réglé à la pression atmosphérique au début et toutes les 4 h. La carte montre où.</p></td>
+</tr>
+<tr class="row-even"><td><p>Fonctions</p></td>
+<td><p>Un deuxième arpenteur enregistre la position de chaque verticale avec un rover DGPS pendant que la vitesse est mesurée. La DGPS ne retarde donc l’enquête que lorsqu’elle perd sa réception des données.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Enquêteurs</p></td>
+<td><p>Un arpenteur avec une sonde. Avec plus d’arpenteurs, chaque arpenteur obtient son propre chemin de marche, et l’arpenteur DGPS obtient un chemin séparé qui visite ses verticales. Trois sondes au maximum par rover DGPS sont recommandées.</p></td>
+</tr>
+<tr class="row-even"><td><p>Jour ouvrable</p></td>
+<td><p>8 h au maximum, avec une pause de 10 min toutes les 2 h et de 30 min toutes les 4 h. Un sondage qui ne correspond pas à un jour se poursuit le lendemain à partir du point d’accès.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Vélocimétrie aéroportée.</strong> Un drone de caméra survole la rivière et filme des traceurs sur la surface libre. Le suivi des particules ou la vélocimétrie de l’image des particules (PTV ou PIV) avec <a class="reference external" href="https://pxv.readthedocs.io/">pXv</a> transforme chaque vidéo en vitesse de surface de la zone filmée, de sorte qu’une position de vol stationnaire remplace de nombreuses verticales, aussi là où l’eau est trop profonde ou trop rapide pour se déplacer. Le planificateur prend un drone de caméra DJI avec la caméra pointée tout droit vers le bas et planifie les positions de vol stationnaire, la hauteur de vol au-dessus de la surface libre (40 m par défaut, 120 m au plus), le cap du cadre, la durée de chaque vidéo (180 s), l’itinéraire, et la batterie change. La fiche d’information énumère les coordonnées de chaque position de vol stationnaire, les paramètres de vol, la taille du cadre sur l’eau, la taille d’un traceur en pixels et les indications sur les points de contrôle au sol et sur le panneau calage pour la correction de l’objectif. Notez que la vidéo montre la vitesse de la surface libre, qui est plus grande que la vitesse moyenne en profondeur d’un modèle 2D.</p>
+<p><strong>Vélocimétrie de la dériveuse kayak.</strong> Un kayak qui n’est pas pagayé dérive à la vitesse de la surface libre. Un rover DGPS sur le kayak qui enregistre une position tous les 5 s enregistre donc la vitesse de surface le long de la ligne de dérive : seule la position horizontale et la distance entre deux positions consécutives comptent (Barker et al. 2018). Le planificateur a besoin d’un point d’accès et d’un point de départ. Il trace des lignes de dérive à travers le champ d’écoulement du modèle, calcule la durée d’un flotteur à partir de la vitesse modélisée, et marque des patchs plus rapides que 3 m/s, qui doivent être évités. Deux kayakistes sont par défaut pour des raisons de sécurité ; un seul kayakiste flotte le tronçon deux fois. Une pause de 10 min est prévue toutes les 2 h, et seul un DGPS qui perd sa connexion retarde un flotteur. La méthode est efficace pour les longs tronçons, mais elle nécessite un entraînement au point de départ et le transport des kayaks. Les vitesses mesurées à quelques points avec un ADV ou un ADCP relient la vitesse de surface à la vitesse moyenne de profondeur et supportent la validation.</p>
+<p><strong>Température de l’eau.</strong> Le planificateur trie le tronçon mouillé en quatre sortes d’eau : lente ou rapide (limite 0,2 m/s) et peu profonde ou profonde (limite 0,3 m). L’eau lente et peu profonde se réchauffe au soleil en une heure, tandis que l’eau profonde et rapide porte la température de la rivière en amont, de sorte que chaque type d’eau qui se produit obtient au moins un point. Les points sont soit des bûcherons fixes qui restent dans la rivière, soit les relevés d’une sonde mobile qui est portée de point en point. La marche jusqu’aux points suit les règles de l’étude au sol, y compris la bande le long du bord mouillé et les zones marchables.</p>
+<p><strong>Heure, météo et couverture du réseau</strong> Sans une heure de départ, le calendrier d’un plan commence à 00:00 et indique les durées. Avec le jour de l’enquête et <em>Look up</em>, le planificateur calcule le lever et le coucher du soleil pour le tronçon, lit les prévisions météorologiques de <a class="reference external" href="https://open-meteo.com/">Open-Meteo</a>, et suggère une heure de départ qui garde la journée de travail en plein jour et hors de la pluie et du vent fort. Avec une journée d’enquête et une heure de début, la journée de travail se termine au plus tard au coucher du soleil, et une heure de début après le coucher du soleil est refusée à moins que <em>End before sunset when the day is known</em> ne soit effacé. Pour la couverture du réseau, il désigne la carte de couverture du régulateur national et les services de correction en temps réel de la DGPS pour l’Allemagne, la Suisse, la France, l’Autriche, l’Italie, les Pays-Bas, la République tchèque, le Danemark, la Suède, le Canada, la Chine et les États-Unis. En Suisse, elle lit également le modèle de couverture de l’Office fédéral des communications du tronçon, et partout elle compte les mâts mobiles qu’OpenStreetMap affiche à moins de 5 km. Il n’y a pas non plus de mesure de la réception sur la rivière, de sorte que chaque fiche d’information indique d’où proviennent ses informations et demande aux arpenteurs de vérifier la couverture avant l’enquête. La case à cocher pour la recherche peut être effacé sur un ordinateur sans accès à Internet ; le plan contient alors le lever et le coucher du soleil seulement.</p>
+<p><strong>Le plan.</strong> <em>Plan the survey</em> écrit le dossier <code class="docutils literal notranslate"><span class="pre">axqua-case/calibration-validation/survey-plan/</span></code>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 34.0%" />
+<col style="width: 66.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Fichier</p></th>
+<th class="head"><p>Contenu</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">survey-plan.gpkg</span></code></p></td>
+<td><p>Les couches que QGIS montre : les points d’accès, les zones marchables, les verticales (<code class="docutils literal notranslate"><span class="pre">flowtracker_points</span></code>), les chemins de randonnée avec leur direction (<code class="docutils literal notranslate"><span class="pre">walk_paths</span></code>), les pauses, les réglages de pression et les changements de batterie (<code class="docutils literal notranslate"><span class="pre">survey_events</span></code>), les positions de vol stationnaire, les cadres et l’itinéraire du drone, les lignes de dérive des kayaks avec les patchs à éviter, et les points de température avec les quatre types d’eau.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">survey-map-&lt;kind&gt;.pdf</span></code> et <code class="docutils literal notranslate"><span class="pre">.png</span></code></p></td>
+<td><p>Une carte par type de relevé sur une feuille A4.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">survey-factsheet-&lt;kind&gt;.odt</span></code></p></td>
+<td><p>Une page par type d’enquête pour le terrain : le plan en nombre, le calendrier avec début, pauses et fin, le lever du soleil, coucher du soleil et la météo, la couverture réseau, les hypothèses, et des conseils pour le travail sur le terrain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">survey-plan.json</span></code> et <code class="docutils literal notranslate"><span class="pre">survey-settings.json</span></code></p></td>
+<td><p>Chaque numéro du plan et les hypothèses sur lesquelles il repose. Le assistant commence par les hypothèses du dernier plan.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Les points d’accès et les zones à pied sont conservés lorsqu’un relevé est prévu à nouveau ; toutes les autres Coupes sont remplacées. Les couches ne sont remplacées qu’après avoir dressé les cartes et les fiches d’information du nouveau plan, de sorte qu’un plan qui échoue laisse le plan précédent en place. Une sorte d’enquête qui ne peut être planifiée, par exemple une enquête sur le kayak sans point de départ, n’arrête pas les autres et est énumérée avec sa raison. Le même plan est disponible à terminal:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua survey init &lt;case-file&gt;
+axqua survey plan &lt;case-file&gt; --kinds ground,kayak --date 2026-06-15 --start 08:00
+</pre></div>
+</div>
+<p>Le plan tient pour le débit de la simulation avec laquelle il a été calculé. Exécutez de nouveau la simulation en régime permanent si le débit le jour de l’enquête diffère considérablement, et déplacez une verticale dans le champ où l’eau est plus profonde ou plus rapide que prévu. Après l’enquête, les valeurs et les positions mesurées sont entrées comme vérité terrain comme décrit ci-dessus.</p>
 </section>
 <section id="bayesian-calibration-validation-setup">
 <span id="calibration-setup"></span><h2>Calage bayésien &amp; configuration de validation<a class="headerlink" href="#bayesian-calibration-validation-setup" title="Lien vers cette rubrique"></a></h2>
@@ -546,7 +685,7 @@ axqua submit &lt;case-file&gt; --kind calibration
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua submit &lt;case-file&gt; --kind validation
 </pre></div>
 </div>
-<p>La validation exécute le modèle étalonné avec les valeurs frontière de la situation de validation. Son fichier de paramètres est dérivé de celui du built cas et ne diffère que dans les valeurs prescrites débits et niveaux d’eau, dans les noms de ses propres fichiers de résultats, et dans les paramètres calibrés. Le maillage et tous les autres paramètres sont ceux du modèle étalonné, de sorte qu’une différence entre le modèle et la mesure ne peut pas découler d’un modèle qui a été construit différemment. Les valeurs calibrées sont le paramètre distribution a posteriori maxima du dernier calage: pour chaque paramètre, le pic de son propre distribution a posteriori. Les fichiers de la compilation cas et le résultat de la simulation en régime permanent ne sont pas modifiés.</p>
+<p>La validation exécute le modèle étalonné avec les valeurs frontière de la situation de validation. Son fichier de paramètres est dérivé de celui du cas construit et ne diffère que dans les débits et les Niveau D’eau prescrits, dans les noms de ses propres fichiers de résultats, et dans les valeurs des paramètres calibrés. Le maillage et tous les autres paramètres sont ceux du modèle étalonné, de sorte qu’une différence entre le modèle et la mesure ne peut pas découler d’un modèle qui a été construit différemment. L’exécution commence par la façon dont le calage a commencé : à partir du début sec ou préhumide du cas construit ou, avec <code class="docutils literal notranslate"><span class="pre">hotstart:</span> <span class="pre">true</span></code>, à partir du résultat stable pour 1,2 temps de résidence au débit de la situation de validation. Les valeurs étalonnées sont les maxima de distribution a posteriori du dernier calage : pour chaque paramètre, le pic de sa propre distribution a posteriori. Les fichiers du cas construit et le résultat de la simulation en régime permanent ne sont pas modifiés.</p>
 <p>aXqua lit ensuite le modèle aux points de validation et écrit trois fichiers dans <code class="docutils literal notranslate"><span class="pre">axqua-case/calibration-validation/validation/</span></code>: une table avec la valeur mesurée et la valeur modélisée à chaque point (<code class="docutils literal notranslate"><span class="pre">validation-&lt;name&gt;.csv</span></code>), un résumé (<code class="docutils literal notranslate"><span class="pre">validation-&lt;name&gt;.json</span></code>) et une figure du modèle par rapport aux valeurs mesurées (<code class="docutils literal notranslate"><span class="pre">validation-&lt;name&gt;.png</span></code>). Les points de mesure en dehors du modèle sont comptés et exclus, et les points inférieurs à 15 nœuds du maillage d’une ligne d’entrée ou de sortie sont exclus avec le même avertissement que dans le calage.</p>
 <p><strong>Plusieurs débits.</strong> Les valeurs de rugosité qui ont été étalonnées à un débit ne sont pas nécessairement valables à un autre. Les mesures de plusieurs relevés à différents débits peuvent donc être étalonnées ensemble. Chaque enquête est une situation <strong>calage</strong>, décrite comme une situation de validation, avec un nom, ses mesures et son débit :</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">calibration</span><span class="p">:</span>
@@ -651,6 +790,7 @@ axqua submit &lt;case-file&gt; --kind calibration
 <p>Le <a class="reference external" href="https://hydrobayescal.readthedocs.io">HydroBayeCal documentation</a> décrit les fichiers de résultats et les chiffres en détail.</p>
 <section id="references">
 <h3>Références<a class="headerlink" href="#references" title="Lien vers cette rubrique"></a></h3>
+<p>Barker, J. R., Pasternack, G. B., Bratovich, P. M., Massa, D. A., Wyrick, J. R., and Johnson, T. R. (2018). « Kayak drifter surface velocity observation for 2D hydraulic model validation. » <em>River Research and Applications</em>, 34(2), 124-134. <a class="reference external" href="https://doi.org/10.1002/rra.3238">doi:10.1002/rra.3238</a></p>
 <p>Mouris, K., Acuña Espinoza, E., Schwindt, S., Mohammadi, F., Haun, S., Wieprecht, S., and Oladyshkin, S. (2023). « Stability criteria for Bayesian calibration of reservoir sedimentation models. » <em>Modeling Earth Systems and Environment</em>, 9, 3643-3661. <a class="reference external" href="https://doi.org/10.1007/s40808-023-01712-7">doi:10.1007/s40808-023-01712-7</a></p>
 <p>Oladyshkin, S., Mohammadi, F., Kroeker, I., and Nowak, W. (2020). « Bayesian3 active learning for the Gaussian process emulator using information theory. » <em>Entropy</em>, 22(8), 890. <a class="reference external" href="https://doi.org/10.3390/e22080890">doi:10.3390/e22080890</a></p>
 <p>Rasmussen, C. E., and Williams, C. K. I. (2006). <em>Gaussian processes for machine learning</em>. MIT Press.</p>
