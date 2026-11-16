@@ -15,6 +15,12 @@ name: auto-release
 # as for a tag pushed by hand (github.ref is refs/tags/v<version>).
 #
 # A push that does not change the version releases nothing: its tag exists already.
+# One exception: a tag whose release never came out. On 2026-11-16 the tag v1.4.0 was
+# pushed and `release` was started during an incident of GitHub Actions; the run stayed
+# "queued" without a job and could not be cancelled, so there was a tag, no release and
+# no upload, and the next push said "nothing to release". When the tag exists, the last
+# step therefore looks for the files of its GitHub release and starts `release` on the
+# tag again if they are missing, unless a run for that tag is under way.
 on:
   workflow_run:
     workflows: ["tests"]
@@ -87,3 +93,12 @@ jobs:
           git push origin "$tag"
           gh workflow run plugin-release.yml --ref "$tag"
           echo "released $tag: see Actions > release"
+
+      - name: A tag without its release gets the release started again
+        if: steps.version.outputs.new == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PYPI_UPLOAD: ${{ vars.PYPI_UPLOAD }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: bash .github/scripts/release-again.sh
