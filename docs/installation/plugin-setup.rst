@@ -12,7 +12,7 @@ The plugin setup contains everything that describes the **computer** and not the
 
       <div class="video-embed">
         <iframe
-          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          src="https://www.youtube.com/embed/C3fWplQX5VE"
           title="Installing aXqua: QGIS Plugin and Python Backend"
           loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -21,7 +21,7 @@ The plugin setup contains everything that describes the **computer** and not the
         </iframe>
       </div>
 
-   `Open the tutorial on YouTube <https://youtu.be/gK83Q8bJCHI>`_.
+   `Open the tutorial on YouTube <https://youtu.be/C3fWplQX5VE>`_.
 
 .. _plugin-profile:
 
