@@ -741,13 +741,12 @@ bars, the figure has to match aXqua’s other figures
 comparison must stay reproducible on a machine with no VisIt at all.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="axqua.postproc.profiles.MEASUREMENT_FRACTION">
-<span class="sig-prename descclassname"><span class="pre">axqua.postproc.profiles.</span></span><span class="sig-name descname"><span class="pre">MEASUREMENT_FRACTION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.4</span></span><a class="headerlink" href="#axqua.postproc.profiles.MEASUREMENT_FRACTION" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.profiles.</span></span><span class="sig-name descname"><span class="pre">MEASUREMENT_FRACTION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.6</span></span><a class="headerlink" href="#axqua.postproc.profiles.MEASUREMENT_FRACTION" title="Link to this definition"></a></dt>
 <dd><p>Fallback height above the BED, as a fraction of the depth, when the ground truth
-does not say where the probe sat. <strong>The „0.6 depth“ convention measures DOWN FROM
-THE SURFACE</strong> (verified on this dataset: MeasD/FinalD has median 0.59), so the
-probe is at 0.4 of the depth ABOVE the bed. This constant was 0.6 and documented
-as „from the BED“, which placed every comparison 0.2*h too high. Prefer the
-per-row value from ground_truth.relative_height, which reads MeasD/FinalD.</p>
+does not say where the probe sat: 0.6 of the water depth above the riverbed, as
+<code class="docutils literal notranslate"><span class="pre">ground_truth.DEFAULT_RELATIVE_HEIGHT</span></code> (the user’s decision of 2026-11-12; it was
+0.4 until then). A recorded MeasD/FinalD counts DOWN FROM THE SURFACE and wins: the
+per-row value comes from ground_truth.relative_height.</p>
 </dd></dl>
 
 <dl class="py function">

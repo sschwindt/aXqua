@@ -375,12 +375,11 @@
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
 
 <span class="c1">#: Fallback height above the BED, as a fraction of the depth, when the ground truth</span>
-<span class="c1">#: does not say where the probe sat. **The "0.6 depth" convention measures DOWN FROM</span>
-<span class="c1">#: THE SURFACE** (verified on this dataset: MeasD/FinalD has median 0.59), so the</span>
-<span class="c1">#: probe is at 0.4 of the depth ABOVE the bed. This constant was 0.6 and documented</span>
-<span class="c1">#: as "from the BED", which placed every comparison 0.2*h too high. Prefer the</span>
-<span class="c1">#: per-row value from ground_truth.relative_height, which reads MeasD/FinalD.</span>
-<span class="n">MEASUREMENT_FRACTION</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="c1">#: does not say where the probe sat: 0.6 of the water depth above the riverbed, as</span>
+<span class="c1">#: ``ground_truth.DEFAULT_RELATIVE_HEIGHT`` (the user's decision of 2026-11-12; it was</span>
+<span class="c1">#: 0.4 until then). A recorded MeasD/FinalD counts DOWN FROM THE SURFACE and wins: the</span>
+<span class="c1">#: per-row value comes from ground_truth.relative_height.</span>
+<span class="n">MEASUREMENT_FRACTION</span> <span class="o">=</span> <span class="mf">0.6</span>
 
 
 <div class="viewcode-block" id="read_curve">
@@ -458,7 +457,7 @@
         <span class="n">depth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">"h"</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">point</span><span class="p">])</span> <span class="k">if</span> <span class="s2">"h"</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">distance</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="ow">or</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="n">measured</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">speed</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">point</span><span class="p">])</span>
         <span class="c1"># per-row height above the bed when MeasD/FinalD are carried, else the</span>
-        <span class="c1"># documented fallback - never a bare 0.6, which is measured from the surface</span>
+        <span class="c1"># documented fallback (0.6 of the depth above the bed)</span>
         <span class="n">f_row</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">fractions</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">point</span><span class="p">])</span> <span class="k">if</span> <span class="n">fractions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
             <span class="k">else</span> <span class="n">MEASUREMENT_FRACTION</span>
 

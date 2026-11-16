@@ -1053,8 +1053,8 @@ quantity columns absent from a given dataset are simply not present
 <span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">PROFILE_HEIGHT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.6</span></span><a class="headerlink" href="#axqua.ground_truth.PROFILE_HEIGHT" title="Link to this definition"></a></dt>
 <dd><p>Height above the bed, as a fraction of the water depth, at which the velocity of
 a vertical is compared with a depth-averaged (2D) model: <strong>0.6 of the depth above
-the riverbed</strong> (the user’s rule of 2026-11-11, which replaces the „0.6 of the depth
-below the surface“ of the FlowTracker manual). Where a vertical has several
+the riverbed</strong> (the user’s rule of 2026-11-11 and 2026-11-12; never 0.6 of the depth
+below the surface). Where a vertical has several
 readings, the <code class="docutils literal notranslate"><span class="pre">log-profile</span></code> rule reads the velocity at this height off a
 logarithmic profile fitted to them. On a logarithmic profile this velocity is
 approximately 10 % above the depth average (KB15 surveys, median of 36 fits).</p>
@@ -1062,13 +1062,12 @@ approximately 10 % above the depth average (KB15 surveys, median of 36 fits).</p
 
 <dl class="py data">
 <dt class="sig sig-object py" id="axqua.ground_truth.DEFAULT_RELATIVE_HEIGHT">
-<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_RELATIVE_HEIGHT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.4</span></span><a class="headerlink" href="#axqua.ground_truth.DEFAULT_RELATIVE_HEIGHT" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">DEFAULT_RELATIVE_HEIGHT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.6</span></span><a class="headerlink" href="#axqua.ground_truth.DEFAULT_RELATIVE_HEIGHT" title="Link to this definition"></a></dt>
 <dd><p>Height above the bed, as a fraction of the column, assumed for a reading whose
-height the data do not give (no MeasD, % Depth or label): 0.4, where a crew that
-follows the FlowTracker manual holds the probe (0.6 of the depth below the
-surface; the single readings of August 2026 on KB15 sit at a median 0.35 h). This
-is where the reading was taken, not where it is compared (<a class="reference internal" href="#axqua.ground_truth.PROFILE_HEIGHT" title="axqua.ground_truth.PROFILE_HEIGHT"><code class="xref py py-data docutils literal notranslate"><span class="pre">PROFILE_HEIGHT</span></code></a>);
-the <code class="docutils literal notranslate"><span class="pre">log-profile</span></code> rule moves it there. A <em>recorded</em> measurement depth (MeasD,
+height the data do not give (no MeasD, % Depth or label): 0.6 of the water depth
+above the riverbed, the comparison height itself (<a class="reference internal" href="#axqua.ground_truth.PROFILE_HEIGHT" title="axqua.ground_truth.PROFILE_HEIGHT"><code class="xref py py-data docutils literal notranslate"><span class="pre">PROFILE_HEIGHT</span></code></a>; the
+user’s decision of 2026-11-12), so such a reading is used as it is and never
+moved along a profile. It was 0.4 until then. A <em>recorded</em> measurement depth (MeasD,
 <code class="docutils literal notranslate"><span class="pre">Meas.</span> <span class="pre">Depth</span></code>, <code class="docutils literal notranslate"><span class="pre">%</span> <span class="pre">Depth</span></code>) counts DOWN FROM THE SURFACE, as a FlowTracker
 records it: in the KB15 surveys of 2025 and 2026, the reading with the smallest
 MeasD is the fastest in 39 of the 50 verticals with several readings. Getting
@@ -1077,7 +1076,7 @@ this backwards misplaces every target by 0.2 h.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.ground_truth.relative_height">
-<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">relative_height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#relative_height"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.ground_truth.relative_height" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">relative_height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#relative_height"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.ground_truth.relative_height" title="Link to this definition"></a></dt>
 <dd><p>Height above the bed as a fraction of the column, per measurement row.</p>
 <p>Returns <code class="docutils literal notranslate"><span class="pre">(f,</span> <span class="pre">source)</span></code>; <em>source</em> names which rule fired, so a placement
 audit can say where every target’s position came from rather than leaving it

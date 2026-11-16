@@ -515,6 +515,14 @@
 <span class="sd">    writes last and HydroBayesCal reads, left that term out without a word.</span>
 <span class="sd">    """</span>
     <span class="n">compile_ground_truth</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"the case has no measurement points to calibrate against: it names no "</span>
+            <span class="sa">f</span><span class="s2">"measurement file, and </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth_path</span><span class="si">}</span><span class="s2"> does not exist"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"ground_truth.sources"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Add the velocity survey under Measurement files in the case editor "</span>
+                   <span class="s2">"(ground_truth.sources in the case file), or a calibration situation."</span><span class="p">)</span>
     <span class="n">tables</span> <span class="o">=</span> <span class="n">read_tidy</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth_path</span><span class="p">)</span>
     <span class="k">if</span> <span class="s2">"hydraulics"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no 'hydraulics' tab in </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth_path</span><span class="si">}</span><span class="s2">; check "</span>

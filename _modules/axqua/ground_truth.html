@@ -872,24 +872,23 @@
 <span class="c1"># --------------------------------------------------------------------------- #</span>
 <span class="c1">#: Height above the bed, as a fraction of the water depth, at which the velocity of</span>
 <span class="c1">#: a vertical is compared with a depth-averaged (2D) model: **0.6 of the depth above</span>
-<span class="c1">#: the riverbed** (the user's rule of 2026-11-11, which replaces the "0.6 of the depth</span>
-<span class="c1">#: below the surface" of the FlowTracker manual). Where a vertical has several</span>
+<span class="c1">#: the riverbed** (the user's rule of 2026-11-11 and 2026-11-12; never 0.6 of the depth</span>
+<span class="c1">#: below the surface). Where a vertical has several</span>
 <span class="c1">#: readings, the ``log-profile`` rule reads the velocity at this height off a</span>
 <span class="c1">#: logarithmic profile fitted to them. On a logarithmic profile this velocity is</span>
 <span class="c1">#: approximately 10 % above the depth average (KB15 surveys, median of 36 fits).</span>
 <span class="n">PROFILE_HEIGHT</span> <span class="o">=</span> <span class="mf">0.6</span>
 
 <span class="c1">#: Height above the bed, as a fraction of the column, assumed for a reading whose</span>
-<span class="c1">#: height the data do not give (no MeasD, % Depth or label): 0.4, where a crew that</span>
-<span class="c1">#: follows the FlowTracker manual holds the probe (0.6 of the depth below the</span>
-<span class="c1">#: surface; the single readings of August 2026 on KB15 sit at a median 0.35 h). This</span>
-<span class="c1">#: is where the reading was taken, not where it is compared (:data:`PROFILE_HEIGHT`);</span>
-<span class="c1">#: the ``log-profile`` rule moves it there. A *recorded* measurement depth (MeasD,</span>
+<span class="c1">#: height the data do not give (no MeasD, % Depth or label): 0.6 of the water depth</span>
+<span class="c1">#: above the riverbed, the comparison height itself (:data:`PROFILE_HEIGHT`; the</span>
+<span class="c1">#: user's decision of 2026-11-12), so such a reading is used as it is and never</span>
+<span class="c1">#: moved along a profile. It was 0.4 until then. A *recorded* measurement depth (MeasD,</span>
 <span class="c1">#: ``Meas. Depth``, ``% Depth``) counts DOWN FROM THE SURFACE, as a FlowTracker</span>
 <span class="c1">#: records it: in the KB15 surveys of 2025 and 2026, the reading with the smallest</span>
 <span class="c1">#: MeasD is the fastest in 39 of the 50 verticals with several readings. Getting</span>
 <span class="c1">#: this backwards misplaces every target by 0.2 h.</span>
-<span class="n">DEFAULT_RELATIVE_HEIGHT</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="n">DEFAULT_RELATIVE_HEIGHT</span> <span class="o">=</span> <span class="n">PROFILE_HEIGHT</span>
 
 
 <div class="viewcode-block" id="relative_height">
@@ -937,7 +936,7 @@
     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
         <span class="s2">"no MeasD/</span><span class="si">%%</span><span class="s2">Depth/label in the ground truth, so the measurement height "</span>
         <span class="s2">"is unknown for all </span><span class="si">%d</span><span class="s2"> point(s); assuming </span><span class="si">%.2f</span><span class="s2"> of the depth above the "</span>
-        <span class="s2">"bed, where the FlowTracker manual places the probe. "</span>
+        <span class="s2">"riverbed, the height at which velocities are compared. "</span>
         <span class="s2">"Carry MeasD + FinalD to place targets from the data instead."</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">default</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"default </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2">"</span></div>
 
@@ -1087,7 +1086,9 @@
 <span class="sd">    than e ``z0`` to the bed, the reading is kept as measured.</span>
 
 <span class="sd">    Every other column (TKE, the standard deviations, z, the point name) comes from</span>
-<span class="sd">    the reading nearest ``z*``. The rows that come out stand at ``z*``: ``h_meas``,</span>
+<span class="sd">    the reading nearest ``z*``. ``z* = PROFILE_HEIGHT h`` with ``h`` the median water</span>
+<span class="sd">    depth of the vertical's readings, and each reading stands at its own recorded</span>
+<span class="sd">    height. The rows that come out stand at ``z*``: ``h`` (that median depth), ``h_meas``,</span>
 <span class="sd">    ``pct_depth``, ``f`` and the height suffix of a ``label`` are set accordingly, so</span>
 <span class="sd">    that a later placement reads the height they now represent.</span>
 <span class="sd">    """</span>
@@ -1109,7 +1110,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">at_target</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""The placement columns of a row that now stands at PROFILE_HEIGHT."""</span>
-        <span class="n">moved</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"_f"</span><span class="p">:</span> <span class="n">PROFILE_HEIGHT</span><span class="p">}</span>
+        <span class="n">moved</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"_f"</span><span class="p">:</span> <span class="n">PROFILE_HEIGHT</span><span class="p">,</span> <span class="s2">"h"</span><span class="p">:</span> <span class="n">h</span><span class="p">}</span>
         <span class="k">if</span> <span class="s2">"f"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">moved</span><span class="p">[</span><span class="s2">"f"</span><span class="p">]</span> <span class="o">=</span> <span class="n">PROFILE_HEIGHT</span>
         <span class="k">if</span> <span class="s2">"h_meas"</span> <span class="ow">in</span> <span class="n">work</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -1144,7 +1145,10 @@
         <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="n">template</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">grp</span><span class="p">[</span><span class="s2">"_f"</span><span class="p">]</span> <span class="o">-</span> <span class="n">PROFILE_HEIGHT</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
             <span class="k">continue</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">depth</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># one depth per vertical: the median of its readings (a repeat reading may</span>
+        <span class="c1"># record another depth; the first one decided until 2026-11-12, and the row</span>
+        <span class="c1"># then stood at 0.62 h instead of 0.6 h)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">depth</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">())</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">PROFILE_HEIGHT</span> <span class="o">*</span> <span class="n">h</span>
         <span class="c1"># the reading(s) nearest z*; of two heights equally near, the lower</span>
         <span class="n">distance</span> <span class="o">=</span> <span class="p">(</span><span class="n">zg</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
@@ -1215,7 +1219,7 @@
     <span class="n">out</span> <span class="o">=</span> <span class="n">work</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">changed</span> <span class="o">=</span> <span class="p">{</span><span class="n">column</span> <span class="k">for</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">new</span><span class="p">}</span>
     <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">changed</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="s2">"f"</span><span class="p">,</span> <span class="s2">"h_meas"</span><span class="p">,</span> <span class="s2">"pct_depth"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">column</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_err"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="s2">"f"</span><span class="p">,</span> <span class="s2">"h"</span><span class="p">,</span> <span class="s2">"h_meas"</span><span class="p">,</span> <span class="s2">"pct_depth"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">column</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_err"</span><span class="p">):</span>
             <span class="n">out</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="n">column</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"coerce"</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">new</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

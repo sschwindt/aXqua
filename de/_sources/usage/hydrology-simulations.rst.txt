@@ -12,7 +12,7 @@ A hydrology simulation computes how rain on a catchment becomes runoff. Rain fal
 
       <div class="video-embed">
         <iframe
-          src="https://youtu.be/RfoUXIGyqjo"
+          src="https://www.youtube.com/embed/RfoUXIGyqjo"
           title="TELEMAC 2D simulations with aXqua: dry start"
           loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
