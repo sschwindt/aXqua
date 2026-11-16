@@ -56,8 +56,8 @@ def _geometry(kind: str, coordinates):
     return ogr.CreateGeometryFromWkt(f"MULTIPOLYGON ((({ring(coordinates)})))")
 
 
-def write_gpkg(path: Path, *, plan: bool = True, access=()) -> Path:
-    """``survey-plan.gpkg`` as the library writes it: the layer of the access points and, with *plan*, the layers of a plan."""
+def write_gpkg(path: Path, *, plan: bool = True, access=(), walkable=()) -> Path:
+    """``survey-plan.gpkg`` as the library writes it: the layers of the access points and of the walkable areas and, with *plan*, the layers of a plan."""
     from osgeo import ogr, osr
 
     ogr.UseExceptions()
@@ -65,7 +65,8 @@ def write_gpkg(path: Path, *, plan: bool = True, access=()) -> Path:
     kinds = {str: ogr.OFTString, int: ogr.OFTInteger, float: ogr.OFTReal}
     system = osr.SpatialReference()
     system.ImportFromEPSG(25832)
-    layers = {"access_points": ("Point", [("role", str), ("name", str)], [(xy, (role, f"the {role}")) for role, xy in access])}
+    layers = {"access_points": ("Point", [("role", str), ("name", str)], [(xy, (role, f"the {role}")) for role, xy in access]),
+              "walkable_areas": ("Polygon", [("name", str)], [(ring, ("dry ground",)) for ring in walkable])}
     if plan:
         layers.update(PLAN)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -89,7 +90,7 @@ def answer_of(gpkg: Path, files: dict | None = None) -> dict:
     return {"gpkg": str(gpkg), "folder": str(gpkg.parent), "layers": {name: len(rows) for name, (_kind, _fields, rows) in PLAN.items()}, "files": files or {}, "skipped": {}, "notes": [],
             "plans": {"ground": {"summary": {"verticals": 4, "one_depth": 1, "two_depths": 1, "three_depths": 2, "surveyors": 2, "walk_length": 320.0, "days": 1, "start": "08:00", "end": "10:40"}, "warnings": []},
                       "kayak": {"summary": {"floats": 2, "length": 100.0, "kayakers": 2, "fixes": 20, "start": "08:00", "end": "08:20"}, "warnings": []}},
-            "access": {"access": [X0 + 60.0, Y0 + 1.0], "leave": [X0 + 160.0, Y0 + 1.0], "takeoff": None, "count": 2, "notes": [], "names": {}}}
+            "access": {"access": [X0 + 60.0, Y0 + 1.0], "leave": [X0 + 160.0, Y0 + 1.0], "takeoff": None, "count": 2, "notes": [], "names": {}}, "walkable": {"count": 0, "area": 0.0, "notes": []}}
 
 
 @pytest.fixture
@@ -160,10 +161,39 @@ def test_the_access_layer_is_put_on_the_map_once_and_edited(project, tmp_path):
     assert survey_layers.show_access(gpkg, ROLES, edit=False) is layer and not layer.isEditable()
 
 
+def test_the_walkable_areas_are_drawn_below_the_plan_and_saved(project, tmp_path):
+    from qgis.core import QgsVectorLayer, QgsWkbTypes
+
+    from axqua_plugin.gui import survey_layers
+
+    gpkg = write_gpkg(tmp_path / "survey-plan.gpkg", access=(("access", (60, 1)),))
+    layer = survey_layers.show_walkable(gpkg)
+    assert layer is not None and layer.isValid() and layer.isEditable() and layer.name() == "Walkable areas (survey plan)"
+    assert QgsWkbTypes.geometryType(layer.wkbType()) == QgsWkbTypes.PolygonGeometry
+    assert int(layer.editFormConfig().suppress()) == 1, "a drawn area is stored without a question for its attributes"
+    assert survey_layers.show_walkable(gpkg) is layer and len(project.mapLayers()) == 1
+
+    feature = QgsFeature(layer.fields())
+    feature.setGeometry(QgsGeometry.fromPolygonXY([[QgsPointXY(X0 + 50, Y0 - 30), QgsPointXY(X0 + 70, Y0 - 30), QgsPointXY(X0 + 70, Y0 + 2), QgsPointXY(X0 + 50, Y0 + 2), QgsPointXY(X0 + 50, Y0 - 30)]]))
+    assert layer.addFeature(feature) and survey_layers.commit_walkable(gpkg) == "" and not layer.isEditable()
+    stored = QgsVectorLayer(f"{gpkg}|layername=walkable_areas", "as the library reads it", "ogr")
+    assert [round(feature.geometry().area()) for feature in stored.getFeatures()] == [640]
+    assert len(_colors(layer)) >= 2, "the areas show on the map"
+
+    # the plan and the access points are drawn over the areas, and a new plan leaves them on the map
+    survey_layers.show_access(gpkg, ROLES, edit=False)
+    survey_layers.show_plan(answer_of(gpkg))
+    names = _tree_names(project)
+    assert names[0] == "Access points (survey plan)" and names[-1] == "Walkable areas (survey plan)" and len(names) == 11
+    assert survey_layers.remove_plan(gpkg) == 9 and _tree_names(project) == ["Access points (survey plan)", "Walkable areas (survey plan)"]
+    assert survey_layers.show_walkable(gpkg, edit=False) is layer and not layer.isEditable()
+
+
 def test_a_file_without_the_layer_gives_no_layer(project, tmp_path):
     from axqua_plugin.gui import survey_layers
 
     assert survey_layers.show_access(tmp_path / "missing.gpkg", ROLES) is None and not project.mapLayers()
+    assert survey_layers.show_walkable(tmp_path / "missing.gpkg") is None and survey_layers.commit_walkable(tmp_path / "missing.gpkg") == ""
     assert survey_layers.commit_access(tmp_path / "missing.gpkg") == "" and survey_layers.remove_plan(tmp_path / "missing.gpkg") == 0
     assert survey_layers.show_plan({}) == [] and survey_layers.show_plan({"gpkg": str(tmp_path / "missing.gpkg")}) == []
 
@@ -277,11 +307,12 @@ def test_zoom_shows_the_layers_of_the_plan(project, tmp_path):
 class _Client:
     """Answers what ``axqua survey`` answers, and keeps what it was asked."""
 
-    def __init__(self, gpkg: Path, *, parameters=None, access=None, last_plan=None, fail=None):
+    def __init__(self, gpkg: Path, *, parameters=None, access=None, walkable=None, last_plan=None, fail=None):
         self.gpkg = Path(gpkg)
         self.calls: list[tuple] = []
         self.fail = fail or {}
         self.access = access or {"access": None, "leave": None, "takeoff": None, "count": 0, "notes": [], "names": {}}
+        self.walkable = walkable or {"count": 0, "area": 0.0, "notes": []}
         self.parameters = parameters if parameters is not None else [
             {"name": "zone1", "rule": "zone", "zone": 1, "points": 6, "use": True, "declared": True, "note": "", "limits": [0.02, 0.3]},
             {"name": "zone2", "rule": "zone", "zone": 2, "points": 6, "use": True, "declared": True, "note": "", "limits": [0.05, 0.6]},
@@ -300,12 +331,12 @@ class _Client:
     def survey_info(self, case):
         self.calls.append(("info", str(case)))
         return self._answer("info", {"settings": copy.deepcopy(DEFAULTS), "parameters": copy.deepcopy(self.parameters), "rules": dict(RULES), "roles": dict(ROLES), "folder": str(self.gpkg.parent), "gpkg": str(self.gpkg),
-                                     "gpkg_exists": self.gpkg.is_file(), "access_layer": "access_points", "access": copy.deepcopy(self.access), "crs_epsg": 25832, "has_zones": True, "built": True,
+                                     "gpkg_exists": self.gpkg.is_file(), "access_layer": "access_points", "access": copy.deepcopy(self.access), "walkable_layer": "walkable_areas", "walkable": copy.deepcopy(self.walkable), "crs_epsg": 25832, "has_zones": True, "built": True,
                                      "result": str(self.gpkg.parent / "r2d.slf"), "result_exists": True, "last_plan": self.last_plan})
 
     def survey_init(self, case):
         self.calls.append(("init", str(case)))
-        return self._answer("init", {"gpkg": str(self.gpkg), "layer": "access_points", "created": True, "roles": dict(ROLES), "crs_epsg": 25832, "access": copy.deepcopy(self.access)})
+        return self._answer("init", {"gpkg": str(self.gpkg), "layer": "access_points", "created": True, "roles": dict(ROLES), "crs_epsg": 25832, "access": copy.deepcopy(self.access), "walkable_layer": "walkable_areas", "walkable": copy.deepcopy(self.walkable)})
 
     def survey_conditions(self, case, settings=None, *, offline=False):
         self.calls.append(("conditions", copy.deepcopy(settings), offline))
@@ -518,12 +549,45 @@ def test_the_access_points_are_set_on_the_map_and_saved(planner, project, tmp_pa
     assert window.status.text() == "The layer holds no point yet."
 
 
+def test_the_walkable_areas_are_drawn_on_the_map_and_saved(planner, project, tmp_path):
+    gpkg = write_gpkg(tmp_path / "survey-plan" / "survey-plan.gpkg")
+    window, client = planner(gpkg=gpkg)
+    assert window.walkable_label.text() == "No area is drawn: on land the plan walks along the wetted edge only."
+    window.start_walkable()
+    assert client.calls[-1][0] == "init" and window.draw_areas.isEnabled() and "Click the corners" in window.status.text()
+    layer = project.mapLayersByName("Walkable areas (survey plan)")[0]
+    assert layer.isEditable()
+
+    feature = QgsFeature(layer.fields())
+    feature.setGeometry(QgsGeometry.fromPolygonXY([[QgsPointXY(X0 + 50, Y0 - 30), QgsPointXY(X0 + 70, Y0 - 30), QgsPointXY(X0 + 70, Y0 + 2), QgsPointXY(X0 + 50, Y0 - 30)]]))
+    layer.addFeature(feature)
+    client.walkable = {"count": 1, "area": 320.0, "notes": []}
+    window.save_walkable()
+    assert not layer.isEditable() and layer.featureCount() == 1                # saved before the library reads the file
+    assert window.status.text() == "The areas are saved." and window.walkable_label.text().startswith("1 area, 320 m")
+
+    client.walkable = {"count": 0, "area": 0.0, "notes": []}
+    window.save_walkable()
+    assert window.status.text() == "The layer holds no area yet." and window.walkable_label.text().startswith("No area is drawn")
+
+    # an area that is still being drawn is saved before the plan is made, and stays below the plan on the map
+    window.start_walkable()
+    layer.addFeature(feature)
+    client.plan_answer = dict(answer_of(gpkg), walkable={"count": 2, "area": 640.0, "notes": []})
+    window.plan()
+    assert not layer.isEditable() and layer.featureCount() == 2 and window.walkable_label.text().startswith("2 areas, 640 m")
+    names = _tree_names(project)
+    assert names[0] == "Access points (survey plan)" and names[-1] == "Walkable areas (survey plan)" and len(names) == 11
+
+
 def test_a_layer_that_cannot_be_made_is_reported(planner, tmp_path):
     from axqua_plugin.core.runner_client import RunnerError
 
     window, _client = planner()                                                # the client names a file that does not exist
     window.start_access()
     assert window.status.text() == "The layer of the access points could not be opened in QGIS." and window.set_points.isEnabled()
+    window.start_walkable()
+    assert window.status.text() == "The layer of the walkable areas could not be opened in QGIS." and window.draw_areas.isEnabled()
     failing, _client = planner(fail={"init": RunnerError("the folder of the case cannot be written")})
     failing.start_access()
     assert "cannot be written" in failing.status.text() and failing.set_points.isEnabled()

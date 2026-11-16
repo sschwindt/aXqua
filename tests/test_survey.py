@@ -98,9 +98,9 @@ def test_settings_say_what_is_wrong_with_them():
 
 
 def test_every_number_a_plan_divides_by_is_checked():
-    wrong = SurveySettings.from_dict({"airborne": {"fps": 0, "width_px": 0, "height_px": -1, "cruise_speed": 0, "battery_minutes": 0, "hfov_deg": 180, "overlap": 1.0}, "ground": {"max_depth": 0}})
+    wrong = SurveySettings.from_dict({"airborne": {"fps": 0, "width_px": 0, "height_px": -1, "cruise_speed": 0, "battery_minutes": 0, "hfov_deg": 180, "overlap": 1.0}, "ground": {"max_depth": 0, "bank_strip": 0}})
     text = "; ".join(wrong.problems())
-    for part in ("the frame rate of the video", "the width of the video", "the height of the video", "the cruise speed of the drone", "the flight time of a battery", "the largest wading depth"):
+    for part in ("the frame rate of the video", "the width of the video", "the height of the video", "the cruise speed of the drone", "the flight time of a battery", "the largest wading depth", "the strip along the wetted edge that can be walked on"):
         assert f"{part} must be larger than zero" in text
     assert "the field of view of the video lies between 0 and 180 degrees" in text and "the overlap of the video frames lies between 0 and 1" in text
 
@@ -448,7 +448,7 @@ def test_walking_upstream_takes_longer_and_the_pool_is_walked_around(flow):
     # against the current in 0.9 m of water the 40 m would take 24 min: the way back leaves the river and follows the bank
     assert 1.5 * router.seconds[1, 2] < router.seconds[2, 1] < 300.0
     back = router.line(2, 1)
-    assert walk.length(back) > 80.0 and min(p[1] for p in back) < Y0 + 5.0
+    assert walk.length(back) > 80.0 and (min(p[1] for p in back) < Y0 + 5.0 or max(p[1] for p in back) > Y0 + survey_case.HEIGHT - 5.0)    # along one of the two banks
     assert router.reachable().tolist()[:5] == [True] * 5
     line = router.line(3, 4)                                                      # past the pool, in water a surveyor can stand in
     assert line[0] == sites[3] and line[-1] == sites[4] and walk.length(line) >= 70.0
@@ -462,11 +462,98 @@ def test_walking_upstream_takes_longer_and_the_pool_is_walked_around(flow):
 
 
 def test_land_is_walked_faster_than_water(flow):
+    from shapely.geometry import box
+
     ground = GroundSettings()
-    sites = [(X0 + 40.0, Y0 - 10.0), (X0 + 140.0, Y0 - 10.0)]                      # both on the bank
-    router = walk.Router(walk.build_grid(flow, ground, sites), sites)
+    sites = [(X0 + 40.0, Y0 - 10.0), (X0 + 140.0, Y0 - 10.0)]                      # both on the bank, 13 m from the water
+    grid = walk.build_grid(flow, ground, sites, walkable=box(X0 + 30.0, Y0 - 15.0, X0 + 150.0, Y0 + 4.0))    # a meadow from the points to the water
+    router = walk.Router(grid, sites)
     assert router.seconds[0, 1] == pytest.approx(100.0 / (3.0 / 3.6), rel=0.1)
-    assert router.wet_share(0, 1) == 0.0
+    assert router.wet_share(0, 1) == 0.0 and grid.links == [] and walk.link_warnings(grid) == []
+
+
+def test_dry_ground_is_walked_on_along_the_wetted_edge_only(flow):
+    """The user's rule of 2026-11-16: terrain beside a river is often next to impassable, so a walk on land keeps within 1 m of the wetted edge unless a walkable area says otherwise."""
+    from scipy.ndimage import distance_transform_edt
+
+    ground = GroundSettings()
+    assert ground.bank_strip == 1.0
+    sites = [(X0 + 40.0, Y0 - 10.0), (X0 + 140.0, Y0 - 10.0)]
+    grid = walk.build_grid(flow, ground, sites)
+    land = grid.passable & ~grid.water
+    away = distance_transform_edt(~grid.water) * grid.cell
+    cells = [grid.cell_of(*site) for site in sites]
+    strip = land.copy()
+    strip.flat[cells] = False                                                      # the two sites are joined by a line, they are no strip
+    assert strip.any() and away[strip].max() <= 1.0 + grid.cell                    # the strip: 1 m, drawn on cells of about 1 m
+    assert not grid.passable[~grid.water & (away > 1.0 + grid.cell)].sum() > len(sites)
+    # the sites lie 13 m from the water: a straight line joins each to the strip, and the walk between them follows the edge of the water
+    assert [round(d) for _x, _y, d in grid.links] == pytest.approx([12, 12], abs=2) and len(walk.link_warnings(grid)) == 2
+    assert "lies 1" in walk.link_warnings(grid)[0] and "draw a walkable area" in walk.link_warnings(grid)[0]
+    router = walk.Router(grid, sites)
+    assert router.seconds[0, 1] == pytest.approx((12.0 + 100.0 + 12.0) / (3.0 / 3.6), rel=0.2) and router.seconds[0, 1] > 1.15 * 100.0 / (3.0 / 3.6)
+    line = router.line(0, 1)
+    assert line[0] == sites[0] and line[-1] == sites[1] and len(line) >= 4
+    assert all(Y0 < y < Y0 + 4.0 for _x, y in line[1:-1])                          # along the wetted edge at y = 3 m, not along y = -10 m
+    assert line[1][0] == pytest.approx(X0 + 40.0, abs=2.0) and line[-2][0] == pytest.approx(X0 + 140.0, abs=2.0)
+    # a wider strip is a setting
+    wide = walk.build_grid(flow, GroundSettings(bank_strip=6.0), sites)
+    assert (wide.passable & ~wide.water).sum() > 3 * land.sum()
+
+
+def test_a_point_close_to_the_strip_is_joined_without_a_warning(flow):
+    grid = walk.build_grid(flow, GroundSettings(), [ACCESS])                       # at the wetted edge: on the strip
+    assert grid.links == [] and grid.passable.flat[grid.cell_of(*ACCESS)] and walk.reachable_nodes(grid, flow, *ACCESS).any()
+    near = (X0 + 60.0, Y0 - 2.5)                                                   # a few steps up the bank
+    grid = walk.build_grid(flow, GroundSettings(), [near])
+    assert len(grid.links) == 1 and 2.0 < grid.links[0][2] < 6.0 and walk.link_warnings(grid) == []
+    assert grid.passable.flat[grid.cell_of(*near)] and walk.reachable_nodes(grid, flow, *near).any()
+    assert grid.cell == 1.0 and grid.graph.shape[0] == len(grid.nodes) == int(grid.passable.sum())      # cells of 1 m, and only those that can be walked on are in the graph
+
+
+def test_a_walkable_area_that_does_not_reach_the_water_leads_nowhere(flow):
+    from shapely.geometry import box
+
+    site = (X0 + 60.0, Y0 - 25.0)
+    island = box(X0 + 50.0, Y0 - 29.0, X0 + 70.0, Y0 - 15.0)                       # a parking lot, 18 m from the water
+    grid = walk.build_grid(flow, GroundSettings(), [site], walkable=island)
+    assert grid.passable.flat[grid.cell_of(X0 + 52.0, Y0 - 20.0)]                  # the area can be walked on
+    assert len(grid.links) == 1 and grid.links[0][2] == pytest.approx(27.0, abs=3.0)    # and the point is joined to the water all the same
+    assert walk.reachable_nodes(grid, flow, *site).any()
+    assert "lies 2" in walk.link_warnings(grid)[0]
+
+
+def test_a_walkable_area_is_no_way_through_water_that_cannot_be_waded(flow):
+    from shapely.geometry import box
+
+    ground = GroundSettings()
+    grid = walk.build_grid(flow, ground, [ACCESS], walkable=box(X0 + 130.0, Y0, X0 + 180.0, Y0 + 60.0))    # drawn across the pool
+    assert not grid.passable[grid.water & (grid.depth > ground.max_depth)].any()
+    far = walk.build_grid(flow, ground, [ACCESS], walkable=box(X0 - 5000.0, Y0 - 5000.0, X0 + 5000.0, Y0 + 5000.0))
+    assert far.cell <= 2.0 * grid.cell                                             # an area as large as the valley does not coarsen the raster
+
+
+def test_the_strip_does_not_lead_around_the_end_of_the_model(flow):
+    """Beyond an inflow or an outflow the river goes on: the strip along the wetted edge ends there, or the plan would cross water of any depth on dry ground."""
+    ground = GroundSettings(max_depth=0.2)                                         # only the margins can be waded: no way across
+    left, right = (X0 + 100.0, Y0 + 2.5), (X0 + 100.0, Y0 + 57.5)
+    grid = walk.build_grid(flow, ground, [left, right])
+    router = walk.Router(grid, [left, right])
+    assert not np.isfinite(router.seconds[0, 1]) and not np.isfinite(router.seconds[1, 0])
+    assert not walk.reachable_nodes(grid, flow, *left)[flow.y > Y0 + 40.0].any() and walk.reachable_nodes(grid, flow, *left)[flow.y < Y0 + 10.0].any()
+    beyond = ~grid.water & (grid.center(np.arange(grid.nx * grid.ny))[0].reshape(grid.ny, grid.nx) < X0)    # the cells upstream of the inflow
+    middle = np.abs(grid.center(np.arange(grid.nx * grid.ny))[1].reshape(grid.ny, grid.nx) - (Y0 + 30.0)) < 20.0
+    assert not grid.passable[beyond & middle].any()
+    # the strip along the bank goes on to the end of the water, also beside a wall of the model
+    full = FlowField(x=flow.x, y=flow.y, triangles=flow.triangles, depth=np.full_like(flow.depth, 2.0), u=flow.u, v=flow.v, bed=flow.bed, hops=flow.hops, zone=flow.zone)
+    walls = walk.build_grid(full, ground, [left])
+    beside = walls.passable & ~walls.water
+    assert beside[walls.cell_of(X0 + 100.0, Y0 - 0.5) // walls.nx, walls.cell_of(X0 + 100.0, Y0 - 0.5) % walls.nx]
+    cx = walls.center(np.arange(walls.nx * walls.ny))[0].reshape(walls.ny, walls.nx)
+    assert not beside[(cx < X0) | (cx > X0 + survey_case.WIDTH)].any()
+    # a model without its liquid boundaries cannot know where the river goes on
+    blind = FlowField(x=flow.x, y=flow.y, triangles=flow.triangles, depth=flow.depth, u=flow.u, v=flow.v, bed=flow.bed, zone=flow.zone)
+    assert np.isfinite(walk.Router(walk.build_grid(blind, ground, [left, right]), [left, right]).seconds[0, 1])
 
 
 def nearest_neighbor(seconds, sites, start=0):

@@ -384,6 +384,13 @@ def _foot(sheet: Sheet, kind: str, context: dict, level: int) -> None:
     sheet.para(text)
 
 
+def _land(context: dict) -> str:
+    """Where the walk goes on dry ground."""
+    count = int((context.get("walkable") or {}).get("count") or 0)
+    areas = f" or inside the {count} walkable areas of the plan" if count > 1 else " or inside the walkable area of the plan" if count else ""
+    return f"On land the walk keeps within {_g(context['settings'].ground.bank_strip)} m of the wetted edge{areas}."
+
+
 def _breaks(settings: SurveySettings) -> str:
     t = settings.time
     parts = []
@@ -445,7 +452,7 @@ def _ground(sheet: Sheet, plan: dict, context: dict, level: int) -> None:
     limits = ", ".join(f"up to {_g(d)} m depth not faster than {_g(v)} m/s" for d, v in sorted(g.velocity_limits))
     against = ", ".join(f"{_g(v)} km/h where deeper than {_g(d)} m" for d, v in sorted(g.speed_against_current))
     sheet.para(f"not deeper than {_g(g.max_depth)} m; {limits}.", "Wading:")
-    sheet.para(f"{_g(g.speed_land)} km/h on land, {_g(g.speed_with_current)} km/h in water with the current; against the current {against}.", "Walking:")
+    sheet.para(f"{_g(g.speed_land)} km/h on land, {_g(g.speed_with_current)} km/h in water with the current; against the current {against}. {_land(context)}", "Walking:")
     sheet.para(f"{_g(g.time_per_depth)} s per measured depth, {_g(g.time_probe_height)} s to set the probe to each height and {_g(g.time_water_depth)} s for the water depth. One depth ({', '.join(_g(h) + ' h' for h in g.heights_one)}) below {_g(g.depth_two_points)} m of water, two ({', '.join(_g(h) + ' h' for h in g.heights_two)}) from {_g(g.depth_two_points)} m, three ({', '.join(_g(h) + ' h' for h in g.heights_three)}) from {_g(g.depth_three_points)} m; h is the water depth, and the heights count from the riverbed.", "At a vertical:")
     sheet.para(f"The pressure sensor of the probe is adjusted to the atmosphere at the start and every {_g(g.pressure_interval_h)} h ({_g(g.pressure_minutes)} min, star on the map). {_breaks(settings)} No vertical lies closer than 15 mesh nodes to the inflow or the outflow of the model.", "Day:")
     _warnings(sheet, plan, level)
@@ -569,7 +576,7 @@ def _temperature(sheet: Sheet, plan: dict, context: dict, level: int) -> None:
     _network(sheet, context, "The position of every point is recorded with the DGPS.")
     sheet.heading("Assumptions")
     work = f"Installing a logger takes {_g(t.install_minutes)} min; the same walk collects the loggers at the end of the campaign." if loggers else f"The probe settles for {_g(t.reading_seconds)} s at every point."
-    sheet.para(f"The wetted reach of the model is sorted into slow or fast water (limit {_g(t.slow_velocity)} m/s) and shallow or deep water (limit {_g(t.shallow_depth)} m). Every kind of water that exists gets at least one point; the others are dealt by wetted area. {work} The walk follows the wading rules of a ground-based survey (not deeper than {_g(settings.ground.max_depth)} m). {_breaks(settings)}")
+    sheet.para(f"The wetted reach of the model is sorted into slow or fast water (limit {_g(t.slow_velocity)} m/s) and shallow or deep water (limit {_g(t.shallow_depth)} m). Every kind of water that exists gets at least one point; the others are dealt by wetted area. {work} The walk follows the wading rules of a ground-based survey (not deeper than {_g(settings.ground.max_depth)} m). {_land(context)} {_breaks(settings)}")
     _warnings(sheet, plan, level)
     _hints(sheet, [
         "Slow, shallow water warms in the sun within an hour, while deep, fast water carries the temperature of the river upstream: measure both kinds on the same day, and note the time of every reading.",

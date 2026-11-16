@@ -50,6 +50,9 @@ def rule_title(key: str, description: str = "") -> str:
 ACCESS_LAYER = "access_points"
 ROLES = ("access", "leave", "takeoff")
 ACCESS_NAME = "Access points (survey plan)"
+#: The layer of ``survey-plan.gpkg`` the user draws the dry ground in that can be walked on.
+WALKABLE_LAYER = "walkable_areas"
+WALKABLE_NAME = "Walkable areas (survey plan)"
 GROUP_NAME = "Survey plan"
 
 
@@ -87,6 +90,7 @@ GROUND = (
     )),
     Group("Walking", (
         Field("ground.speed_land", "On land", unit="km/h", low=0.1, high=10.0, decimals=1),
+        Field("ground.bank_strip", "On land, no farther from the wetted edge than", unit="m", low=0.1, high=500.0, decimals=1, step=0.5, tip="Terrain beside a river is often next to impassable, so the plan walks on dry ground only within this strip along the water of the model result, and inside the walkable areas drawn on the tab Access."),
         Field("ground.speed_with_current", "In the water, with the current", unit="km/h", low=0.05, high=10.0, decimals=1),
         Field("ground.speed_against_current", "In the water, against the current", kind="pairs", unit="deeper than m: km/h", tip="Against the current the speed falls with the depth. The default: deeper than 0.3 m 1 km/h, deeper than 0.5 m 0.5 km/h, deeper than 0.8 m 0.1 km/h. In shallower water the speed with the current applies."),
     )),
@@ -307,6 +311,19 @@ def access_lines(access: dict, roles: dict | None = None) -> list[str]:
         lines.append("A point with the role access is missing: the wading survey and the kayaks start there.")
     lines += [str(note) for note in access.get("notes") or []]
     return lines
+
+
+def walkable_lines(walkable: dict) -> list[str]:
+    """What the layer ``walkable_areas`` gives the plan."""
+    walkable = walkable or {}
+    count = int(walkable.get("count") or 0)
+    if count:
+        area = float(walkable.get("area") or 0.0)
+        size = f"{area / 10000.0:.2f} ha" if area >= 10000.0 else f"{area:.0f} m\u00b2"
+        lines = [f"{count} area{'s' if count > 1 else ''}, {size}: on land the plan walks inside {'them' if count > 1 else 'it'} and along the wetted edge."]
+    else:
+        lines = ["No area is drawn: on land the plan walks along the wetted edge only."]
+    return lines + [str(note) for note in walkable.get("notes") or []]
 
 
 def conditions_lines(answer: dict, *, days: int = 3) -> list[str]:

@@ -27,7 +27,7 @@ import numpy as np
 
 from axqua.survey import conditions as conditions_module
 from axqua.survey.field import FlowField, SurveyError, load_field, result_path
-from axqua.survey.output import ACCESS_LAYER, GPKG_NAME, LAYERS, ROLES, draw_map, ensure_access_layer, read_access, write_layers
+from axqua.survey.output import ACCESS_LAYER, GPKG_NAME, LAYERS, ROLES, WALKABLE_LAYER, draw_map, ensure_user_layers, read_access, read_walkable, write_layers
 from axqua.survey.placement import case_needs
 from axqua.survey.schedule import day_window, fmt_clock
 from axqua.survey.settings import KIND_TITLES, KINDS, RULES, ParameterNeed, SurveySettings
@@ -116,6 +116,8 @@ def info(cfg) -> dict:
         "gpkg_exists": gpkg.is_file(),
         "access_layer": ACCESS_LAYER,
         "access": read_access(gpkg, cfg.crs_epsg),
+        "walkable_layer": WALKABLE_LAYER,
+        "walkable": _areas(read_walkable(gpkg, cfg.crs_epsg)),
         "layers": {name: geometry for name, (geometry, _) in LAYERS.items()},
         "crs_epsg": cfg.crs_epsg,
         "has_zones": cfg.geodata.roughness_zones is not None,
@@ -126,14 +128,19 @@ def info(cfg) -> dict:
     })
 
 
+def _areas(walkable: dict) -> dict:
+    """What a plan says about the walkable areas: all of :func:`read_walkable` but the geometry."""
+    return {"count": int(walkable["count"]), "area": round(float(walkable["area"]), 1), "notes": list(walkable["notes"])}
+
+
 def init(cfg) -> dict:
-    """Create ``survey-plan.gpkg`` with the empty layer ``access_points`` unless the case has one."""
+    """Create ``survey-plan.gpkg`` with the empty layers ``access_points`` and ``walkable_areas`` as far as the case lacks them."""
     gpkg = gpkg_path(cfg)
     try:
-        created = ensure_access_layer(gpkg, cfg.crs_epsg)
+        created = ensure_user_layers(gpkg, cfg.crs_epsg)
     except Exception as exc:  # noqa: BLE001 - whatever the driver calls a folder it cannot write to
         raise SurveyError(f"{GPKG_NAME} could not be created in {gpkg.parent}: {exc}", subject=str(gpkg), remedy="Check that the folder of the case can be written to.") from exc
-    return plain({"gpkg": gpkg, "layer": ACCESS_LAYER, "created": created, "roles": ROLES, "crs_epsg": cfg.crs_epsg, "access": read_access(gpkg, cfg.crs_epsg)})
+    return plain({"gpkg": gpkg, "layer": ACCESS_LAYER, "created": created, "roles": ROLES, "crs_epsg": cfg.crs_epsg, "access": read_access(gpkg, cfg.crs_epsg), "walkable_layer": WALKABLE_LAYER, "walkable": _areas(read_walkable(gpkg, cfg.crs_epsg))})
 
 
 def conditions(cfg, settings: SurveySettings, *, online: bool | None = None) -> dict:
@@ -176,11 +183,11 @@ def ground_level(cfg, flow: FlowField, point) -> float | None:
         return None
 
 
-def _plan_kind(kind: str, cfg, flow: FlowField, settings: SurveySettings, needs, access: dict, sun) -> dict:
+def _plan_kind(kind: str, cfg, flow: FlowField, settings: SurveySettings, needs, access: dict, sun, walkable=None) -> dict:
     if kind == "ground":
         from axqua.survey.ground import plan_ground
 
-        return plan_ground(flow, settings, needs, access["access"], sun=sun)
+        return plan_ground(flow, settings, needs, access["access"], sun=sun, walkable=walkable)
     if kind == "airborne":
         from axqua.survey.drone import plan_airborne
 
@@ -192,7 +199,7 @@ def _plan_kind(kind: str, cfg, flow: FlowField, settings: SurveySettings, needs,
         return plan_kayak(flow, settings, needs, access["access"], access["leave"], sun=sun)
     from axqua.survey.temperature import plan_temperature
 
-    return plan_temperature(flow, settings, access["access"], sun=sun)
+    return plan_temperature(flow, settings, access["access"], sun=sun, walkable=walkable)
 
 
 def _writable(path: Path) -> bool:
@@ -234,6 +241,8 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
     init(cfg)
     access = read_access(gpkg, cfg.crs_epsg)
     notes += access["notes"]
+    walkable = read_walkable(gpkg, cfg.crs_epsg)
+    notes += walkable["notes"]
     found = conditions_module.look_up(cfg, flow, settings, online=online)
     sun = conditions_module.sun_of(found)
     first = day_window(settings.time, sun, 0)
@@ -247,7 +256,7 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
             continue
         log.info("planning: %s", KIND_TITLES[kind])
         try:
-            plan = _plan_kind(kind, cfg, flow, settings, needs, access, sun)
+            plan = _plan_kind(kind, cfg, flow, settings, needs, access, sun, walkable["geometry"])
         except SurveyError as exc:
             skipped[kind] = {"title": KIND_TITLES[kind], "reason": exc.message, "remedy": exc.remedy or ""}
             continue
@@ -263,7 +272,7 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
 
     made = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     name = str(case_name or "")
-    context = {"settings": settings, "conditions": found, "case": name, "version": __version__, "made": made, "source": Path(flow.source).name, "time": flow.time, "gpkg": GPKG_NAME, "epsg": cfg.crs_epsg}
+    context = {"settings": settings, "conditions": found, "case": name, "version": __version__, "made": made, "source": Path(flow.source).name, "time": flow.time, "gpkg": GPKG_NAME, "epsg": cfg.crs_epsg, "walkable": _areas(walkable)}
     files: dict[str, dict] = {}
     # The maps and the factsheets are drawn into a folder of their own first, and the layers are replaced only when all of them exist:
     # a plan that fails on the way leaves the plan before it as it was, with layers, maps and factsheets that belong together.
@@ -281,7 +290,7 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
                 continue
             map_name, pdf_name, sheet_name = names[kind]
             try:
-                draw_map(flow, kind, plans[kind], draft / map_name, access=access, subtitle=", ".join(text for text in (name, found.get("date") or "") if text), epsg=cfg.crs_epsg)
+                draw_map(flow, kind, plans[kind], draft / map_name, access=access, walkable=walkable["geometry"], subtitle=", ".join(text for text in (name, found.get("date") or "") if text), epsg=cfg.crs_epsg)
                 written = write_factsheet(draft / sheet_name, kind, plans[kind], dict(context, map=pdf_name))
             except OSError as exc:
                 raise SurveyError(f"the map or the factsheet of the plan could not be written: {exc}", subject=str(out_dir), remedy="Check the free space and the access rights of the folder, then plan again.") from exc
@@ -320,6 +329,7 @@ def make_plan(cfg, settings: SurveySettings, *, online: bool | None = None, case
         "settings": settings.as_dict(),
         "parameters": _needs_as_dicts(needs),
         "access": access,
+        "walkable": _areas(walkable),
         "conditions": found,
         "plans": plans,
         "skipped": skipped,

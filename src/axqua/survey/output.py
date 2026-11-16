@@ -1,6 +1,6 @@
 """What a survey plan leaves on the disk: the layers of ``survey-plan.gpkg`` and one map per kind of survey.
 
-``survey-plan.gpkg`` always holds the same layers (:data:`LAYERS`), in the coordinate system of the case. The layer ``access_points`` belongs to the user: aXqua creates it empty and never writes into it again. The other layers are the plan and are replaced by every plan; the layers of a kind of survey that is not planned are empty.
+``survey-plan.gpkg`` always holds the same layers (:data:`LAYERS`), in the coordinate system of the case. The layers ``access_points`` and ``walkable_areas`` belong to the user: aXqua creates them empty and never writes into them again. The other layers are the plan and are replaced by every plan; the layers of a kind of survey that is not planned are empty.
 """
 
 from __future__ import annotations
@@ -15,6 +15,8 @@ from axqua.survey.settings import KIND_TITLES
 
 GPKG_NAME = "survey-plan.gpkg"
 ACCESS_LAYER = "access_points"
+#: The polygons in which dry ground can be walked on; everywhere else a walk on land keeps to the bank strip along the wetted edge.
+WALKABLE_LAYER = "walkable_areas"
 #: The roles a point of ``access_points`` can have, with what each is for.
 ROLES = {
     "access": "where the surveyors reach the river: the start and the end of a wading survey, the put-in of the kayaks, and the take-off point of the drone unless one is set",
@@ -50,18 +52,20 @@ def _layers_of(path: Path) -> list[str]:
     return [str(name) for name, _ in pyogrio.list_layers(path)]
 
 
-def ensure_access_layer(path: Path, epsg) -> bool:
-    """Create ``survey-plan.gpkg`` with the empty layer ``access_points`` unless it has one. True when it was created."""
+def ensure_user_layers(path: Path, epsg) -> bool:
+    """Create ``survey-plan.gpkg`` with the empty layers ``access_points`` and ``walkable_areas`` as far as it lacks them. True when the layer of the access points was created."""
     import geopandas as gpd
     import pandas as pd
 
     path = Path(path)
-    if ACCESS_LAYER in _layers_of(path):
-        return False
+    have = _layers_of(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    frame = gpd.GeoDataFrame({"role": pd.Series([], dtype="str"), "name": pd.Series([], dtype="str")}, geometry=gpd.GeoSeries([], crs=_crs(epsg)), crs=_crs(epsg))
-    frame.to_file(path, layer=ACCESS_LAYER, driver="GPKG", geometry_type="Point")
-    return True
+    empty = lambda columns: gpd.GeoDataFrame({name: pd.Series([], dtype="str") for name in columns}, geometry=gpd.GeoSeries([], crs=_crs(epsg)), crs=_crs(epsg))  # noqa: E731
+    if ACCESS_LAYER not in have:
+        empty(("role", "name")).to_file(path, layer=ACCESS_LAYER, driver="GPKG", geometry_type="Point")
+    if WALKABLE_LAYER not in have:               # also in the file of a plan from before the layer existed
+        empty(("name",)).to_file(path, layer=WALKABLE_LAYER, driver="GPKG", geometry_type="Polygon")
+    return ACCESS_LAYER not in have
 
 
 def role_of(text) -> str:
@@ -108,13 +112,43 @@ def read_access(path: Path, epsg) -> dict:
     return out
 
 
+def read_walkable(path: Path, epsg) -> dict:
+    """The polygons of ``walkable_areas``: ``{"geometry": their union | None, "count", "area" [m2], "notes"}`` in the coordinate system of the case."""
+    out = {"geometry": None, "count": 0, "area": 0.0, "notes": []}
+    if WALKABLE_LAYER not in _layers_of(path):
+        return out
+    import geopandas as gpd
+    import shapely
+
+    frame = gpd.read_file(path, layer=WALKABLE_LAYER)
+    frame = frame[frame.geometry.notna() & ~frame.geometry.is_empty]
+    if frame.crs is not None and epsg and frame.crs.to_epsg() != int(epsg):
+        frame = frame.to_crs(_crs(epsg))
+    polygons, other = [], 0
+    for geometry in frame.geometry:
+        if not geometry.is_valid:                # a polygon that crosses itself, drawn by hand
+            geometry = shapely.make_valid(geometry)
+        parts = [part for part in getattr(geometry, "geoms", [geometry]) if part.geom_type in ("Polygon", "MultiPolygon") and part.area > 0]
+        if parts:
+            polygons += parts
+            out["count"] += 1
+        else:
+            other += 1
+    if other:
+        out["notes"].append(f"{other} feature{'s' if other > 1 else ''} of the layer {WALKABLE_LAYER} {'are' if other > 1 else 'is'} no polygon with an area: not used")
+    if polygons:
+        union = shapely.unary_union(polygons)
+        out["geometry"], out["area"] = union, float(union.area)
+    return out
+
+
 def write_layers(path: Path, epsg, plans: dict) -> dict[str, int]:
     """Replace the plan layers of ``survey-plan.gpkg`` with those of *plans* (``kind -> plan``). Returns the number of features per layer."""
     import geopandas as gpd
     import pandas as pd
     from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
-    ensure_access_layer(path, epsg)
+    ensure_user_layers(path, epsg)
     ground, air, kayak, temperature = (plans.get(kind) or {} for kind in ("ground", "airborne", "kayak", "temperature"))
     line = lambda row: LineString(row["coords"]) if len(row["coords"]) > 1 else LineString([row["coords"][0], row["coords"][0]])  # noqa: E731
     point = lambda row: Point(row["x"], row["y"])  # noqa: E731
@@ -167,13 +201,14 @@ HALO = "#ffffff"
 #: Who walks, floats or flies: colors that stand on blue water, told apart by the labels and line styles too.
 WHO = ("#c8501e", "#5b3fc4", "#0a6b2d", "#a3176b", "#7a5200", "#33414e")
 DANGER = "#c62828"
+WALKABLE_FILL, WALKABLE_EDGE = "#e3ecd3", "#7d9a55"
 #: Slow water warm, fast water blue; shallow light, deep dark.
 WATER_CLASS = {"slow, shallow": "#f6d9a3", "slow, deep": "#d99a2b", "fast, shallow": "#b4d3ee", "fast, deep": "#3f7fbf"}
 DEPTH_MARKERS = {1: ("o", "one depth"), 2: ("^", "two depths"), 3: ("s", "three depths")}
 
 
-def draw_map(flow: FlowField, kind: str, plan: dict, path: Path, *, access: dict | None = None, title: str = "", subtitle: str = "", epsg=None, pdf: bool = True) -> Path:
-    """Draw the map of one kind of survey on an A4 sheet (PNG, and PDF for printing)."""
+def draw_map(flow: FlowField, kind: str, plan: dict, path: Path, *, access: dict | None = None, walkable=None, title: str = "", subtitle: str = "", epsg=None, pdf: bool = True) -> Path:
+    """Draw the map of one kind of survey on an A4 sheet (PNG, and PDF for printing). *walkable* is the union of the walkable areas, drawn under the maps of the surveys that walk."""
     import matplotlib
 
     matplotlib.use("Agg", force=False)
@@ -212,6 +247,9 @@ def draw_map(flow: FlowField, kind: str, plan: dict, path: Path, *, access: dict
         from matplotlib.tri import Triangulation
 
         tri = Triangulation(flow.x, flow.y, flow.triangles, mask=~wet[flow.triangles].all(axis=1))
+        if walkable is not None and not walkable.is_empty and kind in ("ground", "temperature"):
+            ax.add_patch(_patch(walkable, facecolor=WALKABLE_FILL, edgecolor=WALKABLE_EDGE, linewidth=0.6, zorder=0.5))
+            handles.append(Patch(facecolor=WALKABLE_FILL, edgecolor=WALKABLE_EDGE, linewidth=0.6, label="Walkable area on land"))
         if kind == "temperature":
             ax.tripcolor(tri, np.ones(len(flow.x)), cmap=LinearSegmentedColormap.from_list("water", ["#e9eef2", "#e9eef2"]), rasterized=True, zorder=1)
             for patch in plan.get("patches", []):
@@ -434,4 +472,4 @@ def _nice(length: float) -> float:
     return max(step * power for step in (1.0, 2.0, 5.0) if step * power <= length)
 
 
-__all__ = ["ACCESS_LAYER", "GPKG_NAME", "LAYERS", "ROLES", "draw_map", "ensure_access_layer", "read_access", "role_of", "write_layers"]
+__all__ = ["ACCESS_LAYER", "GPKG_NAME", "LAYERS", "ROLES", "WALKABLE_LAYER", "draw_map", "ensure_user_layers", "read_access", "read_walkable", "role_of", "write_layers"]

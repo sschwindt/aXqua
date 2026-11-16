@@ -1282,6 +1282,35 @@ def situation_points(cfg: Config, situation, folder: Path, *,
                               depth_err_floor=depth_err_floor, positional=positional)
 
 
+def situation_start(cfg: Config, situation, name: str, results: str) -> str:
+    """The steering text a run of *situation* starts from, before its boundary values.
+
+    The built steady case; with ``calibration.hotstart`` its continuation from the
+    steady result for 1.2 residence times at the situation's discharge
+    (:func:`calibration_hotstart_duration`), unless the situation names a duration.
+    Calibration situations and the validation share it, so the validation run starts
+    the way the calibration runs did. *name* is the steering file a hotstart writes
+    in the model folder, *results* its results file.
+    """
+    import copy
+
+    from axqua.solvers.telemac.steering import write_hotstart_cas
+
+    if cfg.calibration.hotstart:
+        _steady_result(cfg)
+        at_q = copy.deepcopy(cfg)
+        at_q.boundaries.prescribed_flowrate = (situation.total_flowrate
+                                               or cfg.boundaries.prescribed_flowrate)
+        duration = (float(situation.duration) if situation.duration
+                    else calibration_hotstart_duration(at_q))
+        return write_hotstart_cas(cfg, duration, out_name=name,
+                                  results_name=results).read_text()
+    text = cfg.model_path(cfg.cas_file).read_text()
+    if situation.duration:
+        text = _patch_cas(text, "DURATION", f"{float(situation.duration)}")
+    return text
+
+
 def write_situation_cas(cfg: Config, situation, folder: Path) -> tuple[str, float]:
     """Write ``steady2d-<situation>.cas`` into the model folder; returns its name and Q.
 
@@ -1291,27 +1320,13 @@ def write_situation_cas(cfg: Config, situation, folder: Path) -> tuple[str, floa
     of the case for 1.2 residence times at the situation's discharge
     (:func:`calibration_hotstart_duration`).
     """
-    import copy
-
-    from axqua.solvers.telemac.steering import fit_columns, write_hotstart_cas
+    from axqua.solvers.telemac.steering import fit_columns
     from axqua.validation import slug, with_boundaries_of
 
     tag = slug(situation.name)
     name = f"steady2d-{tag}.cas"
-    q = situation.total_flowrate or cfg.boundaries.prescribed_flowrate
     results = f"{Path(cfg.results_slf).stem}-{tag}.slf"
-    if cfg.calibration.hotstart:
-        _steady_result(cfg)
-        at_q = copy.deepcopy(cfg)
-        at_q.boundaries.prescribed_flowrate = q
-        duration = (float(situation.duration) if situation.duration
-                    else calibration_hotstart_duration(at_q))
-        text = write_hotstart_cas(cfg, duration, out_name=name,
-                                  results_name=results).read_text()
-    else:
-        text = cfg.model_path(cfg.cas_file).read_text()
-        if situation.duration:
-            text = _patch_cas(text, "DURATION", f"{float(situation.duration)}")
+    text = situation_start(cfg, situation, name, results)
     text, total, notes, _flow, _elev = with_boundaries_of(
         cfg, situation, text, folder, role="calibration")
     for note in notes:

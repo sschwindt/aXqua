@@ -59,15 +59,60 @@ def test_the_access_layer_is_created_once_and_never_emptied(tmp_path):
     import geopandas as gpd
 
     path = tmp_path / "plan" / output.GPKG_NAME
-    assert output.ensure_access_layer(path, 25832) is True
+    assert output.ensure_user_layers(path, 25832) is True
     frame = gpd.read_file(path, layer=output.ACCESS_LAYER)
     assert len(frame) == 0 and list(frame.columns) == ["role", "name", "geometry"] and frame.crs.to_epsg() == 25832
     assert output.read_access(path, 25832)["count"] == 0
     from shapely.geometry import Point
 
     gpd.GeoDataFrame({"role": ["access"], "name": ["bridge"]}, geometry=[Point(700060.0, 5340001.0)], crs="EPSG:25832").to_file(path, layer=output.ACCESS_LAYER, driver="GPKG")
-    assert output.ensure_access_layer(path, 25832) is False
+    assert output.ensure_user_layers(path, 25832) is False
     assert output.read_access(path, 25832)["access"] == (700060.0, 5340001.0)
+
+
+def test_the_layer_of_the_walkable_areas_is_created_empty_and_added_to_an_older_file(tmp_path):
+    import geopandas as gpd
+    import pyogrio
+    from shapely.geometry import Point, Polygon
+
+    path = tmp_path / "plan" / output.GPKG_NAME
+    output.ensure_user_layers(path, 25832)
+    kinds = {str(name): str(kind) for name, kind in pyogrio.list_layers(path)}
+    assert kinds[output.WALKABLE_LAYER] == "Polygon" and kinds[output.ACCESS_LAYER] == "Point"
+    areas = gpd.read_file(path, layer=output.WALKABLE_LAYER)
+    assert len(areas) == 0 and list(areas.columns) == ["name", "geometry"] and areas.crs.to_epsg() == 25832
+    assert output.read_walkable(path, 25832) == {"geometry": None, "count": 0, "area": 0.0, "notes": []}
+    # the file of a plan from before the layer existed: the points stay, the layer is added
+    old = tmp_path / "old" / output.GPKG_NAME
+    old.parent.mkdir()
+    gpd.GeoDataFrame({"role": ["access"], "name": ["bridge"]}, geometry=[Point(700060.0, 5340001.0)], crs="EPSG:25832").to_file(old, layer=output.ACCESS_LAYER, driver="GPKG")
+    assert output.ensure_user_layers(old, 25832) is False
+    assert output.read_access(old, 25832)["count"] == 1 and len(gpd.read_file(old, layer=output.WALKABLE_LAYER)) == 0
+    # and what the user drew is never emptied
+    gpd.GeoDataFrame({"name": ["bar"]}, geometry=[Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])], crs="EPSG:25832").to_file(old, layer=output.WALKABLE_LAYER, driver="GPKG")
+    output.ensure_user_layers(old, 25832)
+    assert output.read_walkable(old, 25832)["count"] == 1 and output.read_access(old, 25832)["count"] == 1
+
+
+def test_walkable_areas_are_read_as_one_area_in_the_coordinate_system_of_the_case(tmp_path):
+    import geopandas as gpd
+    from shapely.geometry import LineString, Polygon
+
+    path = tmp_path / output.GPKG_NAME
+    square = Polygon([(700000, 5340000), (700010, 5340000), (700010, 5340010), (700000, 5340010)])
+    overlapping = Polygon([(700005, 5340000), (700015, 5340000), (700015, 5340010), (700005, 5340010)])
+    bow_tie = Polygon([(700100, 5340000), (700110, 5340010), (700110, 5340000), (700100, 5340010)])       # crosses itself, as a hand draws it
+    frame = gpd.GeoDataFrame({"name": ["a", "b", "c"]}, geometry=[square, overlapping, bow_tie], crs="EPSG:25832").to_crs("EPSG:4326")
+    frame.to_file(path, layer=output.WALKABLE_LAYER, driver="GPKG")
+    found = output.read_walkable(path, 25832)
+    assert found["count"] == 3 and found["notes"] == []
+    assert found["area"] == pytest.approx(150.0 + 50.0, rel=0.01)                  # the overlap counts once, the bow tie as its two triangles
+    assert found["geometry"].is_valid and found["geometry"].contains(square.centroid)
+    lines = tmp_path / "lines.gpkg"
+    gpd.GeoDataFrame({"name": ["path"]}, geometry=[LineString([(700000, 5340000), (700010, 5340000)])], crs="EPSG:25832").to_file(lines, layer=output.WALKABLE_LAYER, driver="GPKG")
+    found = output.read_walkable(lines, 25832)
+    assert found["geometry"] is None and found["count"] == 0 and "1 feature of the layer walkable_areas is no polygon with an area: not used" in found["notes"][0]
+    assert output.read_walkable(tmp_path / "missing.gpkg", 25832)["count"] == 0
 
 
 @pytest.mark.parametrize("text, role", [
@@ -103,7 +148,7 @@ def test_the_plan_layers_are_replaced_and_the_access_points_kept(planned):
     cfg, _, result = planned
     gpkg = Path(result["gpkg"])
     layers = {str(name): str(kind) for name, kind in pyogrio.list_layers(gpkg)}
-    assert set(layers) == set(output.LAYERS) | {output.ACCESS_LAYER}
+    assert set(layers) == set(output.LAYERS) | {output.ACCESS_LAYER, output.WALKABLE_LAYER}
     assert result["layers"] == {name: len(gpd.read_file(gpkg, layer=name)) for name in output.LAYERS}
     assert len(gpd.read_file(gpkg, layer=output.ACCESS_LAYER)) == 2
     points = gpd.read_file(gpkg, layer="flowtracker_points")
@@ -351,6 +396,34 @@ def test_the_width_of_a_text_decides_its_lines():
     assert factsheet.wrapped_lines("", width) == 1
 
 
+def test_a_plan_walks_on_land_along_the_water_or_inside_the_areas_the_user_drew(case):
+    X0, Y0 = survey_case.X0, survey_case.Y0
+    cfg = load(case)
+    road = (X0 + 60.0, Y0 - 20.0)                                                  # 23 m from the water, behind the brush of the bank
+    survey_case.set_points(cfg, access=road)
+    settings = SurveySettings.from_dict({"kinds": ["ground", "temperature"]})
+    first = planner.make_plan(cfg, settings, online=False)
+    assert first["walkable"] == {"count": 0, "area": 0.0, "notes": []}
+    for kind in ("ground", "temperature"):
+        said = [text for text in first["plans"][kind]["warnings"] if "from ground the plan can walk on" in text]
+        assert len(said) == 1 and said[0].startswith("the access point lies 2") and "the strip of 1 m along the wetted edge and the walkable areas" in said[0]
+    sheet = zipfile.ZipFile(first["files"]["ground"]["factsheet"]).read("content.xml").decode()
+    assert "On land the walk keeps within 1 m of the wetted edge." in sheet
+    # a path through the brush, drawn by the user: the plan follows it and the warning is gone
+    survey_case.set_areas(cfg, [(X0 + 56.0, Y0 - 24.0), (X0 + 64.0, Y0 - 24.0), (X0 + 64.0, Y0 + 4.0), (X0 + 56.0, Y0 + 4.0)])
+    assert planner.info(cfg)["walkable"] == {"count": 1, "area": 224.0, "notes": []} and planner.info(cfg)["walkable_layer"] == "walkable_areas"
+    second = planner.make_plan(cfg, settings, online=False)
+    assert second["walkable"]["count"] == 1 and json.loads((Path(second["folder"]) / planner.PLAN_JSON).read_text())["walkable"]["area"] == 224.0
+    for kind in ("ground", "temperature"):
+        assert not [text for text in second["plans"][kind]["warnings"] if "from ground the plan can walk on" in text]
+    sheet = zipfile.ZipFile(second["files"]["ground"]["factsheet"]).read("content.xml").decode()
+    assert "On land the walk keeps within 1 m of the wetted edge or inside the walkable area of the plan." in sheet
+    assert first["plans"]["ground"]["summary"]["verticals"] == second["plans"]["ground"]["summary"]["verticals"]
+    import geopandas as gpd
+
+    assert len(gpd.read_file(second["gpkg"], layer=output.WALKABLE_LAYER)) == 1    # a plan never touches what the user drew
+
+
 def test_a_kind_that_cannot_be_planned_is_skipped_with_its_reason(case):
     cfg = load(case)
     survey_case.set_points(cfg, access=survey_case.ACCESS)                          # no leave point
@@ -470,12 +543,12 @@ def test_axqua_survey_from_init_to_plan(case, capsys):
 
     assert run_survey(["init", str(case), "--json"]) == 0
     first = answer(capsys)
-    assert first["ok"] is True and first["data"]["created"] is True
+    assert first["ok"] is True and first["data"]["created"] is True and first["data"]["walkable_layer"] == "walkable_areas" and first["data"]["walkable"]["count"] == 0
     survey_case.set_points(load(case), access=survey_case.ACCESS, leave=survey_case.LEAVE)
 
     assert run_survey(["info", str(case), "--json"]) == 0
     data = answer(capsys)["data"]
-    assert data["access"]["access"] and data["access"]["leave"] and data["result_exists"] is True
+    assert data["access"]["access"] and data["access"]["leave"] and data["result_exists"] is True and data["walkable"] == {"count": 0, "area": 0.0, "notes": []}
 
     assert run_survey(["conditions", str(case), "--date", "2026-06-20", "--offline", "--json"]) == 0
     data = answer(capsys)["data"]

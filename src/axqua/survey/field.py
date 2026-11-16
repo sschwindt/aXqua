@@ -66,20 +66,29 @@ class FlowField:
 
     def sample(self, xs, ys) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """``depth, u, v, inside`` at points, linear within the triangles; zero and False outside the mesh."""
-        from matplotlib.tri import LinearTriInterpolator
-
         xs = np.asarray(xs, dtype=float)
         ys = np.asarray(ys, dtype=float)
-        if "interp" not in self._cache:
-            tri = self.triangulation
-            finder = tri.get_trifinder()
-            self._cache["interp"] = tuple(LinearTriInterpolator(tri, values, trifinder=finder) for values in (self.depth, self.u, self.v))
+        if "finder" not in self._cache:
+            self._cache["finder"] = self.triangulation.get_trifinder()
+        # The triangle of every point is looked up once and serves the three fields: the lookup is what costs, with the millions of cells of a walking raster.
+        found = np.asarray(self._cache["finder"](xs, ys))
+        inside = found >= 0
+        nodes = self.triangulation.triangles[found[inside]]
+        x1, x2, x3 = (self.x[nodes[:, i]] for i in range(3))
+        y1, y2, y3 = (self.y[nodes[:, i]] for i in range(3))
+        px, py = xs[inside], ys[inside]
+        twice = (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1)
+        flat = np.abs(twice) < 1e-12
+        safe = np.where(flat, 1.0, twice)
+        w2 = np.where(flat, 0.0, ((px - x1) * (y3 - y1) - (x3 - x1) * (py - y1)) / safe)
+        w3 = np.where(flat, 0.0, ((x2 - x1) * (py - y1) - (px - x1) * (y2 - y1)) / safe)
+        w1 = 1.0 - w2 - w3
         out = []
-        for interpolator in self._cache["interp"]:
-            values = interpolator(xs, ys)
-            out.append(np.ma.filled(values, np.nan))
-        inside = np.isfinite(out[0])
-        return tuple(np.where(inside, values, 0.0) for values in out) + (inside,)
+        for values in (self.depth, self.u, self.v):
+            at = np.zeros(xs.shape)
+            at[inside] = w1 * values[nodes[:, 0]] + w2 * values[nodes[:, 1]] + w3 * values[nodes[:, 2]]
+            out.append(at)
+        return tuple(out) + (inside,)
 
     def neighbors(self):
         """The mesh as a sparse node adjacency matrix."""
@@ -116,19 +125,32 @@ class FlowField:
         weight = np.where(weight > 0, weight, 1.0)
         return sx / weight, sy / weight
 
-    def outline_nodes(self) -> np.ndarray:
-        """Whether a node lies on the outline of the mesh: on an edge that belongs to one triangle only."""
-        if "outline" not in self._cache:
+    def outline_edges(self) -> np.ndarray:
+        """The edges of the outline of the mesh as pairs of nodes ``(m, 2)``: the edges that belong to one triangle only."""
+        if "outline_edges" not in self._cache:
             t, n = self.triangles.astype(np.int64), len(self.x)
             a = np.concatenate([t[:, 0], t[:, 1], t[:, 2]])
             b = np.concatenate([t[:, 1], t[:, 2], t[:, 0]])
             keys, counts = np.unique(np.minimum(a, b) * n + np.maximum(a, b), return_counts=True)
             single = keys[counts == 1]
-            out = np.zeros(n, dtype=bool)
-            out[single // n] = True
-            out[single % n] = True
+            self._cache["outline_edges"] = np.column_stack([single // n, single % n])
+        return self._cache["outline_edges"]
+
+    def outline_nodes(self) -> np.ndarray:
+        """Whether a node lies on the outline of the mesh: on an edge that belongs to one triangle only."""
+        if "outline" not in self._cache:
+            out = np.zeros(len(self.x), dtype=bool)
+            out[self.outline_edges().ravel()] = True
             self._cache["outline"] = out
         return self._cache["outline"]
+
+    def open_water_edges(self) -> tuple[np.ndarray, np.ndarray]:
+        """The outline edges split in two: those of an inflow or an outflow that carry water, beyond which the river goes on, and all the others. Without the liquid boundaries of the model no edge is of the first kind."""
+        edges = self.outline_edges()
+        if self.hops is None or not len(edges):
+            return edges[:0], edges
+        liquid = (np.asarray(self.hops)[edges] == 0).all(axis=1) & self.wet[edges].any(axis=1)
+        return edges[liquid], edges[~liquid]
 
     def wet_edge_distance(self) -> np.ndarray:
         """How many mesh nodes every wet node lies from the nearest dry node or solid boundary (0 at the edge). A wall of the model is a bank like a dry bar is: without it a channel that is wet from wall to wall would have no banks. The inflow and the outflow are not banks."""

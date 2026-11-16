@@ -29,7 +29,7 @@ def classify(depth, speed, slow_velocity: float, shallow_depth: float) -> np.nda
     return (np.asarray(speed) >= float(slow_velocity)).astype(int) * 2 + (np.asarray(depth) >= float(shallow_depth)).astype(int)
 
 
-def plan_temperature(flow: FlowField, settings: SurveySettings, access=None, *, sun=None) -> dict:
+def plan_temperature(flow: FlowField, settings: SurveySettings, access=None, *, sun=None, walkable=None) -> dict:
     from axqua.survey.ground import timetable
 
     t = settings.temperature
@@ -41,7 +41,8 @@ def plan_temperature(flow: FlowField, settings: SurveySettings, access=None, *, 
     wadeable = settings.ground.wadeable(flow.depth, flow.speed)
     grid = None
     if access is not None:
-        grid = walk.build_grid(flow, settings.ground, [tuple(access)])
+        grid = walk.build_grid(flow, settings.ground, [tuple(access)], walkable=walkable)
+        warnings += walk.link_warnings(grid)
         on_foot = wadeable & walk.reachable_nodes(grid, flow, access[0], access[1])
     else:
         on_foot = wadeable

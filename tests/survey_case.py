@@ -87,6 +87,20 @@ geodata:
     return case
 
 
+def set_areas(cfg, *polygons) -> Path:
+    """Write polygons (lists of ``(x, y)``) into the layer ``walkable_areas`` of the case."""
+    import geopandas as gpd
+    from shapely.geometry import Polygon
+
+    from axqua.survey import output, planner
+
+    path = planner.gpkg_path(cfg)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    frame = gpd.GeoDataFrame({"name": [f"area {n}" for n in range(1, len(polygons) + 1)]}, geometry=[Polygon(p) for p in polygons], crs=f"EPSG:{cfg.crs_epsg}")
+    frame.to_file(path, layer=output.WALKABLE_LAYER, driver="GPKG")
+    return path
+
+
 def set_points(cfg, **roles) -> Path:
     """Write points into the layer ``access_points`` of the case: ``set_points(cfg, access=(x, y), leave=(x, y))``."""
     import geopandas as gpd

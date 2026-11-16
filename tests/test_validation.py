@@ -195,6 +195,41 @@ def test_the_validation_run_is_the_calibrated_model_with_other_boundary_values(b
     assert built.model_path("friction.tbl").read_text() == TABLE
 
 
+def test_the_validation_run_starts_where_the_calibration_runs_started(built, monkeypatch):
+    """The user's question of 2026-11-12 (calibration video, cue 109): with
+    calibration.hotstart, the calibration runs continue from the steady result, so the
+    validation run does as well, for 1.2 residence times at its own discharge."""
+    from axqua import bayescal
+
+    built.model_path(built.cas_file).write_text(
+        CAS + "PREVIOUS COMPUTATION FILE : initial-conditions.slf\n"
+              "INITIAL TIME SET TO ZERO : YES\n")
+    built.calibration.hotstart = True
+    seen = {}
+    monkeypatch.setattr(bayescal, "_steady_result", lambda cfg: None)
+
+    def duration(cfg):
+        seen["q"] = cfg.boundaries.prescribed_flowrate
+        return 3400.0
+
+    monkeypatch.setattr(bayescal, "calibration_hotstart_duration", duration)
+    situation = ValidationSituation(name="November 2025", prescribed_flowrate=4.8,
+                                    prescribed_elevation=100.9)
+    setup = validation.build(built, situation, {"zone4": 0.04064})
+    text = setup.cas.read_text()
+    assert seen["q"] == 4.8                       # residence time at its own discharge
+    assert "PREVIOUS COMPUTATION FILE : r2d.slf" in text
+    assert "DURATION : 3400.0" in text and validation.run_duration(setup) == 3400.0
+    assert "RESULTS FILE : r2d-validation-november-2025.slf" in text   # never its seed
+    assert "PRESCRIBED FLOWRATES : 1.6000;0.;3.2000" in text
+    assert "FRICTION DATA FILE : friction-validation-november-2025.tbl" in text
+    assert f"TITLE : '{built.name} validation november-2025'" in text
+    # without the option it is the built case, as before
+    built.calibration.hotstart = False
+    plain = validation.build(built, situation, {}).cas.read_text()
+    assert "PREVIOUS COMPUTATION FILE : initial-conditions.slf" in plain
+
+
 def test_a_total_discharge_keeps_the_split_of_the_calibrated_case(built):
     situation = ValidationSituation(name="high", prescribed_flowrate=4.8,
                                     prescribed_elevation=100.9, duration=5000)

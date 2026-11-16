@@ -1,6 +1,6 @@
 """``axqua survey``: plan the field survey that a calibration of the case needs.
 
-``axqua survey info <case-file>`` lists what a plan can rest on: the calibration parameters of the case with the rule that places their measurements, the settings of the last plan (or the defaults), the folder of the plan, and the points of the layer ``access_points``. ``axqua survey init <case-file>`` creates ``survey-plan.gpkg`` with the empty layer ``access_points``, in which the user sets where the surveyors reach the river. ``axqua survey conditions <case-file>`` looks up sunrise, sunset, the weather forecast and what is known about the mobile network and the DGPS corrections at the reach. ``axqua survey plan <case-file>`` plans the survey and writes the layers, the maps and the factsheets (:mod:`axqua.survey.planner`).
+``axqua survey info <case-file>`` lists what a plan can rest on: the calibration parameters of the case with the rule that places their measurements, the settings of the last plan (or the defaults), the folder of the plan, the points of the layer ``access_points`` and the areas of the layer ``walkable_areas``. ``axqua survey init <case-file>`` creates ``survey-plan.gpkg`` with two empty layers: ``access_points``, in which the user sets where the surveyors reach the river, and ``walkable_areas``, in which the user draws the dry ground that can be walked on beyond the strip along the wetted edge. ``axqua survey conditions <case-file>`` looks up sunrise, sunset, the weather forecast and what is known about the mobile network and the DGPS corrections at the reach. ``axqua survey plan <case-file>`` plans the survey and writes the layers, the maps and the factsheets (:mod:`axqua.survey.planner`).
 
 The settings are read from a JSON file (``--settings``) with the keys of :class:`axqua.survey.settings.SurveySettings`; without one, the settings of the last plan apply, or the defaults. The Survey planner of the QGIS plugin is filled from ``info`` and runs ``plan``.
 """
@@ -24,7 +24,7 @@ def _parser() -> argparse.ArgumentParser:
         prog="axqua survey",
         description="Plan a field survey for the calibration of a case: where to measure by wading, from a drone, from a kayak or with temperature loggers, in which order, and how long it takes. "
                     "The plan is written to the folder survey-plan of the calibration phase.")
-    p.add_argument("action", choices=ACTIONS, help="info: what a plan can rest on; init: create survey-plan.gpkg with the layer access_points; conditions: daylight, weather and network coverage; plan: plan the survey")
+    p.add_argument("action", choices=ACTIONS, help="info: what a plan can rest on; init: create survey-plan.gpkg with the layers access_points and walkable_areas; conditions: daylight, weather and network coverage; plan: plan the survey")
     p.add_argument("case", type=Path, help="the case file")
     p.add_argument("--settings", type=Path, default=None, help="a JSON file with the settings of the plan (default: those of the last plan, or the defaults)")
     p.add_argument("--result", default="", help="the result file of the steady run to plan with (default: the result of the case)")
@@ -96,9 +96,10 @@ def run_survey(argv: list[str]) -> int:
             lines += [f"parameter {p['name']}: {p['rule']}" + (f" {p['zone']}" if p.get("zone") is not None else "") + f", {p['points']} points" + ("" if p["use"] else " (not used)") + (f"; {p['note']}" if p.get("note") else "") for p in data["parameters"]]
             access = data["access"]
             lines.append("points of the layer access_points: " + (", ".join(role for role in ("access", "leave", "takeoff") if access.get(role)) or "none"))
+            lines.append(f"walkable areas of the layer {data['walkable_layer']}: " + (f"{data['walkable']['count']} ({data['walkable']['area']:.0f} m2)" if data["walkable"]["count"] else "none (land is walked on along the wetted edge only)"))
         elif args.action == "init":
             data = planner.init(cfg)
-            lines = [("created " if data["created"] else "exists: ") + data["gpkg"], f"Set a point with the role 'access' in the layer {data['layer']}."]
+            lines = [("created " if data["created"] else "exists: ") + data["gpkg"], f"Set a point with the role 'access' in the layer {data['layer']}.", f"Draw the dry ground that can be walked on in the layer {data['walkable_layer']}; without it, land is walked on along the wetted edge only."]
         elif args.action == "conditions":
             data = planner.conditions(cfg, read_settings(cfg, args), online=online)
             lines = [f"{day['date']}: sunrise {day.get('sunrise_text', '')}, sunset {day.get('sunset_text', '')}" + (f", {day['weather']}" if day.get("weather") else "") for day in data.get("days", [])[:3]]

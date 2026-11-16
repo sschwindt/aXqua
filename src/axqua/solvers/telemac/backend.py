@@ -413,7 +413,7 @@ class TelemacBackend(BaseBackend):
             setup = validation.build(cfg, chosen, calibrated.as_dict())
             self._launch(cfg, ctx=ctx, cas_file=setup.cas.name, ncsize=ncsize,
                          solver=None, name="telemac2d",
-                         duration=chosen.duration or None)
+                         duration=chosen.duration or validation.run_duration(setup))
             listing = sortie.latest_sortie(cfg.model_dir, setup.cas.name)
             if listing is not None:
                 history = sortie.read_sortie(listing)

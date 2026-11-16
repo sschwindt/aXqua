@@ -70,9 +70,10 @@ def test_the_names_of_the_plugin_are_the_names_of_the_library():
     assert survey.KIND_TITLES == ast.literal_eval(_assigned(library / "settings.py", "KIND_TITLES"))
     assert set(survey.RULE_TITLES) == set(ast.literal_eval(_assigned(library / "settings.py", "RULES")))
     assert survey.ACCESS_LAYER == ast.literal_eval(_assigned(library / "output.py", "ACCESS_LAYER"))
+    assert survey.WALKABLE_LAYER == ast.literal_eval(_assigned(library / "output.py", "WALKABLE_LAYER"))
     assert survey.ROLES == tuple(ast.literal_eval(_assigned(library / "output.py", "ROLES")))
     layers = [key.value for key in _assigned(library / "output.py", "LAYERS").keys]
-    assert sorted(name for name, _kind, _title in survey.PLAN_LAYERS) == sorted(layers) and survey.ACCESS_LAYER not in layers
+    assert sorted(name for name, _kind, _title in survey.PLAN_LAYERS) == sorted(layers) and survey.ACCESS_LAYER not in layers and survey.WALKABLE_LAYER not in layers
     assert {kind for _name, kind, _title in survey.PLAN_LAYERS} <= set(survey.KINDS) | {""}
 
 
@@ -128,6 +129,16 @@ def test_the_points_of_the_access_layer_in_lines():
     lines = survey.access_lines({"access": [700060.0, 5340001.0], "leave": [700160.04, 5340001.0], "takeoff": None, "names": {"access": "bridge"}, "notes": ["a note"]})
     assert lines == ["access \"bridge\": 700060.0, 5340001.0", "leave: 700160.0, 5340001.0", "a note"]
     assert "role access is missing" in survey.access_lines({"leave": [1.0, 2.0]})[-1]
+
+
+def test_the_areas_of_the_walkable_layer_in_lines():
+    nothing = ["No area is drawn: on land the plan walks along the wetted edge only."]
+    assert survey.walkable_lines({}) == nothing and survey.walkable_lines(None) == nothing and survey.walkable_lines({"count": 0, "area": 0.0, "notes": []}) == nothing
+    assert survey.walkable_lines({"count": 1, "area": 412.4, "notes": []}) == ["1 area, 412 m\u00b2: on land the plan walks inside it and along the wetted edge."]
+    lines = survey.walkable_lines({"count": 3, "area": 25300.0, "notes": ["1 feature of the layer walkable_areas is no polygon with an area: not used"]})
+    assert lines == ["3 areas, 2.53 ha: on land the plan walks inside them and along the wetted edge.", "1 feature of the layer walkable_areas is no polygon with an area: not used"]
+    field = next(field for group in survey.GROUND for field in group.fields if field.key == "ground.bank_strip")
+    assert field.unit == "m" and field.low > 0.0 and "walkable areas" in field.tip
 
 
 def test_daylight_weather_and_coverage_in_lines():

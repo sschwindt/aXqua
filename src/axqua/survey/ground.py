@@ -26,8 +26,8 @@ from axqua.survey.settings import SurveySettings
 MAX_DAYS = 30
 
 
-def plan_ground(flow: FlowField, settings: SurveySettings, needs, access, *, sun=None) -> dict:
-    """Plan the wading survey from the access point ``(x, y)``."""
+def plan_ground(flow: FlowField, settings: SurveySettings, needs, access, *, sun=None, walkable=None) -> dict:
+    """Plan the wading survey from the access point ``(x, y)``. *walkable* is the union of the areas in which dry ground can be walked on."""
     g = settings.ground
     if access is None:
         raise SurveyError("a ground-based survey needs an access point", remedy="Set one point with the role 'access' in the layer access_points of survey-plan.gpkg: the place where the surveyors reach the river.")
@@ -38,7 +38,8 @@ def plan_ground(flow: FlowField, settings: SurveySettings, needs, access, *, sun
     if nearest > max(2000.0, reach):
         raise SurveyError(f"the access point lies {nearest:.0f} m from the water of the model", remedy="Move the access point to the river bank of the modeled reach.")
     warnings: list[str] = []
-    grid = walk.build_grid(flow, g, [(ax, ay)])
+    grid = walk.build_grid(flow, g, [(ax, ay)], walkable=walkable)
+    warnings += walk.link_warnings(grid)
     wadeable = g.wadeable(flow.depth, flow.speed)
     allowed = placement.reachable_mask(flow, g.min_depth) & wadeable & walk.reachable_nodes(grid, flow, ax, ay)
     points = placement.place(flow, needs, allowed, min_spacing=settings.min_spacing, what="wading measurement")

@@ -2,19 +2,21 @@
 
 Wading is not symmetric. With the current a surveyor is carried along; against it every step costs more the deeper the water is, and above the wading limit there is no way at all. On a dry bank one walks at ease. The plan therefore does not connect its points by straight lines. It lays a raster over the reach, gives every step between two neighboring cells the time it takes in that direction, and finds the fastest walk with Dijkstra's algorithm on the directed graph of those steps:
 
-* a step on land (dry cells of the model and everything outside it) at the land speed;
+* a step on land at the land speed, where land can be walked on: within the bank strip along the wetted edge (1 m by default) and inside the walkable areas the user draws;
 * a step in water with the current, or across it, at the speed with the current;
 * a step against the current at the speed of its depth class, weighted by how directly it goes upstream (the cosine of the angle between the step and the flow);
 * no step into water that cannot be waded (too deep, or too fast for its depth).
 
 The fastest walk between two points upstream of each other therefore leaves the water, follows the bank and enters again, and the order of the points (an asymmetric traveling-salesman tour from the access point and back, improved by moving and reversing parts of it) runs with the current wherever it can.
 
-Outside the model nothing is known about the ground; it is taken as land that can be walked on, which the factsheet states.
+**Dry ground is not walked on, with two exceptions.** Terrain beside a river is often next to impassable (riparian forest, riprap, steep banks, private land), and the model knows nothing about it. A surveyor therefore walks on land only within the bank strip, ``ground.bank_strip`` meters from the wetted edge of the result the plan rests on, and inside the polygons of the layer ``walkable_areas`` of ``survey-plan.gpkg`` (paths, gravel bars, meadows). On the raster the strip is the ring of cells around the water, so it is never narrower than one cell. This holds for dry ground inside the model, a gravel bar for instance, as much as for ground outside it.
+
+A site on land that is not connected to the water this way, typically an access point set on a road, is joined to the nearest ground that is by a straight line walked at the land speed (:attr:`WalkGrid.links`); the plan warns of a long one, because nothing says that the line can be walked.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -23,6 +25,10 @@ from axqua.survey.settings import GroundSettings
 
 #: Slower than this the water has no direction that matters for walking [m/s].
 STILL = 0.05
+#: The raster takes in walkable areas this far around the wetted reach and the sites [m].
+AREA_REACH = 150.0
+#: A straight line from a site to ground that can be walked on is worth a warning from this length on [m].
+LONG_LINK = 10.0
 KMH = 1.0 / 3.6
 
 
@@ -38,7 +44,11 @@ class WalkGrid:
     v: np.ndarray
     water: np.ndarray           # wet cells of the model
     passable: np.ndarray
-    graph: object               # csr matrix of step times [s]
+    graph: object               # csr matrix of step times [s] between the cells that can be walked on: row and column n stand for the cell nodes[n]
+    nodes: np.ndarray           # the cells of the graph
+    node_of: np.ndarray         # the row of a cell in the graph, -1 for a cell that cannot be walked on
+    strip: float = 0.0          # the width of the bank strip that was asked for [m]
+    links: list = field(default_factory=list)    # (x, y, length [m]) of the sites joined to the walkable ground by a straight line
 
     def cell_of(self, x: float, y: float) -> int:
         ix = int(np.clip((x - self.x0) // self.cell, 0, self.nx - 1))
@@ -48,6 +58,13 @@ class WalkGrid:
     def center(self, index) -> tuple[np.ndarray, np.ndarray]:
         index = np.asarray(index)
         return self.x0 + (index % self.nx + 0.5) * self.cell, self.y0 + (index // self.nx + 0.5) * self.cell
+
+    def node(self, index: int) -> int:
+        """The row of the cell *index* in the graph. A cell that was made passable after the raster was built has none."""
+        node = int(self.node_of[index])
+        if node < 0:
+            raise SurveyError("a point of the plan lies on ground that the walking raster does not hold")
+        return node
 
     def nearest_passable(self, x: float, y: float) -> int:
         index = self.cell_of(x, y)
@@ -68,21 +85,52 @@ def against_speed(ground: GroundSettings, depth: np.ndarray) -> np.ndarray:
     return speed * KMH
 
 
-def build_grid(flow: FlowField, ground: GroundSettings, sites_xy, *, max_cells: int = 160_000, min_cell: float = 1.0, margin: float = 30.0) -> WalkGrid:
-    """The raster of walking times around the wetted reach and the *sites_xy* ``[(x, y), ...]``."""
+def build_grid(flow: FlowField, ground: GroundSettings, sites_xy, *, walkable=None, max_cells: int = 2_500_000, min_cell: float = 1.0, margin: float = 30.0) -> WalkGrid:
+    """The raster of walking times around the wetted reach and the *sites_xy* ``[(x, y), ...]``. *walkable* is the union of the polygons in which dry ground can be walked on (a shapely geometry), or None."""
+    from scipy.ndimage import distance_transform_edt
     from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
 
     wet = flow.wet
     xs = np.concatenate([flow.x[wet] if wet.any() else flow.x, [p[0] for p in sites_xy]])
     ys = np.concatenate([flow.y[wet] if wet.any() else flow.y, [p[1] for p in sites_xy]])
     x0, x1, y0, y1 = xs.min() - margin, xs.max() + margin, ys.min() - margin, ys.max() + margin
-    cell = max(float(min_cell), 0.5 * flow.edge_length, float(np.sqrt((x1 - x0) * (y1 - y0) / max_cells)))
+    if walkable is not None and walkable.is_empty:
+        walkable = None
+    if walkable is not None:                      # room for the areas, as far as they lie around the reach: a meadow of a square kilometer must not coarsen the raster
+        ax0, ay0, ax1, ay1 = walkable.bounds
+        x0, y0 = max(min(x0, ax0 - margin), x0 - AREA_REACH), max(min(y0, ay0 - margin), y0 - AREA_REACH)
+        x1, y1 = min(max(x1, ax1 + margin), x1 + AREA_REACH), min(max(y1, ay1 + margin), y1 + AREA_REACH)
+    # Cells of 1 m where the reach allows it: the strip along the wetted edge is as wide as that. Only the cells that can be walked on enter the graph, so
+    # the fine raster costs little.
+    cell = max(float(min_cell), float(np.sqrt((x1 - x0) * (y1 - y0) / max_cells)))
     nx, ny = int(np.ceil((x1 - x0) / cell)), int(np.ceil((y1 - y0) / cell))
     gx, gy = np.meshgrid(x0 + (np.arange(nx) + 0.5) * cell, y0 + (np.arange(ny) + 0.5) * cell)
-    depth, u, v, inside = (a.reshape(ny, nx) for a in flow.sample(gx.ravel(), gy.ravel()))
+    # The plans of two kinds of survey lay the same raster over the reach: the fields on it are sampled once.
+    key = (float(x0), float(y0), float(cell), nx, ny)
+    if flow._cache.get("raster", (None,))[0] != key:
+        flow._cache["raster"] = (key, tuple(a.reshape(ny, nx) for a in flow.sample(gx.ravel(), gy.ravel())))
+    depth, u, v, inside = flow._cache["raster"][1]
     water = inside & (depth > flow.wet_depth)
     speed = np.hypot(u, v)
-    passable = ~water | ground.wadeable(depth, speed)
+    # Dry ground can be walked on within the bank strip and inside the walkable areas, and nowhere else. The strip is measured from the cells in water and is
+    # at least the ring of cells around them; a cell that holds a wet node of the model belongs to it too (a measurement point at the very edge of the water).
+    node_cell = np.zeros((ny, nx), dtype=bool)
+    wet_here = (flow.x >= x0) & (flow.x < x0 + nx * cell) & (flow.y >= y0) & (flow.y < y0 + ny * cell) & wet
+    node_cell[((flow.y[wet_here] - y0) // cell).astype(int), ((flow.x[wet_here] - x0) // cell).astype(int)] = True
+    strip = float(ground.bank_strip)
+    away = distance_transform_edt(~water) * cell if water.any() else np.full((ny, nx), np.inf)
+    on_land = ~water & ((away <= max(strip + 0.5 * cell, 1.5 * cell)) | node_cell)
+    on_land &= ~_river_goes_on(flow, on_land & ~inside, gx, gy, 2.0 * max(strip + 0.5 * cell, 1.5 * cell) + flow.edge_length)
+    if walkable is not None:
+        import shapely
+
+        area = shapely.buffer(walkable, 0.5 * cell)          # a cell the area reaches into counts
+        bx0, by0, bx1, by1 = area.bounds
+        near = ~water & ~on_land & (gx >= bx0) & (gx <= bx1) & (gy >= by0) & (gy <= by1)
+        if near.any():
+            on_land[near] = shapely.contains_xy(area, gx[near], gy[near])
+    passable = (water & ground.wadeable(depth, speed)) | on_land
     v_land, v_with = ground.speed_land * KMH, ground.speed_with_current * KMH
     v_against = against_speed(ground, depth)
     index = np.arange(nx * ny).reshape(ny, nx)
@@ -107,18 +155,78 @@ def build_grid(flow: FlowField, ground: GroundSettings, sites_xy, *, max_cells: 
         rows.append(index[a][ok])
         cols.append(index[b][ok])
         times.append((length / pace)[ok])
-    graph = coo_matrix((np.concatenate(times), (np.concatenate(rows), np.concatenate(cols))), shape=(nx * ny, nx * ny)).tocsr()
-    return WalkGrid(x0=float(x0), y0=float(y0), cell=float(cell), nx=nx, ny=ny, depth=depth, u=u, v=v, water=water, passable=passable, graph=graph)
+    rows, cols, times = np.concatenate(rows), np.concatenate(cols), np.concatenate(times)
+    # The graph holds the cells that can be walked on and the cells of the sites, which may lie on ground that cannot.
+    site_cells = [int(np.clip((y - y0) // cell, 0, ny - 1)) * nx + int(np.clip((x - x0) // cell, 0, nx - 1)) for x, y in sites_xy]
+    member = passable.ravel().copy()
+    member[site_cells] = True
+    nodes = np.flatnonzero(member)
+    node_of = np.full(nx * ny, -1, dtype=np.int32)
+    node_of[nodes] = np.arange(len(nodes), dtype=np.int32)
+    rows, cols, count = node_of[rows], node_of[cols], len(nodes)
+    # A site on land that the strip and the areas do not connect to water a surveyor can stand in is joined to the nearest ground that is, by a straight line.
+    links, extra = [], ([], [], [])
+    _, part = connected_components(coo_matrix((times, (rows, cols)), shape=(count, count)).tocsr(), directed=False) if count else (0, np.zeros(0, dtype=int))
+    joined = np.zeros(int(part.max()) + 1 if count else 0, dtype=bool)
+    joined[part[(water & passable).ravel()[nodes]]] = True
+    targets = nodes[joined[part] & passable.ravel()[nodes]] if count else nodes
+    if len(targets):
+        tx, ty = x0 + (targets % nx + 0.5) * cell, y0 + (targets // nx + 0.5) * cell
+        for (x, y), here in zip(sites_xy, site_cells):
+            if water.flat[here] or (passable.flat[here] and joined[part[node_of[here]]]):
+                continue
+            distance = np.hypot(tx - x, ty - y)
+            nearest = int(np.argmin(distance))
+            seconds = float(distance[nearest]) / v_land
+            passable.flat[here] = True
+            a, b = int(node_of[here]), int(node_of[targets[nearest]])
+            extra[0].extend((a, b))
+            extra[1].extend((b, a))
+            extra[2].extend((seconds, seconds))
+            links.append((float(x), float(y), float(distance[nearest])))
+    graph = coo_matrix((np.concatenate([times, extra[2]]), (np.concatenate([rows, extra[0]]).astype(np.int64), np.concatenate([cols, extra[1]]).astype(np.int64))), shape=(count, count)).tocsr()
+    return WalkGrid(x0=float(x0), y0=float(y0), cell=float(cell), nx=nx, ny=ny, depth=depth, u=u, v=v, water=water, passable=passable, graph=graph, nodes=nodes, node_of=node_of, strip=strip, links=links)
+
+
+def _river_goes_on(flow: FlowField, cells: np.ndarray, gx: np.ndarray, gy: np.ndarray, reach: float) -> np.ndarray:
+    """The *cells* outside the model that lie beyond an inflow or an outflow in water. The model ends there and the river does not: without this the strip along the wetted edge would lead around the end of the water, and the plan would cross a river of any depth on dry ground."""
+    out = np.zeros(cells.shape, dtype=bool)
+    open_edges, other_edges = flow.open_water_edges()
+    if not len(open_edges) or not cells.any():
+        return out
+    import shapely
+
+    def lines(edges):
+        return shapely.multilinestrings(shapely.linestrings(np.stack([flow.x[edges], flow.y[edges]], axis=2)))
+
+    river = lines(open_edges)
+    x0, y0, x1, y1 = river.bounds
+    near = np.flatnonzero((cells & (gx >= x0 - reach) & (gx <= x1 + reach) & (gy >= y0 - reach) & (gy <= y1 + reach)).ravel())
+    points = shapely.points(gx.ravel()[near], gy.ravel()[near])
+    to_river = shapely.distance(points, river)
+    near, points, to_river = near[to_river <= reach], points[to_river <= reach], to_river[to_river <= reach]
+    # beside the model, along a wall or a dry bank, the nearest edge of the outline is none of the inflow or the outflow, and the strip stays
+    to_bank = shapely.distance(points, lines(other_edges)) if len(other_edges) and len(points) else np.full(len(points), np.inf)
+    out.flat[near[to_river <= to_bank + 1e-6]] = True
+    return out
+
+
+def link_warnings(grid: WalkGrid, what: str = "the access point") -> list[str]:
+    """What to say about a site that only a straight line joins to the ground that can be walked on."""
+    return [f"{what} lies {distance:.0f} m from ground the plan can walk on (the strip of {grid.strip:g} m along the wetted edge and the walkable areas): the plan takes the straight line between them; draw a walkable area where the way there is another"
+            for _x, _y, distance in grid.links if distance > LONG_LINK]
 
 
 def reachable_nodes(grid: WalkGrid, flow: FlowField, x: float, y: float) -> np.ndarray:
     """The mesh nodes a surveyor can walk to from ``(x, y)`` and back."""
     from scipy.sparse.csgraph import dijkstra
 
-    start = grid.nearest_passable(x, y)
+    start = grid.node(grid.nearest_passable(x, y))
     there = dijkstra(grid.graph, directed=True, indices=start)
     back = dijkstra(grid.graph.T.tocsr(), directed=True, indices=start)
-    ok = (np.isfinite(there) & np.isfinite(back)).reshape(grid.ny, grid.nx)
+    ok = np.zeros(grid.nx * grid.ny, dtype=bool)
+    ok[grid.nodes] = np.isfinite(there) & np.isfinite(back)
+    ok = ok.reshape(grid.ny, grid.nx)
     ix = np.clip(((flow.x - grid.x0) // grid.cell).astype(int), 0, grid.nx - 1)
     iy = np.clip(((flow.y - grid.y0) // grid.cell).astype(int), 0, grid.ny - 1)
     inside = (flow.x >= grid.x0) & (flow.x < grid.x0 + grid.nx * grid.cell) & (flow.y >= grid.y0) & (flow.y < grid.y0 + grid.ny * grid.cell)
@@ -133,7 +241,7 @@ class Router:
 
         self.grid = grid
         self.xy = [(float(x), float(y)) for x, y in sites_xy]
-        self.cells = [grid.nearest_passable(x, y) for x, y in self.xy]
+        self.cells = [grid.node(grid.nearest_passable(x, y)) for x, y in self.xy]      # rows of the graph
         n = len(self.cells)
         self.seconds = np.full((n, n), np.inf)
         self._previous: list[np.ndarray] = []
@@ -154,7 +262,7 @@ class Router:
             if before < 0:
                 return [self.xy[i], self.xy[j]]
             cells.append(before)
-        cx, cy = self.grid.center(np.asarray(cells[::-1]))
+        cx, cy = self.grid.center(self.grid.nodes[np.asarray(cells[::-1])])
         coords = [self.xy[i]] + list(zip(cx.tolist()[1:-1], cy.tolist()[1:-1])) + [self.xy[j]]
         return _simplify(coords, 0.4 * self.grid.cell)
 
@@ -162,7 +270,7 @@ class Router:
         """The share of the walk from *i* to *j* that is in water."""
         previous, cell, wet, count = self._previous[i], self.cells[j], 0, 0
         while cell != self.cells[i] and cell >= 0:
-            wet += bool(self.grid.water.flat[cell])
+            wet += bool(self.grid.water.flat[self.grid.nodes[cell]])
             count += 1
             cell = int(previous[cell])
         return wet / count if count else 0.0
@@ -266,4 +374,4 @@ def deal_tour(seconds: np.ndarray, order, service, parts: int, start: int = 0) -
     return [run for run in runs if run]
 
 
-__all__ = ["Router", "WalkGrid", "against_speed", "build_grid", "deal_tour", "length", "order_sites", "reachable_nodes", "split_tour", "tour_seconds"]
+__all__ = ["Router", "WalkGrid", "against_speed", "build_grid", "deal_tour", "length", "link_warnings", "order_sites", "reachable_nodes", "split_tour", "tour_seconds"]

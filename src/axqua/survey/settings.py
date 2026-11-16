@@ -38,6 +38,8 @@ class GroundSettings:
     velocity_limits: list = field(default_factory=lambda: [[0.6, 2.0], [0.9, 1.4], [1.2, 1.0]])
     # walking [km/h]; against the current: (deeper than [m], speed)
     speed_land: float = 3.0
+    # dry ground can be walked on this far from the wetted edge [m], and inside the walkable areas the user draws
+    bank_strip: float = 1.0
     speed_with_current: float = 1.5
     speed_against_current: list = field(default_factory=lambda: [[0.3, 1.0], [0.5, 0.5], [0.8, 0.1]])
     # durations at a vertical [s]
@@ -199,7 +201,7 @@ class SurveySettings:
         if not g.depth_two_points <= g.depth_three_points:
             out.append("the depth from which three depths are measured lies below the one for two depths")
         for value, text in ((g.speed_land, "the walking speed on land"), (g.speed_with_current, "the walking speed with the current"), (self.time.day_hours, "the working day"), (self.airborne.altitude, "the flight altitude"), (self.airborne.hover_seconds, "the hover time"), (self.kayak.log_interval, "the DGPS interval of the kayak"),
-                            (self.airborne.fps, "the frame rate of the video"), (self.airborne.width_px, "the width of the video"), (self.airborne.height_px, "the height of the video"), (self.airborne.cruise_speed, "the cruise speed of the drone"), (self.airborne.battery_minutes, "the flight time of a battery"), (g.max_depth, "the largest wading depth")):
+                            (self.airborne.fps, "the frame rate of the video"), (self.airborne.width_px, "the width of the video"), (self.airborne.height_px, "the height of the video"), (self.airborne.cruise_speed, "the cruise speed of the drone"), (self.airborne.battery_minutes, "the flight time of a battery"), (g.max_depth, "the largest wading depth"), (g.bank_strip, "the strip along the wetted edge that can be walked on")):
             if not value > 0:
                 out.append(f"{text} must be larger than zero")
         if not 0 < self.airborne.hfov_deg < 180:

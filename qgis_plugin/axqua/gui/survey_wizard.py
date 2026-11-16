@@ -7,7 +7,7 @@ A calibration can only settle a parameter where a measurement feels it: the roug
 * **Kayak**: drifting kayaks that carry a DGPS rover (Barker et al., 2018);
 * **Water temperature**: fixed loggers or a mobile probe, in slow and shallow as well as fast and deep water.
 
-One window with a tab per step, visited in any order, with *Back* and *Next* walking through them: Survey (kinds and parameters), Access (the points where the surveyors reach the river, set on the map), one tab of settings per kind, Time and weather, Plan. The window is not modal, because the access points are set on the map while it is open. It decides nothing: the forms are the tables of :mod:`..core.survey`, and every step is a call of ``axqua survey``. The plan is written to ``survey-plan.gpkg``, one map and one factsheet per kind in the folder ``survey-plan`` of the case.
+One window with a tab per step, visited in any order, with *Back* and *Next* walking through them: Survey (kinds and parameters), Access (the points where the surveyors reach the river, set on the map, and the dry ground that can be walked on, drawn on the map), one tab of settings per kind, Time and weather, Plan. The window is not modal, because the access points are set on the map while it is open. It decides nothing: the forms are the tables of :mod:`..core.survey`, and every step is a call of ``axqua survey``. The plan is written to ``survey-plan.gpkg``, one map and one factsheet per kind in the folder ``survey-plan`` of the case.
 """
 
 from __future__ import annotations
@@ -45,6 +45,10 @@ KIND_NOTES = {
 
 ACCESS_INTRO = ("Set the points where the surveyors reach the river in the layer <b>access_points</b> of survey-plan.gpkg. <i>Set points on the map</i> creates the layer, adds it to the map and "
                 "starts the tool that adds a point: click on the map, choose the role of the point and give it a name if you like. <i>Save the points</i> writes them into the file.")
+
+WALKABLE_INTRO = ("Terrain beside a river is often next to impassable. On land the plan therefore walks only along the wetted edge of the model result, within the strip set on the tab Ground-based (1 m by default). "
+                  "Where a gravel bar, a path or a meadow can be walked on, draw it as a polygon in the layer <b>walkable_areas</b>: <i>Draw areas on the map</i> starts the tool (click the corners, right-click to finish), "
+                  "<i>Save the areas</i> writes them into the file. An access point away from the water is joined to it by a straight line unless an area leads there.")
 
 GROUND_INTRO = ("The plan keeps every vertical and every walk path in water a person can wade, orders the verticals into the shortest walk from and back to the access point, and adds up the time: "
                 "walking, measuring, breaks and the adjustment of the pressure sensor.")
@@ -242,6 +246,21 @@ class SurveyWizard(QDialog):
         self.access_label = _label("")
         box.addWidget(self.access_label)
         layout.addWidget(found)
+        layout.addWidget(_label(WALKABLE_INTRO, rich=True))
+        row = QHBoxLayout()
+        self.draw_areas = QPushButton("Draw areas on the map")
+        self.draw_areas.clicked.connect(self.start_walkable)
+        row.addWidget(self.draw_areas)
+        self.save_areas = QPushButton("Save the areas")
+        self.save_areas.clicked.connect(self.save_walkable)
+        row.addWidget(self.save_areas)
+        row.addStretch(1)
+        layout.addLayout(row)
+        ground = QGroupBox("Dry ground the plan will walk on")
+        box = QVBoxLayout(ground)
+        self.walkable_label = _label("")
+        box.addWidget(self.walkable_label)
+        layout.addWidget(ground)
         layout.addStretch(1)
         return page
 
@@ -376,6 +395,7 @@ class SurveyWizard(QDialog):
         self.show_settings()
         self.show_parameters(survey.parameter_rows(self.info))
         self.show_access(self.info.get("access") or {})
+        self.show_walkable(self.info.get("walkable") or {})
         roles = self.info.get("roles") or {}
         self.roles_label.setText("<ul>" + "".join(f"<li><b>{role}</b>: {text}</li>" for role, text in roles.items()) + "</ul>" if roles else "")
         notes = []
@@ -605,6 +625,48 @@ class SurveyWizard(QDialog):
 
         run_async("aXqua: reading the access points", lambda: client.survey_init(case), on_success=done, on_error=self._failed, owner=self)
 
+    # -- the walkable areas -------------------------------------------------------
+    def show_walkable(self, walkable: dict) -> None:
+        self.walkable_label.setText("\n".join(survey.walkable_lines(walkable)))
+
+    def start_walkable(self) -> None:
+        client, case = self.client, self.case
+        self.status.setText("Creating the layer of the walkable areas...")
+        self.draw_areas.setEnabled(False)
+
+        def failed(exc) -> None:
+            self.draw_areas.setEnabled(True)
+            self._failed(exc)
+
+        run_async("aXqua: creating the layer of the walkable areas", lambda: client.survey_init(case), on_success=self._walkable_ready, on_error=failed, owner=self)
+
+    def _walkable_ready(self, answer: dict) -> None:
+        self.draw_areas.setEnabled(True)
+        gpkg = answer.get("gpkg")
+        self.info["gpkg"] = gpkg
+        layer = survey_layers.show_walkable(gpkg, iface=self.ctx.iface) if gpkg else None
+        if layer is None:
+            self.status.setText("The layer of the walkable areas could not be opened in QGIS.")
+            return
+        self.show_walkable(answer.get("walkable") or {})
+        self.status.setText("Click the corners of an area on the map, right-click to finish it, then click Save the areas.")
+
+    def save_walkable(self) -> None:
+        gpkg = self.info.get("gpkg")
+        wrong = survey_layers.commit_walkable(gpkg) if gpkg else ""
+        if wrong:
+            self.status.setText(f"The areas could not be saved: {wrong}")
+            return
+        client, case = self.client, self.case
+        self.status.setText("Reading the areas...")
+
+        def done(answer: dict) -> None:
+            self.info["walkable"] = answer.get("walkable") or {}
+            self.show_walkable(self.info["walkable"])
+            self.status.setText("The areas are saved." if self.info["walkable"].get("count") else "The layer holds no area yet.")
+
+        run_async("aXqua: reading the walkable areas", lambda: client.survey_init(case), on_success=done, on_error=self._failed, owner=self)
+
     # -- daylight, weather, coverage ----------------------------------------------
     def ask_conditions(self) -> None:
         settings = self._checked_settings()
@@ -649,6 +711,11 @@ class SurveyWizard(QDialog):
             self.tabs.setCurrentIndex(1)
             self.status.setText(f"The access points could not be saved: {wrong}")
             return
+        wrong = survey_layers.commit_walkable(gpkg) if gpkg else ""
+        if wrong:
+            self.tabs.setCurrentIndex(1)
+            self.status.setText(f"The walkable areas could not be saved: {wrong}")
+            return
         self._shown_before = survey_layers.shown_plan(gpkg) if gpkg else []
         if gpkg:
             survey_layers.remove_plan(gpkg)          # the library replaces these layers in the file
@@ -681,10 +748,15 @@ class SurveyWizard(QDialog):
         self.show_files(self.answer)
         if self.answer.get("access"):
             self.show_access(self.answer["access"])
+        if self.answer.get("walkable"):
+            self.info["walkable"] = self.answer["walkable"]
+            self.show_walkable(self.answer["walkable"])
         planned = [survey.KIND_TITLES[kind] for kind in survey.KINDS if kind in (self.answer.get("plans") or {})]
         self.status.setText(("Planned: " + ", ".join(planned) + ".") if planned else "Nothing could be planned; the reasons are listed above.")
         if self.add_to_map.isChecked() and self.answer.get("gpkg"):
             layers = survey_layers.show_plan(self.answer)
+            if (self.answer.get("walkable") or {}).get("count"):
+                survey_layers.show_walkable(self.answer["gpkg"], edit=False)
             access = survey_layers.show_access(self.answer["gpkg"], self.info.get("roles"), edit=False)
             survey_layers.zoom_to(self.ctx.iface, layers + ([access] if access is not None else []))
 

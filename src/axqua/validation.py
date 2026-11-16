@@ -12,9 +12,12 @@ that flow field and says nothing about another discharge.
 The validation run is **the calibrated model with other boundary values**. Its steering
 file is derived from the built steady case and differs in exactly these lines: the
 prescribed discharges and water levels of the situation, the names of its own result
-and friction files, and the calibrated values. Mesh, bed, numerical settings and
-initial state are untouched, so a difference between model and measurement cannot come
-from a model that was built differently.
+and friction files, and the calibrated values. Mesh, bed and numerical settings are
+untouched, so a difference between model and measurement cannot come from a model
+that was built differently. It starts the way the calibration runs started: from the
+dry or pre-wetted start of the built case, or, with ``calibration.hotstart``, from the
+steady result for 1.2 residence times at the discharge of the situation
+(:func:`axqua.bayescal.situation_start`).
 
 The calibrated values are the **per-parameter posterior maxima** of the newest
 calibration (:func:`calibrated_parameters`): the peak of each parameter's own posterior,
@@ -250,6 +253,15 @@ def _keyword(text: str, key: str) -> str | None:
     return found.group(1).strip().strip("'\"") if found else None
 
 
+def run_duration(setup) -> float | None:
+    """The simulated time [s] of a validation run, from its steering file."""
+    value = _keyword(setup.cas.read_text(encoding="utf-8"), "DURATION")
+    try:
+        return float(value) if value else None
+    except ValueError:
+        return None
+
+
 @dataclass
 class ValidationSetup:
     """The files of one validation run."""
@@ -344,17 +356,17 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
                           remedy="Build the case first (tab Preprocessing).")
     tag = slug(situation.name)
     model = Path(cfg.model_dir)
-    text = base.read_text(encoding="utf-8")
+    results = f"{Path(cfg.results_slf).stem}-validation-{tag}.slf"
+    # the start of the calibration runs: the built case, or with calibration.hotstart
+    # its continuation from the steady result
+    text = bayescal.situation_start(cfg, situation, f"validation-{tag}.cas", results)
     notes: list[str] = []
 
     # ---- the boundary values of the situation --------------------------------------
     text, total, notes, flow, elev = with_boundaries_of(
         cfg, situation, text, Path(cfg.calibration_dir) / FOLDER)
     text = bayescal._patch_cas(text, "TITLE", f"'{cfg.name} validation {tag}'")
-    results = f"{Path(cfg.results_slf).stem}-validation-{tag}.slf"
     text = bayescal._patch_cas(text, "RESULTS FILE", results)
-    if situation.duration:
-        text = bayescal._patch_cas(text, "DURATION", f"{float(situation.duration)}")
 
     # ---- the calibrated values -----------------------------------------------------
     zones = {name: value for name, value in parameters.items()

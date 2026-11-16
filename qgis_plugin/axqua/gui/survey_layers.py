@@ -1,6 +1,6 @@
-"""The layers of ``survey-plan.gpkg`` on the map: the access points the user sets, and the plan.
+"""The layers of ``survey-plan.gpkg`` on the map: the access points the user sets, the walkable areas the user draws, and the plan.
 
-The layer ``access_points`` belongs to the user. :func:`show_access` adds it to the project, limits its field ``role`` to the roles the library knows (a value map, so nobody has to spell one), and switches it to editing with the *Add point* tool, so that the next click on the map sets a point. :func:`commit_access` saves the edits before the library reads the file.
+The layer ``access_points`` belongs to the user. :func:`show_access` adds it to the project, limits its field ``role`` to the roles the library knows (a value map, so nobody has to spell one), and switches it to editing with the *Add point* tool, so that the next click on the map sets a point. :func:`commit_access` saves the edits before the library reads the file. The layer ``walkable_areas`` belongs to the user too: polygons of dry ground that can be walked on, because a plan walks on land only along the wetted edge otherwise. :func:`show_walkable` adds it below the plan and starts the tool that draws a polygon, :func:`commit_walkable` saves it.
 
 The other layers are the plan, which the library replaces as a whole. :func:`remove_plan` takes them off the map first (a layer that is open keeps the file busy on Windows), and :func:`show_plan` adds those that hold something, in a group of their own and with a style that says what the paper map says: the walk paths carry an arrow in their direction, the DGPS surveyor walks a dashed line, a vertical is a circle, a triangle or a square for one, two or three depths.
 """
@@ -16,6 +16,7 @@ DGPS_COLOR = "#33414e"
 INK = "#1f1f1e"
 DANGER = "#c62828"
 PURPLE = "#2e014b"
+WALKABLE_COLOR = "#7d9a55"
 WATER_COLORS = {"slow, shallow": "#f6d9a3", "slow, deep": "#d99a2b", "fast, shallow": "#b4d3ee", "fast, deep": "#3f7fbf"}
 DEPTH_MARKERS = {1: ("circle", "one depth"), 2: ("triangle", "two depths"), 3: ("square", "three depths")}
 EVENT_MARKERS = {"break": ("diamond", "#6b6a66"), "pressure adjustment": ("star", DANGER), "battery change": ("cross_fill", "#5b3fc4")}
@@ -210,20 +211,69 @@ def _default(expression: str):
     return QgsDefaultValue(expression)
 
 
-def commit_access(gpkg: str | Path) -> str:
-    """Save the edits of the access layer. Returns what went wrong, or an empty text."""
-    for layer in open_layers(gpkg).get(survey.ACCESS_LAYER) or []:
+def _commit(gpkg: str | Path, name: str, what: str) -> str:
+    for layer in open_layers(gpkg).get(name) or []:
         if layer.isEditable() and layer.isModified():
             if not layer.commitChanges():
-                return "; ".join(layer.commitErrors()) or "the edits of the layer of the access points could not be saved"
+                return "; ".join(layer.commitErrors()) or f"the edits of the layer of the {what} could not be saved"
         elif layer.isEditable():
             layer.rollBack()
     return ""
 
 
+def commit_access(gpkg: str | Path) -> str:
+    """Save the edits of the access layer. Returns what went wrong, or an empty text."""
+    return _commit(gpkg, survey.ACCESS_LAYER, "access points")
+
+
+# -- the walkable areas -------------------------------------------------------------
+def show_walkable(gpkg: str | Path, *, iface=None, edit: bool = True):
+    """Add the layer of the walkable areas to the map (once), below the plan, and switch it to editing with the tool that draws a polygon. Returns the layer, or None when the file has none."""
+    from qgis.core import QgsProject, QgsSingleSymbolRenderer, QgsVectorLayer
+
+    existing = open_layers(gpkg).get(survey.WALKABLE_LAYER) or []
+    layer = existing[0] if existing else QgsVectorLayer(survey.layer_uri(gpkg, survey.WALKABLE_LAYER), survey.WALKABLE_NAME, "ogr")
+    if not layer.isValid():
+        return None
+    if not existing:
+        layer.setRenderer(QgsSingleSymbolRenderer(_fill(WALKABLE_COLOR, opacity=0.45, outline="#4f6b2c")))
+        _no_form(layer)
+        QgsProject.instance().addMapLayer(layer, False)
+        _group().addLayer(layer)                    # at the bottom of the group: the plan is drawn over it
+    if edit:
+        if not layer.isEditable():
+            layer.startEditing()
+        if iface is not None:
+            try:
+                iface.setActiveLayer(layer)
+                iface.actionAddFeature().trigger()
+            except (AttributeError, RuntimeError):      # a QGIS without that tool, or without a window
+                pass
+    return layer
+
+
+def _no_form(layer) -> None:
+    """A drawn area is stored without the question for its attributes: its name says nothing to the plan."""
+    config = layer.editFormConfig()
+    try:
+        from qgis.core import Qgis
+
+        config.setSuppress(Qgis.AttributeFormSuppression.On)
+    except (ImportError, AttributeError, TypeError):    # a QGIS from before that enumeration
+        from qgis.core import QgsEditFormConfig
+
+        config.setSuppress(QgsEditFormConfig.SuppressOn)
+    layer.setEditFormConfig(config)
+
+
+def commit_walkable(gpkg: str | Path) -> str:
+    """Save the edits of the layer of the walkable areas. Returns what went wrong, or an empty text."""
+    return _commit(gpkg, survey.WALKABLE_LAYER, "walkable areas")
+
+
 # -- the plan -----------------------------------------------------------------------
 def remove_plan(gpkg: str | Path) -> int:
-    """Take the plan layers of *gpkg* off the map; the access layer stays. Returns how many were removed."""
+    """Take the plan layers of *gpkg* off the map; the access points and the walkable areas stay. Returns how many were removed."""
     from qgis.core import QgsProject
 
     plan = {name for name, _kind, _title in survey.PLAN_LAYERS}

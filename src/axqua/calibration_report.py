@@ -29,6 +29,7 @@ import json
 import logging
 import pickle
 import re
+import textwrap
 from pathlib import Path
 
 import numpy as np
@@ -189,6 +190,8 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
     rows = int(np.ceil(n / cols))
     fig, axes = plt.subplots(rows, cols, figsize=(6.4 * cols, 3.3 * rows + 0.9),
                              facecolor=SURFACE, squeeze=False)
+    # every title at the same height, above the longest verdict
+    lines = max(len(textwrap.wrap(entry["verdict"], 72)) or 1 for entry in parameters)
     for k, (ax, entry) in enumerate(zip(axes.flat, parameters)):
         zone = entry["zone"] is not None
         scale = 100.0 if zone else 1.0
@@ -222,8 +225,13 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
         ax.grid(axis="x", color=GRID, lw=0.8)
         ax.set_axisbelow(True)
         title = f"Zone {entry['zone']}" if zone else entry["name"]
-        ax.set_title(title, loc="left", fontsize=14, fontweight="bold", pad=18)
-        ax.text(0, 1.03, entry["verdict"], transform=ax.transAxes, fontsize=10,
+        # the verdict wraps within its panel (a long one ran into the next panel)
+        verdict = textwrap.wrap(entry["verdict"], 72) or [""]
+        ax.set_title(title, loc="left", fontsize=14, fontweight="bold",
+                     pad=18 + 13 * (lines - 1))
+        # blank lines below a shorter verdict keep its first line under the title
+        verdict += [""] * (lines - len(verdict))
+        ax.text(0, 1.03, "\n".join(verdict), transform=ax.transAxes, fontsize=10,
                 color=INK2, va="bottom")
     for ax in list(axes.flat)[n:]:
         ax.set_visible(False)
@@ -241,6 +249,8 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
 
 def plot_evidence(summary: dict, path: Path) -> Path | None:
     """Log Bayesian model evidence and relative entropy over the training runs."""
+    from matplotlib.ticker import MaxNLocator
+
     evidence = summary["evidence"]
     if not evidence["log_bme"]:
         return None
@@ -253,6 +263,7 @@ def plot_evidence(summary: dict, path: Path) -> Path | None:
         if values:
             ax.plot(runs[:len(values)], values, color=COLORS[0], lw=2, marker="o", ms=4)
         ax.set_xlabel("TELEMAC parameter sets")
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True, steps=[1, 2, 5, 10]))  # no run 32.5
         ax.set_title(label, loc="left", fontweight="bold")
         ax.grid(color=GRID, lw=0.8)
         for side in ("top", "right"):
