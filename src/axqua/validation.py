@@ -425,18 +425,23 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
         friction_path = model / f"{Path(table).stem}-validation-{tag}.tbl"
         friction_path.write_text(new_table, encoding="utf-8")
         text = bayescal._patch_cas(text, "FRICTION DATA FILE", friction_path.name)
-    if offset.VARIABLE in constants:
-        # the calibrated outflow level: the routine that adds it, in the folder the
+    level = [name for name in offset.VARIABLES if name in constants]
+    if level:
+        # the calibrated outflow level: the routine that sets it, in the folder the
         # calibration compiled it from (a case without user Fortran gets the folder),
-        # and a run long enough for the offset to rise and the reach to settle
+        # and a run long enough for the level to rise and the reach to settle. The
+        # routine of the slope solves the rating at the discharge of the situation.
         offset.check_folder(cfg)
         text = offset.with_fortran_folder(cfg, text)
         folder = _keyword(text, "FORTRAN FILE")
-        if not (model / folder / offset.FILE).is_file():
-            offset.write(model / folder)
+        routine = model / folder / offset.FILE
+        if not routine.is_file() or not re.search(
+                rf"^\s*{level[0]}\s*=", routine.read_text(encoding="utf-8"), flags=re.M):
+            offset.write_for(cfg, model / folder,
+                             "slope" if level[0] == offset.SLOPE_VARIABLE else "offset")
         text, short = offset.with_duration(text)
         if short is not None:
-            notes.append(f"DURATION {short:g} s ended before the outflow offset had risen "
+            notes.append(f"DURATION {short:g} s ended before the outflow level had risen "
                          f"over {offset.RAMP:g} s and the reach had settled; the run "
                          f"lasts {offset.MIN_DURATION:g} s")
     if constants:

@@ -417,6 +417,15 @@ CURATED: dict[str, dict[str, Any]] = {
              "situation. For a water level held up by a control that the terrain model "
              "does not resolve or that lies downstream of the model. Leave empty to "
              "keep the level of the rating."),
+    "calibration.outflow_slope": _c(
+        "Range of the energy slope at the outlet", "yaml", "-",
+        help="[min, max], for example [1.0e-5, 2.0e-3]: the calibration varies the "
+             "energy slope in the rating of the outflow section (rating_method: "
+             "section) in this range, in place of the bed slope of the reach, so that "
+             "every situation gets the level of one calibrated stage-discharge curve at "
+             "its discharge. For a water level held up by a control downstream of the "
+             "model (a backwater). Not together with the offset of the outflow level. "
+             "Leave empty to keep the level of the rating."),
     "openfoam.mode": _c("Free surface", "choice", choices=("vof", "rigid-lid")),
     "openfoam.outflow_boundary": _c(
         "Outflow boundary", "choice", choices=("level", "rating-curve"),

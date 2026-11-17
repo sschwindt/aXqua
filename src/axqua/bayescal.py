@@ -423,11 +423,11 @@ def calibration_hotstart_duration(cfg: Config) -> float:
     residence = volume / discharge
     settle = float(max(HOTSTART_MIN_DURATION,
                        np.ceil(HOTSTART_RESIDENCE_TIMES * residence / 100.0) * 100.0))
-    if cfg.calibration.outflow_offset is not None:
-        # the outflow offset rises over its ramp first, and the reach settles after it
-        from axqua.solvers.telemac.outflow_offset import RAMP
+    from axqua.solvers.telemac import outflow_offset
 
-        settle += RAMP
+    if outflow_offset.configured(cfg):
+        # the outflow level rises over its ramp first, and the reach settles after it
+        settle += outflow_offset.RAMP
     return settle
 
 
@@ -553,15 +553,16 @@ def ready_outflow_offset(cfg: Config, parameters, steering_files, *, model_dir=N
                          copy: bool = False, settle: bool = True) -> list[str]:
     """Prepare the runs of a calibration of the outflow level, when *parameters* hold it.
 
-    Writes ``user_sl.f`` (offset 0) into ``user_fortran`` of *model_dir* (the case's
-    model folder by default), names that folder in each of *steering_files* (names in
+    Writes ``user_sl.f`` (offset 0, or the reach slope for the energy slope at the
+    outlet) into ``user_fortran`` of *model_dir* (the case's model folder by default),
+    names that folder in each of *steering_files* (names in
     that folder) and, with *settle*, lengthens a run that would end before the offset
     has risen and the reach has settled (:mod:`axqua.solvers.telemac.outflow_offset`).
     With *copy* the one steering file is left as it is and the runs get
     :data:`CALIBRATION_OFFSET_CAS`: the built case and a control file of the user's
     are never changed. Call it before :func:`case_as_built` takes its copy, so that a
-    calibration hands the routine back with the offset 0. Returns the names of the
-    steering files the runs use, or ``[]`` when the offset is not calibrated.
+    calibration hands the routine back at its neutral value. Returns the names of the
+    steering files the runs use, or ``[]`` when the outflow level is not calibrated.
     """
     from axqua.solvers.telemac import outflow_offset
 
@@ -586,8 +587,10 @@ def ready_outflow_offset(cfg: Config, parameters, steering_files, *, model_dir=N
         if copy or new != text:
             (folder / name).write_text(new)
         used.append(name)
-    print(f"outflow level offset {cfg.calibration.outflow_offset} m -> {path}"
-          + (f" (runs: {', '.join(used)})" if copy else ""))
+    what = (f"outflow level offset {cfg.calibration.outflow_offset} m"
+            if outflow_offset.kind(cfg) == "offset" else
+            f"energy slope at the outlet {cfg.calibration.outflow_slope}")
+    print(f"{what} -> {path}" + (f" (runs: {', '.join(used)})" if copy else ""))
     return used
 
 
@@ -601,9 +604,9 @@ def _rewritten_by_the_driver(cfg: Config) -> list[str]:
     names = [cfg.calibration.control_file or cfg.cas_file, cfg.friction_tbl]
     if cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran":
         names.append("user_fortran/user_rain.f")
-    if getattr(cfg.calibration, "outflow_offset", None) is not None:
-        from axqua.solvers.telemac import outflow_offset
+    from axqua.solvers.telemac import outflow_offset
 
+    if outflow_offset.configured(cfg):
         names.append(f"{outflow_offset.FOLDER}/{outflow_offset.FILE}")
     if cfg.morphodynamics.enabled:
         names.append(cfg.gaia_cas)

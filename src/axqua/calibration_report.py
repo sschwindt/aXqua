@@ -104,12 +104,17 @@ def _verdict(zone_info: dict | None, flags, reduction) -> str:
 
 
 #: Title and axis label of parameters that are not a roughness zone.
-LABELS = {"f.OUTFLOW_OFFSET": ("Outflow level", "offset above the rating level (m)")}
+LABELS = {"f.OUTFLOW_OFFSET": ("Outflow level", "offset above the rating level (m)"),
+          "f.OUTFLOW_LOG_SLOPE": ("Energy slope at the outlet",
+                                  "log10 of the energy slope of the outflow section (-)")}
 
 
 def _value_text(value: float, zone: bool, name: str = "") -> str:
-    if name in LABELS:
+    if name == "f.OUTFLOW_OFFSET":
         return f"{value:+.2f} m"
+    if name == "f.OUTFLOW_LOG_SLOPE":
+        # the parameter is log10 of the slope; the slope itself is what a reader knows
+        return f"S = {10.0 ** value:.2g}"
     if not zone:
         return f"{value:.4g}"
     cm = 100 * value

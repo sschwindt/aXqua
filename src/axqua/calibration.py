@@ -295,7 +295,7 @@ def merged_parameters(cfg: Config) -> list:
     < the roughness table's ``zone<N>`` rows (``geodata.roughness_table`` with the
     bounds schema) < the ``parameters`` tab of the filled calibration-target
     template, and ``calibration.outflow_offset`` as the parameter
-    ``f.OUTFLOW_OFFSET``. The roughness table outranks the config because it is where the
+    ``f.OUTFLOW_OFFSET`` or ``calibration.outflow_slope`` as ``f.OUTFLOW_LOG_SLOPE``. The roughness table outranks the config because it is where the
     zonation itself is defined - adding a zone there must not require editing the
     parameter list in two files - while the spreadsheet stays the live override.
     """
@@ -341,7 +341,7 @@ def telemac_parameters(cfg: Config) -> list:
 
 def fortran_file_of(cfg: Config, names) -> str | None:
     """The file of the user Fortran folder HydroBayesCal rewrites for the ``f.``
-    parameters *names*: ``user_sl.f`` for the outflow offset
+    parameters *names*: ``user_sl.f`` for the outflow level (offset or slope)
     (:mod:`axqua.solvers.telemac.outflow_offset`), ``user_rain.f`` for a gain-lose
     reach, else None."""
     from axqua.solvers.telemac import outflow_offset

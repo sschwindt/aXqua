@@ -84,6 +84,10 @@ def test_a_run_lasts_the_residence_time_of_the_reach(cfg):
     # review of 2026-11-16: a run that calibrates the outflow level lasts its ramp longer
     cfg.calibration.outflow_offset = [0.0, 2.0]
     assert bayescal.calibration_hotstart_duration(cfg) == pytest.approx(expected + 600.0)
+    # and so does one that calibrates the energy slope at the outlet
+    cfg.calibration.outflow_offset = None
+    cfg.calibration.outflow_slope = [1.0e-5, 2.0e-3]
+    assert bayescal.calibration_hotstart_duration(cfg) == pytest.approx(expected + 600.0)
 
 
 def test_a_given_duration_wins(cfg):

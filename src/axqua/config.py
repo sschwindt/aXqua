@@ -1817,6 +1817,13 @@ class Calibration:
     # whose water level is held up by a control the terrain model does not resolve or
     # that lies downstream of the model (axqua.solvers.telemac.outflow_offset).
     outflow_offset: list[float] | None = None
+    # The outflow level as a calibration parameter through the rating of the outflow
+    # section (rating_method: section): a range [min, max] of the energy slope at the
+    # outlet [-], in place of the bed slope of the reach that the rating uses. One slope
+    # for all situations gives one stage-discharge curve; HydroBayesCal samples its
+    # log10. For a backwater from a control downstream of the model. Not together with
+    # outflow_offset (axqua.solvers.telemac.outflow_offset).
+    outflow_slope: list[float] | None = None
 
     @classmethod
     def from_dict(cls, d: dict[str, Any], cfg_dir: Path | None = None) -> "Calibration":

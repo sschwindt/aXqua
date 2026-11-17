@@ -197,7 +197,7 @@ def test_a_short_validation_run_lasts_long_enough_for_the_offset(built):  # noqa
     situation = ValidationSituation(name="v", prescribed_flowrate=2.4, prescribed_elevation=100.0, duration=400.0)
     setup = validation.build(built, situation, {"f.OUTFLOW_OFFSET": 1.31})
     assert "DURATION : 1200" in setup.cas.read_text()
-    assert any("ended before the outflow offset" in note for note in setup.notes)
+    assert any("ended before the outflow level" in note for note in setup.notes)
 
 
 def test_the_validation_runs_with_the_calibrated_offset(built):  # noqa: F811
@@ -209,3 +209,147 @@ def test_the_validation_runs_with_the_calibrated_offset(built):  # noqa: F811
     assert "      OUTFLOW_OFFSET = 1.31\n" in copied.read_text()
     original = built.model_path("user_fortran") / outflow_offset.FILE
     assert "OUTFLOW_OFFSET = 0D0" in original.read_text()      # the case keeps 0
+
+
+# --------------------------------------------------------------------------- #
+# the energy slope at the outlet (calibration.outflow_slope)
+# --------------------------------------------------------------------------- #
+def _section() -> outflow_offset.Section:
+    """A trapezoidal channel 20 m wide at the bottom with banks 1:2, ks 0.1 m, slope 0.002."""
+    import numpy as np
+
+    station = np.linspace(0.0, 40.0, 121)
+    bed = np.clip(np.abs(station - 20.0) - 10.0, 0.0, None) / 2.0 + 100.0
+    return outflow_offset.Section(station=station, bed=bed,
+                                  ks=np.full(station.shape, 0.1), slope=0.002)
+
+
+@pytest.fixture
+def sloped(fake_case, monkeypatch):
+    """The fake case with a section rating at its outlet and the energy slope calibrated."""
+    fake_case.boundaries.outflow_condition = "stage_discharge"
+    fake_case.boundaries.rating_method = "section"
+    fake_case.calibration.outflow_slope = [1.0e-5, 2.0e-3]
+    monkeypatch.setattr(outflow_offset, "section_of", lambda cfg: _section())
+    return fake_case
+
+
+def test_the_slope_range_becomes_a_parameter_in_log10(fake_case, tmp_path):
+    import math
+
+    assert Calibration.from_dict({}).outflow_slope is None
+    fake_case.calibration.outflow_slope = [1.0e-5, 2.0e-3]
+    dump_config(fake_case, tmp_path / "again.axq-case")
+    again = load_config(tmp_path / "again.axq-case")
+    assert again.calibration.outflow_slope == [1.0e-5, 2.0e-3]
+    (slope,) = [p for p in merged_parameters(again) if p.name == "f.OUTFLOW_LOG_SLOPE"]
+    assert (slope.min, slope.max) == pytest.approx((-5.0, math.log10(2.0e-3)))
+    assert outflow_offset.kind(again) == "slope" and outflow_offset.configured(again)
+
+
+@pytest.mark.parametrize("given", [[0.0, 1.0e-3], [-1.0e-4, 1.0e-3], [2.0e-3, 1.0e-5]])
+def test_a_slope_range_that_is_not_positive_and_increasing_is_refused(fake_case, given):
+    fake_case.calibration.outflow_slope = given
+    with pytest.raises(ConfigError, match="outflow_slope"):
+        outflow_offset.parameter(fake_case)
+
+
+def test_an_offset_and_a_slope_together_are_refused(fake_case):
+    fake_case.calibration.outflow_offset = [0.0, 2.0]
+    fake_case.calibration.outflow_slope = [1.0e-5, 2.0e-3]
+    with pytest.raises(ConfigError, match="both move the outflow level"):
+        merged_parameters(fake_case)
+
+
+def test_the_slope_needs_the_rating_of_the_outflow_section(sloped):
+    outflow_offset.check(sloped)
+    sloped.boundaries.rating_method = "trapezoid"
+    with pytest.raises(ConfigError, match="'trapezoid'"):
+        outflow_offset.check(sloped)
+    sloped.boundaries.rating_method = "section"
+    sloped.boundaries.outflow_condition = "elevation"
+    with pytest.raises(ConfigError, match="fixed level"):
+        outflow_offset.check(sloped)
+
+
+def test_the_section_reproduces_the_rating_and_finds_the_slope_of_a_level(tmp_path):
+    import pandas as pd
+
+    from axqua.rating import section_rating
+
+    section = _section()
+    path = section_rating(tmp_path / "r.csv", [5.0, 20.0], station=section.station,
+                          bed=section.bed, ks=section.ks, slope=section.slope)
+    rated = pd.read_csv(path)["WSE"].tolist()
+    assert [section.stage(5.0), section.stage(20.0)] == pytest.approx(rated, abs=1e-4)
+    # a backwater: the level 0.8 m higher needs a far smaller energy slope
+    level = section.stage(20.0) + 0.8
+    slope = section.slope_for(20.0, level)
+    assert slope < section.slope / 10
+    assert section.stage(20.0, slope) == pytest.approx(level, abs=1e-6)
+
+
+def test_the_slope_routine_fits_the_columns_and_hydrobayescal_finds_one_line():
+    import math
+
+    section = _section()
+    text = outflow_offset.slope_source(section)
+    code = [line for line in text.splitlines() if not line.startswith("!")]
+    assert max(len(line) for line in code) <= 72
+    hits = [line for line in text.splitlines()
+            if _keyword_of(line) == outflow_offset.SLOPE_VARIABLE]
+    assert len(hits) == 1
+    # neutral: the slope of the reach, at which the level stays that of the rating
+    assert float(hits[0].split("=")[1].replace("D", "E")) == pytest.approx(
+        math.log10(section.slope), abs=1e-9)
+    assert text.startswith(outflow_offset.MARK) and "SUBROUTINE USER_SL" in text
+    # every value of the section, in DATA statements of few continuation lines
+    assert text.count("DATA AXQ_ZB(") == math.ceil(121 / 45)
+    values = "".join(line[8:] for line in text.splitlines() if line.startswith("     &  "))
+    assert values.count("D") == 3 * 121 + 120
+    for statement in text.split("      DATA ")[1:]:
+        assert statement.split("/\n")[0].count("\n     &") <= 19
+    # the discharge of the run and the ramp
+    assert "DEBIT(AXQ_K)" in text and "MIN(1.D0,MAX(0.D0,AT/OUTFLOW_RAMP))" in text
+
+
+def test_a_slope_calibration_prepares_the_routine_and_both_configurations(sloped, tmp_path):
+    cfg = sloped
+    cfg.model_path("steady2d-a.cas").write_text("TITLE : 'a'\nDURATION : 3000.\n")
+    assert bayescal.ready_outflow_offset(cfg, merged_parameters(cfg),
+                                         ["steady2d-a.cas"]) == ["steady2d-a.cas"]
+    routine = (cfg.model_path("user_fortran") / outflow_offset.FILE).read_text()
+    assert routine == outflow_offset.slope_source(_section())
+    assert "FORTRAN FILE : 'user_fortran'" in cfg.model_path("steady2d-a.cas").read_text()
+    assert "user_fortran/user_sl.f" in bayescal._rewritten_by_the_driver(cfg)
+    text = Path(emit_hbc_config(cfg, None)).read_text()
+    assert "'fortran_file': 'user_sl.f'" in text and "'f.OUTFLOW_LOG_SLOPE'" in text
+    flows = [bayescal.FlowSpec(name="a", discharge=1.0, kind="csv", values=tmp_path / "a.csv")]
+    path = bayescal.emit_multiflow_config(cfg, tmp_path, cfg.model_dir, flows,
+                                          {"a": tmp_path / "a.csv"}, n_cpus=1,
+                                          init_runs=4, max_runs=6)
+    assert "'fortran_file': 'user_sl.f'" in Path(path).read_text()
+
+
+def test_the_validation_solves_the_rating_at_the_calibrated_slope(built, monkeypatch):  # noqa: F811
+    monkeypatch.setattr(outflow_offset, "section_of", lambda cfg: _section())
+    situation = ValidationSituation(name="v", prescribed_flowrate=2.4,
+                                    prescribed_elevation=100.0)
+    setup = validation.build(built, situation, {"f.OUTFLOW_LOG_SLOPE": -4.4})
+    assert "FORTRAN FILE : 'user_fortran-validation-v'" in setup.cas.read_text()
+    copied = (built.model_path("user_fortran-validation-v") / outflow_offset.FILE).read_text()
+    assert "      OUTFLOW_LOG_SLOPE = -4.4\n" in copied and "AXQ_STAGE" in copied
+    # an offset routine the folder held is replaced by the routine of the slope
+    original = built.model_path("user_fortran") / outflow_offset.FILE
+    original.write_text(outflow_offset.source(0.0))
+    validation.build(built, situation, {"f.OUTFLOW_LOG_SLOPE": -4.0})
+    copied = (built.model_path("user_fortran-validation-v") / outflow_offset.FILE).read_text()
+    assert "      OUTFLOW_LOG_SLOPE = -4\n" in copied
+
+
+def test_the_report_shows_the_slope_itself():
+    from axqua.calibration_report import LABELS, _value_text
+
+    assert _value_text(-4.4255, False, "f.OUTFLOW_LOG_SLOPE") == "S = 3.8e-05"
+    assert LABELS["f.OUTFLOW_LOG_SLOPE"][0] == "Energy slope at the outlet"
+    assert _value_text(1.31, False, "f.OUTFLOW_OFFSET") == "+1.31 m"
