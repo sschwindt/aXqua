@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/core/schema_meta.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=ec0dc317"></script>
+      <script src="../../../_static/documentation_options.js?v=4875470e"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -770,6 +770,15 @@
              <span class="s2">"situation. For a water level held up by a control that the terrain model "</span>
              <span class="s2">"does not resolve or that lies downstream of the model. Leave empty to "</span>
              <span class="s2">"keep the level of the rating."</span><span class="p">),</span>
+    <span class="s2">"calibration.outflow_slope"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span>
+        <span class="s2">"Range of the energy slope at the outlet"</span><span class="p">,</span> <span class="s2">"yaml"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">"[min, max], for example [1.0e-5, 2.0e-3]: the calibration varies the "</span>
+             <span class="s2">"energy slope in the rating of the outflow section (rating_method: "</span>
+             <span class="s2">"section) in this range, in place of the bed slope of the reach, so that "</span>
+             <span class="s2">"every situation gets the level of one calibrated stage-discharge curve at "</span>
+             <span class="s2">"its discharge. For a water level held up by a control downstream of the "</span>
+             <span class="s2">"model (a backwater). Not together with the offset of the outflow level. "</span>
+             <span class="s2">"Leave empty to keep the level of the rating."</span><span class="p">),</span>
     <span class="s2">"openfoam.mode"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span><span class="s2">"Free surface"</span><span class="p">,</span> <span class="s2">"choice"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"vof"</span><span class="p">,</span> <span class="s2">"rigid-lid"</span><span class="p">)),</span>
     <span class="s2">"openfoam.outflow_boundary"</span><span class="p">:</span> <span class="n">_c</span><span class="p">(</span>
         <span class="s2">"Outflow boundary"</span><span class="p">,</span> <span class="s2">"choice"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"level"</span><span class="p">,</span> <span class="s2">"rating-curve"</span><span class="p">),</span>

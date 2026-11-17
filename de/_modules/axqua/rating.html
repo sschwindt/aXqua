@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/rating.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=ec0dc317"></script>
+      <script src="../../_static/documentation_options.js?v=4875470e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -839,6 +839,63 @@
 
 
 
+<div class="viewcode-block" id="reach_slope">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.rating.reach_slope">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reach_slope</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The bed slope of the reach that the section rating uses: a linear fit of the DEM along ``geodata.channel_centerline``."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="p">)</span> <span class="k">as</span> <span class="n">dem</span><span class="p">:</span>
+        <span class="n">cl</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">channel_centerline</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">cline</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged</span> <span class="k">if</span> <span class="n">merged</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"LineString"</span>
+                 <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">merged</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
+        <span class="n">sc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">cline</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+        <span class="n">cp</span> <span class="o">=</span> <span class="p">[</span><span class="n">cline</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">sc</span><span class="p">]</span>
+        <span class="n">zc</span> <span class="o">=</span> <span class="n">_sample_dem</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">cp</span><span class="p">)</span>
+        <span class="c1"># nodata, not just NaN: rasterio hands back the raster's fill value, and</span>
+        <span class="c1"># -9999 is perfectly finite. Fitting a slope through it is not a small</span>
+        <span class="c1"># error - on munich-vsf, whose centerline crosses walls the bed rasters</span>
+        <span class="c1"># leave empty, it returned 44.5 instead of 0.053, and a slope three orders</span>
+        <span class="c1"># of magnitude too steep gives a normal depth of 29 mm at the outlet.</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">_valid</span><span class="p">(</span><span class="n">zc</span><span class="p">,</span> <span class="n">dem</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">good</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"geodata.channel_centerline samples no bed elevation in "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, so the reach slope cannot be "</span>
+                <span class="s2">"inferred. Check that the centerline lies over the DEM's covered "</span>
+                <span class="s2">"area, or pass an explicit slope to "</span>
+                <span class="s2">"synthesize_outflow_rating_from_section()."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">sc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">zc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span></div>
+
+
+
+<div class="viewcode-block" id="outflow_section">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.rating.outflow_section">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">outflow_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The outflow cross-section the section rating integrates: ``(station, bed, ks, slope)``, sorted by station.</span>
+
+<span class="sd">    The bed along the ``outflow`` liquid-boundary line, the ks of the roughness zones (:func:`line_section`) and the reach slope (:func:`reach_slope`, unless *slope* is given).</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="n">outflow</span> <span class="o">=</span> <span class="n">outflow_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">outflow</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">!=</span> <span class="s2">"LineString"</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">slope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">slope</span> <span class="o">=</span> <span class="n">reach_slope</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">_pts</span> <span class="o">=</span> <span class="n">line_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
+    <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span> <span class="o">=</span> <span class="n">_sorted_section</span><span class="p">(</span><span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">slope</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="synthesize_outflow_rating_from_section">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.rating.synthesize_outflow_rating_from_section">[Doku]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">synthesize_outflow_rating_from_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -847,43 +904,9 @@
 
 <span class="sd">    Samples the bed along the ``outflow`` liquid-boundary line straight out of ``geodata.dem_initial``, picks up the Nikuradse ``ks`` of the roughness zone each sample falls in (``geodata.roughness_zones`` + ``roughness_table``; the lateral ``friction.boundary_*`` roughness otherwise), takes the reach slope from a linear fit of the DEM along ``geodata.channel_centerline``, and inverts the section conveyance with :func:`section_rating`.</span>
 <span class="sd">    """</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
 
-    <span class="n">outflow</span> <span class="o">=</span> <span class="n">outflow_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">outflow</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">!=</span> <span class="s2">"LineString"</span><span class="p">:</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">slope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="p">)</span> <span class="k">as</span> <span class="n">dem</span><span class="p">:</span>
-            <span class="n">cl</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">channel_centerline</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
-                <span class="n">cl</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
-            <span class="n">merged</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-            <span class="n">cline</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged</span> <span class="k">if</span> <span class="n">merged</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"LineString"</span>
-                     <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">merged</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
-            <span class="n">sc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">cline</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
-            <span class="n">cp</span> <span class="o">=</span> <span class="p">[</span><span class="n">cline</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">sc</span><span class="p">]</span>
-            <span class="n">zc</span> <span class="o">=</span> <span class="n">_sample_dem</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">cp</span><span class="p">)</span>
-            <span class="c1"># nodata, not just NaN: rasterio hands back the raster's fill value, and</span>
-            <span class="c1"># -9999 is perfectly finite. Fitting a slope through it is not a small</span>
-            <span class="c1"># error - on munich-vsf, whose centerline crosses walls the bed rasters</span>
-            <span class="c1"># leave empty, it returned 44.5 instead of 0.053, and a slope three orders</span>
-            <span class="c1"># of magnitude too steep gives a normal depth of 29 mm at the outlet.</span>
-            <span class="n">good</span> <span class="o">=</span> <span class="n">_valid</span><span class="p">(</span><span class="n">zc</span><span class="p">,</span> <span class="n">dem</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">good</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">"geodata.channel_centerline samples no bed elevation in "</span>
-                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, so the reach slope cannot be "</span>
-                    <span class="s2">"inferred. Check that the centerline lies over the DEM's covered "</span>
-                    <span class="s2">"area, or pass an explicit slope to "</span>
-                    <span class="s2">"synthesize_outflow_rating_from_section()."</span><span class="p">)</span>
-            <span class="n">slope</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">sc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">zc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">_pts</span> <span class="o">=</span> <span class="n">line_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
-
+    <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">slope</span> <span class="o">=</span> <span class="n">outflow_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="n">slope</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"outflow section: </span><span class="si">%.2f</span><span class="s2"> m wide, bed </span><span class="si">%.3f</span><span class="s2">..</span><span class="si">%.3f</span><span class="s2"> m, ks </span><span class="si">%.3f</span><span class="s2">..</span><span class="si">%.3f</span><span class="s2"> m, "</span>
              <span class="s2">"reach slope </span><span class="si">%.5f</span><span class="s2">"</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">station</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">bed</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span>

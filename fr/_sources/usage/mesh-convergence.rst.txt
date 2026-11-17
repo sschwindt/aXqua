@@ -5,7 +5,7 @@ Mesh convergence
 
 Every numerical result depends to some degree on the mesh on which it was computed. A mesh convergence study measures this dependence: it repeats the same simulation on meshes of different resolution and compares the results. The study answers two questions. How large is the uncertainty of the results that stems from the mesh? And which is the coarsest, and therefore fastest, mesh that is accurate enough?
 
-.. admonition:: Watch the TELEMAC-2D dry run setup on YouTube
+.. admonition:: Watch the mesh convergence study on YouTube
    :class: tip dropdown
 
    .. raw:: html

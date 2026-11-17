@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/bayescal.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=9172181d"></script>
+      <script src="../../_static/documentation_options.js?v=350a9c04"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -681,6 +681,8 @@
 
 <span class="c1">#: The steering file of calibration runs that start from the steady result.</span>
 <span class="n">CALIBRATION_HOTSTART_CAS</span> <span class="o">=</span> <span class="s2">"calibration2d.cas"</span>
+<span class="c1">#: The steering file of calibration runs that apply the outflow offset, when they would otherwise run the built steady case or a control file of the user's: neither is changed.</span>
+<span class="n">CALIBRATION_OFFSET_CAS</span> <span class="o">=</span> <span class="s2">"calibration2d-offset.cas"</span>
 <span class="c1">#: Simulated time of such a run, in residence times of the reach (wetted volume over</span>
 <span class="c1">#: discharge). Measured on the finest Inn KB15 mesh (2026-11-08; 133,500 m3 at</span>
 <span class="c1">#: 54.3 m3/s, a residence time of 2,460 s), continuing from the steady result with</span>
@@ -761,7 +763,7 @@
 
 <span class="sd">    ``calibration.hotstart_duration`` when given. Otherwise the run lasts</span>
 <span class="sd">    :data:`HOTSTART_RESIDENCE_TIMES` residence times of the reach, rounded up to</span>
-<span class="sd">    100 s: the residence time is the volume of water in the converged result over the</span>
+<span class="sd">    100 s, plus the ramp of the outflow offset when the case calibrates it: the residence time is the volume of water in the converged result over the</span>
 <span class="sd">    discharge, the time in which the reach exchanges its water once. A changed</span>
 <span class="sd">    roughness changes the stored volume, and the flow has settled once that change</span>
 <span class="sd">    has passed the outflow.</span>
@@ -794,8 +796,14 @@
                         <span class="o">-</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]))</span>
     <span class="n">volume</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">area</span> <span class="o">*</span> <span class="n">h</span><span class="p">[</span><span class="n">ikle</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
     <span class="n">residence</span> <span class="o">=</span> <span class="n">volume</span> <span class="o">/</span> <span class="n">discharge</span>
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">HOTSTART_MIN_DURATION</span><span class="p">,</span>
-                     <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">HOTSTART_RESIDENCE_TIMES</span> <span class="o">*</span> <span class="n">residence</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">))</span></div>
+    <span class="n">settle</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">HOTSTART_MIN_DURATION</span><span class="p">,</span>
+                       <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">HOTSTART_RESIDENCE_TIMES</span> <span class="o">*</span> <span class="n">residence</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">))</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
+
+    <span class="k">if</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">configured</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="c1"># the outflow level rises over its ramp first, and the reach settles after it</span>
+        <span class="n">settle</span> <span class="o">+=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">RAMP</span>
+    <span class="k">return</span> <span class="n">settle</span></div>
 
 
 
@@ -889,13 +897,22 @@
               <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table</span><span class="p">[</span><span class="s1">'SCALAR VELOCITY_DATA'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">ensure_graphic_output</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">))</span>
+    <span class="n">written</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">hotstart</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"calibration.hotstart is ignored: calibration.control_file "</span>
                         <span class="s2">"names the steering file (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span> <span class="o">=</span> <span class="n">write_calibration_hotstart</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
-    <span class="n">ready_outflow_offset</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">])</span>
+            <span class="n">written</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># the built case and a control file of the user's are not changed: the runs get a copy</span>
+    <span class="n">used</span> <span class="o">=</span> <span class="n">ready_outflow_offset</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">],</span>
+                                <span class="n">copy</span><span class="o">=</span><span class="ow">not</span> <span class="n">written</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">used</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span> <span class="o">=</span> <span class="n">used</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">prepare_only</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  a calibration run by hand leaves its last offset in "</span>
+                  <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s1">'user_fortran'</span><span class="p">)</span><span class="si">}</span><span class="s2">/user_sl.f; aXqua's own runs put 0 back"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">only_bal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">csv</span><span class="p">,</span> <span class="n">complete_bal_mode</span><span class="o">=</span><span class="n">complete</span><span class="p">,</span>
@@ -916,28 +933,49 @@
 
 <div class="viewcode-block" id="ready_outflow_offset">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.ready_outflow_offset">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ready_outflow_offset</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">steering_files</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Prepare the case for a calibration of the outflow level, when *parameters* hold it.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ready_outflow_offset</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">steering_files</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">model_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">settle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Prepare the runs of a calibration of the outflow level, when *parameters* hold it.</span>
 
-<span class="sd">    Writes ``user_sl.f`` (offset 0) into the user Fortran folder and names that folder</span>
-<span class="sd">    in each of *steering_files* (names in the model folder) that does not name it yet</span>
-<span class="sd">    (:mod:`axqua.solvers.telemac.outflow_offset`). With the offset 0 the routine</span>
-<span class="sd">    changes nothing, so a steady run of the case that compiles it afterwards keeps the</span>
-<span class="sd">    level of the rating. Returns whether the offset is calibrated.</span>
+<span class="sd">    Writes ``user_sl.f`` (offset 0, or the reach slope for the energy slope at the</span>
+<span class="sd">    outlet) into ``user_fortran`` of *model_dir* (the case's model folder by default),</span>
+<span class="sd">    names that folder in each of *steering_files* (names in</span>
+<span class="sd">    that folder) and, with *settle*, lengthens a run that would end before the offset</span>
+<span class="sd">    has risen and the reach has settled (:mod:`axqua.solvers.telemac.outflow_offset`).</span>
+<span class="sd">    With *copy* the one steering file is left as it is and the runs get</span>
+<span class="sd">    :data:`CALIBRATION_OFFSET_CAS`: the built case and a control file of the user's</span>
+<span class="sd">    are never changed. Call it before :func:`case_as_built` takes its copy, so that a</span>
+<span class="sd">    calibration hands the routine back at its neutral value. Returns the names of the</span>
+<span class="sd">    steering files the runs use, or ``[]`` when the outflow level is not calibrated.</span>
 <span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">calibrated</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">copy</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">steering_files</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"a copy is made of one steering file"</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_dir</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+    <span class="n">used</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">steering_files</span><span class="p">:</span>
-        <span class="n">cas</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">cas</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">folder</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">with_fortran_folder</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">new</span> <span class="o">!=</span> <span class="n">text</span><span class="p">:</span>
-            <span class="n">cas</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"outflow level offset </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">outflow_offset</span><span class="si">}</span><span class="s2"> m -&gt; </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="k">return</span> <span class="kc">True</span></div>
+        <span class="k">if</span> <span class="n">settle</span><span class="p">:</span>
+            <span class="n">new</span><span class="p">,</span> <span class="n">short</span> <span class="o">=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">with_duration</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">short</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: DURATION </span><span class="si">%g</span><span class="s2"> s ends before the outflow offset has risen "</span>
+                            <span class="s2">"over </span><span class="si">%g</span><span class="s2"> s and the reach has settled; the runs last </span><span class="si">%g</span><span class="s2"> s"</span><span class="p">,</span>
+                            <span class="n">name</span><span class="p">,</span> <span class="n">short</span><span class="p">,</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">RAMP</span><span class="p">,</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">MIN_DURATION</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">copy</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">CALIBRATION_OFFSET_CAS</span>
+        <span class="k">if</span> <span class="n">copy</span> <span class="ow">or</span> <span class="n">new</span> <span class="o">!=</span> <span class="n">text</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">folder</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="n">used</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">what</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"outflow level offset </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">outflow_offset</span><span class="si">}</span><span class="s2"> m"</span>
+            <span class="k">if</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">kind</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"offset"</span> <span class="k">else</span>
+            <span class="sa">f</span><span class="s2">"energy slope at the outlet </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">outflow_slope</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" (runs: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">used</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">copy</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">used</span></div>
 
 
 
@@ -951,10 +989,10 @@
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">control_file</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">friction_tbl</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">implementation</span> <span class="o">==</span> <span class="s2">"fortran"</span><span class="p">:</span>
         <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"user_fortran/user_rain.f"</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="p">,</span> <span class="s2">"outflow_offset"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
 
-        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">user_fortran_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">outflow_offset</span><span class="o">.</span><span class="n">FILE</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">configured</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">outflow_offset</span><span class="o">.</span><span class="n">FOLDER</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">outflow_offset</span><span class="o">.</span><span class="n">FILE</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">morphodynamics</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
         <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">gaia_cas</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">name</span><span class="p">]</span>
@@ -1032,6 +1070,16 @@
     <span class="n">keep</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration_path</span><span class="p">(</span><span class="n">AS_BUILT</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">keep</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
         <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># The routine of the outflow offset is no file of the build, so the build does not</span>
+    <span class="c1"># write it anew: it goes back the way the calibration found it, or a killed</span>
+    <span class="c1"># calibration would leave its last sampled offset in the folder of the case.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
+
+    <span class="n">routine</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">outflow_offset</span><span class="o">.</span><span class="n">FOLDER</span><span class="p">)</span> <span class="o">/</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">FILE</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">keep</span> <span class="o">/</span> <span class="n">routine</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">routine</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">keep</span> <span class="o">/</span> <span class="n">routine</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
     <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">keep</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -1576,6 +1624,12 @@
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flows</span><span class="p">:</span>
         <span class="n">write_flow_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">base_cas</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">smoke</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">dest_dir</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
                        <span class="n">listing</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">graphic</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="c1"># the outflow offset in the copied model folder; the plumbing test keeps its 30 s</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">telemac_parameters</span>
+
+    <span class="n">ready_outflow_offset</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">),</span>
+                         <span class="p">[</span><span class="sa">f</span><span class="s2">"steady2d-</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.cas"</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flows</span><span class="p">],</span> <span class="n">model_dir</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                         <span class="n">settle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit_multiflow_config</span><span class="p">(</span>
         <span class="n">cfg</span><span class="p">,</span> <span class="n">smoke</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">flows</span><span class="p">,</span> <span class="n">csv_paths</span><span class="p">,</span> <span class="n">n_cpus</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">init_runs</span><span class="o">=</span><span class="n">init_runs</span><span class="p">,</span>
         <span class="n">max_runs</span><span class="o">=</span><span class="n">init_runs</span><span class="p">,</span> <span class="n">complete_bal_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1638,6 +1692,10 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">"per-flow steering files:"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flows</span><span class="p">:</span>
         <span class="n">write_flow_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">base_cas</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">multiflow_dir</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">telemac_parameters</span>
+
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">ready_outflow_offset</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"steady2d-</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.cas"</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flows</span><span class="p">])</span>
 
     <span class="n">resume</span> <span class="o">=</span> <span class="n">launch_mode</span> <span class="o">==</span> <span class="s2">"resume"</span>
     <span class="k">if</span> <span class="n">resume</span><span class="p">:</span>
@@ -1649,7 +1707,7 @@
     <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit_multiflow_config</span><span class="p">(</span>
         <span class="n">cfg</span><span class="p">,</span> <span class="n">multiflow_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">flows</span><span class="p">,</span> <span class="n">csv_paths</span><span class="p">,</span>
         <span class="n">n_cpus</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span><span class="p">,</span> <span class="n">init_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">init_runs</span><span class="p">,</span>
-        <span class="n">max_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
+        <span class="n">max_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"multiflow config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span>
           <span class="o">+</span> <span class="p">(</span><span class="s2">" (only_bal_mode: reusing completed initial designs)"</span> <span class="k">if</span> <span class="n">resume</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
     <span class="n">driver</span> <span class="o">=</span> <span class="n">stage_driver</span><span class="p">(</span><span class="n">multiflow_dir</span><span class="p">,</span> <span class="s2">"bal_telemac_multiflow.py"</span><span class="p">,</span>

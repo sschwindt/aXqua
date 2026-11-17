@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/de/code/workflow.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ec0dc317"></script>
+      <script src="../_static/documentation_options.js?v=4875470e"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -823,6 +823,29 @@ continuity. Integrating the real section removes that artifact.</p>
 <li><p><strong>n_samples</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>)</p></li>
 <li><p><strong>ks_fallback</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.rating.reach_slope">
+<span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">reach_slope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#reach_slope"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.rating.reach_slope" title="Link to this definition"></a></dt>
+<dd><p>The bed slope of the reach that the section rating uses: a linear fit of the DEM along <code class="docutils literal notranslate"><span class="pre">geodata.channel_centerline</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Rückgabetyp<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.rating.outflow_section">
+<span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">outflow_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#outflow_section"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.rating.outflow_section" title="Link to this definition"></a></dt>
+<dd><p>The outflow cross-section the section rating integrates: <code class="docutils literal notranslate"><span class="pre">(station,</span> <span class="pre">bed,</span> <span class="pre">ks,</span> <span class="pre">slope)</span></code>, sorted by station.</p>
+<p>The bed along the <code class="docutils literal notranslate"><span class="pre">outflow</span></code> liquid-boundary line, the ks of the roughness zones (<a class="reference internal" href="#axqua.rating.line_section" title="axqua.rating.line_section"><code class="xref py py-func docutils literal notranslate"><span class="pre">line_section()</span></code></a>) and the reach slope (<a class="reference internal" href="#axqua.rating.reach_slope" title="axqua.rating.reach_slope"><code class="xref py py-func docutils literal notranslate"><span class="pre">reach_slope()</span></code></a>, unless <em>slope</em> is given).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameter<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_samples</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4054,7 +4077,7 @@ bounds; there the config’s <code class="docutils literal notranslate"><span cl
 &lt; the roughness table’s <code class="docutils literal notranslate"><span class="pre">zone&lt;N&gt;</span></code> rows (<code class="docutils literal notranslate"><span class="pre">geodata.roughness_table</span></code> with the
 bounds schema) &lt; the <code class="docutils literal notranslate"><span class="pre">parameters</span></code> tab of the filled calibration-target
 template, and <code class="docutils literal notranslate"><span class="pre">calibration.outflow_offset</span></code> as the parameter
-<code class="docutils literal notranslate"><span class="pre">f.OUTFLOW_OFFSET</span></code>. The roughness table outranks the config because it is where the
+<code class="docutils literal notranslate"><span class="pre">f.OUTFLOW_OFFSET</span></code> or <code class="docutils literal notranslate"><span class="pre">calibration.outflow_slope</span></code> as <code class="docutils literal notranslate"><span class="pre">f.OUTFLOW_LOG_SLOPE</span></code>. The roughness table outranks the config because it is where the
 zonation itself is defined - adding a zone there must not require editing the
 parameter list in two files - while the spreadsheet stays the live override.</p>
 <dl class="field-list simple">
@@ -4091,7 +4114,7 @@ rewriting a <code class="docutils literal notranslate"><span class="pre">.cas</s
 <dt class="sig sig-object py" id="axqua.calibration.fortran_file_of">
 <span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">fortran_file_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#fortran_file_of"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.calibration.fortran_file_of" title="Link to this definition"></a></dt>
 <dd><p>The file of the user Fortran folder HydroBayesCal rewrites for the <code class="docutils literal notranslate"><span class="pre">f.</span></code>
-parameters <em>names</em>: <code class="docutils literal notranslate"><span class="pre">user_sl.f</span></code> for the outflow offset
+parameters <em>names</em>: <code class="docutils literal notranslate"><span class="pre">user_sl.f</span></code> for the outflow level (offset or slope)
 (<code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.solvers.telemac.outflow_offset</span></code>), <code class="docutils literal notranslate"><span class="pre">user_rain.f</span></code> for a gain-lose
 reach, else None.</p>
 <dl class="field-list simple">
@@ -4299,6 +4322,17 @@ warning that names the boundary and the remedy (<a class="reference internal" hr
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.CALIBRATION_OFFSET_CAS">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">CALIBRATION_OFFSET_CAS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'calibration2d-offset.cas'</span></span><a class="headerlink" href="#axqua.bayescal.CALIBRATION_OFFSET_CAS" title="Link to this definition"></a></dt>
+<dd><p>neither is changed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The steering file of calibration runs that apply the outflow offset, when they would otherwise run the built steady case or a control file of the user’s</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="axqua.bayescal.HOTSTART_RESIDENCE_TIMES">
 <span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">HOTSTART_RESIDENCE_TIMES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.2</span></span><a class="headerlink" href="#axqua.bayescal.HOTSTART_RESIDENCE_TIMES" title="Link to this definition"></a></dt>
 <dd><p>Simulated time of such a run, in residence times of the reach (wetted volume over
@@ -4354,7 +4388,7 @@ written its <code class="docutils literal notranslate"><span class="pre">liquid-
 <dd><p>Simulated time [s] of a calibration run that starts from the steady result.</p>
 <p><code class="docutils literal notranslate"><span class="pre">calibration.hotstart_duration</span></code> when given. Otherwise the run lasts
 <a class="reference internal" href="#axqua.bayescal.HOTSTART_RESIDENCE_TIMES" title="axqua.bayescal.HOTSTART_RESIDENCE_TIMES"><code class="xref py py-data docutils literal notranslate"><span class="pre">HOTSTART_RESIDENCE_TIMES</span></code></a> residence times of the reach, rounded up to
-100 s: the residence time is the volume of water in the converged result over the
+100 s, plus the ramp of the outflow offset when the case calibrates it: the residence time is the volume of water in the converged result over the
 discharge, the time in which the reach exchanges its water once. A changed
 roughness changes the stored volume, and the flow has settled once that change
 has passed the outflow.</p>
@@ -4416,19 +4450,28 @@ simulations an earlier calibration saved. Returns the driver exit code (0 when
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.bayescal.ready_outflow_offset">
-<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">ready_outflow_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steering_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#ready_outflow_offset"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.bayescal.ready_outflow_offset" title="Link to this definition"></a></dt>
-<dd><p>Prepare the case for a calibration of the outflow level, when <em>parameters</em> hold it.</p>
-<p>Writes <code class="docutils literal notranslate"><span class="pre">user_sl.f</span></code> (offset 0) into the user Fortran folder and names that folder
-in each of <em>steering_files</em> (names in the model folder) that does not name it yet
-(<code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.solvers.telemac.outflow_offset</span></code>). With the offset 0 the routine
-changes nothing, so a steady run of the case that compiles it afterwards keeps the
-level of the rating. Returns whether the offset is calibrated.</p>
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">ready_outflow_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steering_files</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#ready_outflow_offset"><span class="viewcode-link"><span class="pre">[Quellcode]</span></span></a><a class="headerlink" href="#axqua.bayescal.ready_outflow_offset" title="Link to this definition"></a></dt>
+<dd><p>Prepare the runs of a calibration of the outflow level, when <em>parameters</em> hold it.</p>
+<p>Writes <code class="docutils literal notranslate"><span class="pre">user_sl.f</span></code> (offset 0, or the reach slope for the energy slope at the
+outlet) into <code class="docutils literal notranslate"><span class="pre">user_fortran</span></code> of <em>model_dir</em> (the case’s model folder by default),
+names that folder in each of <em>steering_files</em> (names in
+that folder) and, with <em>settle</em>, lengthens a run that would end before the offset
+has risen and the reach has settled (<code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.solvers.telemac.outflow_offset</span></code>).
+With <em>copy</em> the one steering file is left as it is and the runs get
+<a class="reference internal" href="#axqua.bayescal.CALIBRATION_OFFSET_CAS" title="axqua.bayescal.CALIBRATION_OFFSET_CAS"><code class="xref py py-data docutils literal notranslate"><span class="pre">CALIBRATION_OFFSET_CAS</span></code></a>: the built case and a control file of the user’s
+are never changed. Call it before <a class="reference internal" href="#axqua.bayescal.case_as_built" title="axqua.bayescal.case_as_built"><code class="xref py py-func docutils literal notranslate"><span class="pre">case_as_built()</span></code></a> takes its copy, so that a
+calibration hands the routine back at its neutral value. Returns the names of the
+steering files the runs use, or <code class="docutils literal notranslate"><span class="pre">[]</span></code> when the outflow level is not calibrated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameter<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>settle</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Rückgabetyp<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -5704,7 +5747,8 @@ untouched, so a difference between model and measurement cannot come from a mode
 that was built differently. It starts the way the calibration runs started: from the
 dry or pre-wetted start of the built case, or, with <code class="docutils literal notranslate"><span class="pre">calibration.hotstart</span></code>, from the
 steady result for 1.2 residence times at the discharge of the situation
-(<a class="reference internal" href="#axqua.bayescal.situation_start" title="axqua.bayescal.situation_start"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.bayescal.situation_start()</span></code></a>).</p>
+(<a class="reference internal" href="#axqua.bayescal.situation_start" title="axqua.bayescal.situation_start"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.bayescal.situation_start()</span></code></a>), or from <code class="docutils literal notranslate"><span class="pre">calibration.control_file</span></code> where
+the calibration at the discharge of the case ran that file (<code class="xref py py-func docutils literal notranslate"><span class="pre">calibration_start()</span></code>).</p>
 <p>The calibrated values are the <strong>per-parameter posterior maxima</strong> of the newest
 calibration (<a class="reference internal" href="#axqua.validation.calibrated_parameters" title="axqua.validation.calibrated_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibrated_parameters()</span></code></a>): the peak of each parameter’s own posterior,
 read from what HydroBayesCal saved (<code class="docutils literal notranslate"><span class="pre">marginal_optima</span></code>, since HydroBayesCal 1.13.0 its
