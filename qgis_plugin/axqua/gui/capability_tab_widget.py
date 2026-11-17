@@ -43,6 +43,11 @@ OPTION_FIELDS = {
                      False),
                     ("extend", "Continue the active learning from all saved simulations",
                      "bool", False)],
+    "openfoam-calibration": [
+        ("prepare_only", "Prepare only (write inputs, do not launch)", "bool", False),
+        ("smoke", "Smoke test (three short runs per situation)", "bool", False),
+        ("resume", "Continue from the saved initial simulations", "bool", False),
+        ("n_processors", "MPI ranks per run", "int", 0)],
     "openfoam-run": [("n_processors", "MPI ranks", "int", 0),
                      ("reconstruct", "Reconstruct afterwards", "bool", True),
                      ("to_vtk", "Convert to VTK for QGIS", "bool", False)],

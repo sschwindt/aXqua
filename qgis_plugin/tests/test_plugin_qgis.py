@@ -3345,6 +3345,31 @@ def test_saving_writes_the_situation_and_keeps_the_rest_of_the_case(validation_b
     assert names == ["September 2025", "flood"]
 
 
+def test_the_openfoam_model_is_validated_with_its_own_job(validation_box):
+    """The model to validate is chosen in the box; OpenFOAM can also run its production
+    model with a free surface, which only it offers."""
+    box, use, submitted, case = validation_box
+    use(_validation_info(calibrated=False))
+    assert box.free_surface.isHidden()
+    assert not box.run_button.isEnabled()          # no TELEMAC calibration yet
+    box.model.setCurrentIndex(box.model.findData("openfoam-validation"))
+    assert not box.free_surface.isHidden()
+    assert box.run_button.isEnabled()              # the job finds the OpenFOAM calibration
+    box.free_surface.setChecked(True)
+    box.validate()
+    assert submitted == [("openfoam-validation",
+                          {"situation": "September 2025", "free_surface": True})]
+
+
+def test_the_openfoam_calibration_has_a_job_of_its_own():
+    from axqua_plugin.gui import capability_tab_widget, capability_tabs
+
+    entry = capability_tabs.BY_SOLVER[("openfoam", "calibration")]
+    assert entry["kind"] == "openfoam-calibration"
+    names = [field[0] for field in capability_tab_widget.OPTION_FIELDS[entry["kind"]]]
+    assert names == ["prepare_only", "smoke", "resume", "n_processors"]
+
+
 def test_saving_before_the_model_is_built_keeps_what_the_form_cannot_show(
         validation_box):
     """The example case names a discharge per inflow. Before the build the form does

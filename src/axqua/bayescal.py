@@ -1397,26 +1397,29 @@ def calibration_situations(cfg: Config) -> list:
     Empty when the case names no situation: the calibration is then the single-flow
     one of the case's discharge.
     """
-    from axqua.config import ValidationSituation
-
     given = list(cfg.calibration.situations)
     if not given:
         return []
     gt = cfg.ground_truth
     if gt.sources or gt.measurements or gt.targets:
-        # no sources of its own: its measurements are those of ground_truth, and its
-        # boundary values are those of the case (the outflow level too, which
-        # outflow_condition: elevation requires of every situation)
-        from axqua.core.boundaries import outlet_level
-
-        inflows = {} if cfg.boundaries.prescribed_flowrate is not None \
-            else case_inflows(cfg)
-        fixed = outlet_level(cfg.outflow_condition) == "fixed"
-        given.insert(0, ValidationSituation(
-            name="case discharge", prescribed_flowrate=cfg.boundaries.prescribed_flowrate,
-            inflows=inflows,
-            prescribed_elevation=cfg.boundaries.prescribed_elevation if fixed else None))
+        given.insert(0, case_situation(cfg))
     return given
+
+
+def case_situation(cfg: Config):
+    """The situation of the case's own discharge, measured in ``ground_truth``.
+
+    No sources of its own: its measurements are those of ``ground_truth``, and its boundary values are those of the case (the discharge of each inflow line where the case gives no total, and the outflow level too, which ``outflow_condition: elevation`` requires of every situation).
+    """
+    from axqua.config import ValidationSituation
+    from axqua.core.boundaries import outlet_level
+
+    inflows = {} if cfg.boundaries.prescribed_flowrate is not None else case_inflows(cfg)
+    fixed = outlet_level(cfg.outflow_condition) == "fixed"
+    return ValidationSituation(
+        name="case discharge", prescribed_flowrate=cfg.boundaries.prescribed_flowrate,
+        inflows=inflows,
+        prescribed_elevation=cfg.boundaries.prescribed_elevation if fixed else None)
 
 
 def situation_points(cfg: Config, situation, folder: Path, *,

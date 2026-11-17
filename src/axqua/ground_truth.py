@@ -279,8 +279,11 @@ def read_flowtracker(xlsx: Path, positions: Path, crs_epsg: int,
 
 
 def scalar_velocity(df: pd.DataFrame) -> pd.Series:
-    """Depth-averaged scalar velocity magnitude from the components present."""
-    comps = [df[c] for c in ("u", "v", "w") if c in df.columns]
+    """Horizontal speed from the components ``u`` and ``v``.
+
+    The vertical component is left out: what a 2D model computes and what a velocity survey is compared with is the horizontal speed, and a side-looking probe's ``w`` is mostly the tilt of its mounting (KB15, September 2025: mean |w| 0.25 m/s against a horizontal speed of 0.28 m/s). Before 2026-11-17 it was included, which inflated the OpenFOAM ``U_MAG`` targets of that survey by 40 %; the TELEMAC targets were always built from ``u`` and ``v``.
+    """
+    comps = [df[c] for c in ("u", "v") if c in df.columns]
     return np.sqrt(sum(c.astype(float) ** 2 for c in comps))
 
 

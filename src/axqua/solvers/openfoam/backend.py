@@ -195,7 +195,7 @@ class OpenFoamBackend(BaseBackend):
 
         if _is_sediment(ctx):
             return self._book_sediment(cfg, ctx)
-        if _is_mesh_study(ctx):
+        if _is_mesh_study(ctx) or _is_calibration(ctx):
             return {}                    # the study wrote its own report
         case_dir = Path(cfg.openfoam_case_dir)
         out: dict[str, Any] = {}
@@ -279,10 +279,61 @@ class OpenFoamBackend(BaseBackend):
             return self._mesh_convergence(cfg, ctx=ctx, seed=seed, **kwargs)
         if capability is not Capability.CALIBRATION:
             return super().study(cfg, capability, **kwargs)
+        if kwargs.pop("validate", False):
+            return self._validation(cfg, ctx=ctx, **kwargs)
+        if "situations" in kwargs:
+            return self._situation_calibration(cfg, ctx=ctx, checkout=checkout,
+                                               rebuild=rebuild, **kwargs)
         from axqua.solvers.openfoam.calibration import run_openfoam_calibration
         return run_openfoam_calibration(
             cfg, launch_mode=launch_mode, checkout=checkout, rebuild=rebuild,
             state=seed, ctx=ctx, **kwargs)
+
+    def _situation_calibration(self, cfg, *, ctx: Any = None, situations=(),
+                               point_filter=None, prepare_only: bool = False,
+                               smoke: bool = False, resume: bool = False,
+                               rebuild: bool = False, checkout=None,
+                               cell_size_factor: float = 4.0, end_time: float = 600.0,
+                               write_interval: float = 20.0, n_avg_timesteps: int = 5,
+                               n_processors: int | None = None, **_ignored):
+        """The job ``openfoam-calibration``: the situations and their water surfaces come
+        from the job's pre-step (:mod:`axqua.openfoam_situations`)."""
+        from axqua.solvers.openfoam.calibration import run_openfoam_situation_calibration
+
+        mode = ("prepare" if prepare_only else "smoke" if smoke
+                else "resume" if resume else "run")
+        code = run_openfoam_situation_calibration(
+            cfg, situations, launch_mode=mode, rebuild=rebuild, checkout=checkout,
+            cell_size_factor=cell_size_factor, end_time=end_time,
+            write_interval=write_interval, n_avg_timesteps=n_avg_timesteps,
+            n_processors=n_processors, point_filter=point_filter, ctx=ctx)
+        if code != 0:
+            raise errors.SolverError(
+                f"the calibration driver exited with code {code}",
+                subject=str(cfg.calibration_dir),
+                remedy="Read the HydroBayesCal output in "
+                       "calibration-validation/openfoam/multiflow/.",
+                component="hydrobayescal", return_code=code)
+        return code
+
+    def _validation(self, cfg, *, ctx: Any = None, situations=(), values=None,
+                    point_filter=None, free_surface: bool = False,
+                    compare_only: bool = False, cell_size_factor: float = 4.0,
+                    end_time: float = 600.0, write_interval: float = 20.0,
+                    n_avg_timesteps: int = 5, n_processors: int | None = None,
+                    **_ignored):
+        """The job ``openfoam-validation`` (:mod:`axqua.solvers.openfoam.validation`)."""
+        from axqua.solvers.openfoam.validation import run_validation
+
+        if not situations:
+            raise errors.ConfigError("the validation job names no situation",
+                                     subject="calibration.validation")
+        return run_validation(
+            self, cfg, situations[0], values=values or {}, ctx=ctx,
+            free_surface=free_surface, compare_only=compare_only,
+            cell_size_factor=cell_size_factor, end_time=end_time,
+            write_interval=write_interval, n_avg_timesteps=n_avg_timesteps,
+            n_processors=n_processors, point_filter=point_filter)
 
     def _mesh_convergence(self, cfg, *, ctx: Any = None, seed=None,
                           discharge: float | None = None, refinement_ratio: float = 1.3,
@@ -314,7 +365,7 @@ class OpenFoamBackend(BaseBackend):
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
         """The relative inlet/outlet discharge imbalance - what the run is judged on."""
         from axqua.solvers.openfoam import report
-        if _is_mesh_study(ctx):
+        if _is_mesh_study(ctx) or _is_calibration(ctx):
             return None
         if _is_sediment(ctx):
             # how far the sediment budget of the reach is from closing, as a share
@@ -401,6 +452,8 @@ class OpenFoamBackend(BaseBackend):
             return []
         if _is_sediment(ctx):
             return self._export_sediment(cfg, ctx)
+        if _is_calibration(ctx):
+            return []                    # recorded by the calibration and validation
         if _is_mesh_study(ctx):
             from axqua.solvers.openfoam.convergence import FOLDER, STEM
 
@@ -483,6 +536,12 @@ def _is_sediment(ctx: Any) -> bool:
 def _is_mesh_study(ctx: Any) -> bool:
     """Whether the job at hand is the mesh convergence study."""
     return getattr(ctx, "capability", None) is Capability.MESH_CONVERGENCE
+
+
+def _is_calibration(ctx: Any) -> bool:
+    """Whether the job at hand is a calibration or validation: they write their own
+    reports, and the case of the production model is not theirs."""
+    return getattr(ctx, "capability", None) is Capability.CALIBRATION
 
 
 def _wants_vtk(ctx: Any, cfg: Any = None) -> bool:

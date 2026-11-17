@@ -27,9 +27,9 @@ from pathlib import Path
 
 from qgis.PyQt.QtCore import QUrl
 from qgis.PyQt.QtGui import QDesktopServices
-from qgis.PyQt.QtWidgets import (QDoubleSpinBox, QFileDialog, QFormLayout, QGroupBox,
-                                 QHBoxLayout, QInputDialog, QLabel, QLineEdit,
-                                 QPushButton, QVBoxLayout, QWidget)
+from qgis.PyQt.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFileDialog,
+                                 QFormLayout, QGroupBox, QHBoxLayout, QInputDialog,
+                                 QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget)
 
 from ..compat import exec_dialog
 from ..core.runner_client import user_text
@@ -47,7 +47,11 @@ NOT_BUILT = ("The model is not built yet, so its inflows are not known. Build th
              "case on the tab Preprocessing first.")
 
 #: What a quantity is called in a sentence, and its unit.
-QUANTITIES = {"SCALAR VELOCITY": ("flow velocity", "m/s"), "WATER DEPTH": ("water depth", "m")}
+QUANTITIES = {"SCALAR VELOCITY": ("flow velocity", "m/s"), "WATER DEPTH": ("water depth", "m"),
+              "U_MAG": ("horizontal flow velocity", "m/s")}
+
+#: The models a validation can run, and the job kind of each.
+MODELS = (("TELEMAC", "validation"), ("OpenFOAM", "openfoam-validation"))
 
 
 def summarize(report: dict) -> str:
@@ -103,6 +107,20 @@ class ValidationBox(QGroupBox):
         self.form = QFormLayout()
         self.name = QLineEdit("validation")
         self.form.addRow("Name of the situation", self.name)
+        self.model = QComboBox()
+        for label, kind in MODELS:
+            self.model.addItem(label, kind)
+        self.model.setToolTip("The calibrated model to run: TELEMAC with the calibrated "
+                              "roughness zones, or OpenFOAM with the calibrated bed "
+                              "roughness and turbulence coefficients")
+        self.model.currentIndexChanged.connect(self._model_changed)
+        self.form.addRow("Model", self.model)
+        self.free_surface = QCheckBox("Production model with a free surface (takes hours)")
+        self.free_surface.setToolTip(
+            "Without: the settings of the calibration runs (rigid lid, coarse cells). "
+            "With: the OpenFOAM case at its own resolution with a free surface, which "
+            "shows what the rigid lid of the calibration left out.")
+        self.form.addRow("", self.free_surface)
         self.layer = QLineEdit()
         self.layer.setPlaceholderText("point layer with the measured velocities and "
                                       "depths")
@@ -239,7 +257,7 @@ class ValidationBox(QGroupBox):
         self.figure_button.setEnabled(bool(self.report.get("figure")))
         ready = self.case is not None
         self.save_button.setEnabled(ready)
-        self.run_button.setEnabled(ready and bool(self.info.get("calibrated")))
+        self._model_changed()
 
     def _mark_required(self) -> None:
         """The validation data and the discharges of the situation are what a
@@ -349,8 +367,20 @@ class ValidationBox(QGroupBox):
         self.save_button.setEnabled(True)
         self.ctx.error(user_text(exc))
 
+    def _openfoam(self) -> bool:
+        return self.model.currentData() == "openfoam-validation"
+
+    def _model_changed(self, *_args) -> None:
+        self._show_row(self.free_surface, self._openfoam())
+        self.run_button.setEnabled(self.case is not None and (
+            self._openfoam() or bool(self.info.get("calibrated"))))
+
     def validate(self) -> None:
         name = self.name.text().strip() or "validation"
+        if self._openfoam():
+            options = {"situation": name, "free_surface": self.free_surface.isChecked()}
+            self.save(then=lambda: self.ctx.submit("openfoam-validation", options))
+            return
         self.save(then=lambda: self.ctx.submit("validation", {"situation": name}))
 
     def open_figure(self) -> None:

@@ -84,6 +84,12 @@ BY_SOLVER = {
         "title": "Mesh convergence of the OpenFOAM model",
         "kind": "openfoam-mesh-convergence",
     },
+    # at the discharges of the calibration situations, under a rigid lid that follows
+    # TELEMAC results, which the job runs first
+    ("openfoam", "calibration"): {
+        "title": "Calibration of the OpenFOAM model (BAL)",
+        "kind": "openfoam-calibration",
+    },
 }
 
 #: Options a tab always sends with its run, because they are what makes the kind run

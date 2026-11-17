@@ -251,8 +251,20 @@ def _verdict(zone_info: dict | None, flags, reduction) -> str:
 
 #: Title and axis label of parameters that are not a roughness zone.
 LABELS = {"f.OUTFLOW_OFFSET": ("Outflow level", "offset above the rating level (m)"),
+          # the OpenFOAM calibration: one roughness for the whole bed, and the k-epsilon
+          # coefficients
+          "ks": ("Bed roughness (whole bed)", "ks (cm)"),
+          "Cmu": ("Turbulence coefficient Cmu", "Cmu (-)"),
+          "C1": ("Turbulence coefficient C1", "C1 (-)"),
+          "C2": ("Turbulence coefficient C2", "C2 (-)"),
           "f.OUTFLOW_LOG_SLOPE": ("Energy slope at the outlet",
                                   "log10 of the energy slope of the outflow section (-)")}
+
+
+def _length(entry: dict) -> bool:
+    """Whether a parameter is a roughness height, shown in cm: a zone, or the ks of the
+    whole bed."""
+    return entry["zone"] is not None or entry["name"] == "ks"
 
 
 def _value_text(value: float, zone: bool, name: str = "") -> str:
@@ -261,7 +273,7 @@ def _value_text(value: float, zone: bool, name: str = "") -> str:
     if name == "f.OUTFLOW_LOG_SLOPE":
         # the parameter is log10 of the slope; the slope itself is what a reader knows
         return f"S = {10.0 ** value:.2g}"
-    if not zone:
+    if not zone and name != "ks":
         return f"{value:.4g}"
     cm = 100 * value
     return f"{cm:.1f} cm" if cm < 10 else f"{cm:.0f} cm"
@@ -359,7 +371,7 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
     lines = max(len(textwrap.wrap(entry["verdict"], 72)) or 1 for entry in parameters)
     for k, (ax, entry) in enumerate(zip(axes.flat, parameters)):
         zone = entry["zone"] is not None
-        scale = 100.0 if zone else 1.0
+        scale = 100.0 if _length(entry) else 1.0
         lo, hi = (entry["prior"] or [np.nanmin(posterior[:, k]), np.nanmax(posterior[:, k])])
         _, counts, edges = marginal_peak(posterior[:, k])
         if counts is None:        # fewer than five samples: no peak, only where they are
@@ -696,7 +708,8 @@ def write_report(cfg, folder: Path, listing: Path | None = None) -> dict:
             log.debug("points per zone not counted: %s", exc)
     steps = [("posteriors", lambda: plot_posteriors(summary, out / "posteriors.png")),
              ("evidence", lambda: plot_evidence(summary, out / "evidence.png"))]
-    if cfg.geodata.roughness_zones is not None:
+    if cfg.geodata.roughness_zones is not None and any(
+            entry["zone"] is not None for entry in summary["parameters"]):
         def zone_files():
             zones = zone_table(cfg, summary)
             gpkg = out / "roughness-zones-calibrated.gpkg"

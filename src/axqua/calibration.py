@@ -129,11 +129,11 @@ def _scalar_velocity_with_error(df: pd.DataFrame) -> tuple[pd.Series, pd.Series 
     cannot drift apart: they are the same quantity under two solvers' names, and
     the error propagation is the part that would be easy to get subtly different.
 
-    sigma_V = (1/V) * sqrt(sum_i (c_i * sigma_i)^2)
+    sigma_V = (1/V) * sqrt(sum_i (c_i * sigma_i)^2), over the horizontal components ``u`` and ``v`` (:func:`axqua.ground_truth.scalar_velocity`).
     """
     vel = ground_truth.scalar_velocity(df)
     terms = [(df[c].astype(float) * df[f"{c}_err"].astype(float)) ** 2
-             for c in ("u", "v", "w") if c in df and f"{c}_err" in df]
+             for c in ("u", "v") if c in df and f"{c}_err" in df]
     err = None
     if terms:
         safe_v = vel.replace(0.0, np.nan)
@@ -159,7 +159,7 @@ def _resolve_quantity(df: pd.DataFrame, qty: str) -> tuple[pd.Series, pd.Series 
     if q == "SCALAR VELOCITY" and "u_mag" in df:
         err = df["u_mag_std"].astype(float) if "u_mag_std" in df else None
         return df["u_mag"].astype(float), err
-    if q == "SCALAR VELOCITY" and any(c in df for c in ("u", "v", "w")):
+    if q == "SCALAR VELOCITY" and any(c in df for c in ("u", "v")):
         return _scalar_velocity_with_error(df)
     # --- OpenFOAM field names (axqua.solvers.openfoam.calibration) ------------
     # HydroBayesCal's OpenFOAM binding extracts U_x/U_y/U_z/U_MAG/TKE, not the
@@ -172,7 +172,7 @@ def _resolve_quantity(df: pd.DataFrame, qty: str) -> tuple[pd.Series, pd.Series 
     if q == "U_MAG" and "u_mag" in df:
         err = df["u_mag_std"].astype(float) if "u_mag_std" in df else None
         return df["u_mag"].astype(float), err
-    if q == "U_MAG" and any(c in df for c in ("u", "v", "w")):
+    if q == "U_MAG" and any(c in df for c in ("u", "v")):
         return _scalar_velocity_with_error(df)
     if q == "TKE" and "tke" in df:
         return df["tke"].astype(float), None
@@ -256,6 +256,7 @@ def build_calibration_csv(cfg: Config, *,
                           path: Path | None = None,
                           z_resolver: "Callable[[pd.DataFrame], np.ndarray] | None" = None,
                           category: str | None = None,
+                          point_filter: "Callable[[pd.DataFrame], np.ndarray] | None" = None,
                           ) -> Path | None:
     """Write the HydroBayesCal calibration-points CSV from the tidy ground truth.
 
@@ -290,6 +291,8 @@ def build_calibration_csv(cfg: Config, *,
     ``hydraulics-3d``). They must not share a category: ``compile_ground_truth``
     concatenates sources that do, which would silently hand both calibrations the
     union of the two row sets.
+
+    *point_filter* returns, for the table of points, which rows to keep. A solver adapter that may not reach into the mesh of another solver is handed the rules of the case this way: the OpenFOAM calibration leaves out the points outside the 2D model and those near an inflow or outflow line (:mod:`axqua.openfoam_situations`).
     """
     compile_ground_truth(cfg)            # no-op when the table is user-supplied
     if not cfg.ground_truth.sources and cfg.ground_truth.measurements is None \
@@ -314,6 +317,11 @@ def build_calibration_csv(cfg: Config, *,
         df = tables[category].reset_index(drop=True)
     else:
         df = _pick_table(tables, quantities).reset_index(drop=True)
+    if point_filter is not None:
+        keep = np.asarray(point_filter(df), dtype=bool)
+        if keep.shape != (len(df),):
+            raise ValueError(f"the point filter returned {keep.shape} for {len(df)} points")
+        df = df.loc[keep].reset_index(drop=True)
 
     if z_resolver is not None:
         z_column = np.asarray(z_resolver(df), dtype=float)

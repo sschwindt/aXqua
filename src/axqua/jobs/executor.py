@@ -388,6 +388,20 @@ def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:
     belongs. The case of the fine sediment simulation takes its water surface from the
     same result.
     """
+    if spec.kind in (JobKind.OPENFOAM_CALIBRATION, JobKind.OPENFOAM_VALIDATION):
+        # The rigid lid of every calibration run follows a TELEMAC result at the
+        # discharge of its situation, and the points are filtered on the 2D mesh.
+        from axqua import openfoam_situations
+
+        validate = spec.kind is JobKind.OPENFOAM_VALIDATION
+        # the job's MPI processes are those of OpenFOAM: TELEMAC runs on the count of
+        # the case unless the job names its own (a TELEMAC built without MPI cannot
+        # take another)
+        extra = openfoam_situations.prepare(
+            cfg, validate=validate, situation=getattr(spec.options, "situation", ""),
+            ctx=ctx, ncsize=getattr(spec.options, "ncsize", None) or None)
+        ctx.sink.step("water surfaces from TELEMAC", done=True)
+        return extra
     if spec.kind not in (JobKind.OPENFOAM_BUILD, JobKind.OPENFOAM_SEDIMENT_BUILD,
                          JobKind.OPENFOAM_MESH_CONVERGENCE):
         return {}

@@ -126,6 +126,13 @@ def _inlet_discharges(of_mesh, cfg: Config, total: float) -> dict[str, float]:
     per_line = {p: of_mesh.inlet_discharge[p] for p in patches
                 if p in of_mesh.inlet_discharge}
     if len(per_line) == len(patches):
+        # A calibration situation at another discharge keeps the split of the lines
+        # and scales them to its own total (set on its copy of the config by
+        # calibration.situation_config; the case file has no such entry).
+        situation = getattr(cfg, "situation_discharge", None)
+        lines = sum(per_line.values())
+        if situation is not None and lines > 0:
+            return {p: q * float(situation) / lines for p, q in per_line.items()}
         return per_line
     counts = {p: of_mesh.polymesh.patch(p).n_faces for p in patches}
     n_total = sum(counts.values()) or 1

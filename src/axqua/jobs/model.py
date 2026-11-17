@@ -154,6 +154,8 @@ class JobKind(str, Enum):
     CALIBRATION = "calibration"
     CALIBRATION_MULTIFLOW = "calibration-multiflow"
     VALIDATION = "validation"
+    OPENFOAM_CALIBRATION = "openfoam-calibration"
+    OPENFOAM_VALIDATION = "openfoam-validation"
 
     def __str__(self) -> str:
         return self.value
@@ -175,7 +177,8 @@ def parse_kind(value: str) -> JobKind:
                "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN,
                "fine-sediment-build": JobKind.OPENFOAM_SEDIMENT_BUILD,
                "fine-sediment": JobKind.OPENFOAM_SEDIMENT_RUN,
-               "of-meshconv": JobKind.OPENFOAM_MESH_CONVERGENCE}
+               "of-meshconv": JobKind.OPENFOAM_MESH_CONVERGENCE,
+               "of-bal": JobKind.OPENFOAM_CALIBRATION, "of-val": JobKind.OPENFOAM_VALIDATION}
     if text in aliases:
         return aliases[text]
     raise ConfigError(
@@ -407,6 +410,51 @@ class ValidationOptions(Options):
     validate: bool = True
 
 @dataclass
+class OpenFoamCalibrationOptions(Options):
+    """The Bayesian calibration of the OpenFOAM model at the discharges of the calibration
+    situations (:func:`axqua.solvers.openfoam.calibration.run_openfoam_situation_calibration`).
+
+    The runs are coarse and under a rigid lid that follows a TELEMAC result at each
+    discharge, which the job runs first where it is missing (:mod:`axqua.openfoam_situations`).
+    *smoke* runs three short runs per situation instead, to test the chain; *resume*
+    continues from the initial runs of an earlier calibration.
+    """
+
+    prepare_only: bool = False
+    smoke: bool = False
+    resume: bool = False
+    rebuild: bool = False
+    cell_size_factor: float = 4.0
+    end_time: float = 600.0
+    write_interval: float = 20.0
+    n_avg_timesteps: int = 5
+    n_processors: int | None = None
+    #: MPI processes of the TELEMAC runs that give the water surfaces (case's own when empty)
+    ncsize: int | None = None
+
+
+@dataclass
+class OpenFoamValidationOptions(Options):
+    """The calibrated OpenFOAM model in a validation situation (:mod:`axqua.solvers.openfoam.validation`).
+
+    *free_surface* runs the production model (its own resolution, two phases) instead
+    of the settings of the calibration runs.
+    """
+
+    situation: str = ""
+    free_surface: bool = False
+    compare_only: bool = False
+    cell_size_factor: float = 4.0
+    end_time: float = 600.0
+    write_interval: float = 20.0
+    n_avg_timesteps: int = 5
+    n_processors: int | None = None
+    ncsize: int | None = None
+    #: What tells the study of the calibration capability that this is a validation.
+    validate: bool = True
+
+
+@dataclass
 class MultiflowCalibrationOptions(Options):
     """``run_Bayes_cal_multiflow.py``.
 
@@ -627,6 +675,15 @@ KIND_META: dict[JobKind, KindMeta] = {
         JobKind.VALIDATION, "val", "telemac",
         "Validation with data of another flow situation", Capability.CALIBRATION,
         "study", ValidationOptions, SolverRunProgress, "case", True),
+    JobKind.OPENFOAM_CALIBRATION: KindMeta(
+        JobKind.OPENFOAM_CALIBRATION, "ofbal", "openfoam",
+        "HydroBayesCal calibration of the OpenFOAM model", Capability.CALIBRATION,
+        "study", OpenFoamCalibrationOptions, CalibrationProgress, "case", True),
+    JobKind.OPENFOAM_VALIDATION: KindMeta(
+        JobKind.OPENFOAM_VALIDATION, "ofval", "openfoam",
+        "Validation of the OpenFOAM model with data of another flow situation",
+        Capability.CALIBRATION, "study", OpenFoamValidationOptions, SolverRunProgress,
+        "case", True),
 }
 
 

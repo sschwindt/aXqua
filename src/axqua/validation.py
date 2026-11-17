@@ -59,7 +59,7 @@ RESULTS = "auto-saved-results-HydroBayesCal"
 FOLDER = "validation"
 
 #: Units of the quantities a hydraulic validation compares, for the figure.
-UNITS = {"SCALAR VELOCITY": "m/s", "WATER DEPTH": "m", "FREE SURFACE": "m",
+UNITS = {"SCALAR VELOCITY": "m/s", "WATER DEPTH": "m", "FREE SURFACE": "m", "U_MAG": "m/s",
          "VELOCITY U": "m/s", "VELOCITY V": "m/s"}
 
 
@@ -200,7 +200,7 @@ def marginal_peak(column):
     return peak, counts, edges
 
 
-def calibrated_parameters(cfg) -> CalibratedSet:
+def calibrated_parameters(cfg, roots=None) -> CalibratedSet:
     """The per-parameter posterior maxima of the newest calibration of this case.
 
     The peak of each parameter's own posterior: the tallest bar of the histogram of its
@@ -209,6 +209,7 @@ def calibrated_parameters(cfg) -> CalibratedSet:
     user's decision of 2026-11-11, since a roughness zone is read and reported per zone.
     HydroBayesCal saves one dictionary per combination of calibration targets; the
     newest is read (see :func:`calibrated_from`).
+    *roots* replaces the folders searched (the OpenFOAM calibration writes into ``calibration-validation/openfoam``).
     """
     import pickle
 
@@ -218,7 +219,8 @@ def calibrated_parameters(cfg) -> CalibratedSet:
     # several discharges into its multiflow folder; the newer result counts
     from axqua.bayescal import MULTIFLOW
 
-    roots = (Path(cfg.calibration_dir), Path(cfg.calibration_dir) / MULTIFLOW)
+    if roots is None:
+        roots = (Path(cfg.calibration_dir), Path(cfg.calibration_dir) / MULTIFLOW)
     found = sorted((path for root in roots
                     for path in (root / RESULTS / "calibration-data").glob(
                         "*/BAL_dictionary.pkl")), key=lambda p: p.stat().st_mtime)
@@ -517,8 +519,12 @@ def with_boundaries_of(cfg, situation, text: str, folder: Path,
     return text, float(total), notes, flow, elev
 
 
-def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
-    """Write the steering file of the validation run into the model folder."""
+def build(cfg, situation, parameters: dict[str, float], *, stem: str = "validation",
+          role: str = "validation") -> ValidationSetup:
+    """Write the steering file of the validation run into the model folder.
+
+    *stem* names its files (``<stem>-<situation>.cas`` and the results), *role* is ``validation`` or ``calibration`` for the messages about the situation. The OpenFOAM calibration takes its water surfaces from such runs of its calibration situations (``stem="openfoam-seed"``, :mod:`axqua.openfoam_situations`).
+    """
     from axqua import bayescal
     from axqua.core.errors import ConfigError
 
@@ -530,14 +536,14 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
                           remedy="Build the case first (tab Preprocessing).")
     tag = slug(situation.name)
     model = Path(cfg.model_dir)
-    results = f"{Path(cfg.results_slf).stem}-validation-{tag}.slf"
-    text = calibration_start(cfg, situation, f"validation-{tag}.cas", results)
+    results = f"{Path(cfg.results_slf).stem}-{stem}-{tag}.slf"
+    text = calibration_start(cfg, situation, f"{stem}-{tag}.cas", results)
     notes: list[str] = []
 
     # ---- the boundary values of the situation --------------------------------------
     text, total, notes, flow, elev = with_boundaries_of(
-        cfg, situation, text, Path(cfg.calibration_dir) / FOLDER)
-    text = bayescal._patch_cas(text, "TITLE", f"'{cfg.name} validation {tag}'")
+        cfg, situation, text, Path(cfg.calibration_dir) / FOLDER, role=role)
+    text = bayescal._patch_cas(text, "TITLE", f"'{cfg.name} {stem} {tag}'")
     text = bayescal._patch_cas(text, "RESULTS FILE", results)
 
     # ---- the calibrated values -----------------------------------------------------
@@ -568,7 +574,7 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
         if missing:
             raise ConfigError("the friction table has no zone " + ", ".join(missing),
                               subject="friction")
-        friction_path = model / f"{Path(table).stem}-validation-{tag}.tbl"
+        friction_path = model / f"{Path(table).stem}-{stem}-{tag}.tbl"
         friction_path.write_text(new_table, encoding="utf-8")
         text = bayescal._patch_cas(text, "FRICTION DATA FILE", friction_path.name)
     level = [name for name in offset.VARIABLES if name in constants]
@@ -596,7 +602,7 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
             raise ConfigError("the steering file names no Fortran folder, but the "
                               "calibration ended with values for constants in it",
                               subject="calibration.parameters")
-        copied = model / f"{folder}-validation-{tag}"
+        copied = model / f"{folder}-{stem}-{tag}"
         shutil.rmtree(copied, ignore_errors=True)
         shutil.copytree(model / folder, copied)
         for name, value in constants.items():
@@ -615,11 +621,11 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
     for name, value in keywords.items():
         text = bayescal._set_cas(text, name, f"{value:.8g}")
 
-    cas = model / f"validation-{tag}.cas"
+    cas = model / f"{stem}-{tag}.cas"
     cas.write_text(text, encoding="utf-8")
-    log.info("validation %s: %s at %.4g m3/s (PRESCRIBED FLOWRATES %s; ELEVATIONS %s), "
-             "calibrated values %s", situation.name, cas.name, total, flow, elev,
-             ", ".join(f"{k}={v:.4g}" for k, v in parameters.items()))
+    log.info("%s %s: %s at %.4g m3/s (PRESCRIBED FLOWRATES %s; ELEVATIONS %s), "
+             "calibrated values %s", stem, situation.name, cas.name, total, flow, elev,
+             ", ".join(f"{k}={v:.4g}" for k, v in parameters.items()) or "none")
     return ValidationSetup(name=situation.name, cas=cas, results=model / results,
                            parameters=dict(parameters), flowrate=total, flowrates=flow,
                            elevations=elev, friction=friction_path, notes=notes)

@@ -179,3 +179,34 @@ def test_a_curve_that_still_changes_as_much_as_before_shows_no_sign_of_a_plateau
 
     assert "no sign of a plateau yet" in _convergence_text(state)
     assert "no sign" not in _convergence_text(convergence(leveling, flat))
+
+
+def test_the_report_of_an_openfoam_calibration_has_no_zone_map(tmp_path):
+    """One roughness for the whole bed and a turbulence coefficient, in the folder of the
+    OpenFOAM calibration: posteriors and evidence with the values of that calibration,
+    ks in cm, and no map of zones that were not calibrated."""
+    from axqua.calibration_report import write_report
+
+    cfg, telemac = _calibrated_case(tmp_path)
+    folder = Path(cfg.calibration_dir) / "openfoam" / "multiflow"
+    rng = np.random.default_rng(1)
+    data = {"calibration_parameters": ["ks", "Cmu"], "param_values": [[0.02, 0.3], [0.06, 0.12]],
+            "posterior": [rng.normal([0.1, 0.09], [0.02, 0.005], (300, 2))],
+            "marginal_optima": [np.array([0.104, 0.091])],
+            "log_BME": np.array([-30.0]), "RE": np.array([1.5]), "N_tp": np.array([16.0])}
+    out = folder / "auto-saved-results-HydroBayesCal" / "calibration-data" / "U_MAG"
+    out.mkdir(parents=True)
+    with open(out / "BAL_dictionary.pkl", "wb") as handle:
+        pickle.dump(data, handle)
+    written = write_report(cfg, folder)
+    assert set(written) == {"posteriors", "evidence", "summary"}
+    summary = json.loads(written["summary"].read_text())
+    # the tallest bar of each drawn histogram, not the peaks HydroBayesCal stored
+    from axqua.validation import marginal_peak
+
+    posterior = data["posterior"][-1]
+    assert [p["name"] for p in summary["parameters"]] == ["ks", "Cmu"]
+    for k, entry in enumerate(summary["parameters"]):
+        assert entry["value"] == pytest.approx(marginal_peak(posterior[:, k])[0])
+    from axqua.calibration_report import _value_text
+    assert _value_text(0.104, False, "ks") == "10 cm"
