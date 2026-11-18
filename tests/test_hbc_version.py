@@ -2,9 +2,11 @@
 
 pip checks ``axqua[calibration]`` only when it installs, so an environment that had
 HydroBayesCal before keeps its old version; ``hbc.require_hbc`` therefore checks the
-installed version as well. The floor is 1.13.0: 1.12.1 starts the Sobol design at the
+installed version as well. The floor is 1.14.1: 1.12.1 starts the Sobol design at the
 first point of the sequence, 1.12.2 lets the scikit-learn emulator run with TELEMAC, 1.13.0
-reads the per-parameter posterior peaks that aXqua applies over bootstrap resamples.
+reads the per-parameter posterior peaks that aXqua applies over bootstrap resamples, 1.14.0
+trains the single-output emulator and brings calibration.gp_mean, 1.14.1 trains it alike for
+every solver.
 """
 
 from __future__ import annotations

@@ -42,8 +42,15 @@ from axqua.core.environment import SolverEnvironment
 #: starts the Sobol design at the first point of the sequence, so that a design of
 #: 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the
 #: scikit-learn emulator (``gp_library: skl``) run with TELEMAC; 1.13.0 reads the
-#: per-parameter posterior peaks over bootstrap resamples, which aXqua applies.
-HBC_MINIMUM = "1.13.0"
+#: per-parameter posterior peaks over bootstrap resamples, which aXqua applies;
+#: 1.14.0 trains the hyperparameters of the single-output emulator (they had stayed
+#: near their initial values: on a k-epsilon test model the velocity error at 16 runs
+#: fell from 0.11 to 0.031), scales the parameters to [0, 1] by default, and brings
+#: the mean of the surrogate model that ``calibration.gp_mean`` selects; 1.14.1
+#: trains the single-output emulator alike for every solver (300 iterations at a
+#: learning rate of 0.1; 1.14.0 kept 150 at 0.07 for TELEMAC and 100 at 0.5 for
+#: OpenFOAM).
+HBC_MINIMUM = "1.14.1"
 
 
 def _release(text: str) -> tuple[int, ...]:
@@ -95,7 +102,8 @@ def require_hbc():
             "tried the lowest part of each parameter range, and before 1.12.2 the "
             "scikit-learn emulator failed with TELEMAC; before 1.13.0 the "
             "per-parameter peak of a flat posterior depended on where its histogram "
-            "bins started, and aXqua reports those peaks. Upgrade it in the "
+            "bins started, and aXqua reports those peaks; before 1.14.0 the emulator "
+            "of a single calibration target did not train its length scales. Upgrade it in the "
             "environment of aXqua:\n"
             "    pip install -U hydrobayescal"
         )

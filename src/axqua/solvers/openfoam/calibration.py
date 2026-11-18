@@ -870,8 +870,9 @@ MULTIFLOW_SUBDIR = "multiflow"
 #: east and north components of the model (the user, 2026-11-17).
 SITUATION_QUANTITIES = ("U_MAG",)
 SITUATION_EXTRACTION = ("U_MAG", "U_x", "U_y", "U_z", "TKE")
-#: The HydroBayesCal release that brings ``bal_openfoam_multiflow.py``.
-HBC_MULTIFLOW_MINIMUM = "1.14.0"
+#: The HydroBayesCal release that brings ``bal_openfoam_multiflow.py``
+#: (``MultiflowOpenFOAMModel``), released on 2026-11-20.
+HBC_MULTIFLOW_MINIMUM = "1.15.0"
 
 
 def require_multiflow_driver() -> None:
