@@ -430,6 +430,15 @@ CURATED: dict[str, dict[str, Any]] = {
              "calibration varies the outflow level, the volume of the reach filled to "
              "the highest outflow level of the range, plus the 600 s over which the "
              "level rises."),
+    "calibration.gp_mean": _c(
+        "Mean of the surrogate model", "choice",
+        choices=("constant", "linear", "hydraulic"),
+        help="hydraulic: the surrogate model starts from a trend that follows how each "
+             "parameter acts on the flow (the friction law of a roughness zone; ks and "
+             "Cmu of the OpenFOAM model through the logarithmic layer), and learns only "
+             "the deviation from it. It needs fewer simulations for the same accuracy. "
+             "constant: no trend, as in HydroBayesCal up to 1.13. Needs HydroBayesCal "
+             "1.14.0 or newer; older releases ignore it."),
     "calibration.prior_samples": _c(
         "Prior samples for the posterior", "int",
         help="Parameter sets drawn from the ranges at which the surrogate model is "

@@ -1760,6 +1760,12 @@ class Calibration:
     max_runs: int | None = None
     parameter_sampling_method: str = "sobol"
     gp_library: str = "gpy"
+    # Mean of the gpytorch emulators (HydroBayesCal sampling['gp_mean'], PR 33 of
+    # 2026-11-17): "constant" (the emulator of HydroBayesCal up to 1.13), "linear", or
+    # "hydraulic", a trend that follows the physics of each parameter (bed friction law,
+    # ks and Cmu of the OpenFOAM model through the log layer). On a k-epsilon channel the
+    # hydraulic mean cut the emulator error of the velocity by a factor of 4 to 8.
+    gp_mean: str = "constant"
     # HydroBayesCal predicts the surrogate at prior_samples points and keeps a prior
     # sample with probability likelihood / largest likelihood. Since 1.12.2 it predicts
     # in pieces, so memory grows in proportion to the number (before, one dense

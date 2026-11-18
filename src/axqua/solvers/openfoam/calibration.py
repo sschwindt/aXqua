@@ -617,6 +617,7 @@ sampling = {{
     'mc_samples_al':  2000,
     'mc_exploration': 1000,
     'gp_library':     {c.gp_library!r},
+    'gp_mean':        {c.gp_mean!r},
     'include_surrogate_error': True,
     'bal_exploration_tradeoff': {c.bal_exploration_tradeoff!r},
 }}

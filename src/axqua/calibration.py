@@ -637,6 +637,7 @@ sampling = {{
     'mc_samples_al': 2000,
     'mc_exploration': 1000,
     'gp_library': {c.gp_library!r},
+    'gp_mean': {c.gp_mean!r},
     # 'variables': one multi-output GPE per location, its outputs the calibration
     # quantities (calibration.multitask_selection)
     'multitask_selection': {c.multitask_selection!r},

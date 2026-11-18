@@ -322,6 +322,21 @@ def test_a_target_outside_the_water_of_the_lattice_is_left_out(tmp_path, monkeyp
     assert "1 of 3 measurement points lie outside the water" in caplog.text
 
 
+def test_the_mean_of_the_surrogate_model_reaches_the_driver(tmp_path):
+    """calibration.gp_mean (HydroBayesCal sampling['gp_mean']); constant unless set."""
+    cfg = _cfg(tmp_path)
+    params = [CalibrationParameter(name="ks", min=0.02, max=0.30)]
+    for value in ("constant", "hydraulic"):
+        cfg.calibration.gp_mean = value
+        path = ofcal.emit_openfoam_config(
+            cfg, template=tmp_path / "t", csv=tmp_path / "c.csv", parameters=params,
+            calibration_quantities=["U_MAG"], extraction_quantities=["U_MAG"],
+            out_dir=tmp_path / value)
+        namespace: dict = {}
+        exec(compile(path.read_text(), str(path), "exec"), namespace)    # noqa: S102
+        assert namespace["sampling"]["gp_mean"] == value
+
+
 # ------------------------------------------- refused before the TELEMAC runs (review 2026-11-23)
 def _no_seeds(monkeypatch):
     def seed_runs(*args, **kwargs):
