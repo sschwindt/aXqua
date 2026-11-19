@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -353,3 +354,164 @@ def test_the_report_shows_the_slope_itself():
     assert _value_text(-4.4255, False, "f.OUTFLOW_LOG_SLOPE") == "S = 3.8e-05"
     assert LABELS["f.OUTFLOW_LOG_SLOPE"][0] == "Energy slope at the outlet"
     assert _value_text(1.31, False, "f.OUTFLOW_OFFSET") == "+1.31 m"
+
+
+# --------------------------------------------------------------------------- #
+# review of 2026-11-18 (eb293859..1035f96d)
+# --------------------------------------------------------------------------- #
+def test_a_rating_curve_of_the_case_is_refused_and_one_of_the_section_is_not(sloped, tmp_path):
+    """The levels of a given curve are not the normal stage of the section, so the slope would be an offset of no defined meaning on top of them."""
+    section = _section()
+    derived = tmp_path / "derived.csv"
+    derived.write_text("Q,WSE,depth\n" + "".join(
+        f"{q},{section.stage(q):.4f},0\n" for q in (5.0, 20.0)))
+    sloped.boundaries.stage_discharge = derived
+    outflow_offset.prepare(sloped)                            # aXqua's own section rating
+    measured = tmp_path / "measured.csv"
+    measured.write_text("Q,WSE\n5.0,100.9\n20.0,101.6\n")
+    sloped.boundaries.stage_discharge = measured
+    with pytest.raises(ConfigError, match="not the normal stage of the outflow section") as caught:
+        outflow_offset.prepare(sloped)
+    assert "outflow_offset" in caught.value.remedy
+
+
+def test_the_rating_check_reads_the_curve_as_the_solver_path_does(sloped, tmp_path):
+    """Other column names and a semicolon are read as read_rating_pairs reads them; a stale derived curve is refused with the remedy to derive it again."""
+    section = _section()
+    other = tmp_path / "other.csv"
+    other.write_text("discharge;stage\n" + "".join(
+        f"{q};{section.stage(q):.4f}\n" for q in (5.0, 20.0)))
+    sloped.boundaries.stage_discharge = other
+    outflow_offset.check_rating(sloped, section)
+    stale = tmp_path / "stale.csv"
+    stale.write_text("Q,WSE\n" + "".join(f"{q},{section.stage(q) + 0.05:.4f}\n" for q in (5.0, 20.0)))
+    sloped.boundaries.stage_discharge = stale
+    with pytest.raises(ConfigError) as caught:
+        outflow_offset.check_rating(sloped, section)
+    assert "delete the file" in caught.value.remedy
+
+
+def test_the_outflow_level_as_a_row_of_the_parameter_list_is_refused(fake_case):
+    """A row named f.OUTFLOW_LOG_SLOPE made the routine of the offset, which has no line for it."""
+    from axqua.config import CalibrationParameter
+
+    fake_case.calibration.parameters = [
+        CalibrationParameter(name="f.OUTFLOW_LOG_SLOPE", min=-5.0, max=-3.0)]
+    with pytest.raises(ConfigError, match="calibration.outflow_offset or calibration.outflow_slope"):
+        merged_parameters(fake_case)
+    fake_case.calibration.parameters = [
+        CalibrationParameter(name="f.outflow_offset", min=0.0, max=1.0)]
+    with pytest.raises(ConfigError, match="calibration.outflow_offset or calibration.outflow_slope"):
+        merged_parameters(fake_case)
+
+
+def test_the_messages_of_a_slope_calibration_name_the_slope(sloped):
+    sloped.user_fortran_dir = "routines"
+    with pytest.raises(ConfigError) as caught:
+        outflow_offset.prepare(sloped)
+    assert "calibration.outflow_slope" in caught.value.remedy
+    sloped.user_fortran_dir = "user_fortran"
+    with pytest.raises(ConfigError) as caught:
+        outflow_offset.with_fortran_folder(sloped, "FORTRAN FILE : 'mine'\n")
+    assert "calibration.outflow_slope" in caught.value.remedy
+
+
+def test_the_validation_names_the_setting_of_the_calibrated_values(fake_case):
+    """The validation knows from the calibrated values which setting moved the level; the case file may no longer name it, or name both."""
+    fake_case.user_fortran_dir = "routines"
+    with pytest.raises(ConfigError) as caught:
+        outflow_offset.check_folder(fake_case, which="slope")
+    assert "calibration.outflow_slope" in caught.value.remedy
+    fake_case.calibration.outflow_offset = [0.0, 2.0]
+    fake_case.calibration.outflow_slope = [1.0e-5, 2.0e-3]
+    with pytest.raises(ConfigError, match="the user Fortran folder") as caught:
+        outflow_offset.check_folder(fake_case, which="slope")
+    with pytest.raises(ConfigError) as caught:
+        outflow_offset.with_fortran_folder(fake_case, "FORTRAN FILE : 'mine'\n", "slope")
+    assert "calibration.outflow_slope" in caught.value.remedy
+
+
+def test_a_small_slope_raises_the_stage_above_the_old_bracket():
+    """The stage was bracketed at the highest bed point + 10 m and saturated there."""
+    section = _section()
+    top = float(section.bed.max()) + 10.0
+    deep = section.stage(400.0, 1e-9)
+    assert deep > top + 1.0
+    deeper = section.stage(400.0, 1e-10)
+    assert deeper > deep
+
+
+_STUBS = """
+module bief
+end module bief
+module declarations_special
+  integer :: lu = 6
+end module declarations_special
+module declarations_telemac
+end module declarations_telemac
+module declarations_telemac2d
+  double precision :: at = 0.d0
+  double precision, allocatable :: debit(:)
+  integer :: ndebit = 0
+end module declarations_telemac2d
+module interface_telemac2d
+  interface
+    subroutine user_sl(i, n, sl)
+      integer, intent(in) :: i, n
+      double precision, intent(inout) :: sl
+    end subroutine user_sl
+    double precision function sl(i, n)
+      integer, intent(in) :: i, n
+    end function sl
+  end interface
+end module interface_telemac2d
+"""
+
+_DRIVER = """
+subroutine plante(i)
+  integer, intent(in) :: i
+  write(*, *) 'PLANTE', i
+  stop 3
+end subroutine plante
+program drive
+  use declarations_telemac2d
+  implicit none
+  double precision :: level
+  character(len=32) :: arg
+  allocate(debit(2))
+  call get_command_argument(1, arg)
+  read(arg, *) debit(2)
+  debit(1) = 0.d0
+  ndebit = 2
+  at = 1200.d0
+  level = 100.d0
+  call user_sl(1, 1, level)
+  write(*, '(F24.12)') level - 100.d0
+end program drive
+"""
+
+
+@pytest.mark.skipif(shutil.which("gfortran") is None, reason="no gfortran")
+@pytest.mark.parametrize("slope", [2.0e-4, 1.0e-9])
+def test_the_compiled_routine_shifts_the_level_as_the_python_rating_does(tmp_path, slope):
+    """The Keulegan rating is written twice, in Python and in the Fortran of the routine; this keeps them together (review of 2026-11-18). 1e-9 needs the raised bracket."""
+    import math
+    import subprocess
+
+    section = _section()
+    (tmp_path / "stubs.f90").write_text(_STUBS)
+    (tmp_path / "user_sl.f").write_text(outflow_offset.slope_source(section, math.log10(slope)))
+    (tmp_path / "driver.f90").write_text(_DRIVER)
+    std = ["-std=f2008", "-fimplicit-none"]
+    for args in (["-c", "stubs.f90"], ["-ffixed-form", "-c", "user_sl.f"],
+                 ["driver.f90", "user_sl.o", "stubs.o", "-o", "drive"]):
+        subprocess.run(["gfortran", *std, *args], cwd=tmp_path, check=True,
+                       capture_output=True, text=True)
+    for discharge in (5.0, 20.0):
+        run = subprocess.run(["./drive", str(discharge)], cwd=tmp_path, check=True,
+                             capture_output=True, text=True)
+        expected = section.stage(discharge, slope) - section.stage(discharge)
+        assert float(run.stdout.split()[-1]) == pytest.approx(expected, abs=1e-6)
+    # no positive prescribed discharge: the run stops instead of applying no shift
+    run = subprocess.run(["./drive", "0.0"], cwd=tmp_path, capture_output=True, text=True)
+    assert run.returncode != 0 and "NO POSITIVE PRESCRIBED FLOWRATE" in run.stdout

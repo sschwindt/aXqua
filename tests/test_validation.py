@@ -151,6 +151,45 @@ def test_the_calibrated_values_are_the_per_parameter_peaks_where_they_are_stored
 
 
 
+def test_the_calibrated_value_is_the_tallest_bar_of_the_posterior_histogram(built):
+    """The user's order of 2026-11-19: the calibrated value is the maximum of the
+    histogram the report draws. Of two groups of samples the larger one counts; the
+    median of bootstrap peaks, which HydroBayesCal stores, can fall between them."""
+    rng = np.random.default_rng(5)
+    zone4 = np.concatenate([rng.normal(0.08, 0.005, 40), rng.uniform(0.11, 0.16, 60)])
+    zone6 = rng.normal(0.2, 0.01, 100)
+    _calibrated(built, marginal_optima=[np.array([0.1, 0.1]), np.array([0.123, 0.2])],
+                posterior=[np.zeros((5, 2)), np.column_stack([zone4, zone6])])
+    found = validation.calibrated_parameters(built)
+    assert found.estimate == "per-parameter posterior maximum"
+    peak, counts, edges = validation.marginal_peak(zone4)
+    top = int(np.argmax(counts))
+    assert edges[top] <= found.as_dict()["zone4"] <= edges[top + 1]
+    assert found.as_dict()["zone4"] == pytest.approx(peak)
+    assert abs(found.as_dict()["zone4"] - 0.08) < 0.01      # the larger group
+    assert validation.peak_bins(zone4) == validation.MIN_BINS  # 100 samples: 8 bars
+
+
+def test_tied_bars_that_touch_are_one_flat_top():
+    # 15 samples from 0 to 0.8: eight bars of 0.1, of which 0.3-0.4 and 0.4-0.5 tie at 5
+    column = np.array([0.0, 0.8, 0.15, 0.16, 0.65, 0.31, 0.33, 0.35, 0.37, 0.39,
+                       0.42, 0.44, 0.46, 0.48, 0.49])
+    peak, counts, edges = validation.marginal_peak(column)
+    assert counts.tolist() == [1, 2, 0, 5, 5, 0, 1, 1]
+    assert peak == pytest.approx(np.mean(column[5:]))      # the mean of both tied bars
+    assert np.isnan(validation.marginal_peak(np.full(10, 0.1))[0])  # all equal: no peak
+
+
+def test_a_calibration_that_stopped_early_still_has_calibrated_values(built):
+    """HydroBayesCal sets aside one entry per iteration; those of the iterations that did
+    not run stay None. The values come from the last iteration that ran."""
+    _calibrated(built, joint_optimum=[np.array([0.2, 0.3]), np.array([0.04064, 0.1059]), None],
+                posterior=[np.zeros((5, 2)), np.full((5, 2), 0.07), None])
+    found = validation.calibrated_parameters(built)
+    assert found.as_dict() == {"zone4": 0.04064, "zone6": 0.1059}
+    assert found.estimate == "joint posterior maximum"
+
+
 def test_a_joint_maximum_of_nan_is_never_applied(built):
     """With one surviving posterior sample HydroBayesCal writes NaN as the joint
     maximum (the example of 2026-10-15); a NaN in the friction table wrecks the run."""

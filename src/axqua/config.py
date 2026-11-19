@@ -1811,18 +1811,9 @@ class Calibration:
     # learning runs with these errors. For a model that cannot reproduce part of the measurements,
     # such as a water level held up by a riffle the terrain model does not resolve.
     structural_error: str = "none"
-    # The outflow level as a calibration parameter: a range [min, max] in m of an offset
-    # added to the level every situation gets from the rating at its own discharge (or
-    # to boundaries.prescribed_elevation), one offset for all situations. For a reach
-    # whose water level is held up by a control the terrain model does not resolve or
-    # that lies downstream of the model (axqua.solvers.telemac.outflow_offset).
+    # The outflow level as a calibration parameter: a range [min, max] in m of an offset added to the level every situation gets from the rating at its own discharge (or to boundaries.prescribed_elevation), one offset for all situations. For a reach whose water level is held up by a control the terrain model does not resolve or that lies downstream of the model (axqua.solvers.telemac.outflow_offset).
     outflow_offset: list[float] | None = None
-    # The outflow level as a calibration parameter through the rating of the outflow
-    # section (rating_method: section): a range [min, max] of the energy slope at the
-    # outlet [-], in place of the bed slope of the reach that the rating uses. One slope
-    # for all situations gives one stage-discharge curve; HydroBayesCal samples its
-    # log10. For a backwater from a control downstream of the model. Not together with
-    # outflow_offset (axqua.solvers.telemac.outflow_offset).
+    # The outflow level as a calibration parameter through the rating of the outflow section (rating_method: section): a range [min, max] of the energy slope at the outlet [-], in place of the bed slope of the reach that the rating uses. One slope for all situations gives one stage-discharge curve; HydroBayesCal samples its log10. For a backwater from a control downstream of the model. Not together with outflow_offset (axqua.solvers.telemac.outflow_offset).
     outflow_slope: list[float] | None = None
 
     @classmethod

@@ -1,61 +1,16 @@
 """The outflow level as a calibration parameter (``calibration.outflow_offset``).
 
-The outflow level of a river case comes from the rating of the outflow section
-(``outflow_condition: stage_discharge``) or is given (``elevation``). Where the water
-level of the reach is held up by a control the terrain model does not resolve, or by
-one downstream of the model, that level is too low, and no roughness within its range
-can raise the water level at the measurement points (Inn KB15, September 2025: the
-model water surface in the main channel 0.45 to 0.65 m below the measured one, with
-the bed within 3 cm). ``calibration.outflow_offset`` gives a range ``[min, max]`` in
-meters, and the calibration varies the level by that offset, added to the level every
-situation gets from the rating at its own discharge. One offset is shared by all
-situations, as one roughness is. In the trial (2026-11-16) a level of 375.80 m, 1.31 m
-above the rating, brought the main channel to within 1 cm of the measured level; the
-water level over the patch upstream did not change.
+The outflow level of a river case comes from the rating of the outflow section (``outflow_condition: stage_discharge``) or is given (``elevation``). Where the water level of the reach is held up by a control the terrain model does not resolve, or by one downstream of the model, that level is too low, and no roughness within its range can raise the water level at the measurement points (Inn KB15, September 2025: the model water surface in the main channel 0.45 to 0.65 m below the measured one, with the bed within 3 cm). ``calibration.outflow_offset`` gives a range ``[min, max]`` in meters, and the calibration varies the level by that offset, added to the level every situation gets from the rating at its own discharge. One offset is shared by all situations, as one roughness is. In the trial (2026-11-16) a level of 375.80 m, 1.31 m above the rating, brought the main channel to within 1 cm of the measured level; the water level over the patch upstream did not change.
 
-The offset is raised linearly from 0 over the first ``RAMP`` seconds of a run. A run
-starts from the steady result at the level of the rating, and a step of a meter at the
-outlet sends a surge up the reach: in the trial the water level rose 1.3 m above its
-final value 300 s after a step of 1.6 m. A run that applies the offset therefore lasts
-the ramp longer (:func:`axqua.bayescal.calibration_hotstart_duration`), and never less
-than ``MIN_DURATION``, the ramp and as long again for the reach to settle
-(:func:`with_duration`): a run that ended during the ramp would tie each sampled offset
-to the water levels of a smaller one.
+The offset is raised linearly from 0 over the first ``RAMP`` seconds of a run. A run starts from the steady result at the level of the rating, and a step of a meter at the outlet sends a surge up the reach: in the trial the water level rose 1.3 m above its final value 300 s after a step of 1.6 m. A run that applies the offset therefore lasts the ramp longer (:func:`axqua.bayescal.calibration_hotstart_duration`), and never less than ``MIN_DURATION``, the ramp and as long again for the reach to settle (:func:`with_duration`): a run that ended during the ramp would tie each sampled offset to the water levels of a smaller one.
 
-HydroBayesCal rewrites ``<model_dir>/user_fortran/user_sl.f`` whatever the case names
-(``control_telemac.py``), so the case's user Fortran folder has to be ``user_fortran``
-and every steering file of a calibration run has to name it (:func:`check`,
-:func:`with_fortran_folder`). The built steering file of the case is never changed:
-a calibration that would run it gets a copy (:func:`axqua.bayescal.ready_outflow_offset`).
+HydroBayesCal rewrites ``<model_dir>/user_fortran/user_sl.f`` whatever the case names (``control_telemac.py``), so the case's user Fortran folder has to be ``user_fortran`` and every steering file of a calibration run has to name it (:func:`check`, :func:`with_fortran_folder`). The built steering file of the case is never changed: a calibration that would run it gets a copy (:func:`axqua.bayescal.ready_outflow_offset`).
 
-How it reaches TELEMAC: TELEMAC-2D calls ``USER_SL`` with every prescribed level it
-reads from ``PRESCRIBED ELEVATIONS`` (``sl.f``), only for boundaries that prescribe a
-level. The generated ``user_sl.f`` adds the variable ``OUTFLOW_OFFSET`` to it. Its value
-is assigned on a line of its own, which HydroBayesCal rewrites for the parameter
-``f.OUTFLOW_OFFSET`` before every run (the way the gain-lose ``f.HMP_KF`` is
-calibrated). The validation copies the folder and writes the calibrated offset into the
-copy (:func:`axqua.validation.build`).
+How it reaches TELEMAC: TELEMAC-2D calls ``USER_SL`` with every prescribed level it reads from ``PRESCRIBED ELEVATIONS`` (``sl.f``), only for boundaries that prescribe a level. The generated ``user_sl.f`` adds the variable ``OUTFLOW_OFFSET`` to it. Its value is assigned on a line of its own, which HydroBayesCal rewrites for the parameter ``f.OUTFLOW_OFFSET`` before every run (the way the gain-lose ``f.HMP_KF`` is calibrated). The validation copies the folder and writes the calibrated offset into the copy (:func:`axqua.validation.build`).
 
-**The energy slope of the outflow section** (``calibration.outflow_slope``) is the
-other way to calibrate the outflow level, for a case whose level comes from the rating
-of its outflow section (``rating_method: section``). That rating is the normal depth of
-the section: Keulegan's law with the ks of the roughness zones and the bed slope of the
-reach. A level held up from downstream is a backwater, in which the energy slope at the
-outlet is far smaller than the bed slope. ``calibration.outflow_slope`` gives a range
-``[min, max]`` of that energy slope, and the generated ``user_sl.f`` carries the section
-and solves the rating itself, for the discharge of the run (the sum of the ``PRESCRIBED
-FLOWRATES``) at the sampled slope: the level rises by the difference between the normal
-stage at that slope and at the slope of the reach, over the same ramp as the offset.
-One slope is calibrated for all situations, so the calibrated relation is a whole
-stage-discharge curve, and a validation at another discharge gets the level of that
-curve. HydroBayesCal samples ``log10`` of the slope (parameter ``f.OUTFLOW_LOG_SLOPE``),
-because the slope spans orders of magnitude. On Inn KB15 the level of the trial, 1.31 m
-above the rating at 54.3 m3/s, needs a ks of 10.7 m in the outflow section (Manning n
-0.21, no river is that rough) or an energy slope of 3.9e-5 instead of the bed slope of
-2.0e-3 (2026-11-17).
+**The energy slope of the outflow section** (``calibration.outflow_slope``) is the other way to calibrate the outflow level, for a case whose level comes from the rating of its outflow section (``rating_method: section``). That rating is the normal depth of the section: Keulegan's law with the ks of the roughness zones and the bed slope of the reach. A level held up from downstream is a backwater, in which the energy slope at the outlet is far smaller than the bed slope. ``calibration.outflow_slope`` gives a range ``[min, max]`` of that energy slope, and the generated ``user_sl.f`` carries the section and solves the rating itself, for the discharge of the run (the sum of the ``PRESCRIBED FLOWRATES``) at the sampled slope: the level rises by the difference between the normal stage at that slope and at the slope of the reach, over the same ramp as the offset. A case with a measured rating curve (``boundaries.stage_discharge``) cannot calibrate the slope, because its level is not the normal stage of the section (:func:`check_rating`), and a run without a positive prescribed discharge stops with a message instead of applying no shift. One slope is calibrated for all situations, so the calibrated relation is a whole stage-discharge curve, and a validation at another discharge gets the level of that curve. HydroBayesCal samples ``log10`` of the slope (parameter ``f.OUTFLOW_LOG_SLOPE``), because the slope spans orders of magnitude. On Inn KB15 the level of the trial, 1.31 m above the rating at 54.3 m3/s, needs a ks of 10.7 m in the outflow section (Manning n 0.21, no river is that rough) or an energy slope of 3.8e-5 instead of the bed slope of 2.0e-3 (2026-11-17).
 
-Not available yet: TELEMAC-3D, a level from TELEMAC's own Z(Q) curve
-(``normal_depth``) and outflow lines without a level (``free``, ``overflow``).
+Not available yet: TELEMAC-3D, a level from TELEMAC's own Z(Q) curve (``normal_depth``) and outflow lines without a level (``free``, ``overflow``).
 """
 
 from __future__ import annotations
@@ -261,6 +216,12 @@ def slope_source(section: Section, log_slope: float | None = None) -> str:
         "      DO AXQ_K = 1, NDEBIT",
         "        AXQ_Q = AXQ_Q + MAX(DEBIT(AXQ_K), 0.D0)",
         "      ENDDO",
+        "      IF(AXQ_Q.LE.0.D0) THEN",
+        "        WRITE(LU,*) 'USER_SL (AXQUA): NO POSITIVE PRESCRIBED FLOWRATE,'",
+        "        WRITE(LU,*) 'THE ENERGY SLOPE AT THE OUTLET WOULD NOT ACT'",
+        "        CALL PLANTE(1)",
+        "        STOP",
+        "      ENDIF",
         "      IF(AXQ_Q.NE.AXQ_QDONE.OR.AXQ_S.NE.AXQ_SDONE) THEN",
         "        AXQ_SHIFT = AXQ_STAGE(AXQ_Q, AXQ_S) - AXQ_STAGE(AXQ_Q, AXQ_S0)",
         "        AXQ_QDONE = AXQ_Q",
@@ -273,14 +234,19 @@ def slope_source(section: Section, log_slope: float | None = None) -> str:
         "      CONTAINS",
         "!",
         "!     normal stage of the section for the discharge AXQ_QQ at the",
-        "!     energy slope AXQ_SS: bisection between the thalweg and 10 m",
-        "!     above the highest bed point",
+        "!     energy slope AXQ_SS: bisection between the thalweg and a level",
+        "!     10 m above the highest bed point, raised in steps of 10 m",
+        "!     until the section carries the discharge",
         "      DOUBLE PRECISION FUNCTION AXQ_STAGE(AXQ_QQ, AXQ_SS)",
         "      DOUBLE PRECISION, INTENT(IN) :: AXQ_QQ, AXQ_SS",
         "      DOUBLE PRECISION AXQ_LO, AXQ_HI, AXQ_MID",
         "      INTEGER AXQ_IT",
         "      AXQ_LO = MINVAL(AXQ_ZB)",
         "      AXQ_HI = MAXVAL(AXQ_ZB) + 10.D0",
+        "      DO AXQ_IT = 1, 100",
+        "        IF(AXQ_CONVEY(AXQ_HI, AXQ_SS).GE.AXQ_QQ) EXIT",
+        "        AXQ_HI = AXQ_HI + 10.D0",
+        "      ENDDO",
         "      DO AXQ_IT = 1, 80",
         "        AXQ_MID = 0.5D0*(AXQ_LO + AXQ_HI)",
         "        IF(AXQ_CONVEY(AXQ_MID, AXQ_SS).LT.AXQ_QQ) THEN",
@@ -330,15 +296,45 @@ def slope_source(section: Section, log_slope: float | None = None) -> str:
     return "\n".join(lines) + "\n"
 
 
+def check_rating(cfg, section: Section) -> None:
+    """Refuse the energy slope for a case whose rating curve is not the normal stage of its outflow section.
+
+    A rating curve the case gives (``boundaries.stage_discharge``) is measured or comes from elsewhere: the levels of the runs are read from it, and the shift of the section's normal stage that the routine adds would be an offset of no defined meaning on top of it. A curve that aXqua derived from the section (``rating_method: section``) is told by its levels, which equal the normal stage of the section at the reach slope. A derived curve from before the DEM, the outflow line or the roughness changed no longer does, and is refused too, because the runs would read their levels from it.
+    """
+    from axqua.core.errors import ConfigError
+    from axqua.hydraulics import read_rating_pairs
+
+    given = getattr(cfg.boundaries, "stage_discharge", None)
+    if given is None or not Path(given).is_file():
+        return
+    try:
+        pairs = list(zip(*read_rating_pairs(Path(given))))
+    except (ValueError, OSError):
+        pairs = []
+    if pairs and all(abs(section.stage(q) - z) <= 2e-3 for q, z in pairs):
+        return
+    raise ConfigError(
+        f"the levels of the rating curve {Path(given).name} (boundaries.stage_discharge) "
+        "are not the normal stage of the outflow section as it is now, so an energy slope "
+        "at the outlet has no meaning there", subject="calibration.outflow_slope",
+        remedy="If aXqua derived that curve before the DEM, the outflow line or the "
+               "roughness changed, delete the file so that it is derived again. If it is "
+               "a measured curve, calibrate an offset of the outflow level "
+               "(calibration.outflow_offset) instead, or remove boundaries.stage_discharge "
+               "so that the rating comes from the outflow section.")
+
+
 def write_for(cfg, folder: Path, which: str | None = None) -> Path:
-    """Write the routine of the outflow level the case calibrates into *folder*, at its neutral value: offset 0, or the reach slope. *which* (``"offset"``/``"slope"``) overrides the case's own choice (the validation takes it from the calibrated values)."""
+    """Write the routine of the outflow level the case calibrates into *folder*, at its neutral value: offset 0, or the reach slope. *which* (``"offset"``/``"slope"``) overrides the case's own choice (the validation takes it from the calibrated values). The slope is refused for a case with a rating curve of its own (:func:`check_rating`)."""
     which = which or kind(cfg) or "offset"
     if which == "offset":
         return write(folder)
+    section = section_of(cfg)
+    check_rating(cfg, section)
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     path = folder / FILE
-    path.write_text(slope_source(section_of(cfg)), encoding="utf-8")
+    path.write_text(slope_source(section), encoding="utf-8")
     return path
 
 
@@ -415,37 +411,47 @@ def calibrated(names) -> bool:
     return any(str(name).strip() in NAMES for name in names)
 
 
+def key(cfg, which: str | None = None) -> str:
+    """The setting that calibrates the outflow level, for messages: ``calibration.outflow_offset`` or ``calibration.outflow_slope``. *which* (``"offset"``/``"slope"``) names it when the caller knows it, as the validation does from the calibrated values; else it is the case's own."""
+    return f"calibration.outflow_{which or kind(cfg) or 'offset'}"
+
+
 def check(cfg) -> None:
     """Refuse a calibration of the outflow level that the case cannot apply."""
     from axqua.core.boundaries import outlet_level
     from axqua.core.errors import ConfigError
 
     which = kind(cfg) or "offset"
-    key = f"calibration.outflow_{which}"
+    setting = key(cfg, which)
     if cfg.calibration.solver_name != "Telemac2d":
         raise ConfigError("the outflow level can only be calibrated with TELEMAC-2D "
                           "(not yet available for TELEMAC-3D)",
-                          subject=key, remedy=f"Remove {key}.")
+                          subject=setting, remedy=f"Remove {setting}.")
     level = outlet_level(cfg.outflow_condition)
     if level not in LEVEL_KINDS:
         raise ConfigError(
             f"the outflow condition {cfg.outflow_condition!r} prescribes no level that "
-            f"the {which} could change", subject=key,
-            remedy=f"Use outflow_condition: stage_discharge or elevation, or remove {key}.")
+            f"the {which} could change", subject=setting,
+            remedy=f"Use outflow_condition: stage_discharge or elevation, or remove {setting}.")
+    if which == "slope" and getattr(cfg, "hydrology_mode", False):
+        raise ConfigError(
+            "a hydrology case is driven by its rain and has no steady discharge whose "
+            "rating an energy slope at the outlet could change", subject=setting,
+            remedy=f"Remove {setting}.")
     method = getattr(cfg.boundaries, "rating_method", "trapezoid")
     if which == "slope" and (level != "rating" or method != "section"):
         source = ("a fixed level (elevation)" if level == "fixed"
                   else f"a rating by the method {method!r}")
         raise ConfigError(
             "the energy slope at the outlet is calibrated in the rating of the outflow "
-            f"section, but the case takes its outflow level from {source}", subject=key,
+            f"section, but the case takes its outflow level from {source}", subject=setting,
             remedy="Use outflow_condition: stage_discharge with rating_method: section, "
                    "or calibrate an offset (calibration.outflow_offset) instead.")
     if cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran":
         raise ConfigError(
             "the outflow level and a gain-lose reach both need the Fortran file "
             "HydroBayesCal rewrites; calibrating both is not yet available",
-            subject=key, remedy=f"Remove {key} or the gain-lose reach.")
+            subject=setting, remedy=f"Remove {setting} or the gain-lose reach.")
 
 
 def folder_name(value) -> str:
@@ -466,26 +472,25 @@ def own_routines(folder: Path) -> list[str]:
     return found
 
 
-def check_folder(cfg, model_dir=None) -> None:
-    """Refuse a case whose user Fortran folder HydroBayesCal does not rewrite, or which holds a ``USER_SL`` of its own."""
+def check_folder(cfg, model_dir=None, which: str | None = None) -> None:
+    """Refuse a case whose user Fortran folder HydroBayesCal does not rewrite, or which holds a ``USER_SL`` of its own. *which* names the setting in the messages (:func:`key`)."""
     from axqua.core.errors import ConfigError
 
+    setting = key(cfg, which)
     if folder_name(cfg.user_fortran_dir) != FOLDER:
         raise ConfigError(
             f"the user Fortran folder of the case is {cfg.user_fortran_dir!r}, but "
             f"HydroBayesCal rewrites the routine of the outflow level in {FOLDER}/{FILE}",
             subject="user_fortran_dir",
-            remedy=f"Name the folder {FOLDER} (user_fortran_dir), or remove "
-                   "calibration.outflow_offset.")
+            remedy=f"Name the folder {FOLDER} (user_fortran_dir), or remove {setting}.")
     folder = Path(model_dir or cfg.model_dir) / FOLDER
     mine = own_routines(folder)
     if mine:
         raise ConfigError(
             f"{folder} holds a routine USER_SL of the case ({', '.join(mine)}), which "
             "the calibration of the outflow level would replace",
-            subject="calibration.outflow_offset",
-            remedy="Remove calibration.outflow_offset, or move the routine out of the "
-                   "folder.")
+            subject=setting,
+            remedy=f"Remove {setting}, or move the routine out of the folder.")
 
 
 def prepare(cfg, model_dir=None) -> Path:
@@ -495,8 +500,8 @@ def prepare(cfg, model_dir=None) -> Path:
     return write_for(cfg, Path(model_dir or cfg.model_dir) / FOLDER)
 
 
-def with_fortran_folder(cfg, text: str) -> str:
-    """*text* of a steering file that names ``user_fortran``; a steering file that names another folder or file is refused, because TELEMAC would not compile the routine HydroBayesCal rewrites."""
+def with_fortran_folder(cfg, text: str, which: str | None = None) -> str:
+    """*text* of a steering file that names ``user_fortran``; a steering file that names another folder or file is refused, because TELEMAC would not compile the routine HydroBayesCal rewrites. *which* names the setting in the message (:func:`key`)."""
     from axqua.core.errors import ConfigError
     from axqua.solvers.telemac.steering import keyword_spans, set_keyword
 
@@ -510,7 +515,7 @@ def with_fortran_folder(cfg, text: str) -> str:
             f"of the outflow level is compiled only from the folder {FOLDER}",
             subject="FORTRAN FILE",
             remedy=f"Put the user routines of the case into the folder {FOLDER} and "
-                   "name it in FORTRAN FILE, or remove calibration.outflow_offset.")
+                   f"name it in FORTRAN FILE, or remove {key(cfg, which)}.")
     return set_keyword(text, "FORTRAN FILE", f"'{FOLDER}'", append=True)
 
 

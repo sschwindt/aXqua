@@ -530,8 +530,9 @@ def run_single_flow_calibration(
     if used:
         cfg.calibration.control_file = used[0]
         if prepare_only:
-            print(f"  a calibration run by hand leaves its last offset in "
-                  f"{cfg.model_path('user_fortran')}/user_sl.f; aXqua's own runs put 0 back")
+            print(f"  a calibration run by hand leaves the last sampled outflow level in "
+                  f"{cfg.model_path('user_fortran')}/user_sl.f; aXqua's own runs put the "
+                  "neutral value back (offset 0, or the slope of the reach)")
 
     def emit(complete: bool, only_bal: bool) -> Path:
         return emit_hbc_config(cfg, csv, complete_bal_mode=complete,

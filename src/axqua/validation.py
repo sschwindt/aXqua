@@ -22,8 +22,8 @@ the calibration at the discharge of the case ran that file (:func:`calibration_s
 
 The calibrated values are the **per-parameter posterior maxima** of the newest
 calibration (:func:`calibrated_parameters`): the peak of each parameter's own posterior,
-read from what HydroBayesCal saved (``marginal_optima``, since HydroBayesCal 1.13.0 its
-calibrated set as well). They are written
+the tallest bar of the histogram of its posterior samples (:func:`marginal_peak`, the
+histogram the calibration report draws). They are written
 into copies of the files HydroBayesCal changed during the calibration, by the same
 rules: ``zone<N>`` is the coefficient of friction zone N in the friction table,
 ``f.<NAME>`` a constant in the user Fortran file, and any other name a keyword of the
@@ -51,8 +51,9 @@ import numpy as np
 log = logging.getLogger("axqua")
 
 __all__ = ["CalibratedSet", "ValidationReport", "ValidationSetup", "boundaries_of",
-           "build", "calibrated_parameters", "compare", "evaluate", "inside_model",
-           "situation_named", "slug", "statistics"]
+           "build", "calibrated_from", "calibrated_parameters", "compare", "evaluate",
+           "inside_model", "iteration_entry", "last_iteration", "marginal_peak",
+           "peak_bins", "situation_named", "slug", "statistics"]
 
 RESULTS = "auto-saved-results-HydroBayesCal"
 FOLDER = "validation"
@@ -109,15 +110,102 @@ class CalibratedSet:
         return {name: float(value) for name, value in zip(self.names, self.values)}
 
 
+#: Average number of posterior samples per histogram bar when the peak is read, and the
+#: fewest bars, as HydroBayesCal's ``marginal_bin_count`` sets them (since 1.13.0).
+SAMPLES_PER_BIN = 25
+MIN_BINS = 8
+
+
+def last_iteration(data: dict) -> int | None:
+    """Index of the last iteration a HydroBayesCal result holds, or None.
+
+    HydroBayesCal sets aside one entry per iteration when the calibration starts and fills
+    them in as it goes. The entries of the iterations still to come stay ``None`` (0 in its
+    arrays), so the last entry is empty while the calibration runs, and stays empty for a
+    calibration that stopped before its last iteration.
+    """
+    for key in ("posterior", "marginal_optima", "joint_optimum"):
+        values = data.get(key)
+        if values is None:
+            continue
+        filled = [i for i, value in enumerate(values)
+                  if value is not None and np.size(value)]
+        if filled:
+            return filled[-1]
+    return None
+
+
+def iteration_entry(data: dict, key: str, index: int | None):
+    """The entry of *key* for iteration *index* of a HydroBayesCal result, or None."""
+    values = data.get(key)
+    if values is None or index is None or index >= len(values):
+        return None
+    return values[index]
+
+
+def peak_bins(column) -> int:
+    """Number of bars of the histogram from which the peak of one posterior is read.
+
+    HydroBayesCal's rule: the Freedman-Diaconis width over the range the samples occupy,
+    at least the Sturges number, and at most as many bars as hold 25 samples each on
+    average, but never fewer than 8. With fewer samples per bar, a bar that is one or two
+    samples taller than its neighbors is noise. A row that occurs several times (a
+    resampled posterior) counts as one sample with a weight (Kish's effective size).
+    """
+    column = np.asarray(column, dtype=float)
+    repeats = np.unique(column, return_counts=True)[1].astype(float)
+    n = max(int(round(repeats.sum() ** 2 / np.sum(repeats ** 2))), 1) if repeats.size else 1
+    count = int(np.ceil(np.log2(max(n, 2)) + 1))
+    span = float(np.ptp(column)) if column.size else 0.0
+    iqr = float(np.subtract(*np.percentile(column, [75, 25]))) if column.size else 0.0
+    if iqr > 0 and span > 0:
+        count = max(count, int(np.ceil(span / (2.0 * iqr / n ** (1.0 / 3.0)))))
+    return int(np.clip(count, MIN_BINS, max(MIN_BINS, n // SAMPLES_PER_BIN)))
+
+
+def marginal_peak(column):
+    """Peak of the posterior of one parameter, and the histogram it is read from.
+
+    The peak is the tallest bar of the histogram of the posterior samples over the range
+    they occupy (:func:`peak_bins` bars), refined to the mean of the samples in that bar.
+    Tied bars that touch are one flat top and are read together; of tied bars that do
+    not touch, the one nearest the posterior median counts. The calibration report draws
+    this histogram, so the calibrated value always lies in its tallest bar.
+
+    HydroBayesCal reports the median of this peak over 200 bootstrap resamples instead.
+    Where the posterior samples form two groups, the resampled peaks jump between them,
+    and their median can fall between the groups, outside the tallest bar of any
+    histogram: zone 5 of the inn-KB15 trial after 48 runs gave 12.3 cm, with the tallest
+    bar at 6.7 to 9.6 cm.
+
+    Returns ``(peak, counts, edges)``. For fewer than five samples, or samples that are
+    all equal, the peak is NaN and counts and edges are None.
+    """
+    column = np.asarray(column, dtype=float).ravel()
+    column = column[np.isfinite(column)]
+    if column.size < 5 or np.ptp(column) <= 0:
+        return float("nan"), None, None
+    counts, edges = np.histogram(column, bins=peak_bins(column),
+                                 range=(float(column.min()), float(column.max())))
+    top = np.flatnonzero(counts == counts.max())
+    groups = np.split(top, np.flatnonzero(np.diff(top) > 1) + 1)
+    median = float(np.median(column))
+    group = min(groups, key=lambda g: abs(0.5 * (edges[g[0]] + edges[g[-1] + 1]) - median))
+    low, high = edges[group[0]], edges[group[-1] + 1]
+    inside = column[(column >= low) & (column <= high)]
+    peak = float(inside.mean()) if inside.size else float(0.5 * (low + high))
+    return peak, counts, edges
+
+
 def calibrated_parameters(cfg) -> CalibratedSet:
     """The per-parameter posterior maxima of the newest calibration of this case.
 
-    The peak of each parameter's own posterior (``marginal_optima`` of the last
-    iteration), as HydroBayesCal 1.13.0 reports the calibrated set; the user's decision
-    of 2026-11-11, since a roughness zone is read and reported per zone. A result without
-    finite peaks gives the joint posterior maximum, and one without that the mean of the
-    posterior sample; :attr:`CalibratedSet.estimate` says which.
-    HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.
+    The peak of each parameter's own posterior: the tallest bar of the histogram of its
+    posterior samples in the last iteration the calibration finished
+    (:func:`marginal_peak`, the histogram the calibration report draws). That is the
+    user's decision of 2026-11-11, since a roughness zone is read and reported per zone.
+    HydroBayesCal saves one dictionary per combination of calibration targets; the
+    newest is read (see :func:`calibrated_from`).
     """
     import pickle
 
@@ -139,28 +227,47 @@ def calibrated_parameters(cfg) -> CalibratedSet:
     source = found[-1]
     with open(source, "rb") as handle:
         data = pickle.load(handle)          # nosec B301 - written by the calibration
+    return calibrated_from(data, source)
+
+
+def calibrated_from(data: dict, source: Path) -> CalibratedSet:
+    """The calibrated set of the HydroBayesCal result *data*, read from *source*.
+
+    The per-parameter peaks of the posterior of the last finished iteration
+    (:func:`marginal_peak`). Where a peak cannot be read (fewer than five samples), the
+    peaks HydroBayesCal stored count, then its joint posterior maximum, then the mean of
+    the posterior sample; :attr:`CalibratedSet.estimate` says which.
+    """
+    from axqua.core.errors import ConfigError
+
     names = [str(name) for name in data.get("calibration_parameters") or []]
+    index = last_iteration(data)
+    posterior = iteration_entry(data, "posterior", index)
+    sample = (np.atleast_2d(np.asarray(posterior, dtype=float))
+              if posterior is not None and np.size(posterior) else None)
     values, estimate = None, None
-    for key, label in (("marginal_optima", "per-parameter posterior maximum"),
-                       ("joint_optimum", "joint posterior maximum")):
-        stored = data.get(key)
-        stored = [] if stored is None else stored
-        if len(stored) and stored[-1] is not None:
-            candidate = np.asarray(stored[-1], dtype=float).ravel()
-            if candidate.size == len(names) and np.isfinite(candidate).all():
-                values, estimate = candidate, label
-                break
+    if sample is not None and names and sample.shape[1] == len(names):
+        peaks = np.array([marginal_peak(sample[:, k])[0] for k in range(len(names))])
+        if np.isfinite(peaks).all():
+            values, estimate = peaks, "per-parameter posterior maximum"
+    if values is None:
+        for key, label in (("marginal_optima", "per-parameter posterior maximum"),
+                           ("joint_optimum", "joint posterior maximum")):
+            stored = iteration_entry(data, key, index)
+            if stored is not None:
+                candidate = np.asarray(stored, dtype=float).ravel()
+                if candidate.size == len(names) and np.isfinite(candidate).all():
+                    values, estimate = candidate, label
+                    break
     # HydroBayesCal writes NaN as the joint maximum when too few prior samples survive
     # the likelihood to estimate a density (one, on the example of 2026-10-15, whose
     # model was 37 % too slow at every point). A NaN would be written into the
     # friction table of the validation run and wreck it, so the mean of the
     # posterior sample stands in, and the estimate says how many samples it rests on.
     if values is None or values.size != len(names) or not np.isfinite(values).all():
-        posterior = data.get("posterior")
-        if posterior is None or not len(posterior):
+        if sample is None:
             raise ConfigError(f"{source} holds no posterior", subject="calibration",
                               remedy="Run the calibration again.")
-        sample = np.atleast_2d(np.asarray(posterior[-1], dtype=float))
         values = sample.mean(axis=0).ravel()
         estimate = ("posterior mean" if len(sample) > 1 else
                     "the only posterior sample (no joint maximum could be estimated)")
@@ -431,14 +538,14 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
         # calibration compiled it from (a case without user Fortran gets the folder),
         # and a run long enough for the level to rise and the reach to settle. The
         # routine of the slope solves the rating at the discharge of the situation.
-        offset.check_folder(cfg)
-        text = offset.with_fortran_folder(cfg, text)
+        which = "slope" if level[0] == offset.SLOPE_VARIABLE else "offset"
+        offset.check_folder(cfg, which=which)
+        text = offset.with_fortran_folder(cfg, text, which)
         folder = _keyword(text, "FORTRAN FILE")
         routine = model / folder / offset.FILE
         if not routine.is_file() or not re.search(
                 rf"^\s*{level[0]}\s*=", routine.read_text(encoding="utf-8"), flags=re.M):
-            offset.write_for(cfg, model / folder,
-                             "slope" if level[0] == offset.SLOPE_VARIABLE else "offset")
+            offset.write_for(cfg, model / folder, which)
         text, short = offset.with_duration(text)
         if short is not None:
             notes.append(f"DURATION {short:g} s ended before the outflow level had risen "

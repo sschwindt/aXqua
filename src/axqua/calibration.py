@@ -307,6 +307,18 @@ def merged_parameters(cfg: Config) -> list:
         by_name[p.name] = p
     for p in targets_mod.read_target_parameters(cfg):
         by_name[p.name] = p
+    # The outflow level is declared by calibration.outflow_offset or outflow_slope only: the routine, the files a run rewrites and the ramp follow that setting, and a row of the parameter list or the template named neither (review of 2026-11-18).
+    reserved = {name.upper() for name in outflow_offset.NAMES}
+    rows = sorted(name for name in by_name if str(name).strip().upper() in reserved)
+    if rows:
+        from axqua.core.errors import ConfigError
+
+        raise ConfigError(
+            f"the parameter list names {', '.join(rows)}: the outflow level is calibrated "
+            "through calibration.outflow_offset or calibration.outflow_slope",
+            subject="calibration.parameters",
+            remedy="Remove the row and give the range as calibration.outflow_offset "
+                   "(an offset in m) or calibration.outflow_slope (an energy slope).")
     offset = outflow_offset.parameter(cfg)
     if offset is not None:
         by_name[offset.name] = offset

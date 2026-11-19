@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from test_calibration_zones import LEFT, Y0, H, _case
 
@@ -54,15 +55,49 @@ def test_the_report_has_the_posteriors_the_zone_map_and_the_evidence(tmp_path):
         assert Path(path).stat().st_size > 0
     summary = json.loads(written["summary"].read_text())
     (zone1,) = summary["parameters"]
-    # the per-parameter maximum, not the joint one
-    assert zone1["value"] == 0.118 and zone1["joint_maximum"] == 0.125
+    # the per-parameter maximum, read off the histogram the report draws: neither the
+    # joint maximum nor the peak HydroBayesCal stored (0.118)
+    from axqua.validation import marginal_peak
+
+    with open(next(folder.rglob("BAL_dictionary.pkl")), "rb") as handle:
+        posterior = pickle.load(handle)["posterior"][-1]
+    peak = marginal_peak(posterior[:, 0])[0]
+    assert zone1["value"] == pytest.approx(peak) and zone1["joint_maximum"] == 0.125
     assert summary["estimate"] == "per-parameter posterior maximum"
     assert zone1["points"] == 3 and "well determined" in zone1["verdict"]
     assert summary["zone_plan"]["excluded_zones"] == [2]
     zones = gpd.read_file(written["zones"]).set_index("zone")
-    assert zones.loc[1, "status"] == "calibrated" and zones.loc[1, "ks_cm"] == 11.8
+    assert zones.loc[1, "status"] == "calibrated"
+    assert zones.loc[1, "ks_cm"] == pytest.approx(round(100 * peak, 2))
     assert zones.loc[2, "status"] == "left out"
     assert zones.loc[2, "label"].startswith("Zone 2\nks ")
+
+
+def test_a_calibration_that_has_not_reached_its_last_iteration_has_a_report(tmp_path):
+    """HydroBayesCal sets aside one entry per iteration and fills them in as it goes, so the
+    last entry stays empty until the last iteration has run (the inn-KB15 trial after 18
+    of 20). The report shows the last iteration that has run, and only the iterations
+    that have run in its evidence figure."""
+    from axqua.calibration_report import write_report
+
+    cfg, folder = _calibrated_case(tmp_path)
+    path = next(folder.rglob("BAL_dictionary.pkl"))
+    with open(path, "rb") as handle:
+        data = pickle.load(handle)
+    for key, value in list(data.items()):
+        if isinstance(value, list) and len(value) == 2:
+            data[key] = value + [None]
+    data["log_BME"] = np.array([-60.0, -59.0, 0.0])
+    data["RE"] = [1.0, 2.0, None]
+    data["N_tp"] = np.array([16.0, 17.0, 0.0])
+    with open(path, "wb") as handle:
+        pickle.dump(data, handle)
+    written = write_report(cfg, folder)
+    summary = json.loads(written["summary"].read_text())
+    assert summary["evidence"] == {"runs": [16, 17], "log_bme": [-60.0, -59.0],
+                                   "relative_entropy": [1.0, 2.0]}
+    assert summary["posterior_size"] == 400
+    assert summary["parameters"][0]["joint_maximum"] == 0.125
 
 
 def test_a_folder_without_a_finished_calibration_has_no_report(tmp_path):

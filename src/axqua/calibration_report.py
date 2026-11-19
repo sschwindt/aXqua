@@ -7,8 +7,8 @@ order of 2026-11-11, after the inn-KB15 trial):
 
 * ``posteriors.png``: for every calibrated parameter, the prior (the range of the
   roughness table) and the posterior of the last iteration, with the calibrated value
-  (:func:`axqua.validation.calibrated_parameters`, the per-parameter posterior maximum)
-  marked, and one line on what the data say: how many calibration points lie in the zone,
+  (:func:`axqua.validation.calibrated_from`, the per-parameter posterior maximum, the
+  tallest bar of the histogram drawn) marked, and one line on what the data say: how many calibration points lie in the zone,
   whether the posterior is narrow, not identifiable or pinned at a limit, whether the
   largest ks was lowered for shallow water (:mod:`axqua.calibration_zones`);
 * ``roughness-zones.png``: a map of every roughness zone with its ks (calibrated, fixed or
@@ -51,13 +51,6 @@ _ZONE = re.compile(r"^zone(\d+)$")
 def _zone(name: str) -> int | None:
     match = _ZONE.match(str(name).strip())
     return int(match.group(1)) if match else None
-
-
-def _last(data: dict, key: str):
-    values = data.get(key)
-    if values is None or not len(values):
-        return None
-    return values[-1]
 
 
 def _dictionary(folder: Path) -> tuple[Path, dict] | None:
@@ -124,7 +117,7 @@ def _value_text(value: float, zone: bool, name: str = "") -> str:
 def summarize(cfg, folder: Path) -> dict | None:
     """The numbers of the report, or None when *folder* holds no finished calibration."""
     from axqua.calibration_zones import read_plan
-    from axqua.validation import calibrated_parameters
+    from axqua.validation import calibrated_from, iteration_entry, last_iteration
 
     found = _dictionary(folder)
     if found is None:
@@ -132,13 +125,19 @@ def summarize(cfg, folder: Path) -> dict | None:
     source, data = found
     names = [str(n) for n in data.get("calibration_parameters") or []]
     ranges = [list(map(float, r)) for r in data.get("param_values") or []]
-    calibrated = calibrated_parameters(cfg)
+    # the last iteration that has run: the entries of the iterations to come are empty
+    index = last_iteration(data)
+
+    def last(key):
+        return iteration_entry(data, key, index)
+
+    calibrated = calibrated_from(data, source)
     values = calibrated.as_dict()
-    spread = _last(data, "marginal_peak_spread")
-    hdi = _last(data, "marginal_hdi")
-    reduction = _last(data, "variance_reduction")
-    flags = _last(data, "identifiability_flags") or [[] for _ in names]
-    joint = _last(data, "joint_optimum")
+    spread = last("marginal_peak_spread")
+    hdi = last("marginal_hdi")
+    reduction = last("variance_reduction")
+    flags = last("identifiability_flags") or [[] for _ in names]
+    joint = last("joint_optimum")
     plan = read_plan(folder) or {}
     zones = {z["zone"]: z for z in plan.get("zones") or []}
     parameters = []
@@ -158,21 +157,24 @@ def summarize(cfg, folder: Path) -> dict | None:
         }
         entry["verdict"] = _verdict(info, entry["flags"], entry["variance_reduction"])
         parameters.append(entry)
-    log_bme = data.get("log_BME")
-    entropy = data.get("RE")
-    runs = data.get("N_tp")
+    def history(key):
+        values = data.get(key)
+        if values is None or index is None:
+            return []
+        return [float(v) for v in list(values)[:index + 1] if v is not None]
+
     return {
         "source": str(source),
         "estimate": calibrated.estimate,
         "parameters": parameters,
         "zone_plan": plan,
         "evidence": {
-            "runs": [int(v) for v in runs] if runs is not None else [],
-            "log_bme": [float(v) for v in log_bme] if log_bme is not None else [],
-            "relative_entropy": [float(v) for v in entropy] if entropy is not None else [],
+            "runs": [int(v) for v in history("N_tp")],
+            "log_bme": history("log_BME"),
+            "relative_entropy": history("RE"),
         },
-        "posterior_size": int(len(np.atleast_2d(_last(data, "posterior")))),
-        "_posterior": np.atleast_2d(np.asarray(_last(data, "posterior"), dtype=float)),
+        "posterior_size": int(len(np.atleast_2d(last("posterior")))),
+        "_posterior": np.atleast_2d(np.asarray(last("posterior"), dtype=float)),
     }
 
 
@@ -189,9 +191,15 @@ def _style():
 
 
 def plot_posteriors(summary: dict, path: Path) -> Path:
-    """One panel per calibrated parameter: prior band, posterior, calibrated value."""
+    """One panel per calibrated parameter: prior band, posterior, calibrated value.
+
+    The posterior is the histogram the calibrated value is read from
+    (:func:`axqua.validation.marginal_peak`), so the value lies in its tallest bar.
+    """
     from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
+
+    from axqua.validation import marginal_peak
 
     plt = _style()
     parameters = summary["parameters"]
@@ -207,16 +215,20 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
         zone = entry["zone"] is not None
         scale = 100.0 if zone else 1.0
         lo, hi = (entry["prior"] or [np.nanmin(posterior[:, k]), np.nanmax(posterior[:, k])])
+        _, counts, edges = marginal_peak(posterior[:, k])
+        if counts is None:        # fewer than five samples: no peak, only where they are
+            counts, edges = np.histogram(posterior[:, k], bins=np.linspace(lo, hi, 21))
         lo, hi = lo * scale, hi * scale
-        column = posterior[:, k] * scale
-        edges = np.linspace(lo, hi, 21)
-        density, _ = np.histogram(column, bins=edges, density=True)
+        edges = np.asarray(edges, dtype=float) * scale
+        density = counts / max(int(counts.sum()), 1) / np.diff(edges)
         prior = 1.0 / (hi - lo) if hi > lo else 0.0
         ax.set_facecolor(SURFACE)
         ax.axhspan(0, prior, color=FIXED, lw=0, zorder=1)
+        # bars narrower than 2 % of the panel get no gap, or the gap would hide them
+        narrow = hi > lo and float(np.min(np.diff(edges))) < 0.02 * (hi - lo)
         ax.bar(edges[:-1], density, width=np.diff(edges), align="edge",
                color=COLORS[k % len(COLORS)] if k < len(COLORS) else MUTED,
-               edgecolor=SURFACE, linewidth=1.5, zorder=2)
+               edgecolor=SURFACE, linewidth=0 if narrow else 1.5, zorder=2)
         top = max(float(density.max()) if density.size else 0.0, prior) * 1.32 or 1.0
         value = entry["value"]
         if value is not None:
@@ -251,7 +263,8 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
                  fontsize=14, fontweight="bold", y=0.995)
     fig.legend(handles=[Patch(color=FIXED, label="prior (calibration range)"),
                         Patch(color=MUTED, label="posterior"),
-                        Line2D([], [], color=INK, lw=2, label="calibrated value")],
+                        Line2D([], [], color=INK, lw=2,
+                               label="calibrated value (tallest bar)")],
                loc="upper center", ncol=3, frameon=False, bbox_to_anchor=(0.5, 0.955))
     fig.tight_layout(rect=(0, 0, 1, 0.9))
     fig.savefig(path, dpi=150, facecolor=SURFACE)

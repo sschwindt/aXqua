@@ -1,6 +1,6 @@
 ---
 name: openfoam-isar-findings
-description: What running the OpenFOAM free-surface backend on the whole Isar reach found (2026-10-13/14: two-phase setup, meshing, stability, budget) and the outlet with a stage-discharge relation plus the OpenFOAM mesh study (2026-10-17). Use when debugging or changing the OpenFOAM backend's case setup, outlet condition, mesh study or run behavior on a real reach.
+description: "What running the OpenFOAM free-surface backend on the whole Isar reach found (2026-10-13/14: two-phase setup, meshing, stability, budget) and the outlet with a stage-discharge relation plus the OpenFOAM mesh study (2026-10-17). Use when debugging or changing the OpenFOAM backend's case setup, outlet condition, mesh study or run behavior on a real reach."
 ---
 
 ## A whole river reach in two phases: what the Isar example found (2026-10-13/14)

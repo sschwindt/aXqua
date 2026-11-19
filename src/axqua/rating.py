@@ -298,10 +298,7 @@ def _sorted_section(station, bed, ks, slope):
 def stage_for_discharge(discharge, *, station, bed, ks, slope, freeboard=10.0):
     """Water level [m] at which a **surveyed cross-section** conveys *discharge*.
 
-    Inverts the section conveyance (:func:`_section_conveyance`) by bisection between
-    the section thalweg and its highest point plus *freeboard*. This is the normal
-    (uniform-flow) stage of the section: the level at which the friction slope equals
-    the bed *slope*.
+    Inverts the section conveyance (:func:`_section_conveyance`) by bisection between the section thalweg and its highest point plus *freeboard*, raised by *freeboard* at a time until the section carries the discharge. This is the normal (uniform-flow) stage of the section: the level at which the friction slope equals the bed *slope*.
 
     Used both by :func:`section_rating` (one stage per requested discharge, written to
     a rating CSV) and by the pre-wet initial condition, which needs the normal stage of
@@ -311,6 +308,11 @@ def stage_for_discharge(discharge, *, station, bed, ks, slope, freeboard=10.0):
     station, bed, ks = _sorted_section(station, bed, ks, slope)
     q_of = _section_conveyance(station, bed, ks, slope)
     lo, hi = float(bed.min()), float(bed.max()) + float(freeboard)
+    # A small energy slope (calibration.outflow_slope) can need a level above that bracket; a fixed bracket returned its top for every smaller slope without a word (review of 2026-11-18). The routine of the outflow slope raises it the same way.
+    for _ in range(100):
+        if q_of(hi) >= discharge:
+            break
+        hi += float(freeboard)
     for _ in range(80):
         mid = 0.5 * (lo + hi)
         if q_of(mid) < discharge:
@@ -490,8 +492,8 @@ def reach_slope(cfg) -> float:
                 "geodata.channel_centerline samples no bed elevation in "
                 f"{cfg.geodata.dem_initial.name}, so the reach slope cannot be "
                 "inferred. Check that the centerline lies over the DEM's covered "
-                "area, or pass an explicit slope to "
-                "synthesize_outflow_rating_from_section().")
+                "area; a script can also pass the slope to "
+                "synthesize_outflow_rating_from_section(slope=...).")
         return abs(float(np.polyfit(sc[good], zc[good], 1)[0]))
 
 
