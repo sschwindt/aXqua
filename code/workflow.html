@@ -778,10 +778,7 @@ roughness defaults to the lateral-boundary friction in the config
 <dt class="sig sig-object py" id="axqua.rating.stage_for_discharge">
 <span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">stage_for_discharge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">discharge</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">station</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freeboard</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#stage_for_discharge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.rating.stage_for_discharge" title="Link to this definition"></a></dt>
 <dd><p>Water level [m] at which a <strong>surveyed cross-section</strong> conveys <em>discharge</em>.</p>
-<p>Inverts the section conveyance (<code class="xref py py-func docutils literal notranslate"><span class="pre">_section_conveyance()</span></code>) by bisection between
-the section thalweg and its highest point plus <em>freeboard</em>. This is the normal
-(uniform-flow) stage of the section: the level at which the friction slope equals
-the bed <em>slope</em>.</p>
+<p>Inverts the section conveyance (<code class="xref py py-func docutils literal notranslate"><span class="pre">_section_conveyance()</span></code>) by bisection between the section thalweg and its highest point plus <em>freeboard</em>, raised by <em>freeboard</em> at a time until the section carries the discharge. This is the normal (uniform-flow) stage of the section: the level at which the friction slope equals the bed <em>slope</em>.</p>
 <p>Used both by <a class="reference internal" href="#axqua.rating.section_rating" title="axqua.rating.section_rating"><code class="xref py py-func docutils literal notranslate"><span class="pre">section_rating()</span></code></a> (one stage per requested discharge, written to
 a rating CSV) and by the pre-wet initial condition, which needs the normal stage of
 a whole sequence of cross-sections along the reach - see
@@ -5750,8 +5747,8 @@ steady result for 1.2 residence times at the discharge of the situation
 the calibration at the discharge of the case ran that file (<code class="xref py py-func docutils literal notranslate"><span class="pre">calibration_start()</span></code>).</p>
 <p>The calibrated values are the <strong>per-parameter posterior maxima</strong> of the newest
 calibration (<a class="reference internal" href="#axqua.validation.calibrated_parameters" title="axqua.validation.calibrated_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibrated_parameters()</span></code></a>): the peak of each parameter’s own posterior,
-read from what HydroBayesCal saved (<code class="docutils literal notranslate"><span class="pre">marginal_optima</span></code>, since HydroBayesCal 1.13.0 its
-calibrated set as well). They are written
+the tallest bar of the histogram of its posterior samples (<a class="reference internal" href="#axqua.validation.marginal_peak" title="axqua.validation.marginal_peak"><code class="xref py py-func docutils literal notranslate"><span class="pre">marginal_peak()</span></code></a>, the
+histogram the calibration report draws). They are written
 into copies of the files HydroBayesCal changed during the calibration, by the same
 rules: <code class="docutils literal notranslate"><span class="pre">zone&lt;N&gt;</span></code> is the coefficient of friction zone N in the friction table,
 <code class="docutils literal notranslate"><span class="pre">f.&lt;NAME&gt;</span></code> a constant in the user Fortran file, and any other name a keyword of the
@@ -5976,15 +5973,36 @@ discharges of another situation: number, inflow or outflow, calibrated discharge
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="axqua.validation.calibrated_from">
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">calibrated_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#calibrated_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.calibrated_from" title="Link to this definition"></a></dt>
+<dd><p>The calibrated set of the HydroBayesCal result <em>data</em>, read from <em>source</em>.</p>
+<p>The per-parameter peaks of the posterior of the last finished iteration
+(<a class="reference internal" href="#axqua.validation.marginal_peak" title="axqua.validation.marginal_peak"><code class="xref py py-func docutils literal notranslate"><span class="pre">marginal_peak()</span></code></a>). Where a peak cannot be read (fewer than five samples), the
+peaks HydroBayesCal stored count, then its joint posterior maximum, then the mean of
+the posterior sample; <a class="reference internal" href="#axqua.validation.CalibratedSet.estimate" title="axqua.validation.CalibratedSet.estimate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CalibratedSet.estimate</span></code></a> says which.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a>)</p></li>
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#axqua.validation.CalibratedSet" title="axqua.validation.CalibratedSet"><em>CalibratedSet</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="axqua.validation.calibrated_parameters">
 <span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">calibrated_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#calibrated_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.calibrated_parameters" title="Link to this definition"></a></dt>
 <dd><p>The per-parameter posterior maxima of the newest calibration of this case.</p>
-<p>The peak of each parameter’s own posterior (<code class="docutils literal notranslate"><span class="pre">marginal_optima</span></code> of the last
-iteration), as HydroBayesCal 1.13.0 reports the calibrated set; the user’s decision
-of 2026-11-11, since a roughness zone is read and reported per zone. A result without
-finite peaks gives the joint posterior maximum, and one without that the mean of the
-posterior sample; <a class="reference internal" href="#axqua.validation.CalibratedSet.estimate" title="axqua.validation.CalibratedSet.estimate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CalibratedSet.estimate</span></code></a> says which.
-HydroBayesCal saves one dictionary per combination of calibration targets; the newest is read.</p>
+<p>The peak of each parameter’s own posterior: the tallest bar of the histogram of its
+posterior samples in the last iteration the calibration finished
+(<a class="reference internal" href="#axqua.validation.marginal_peak" title="axqua.validation.marginal_peak"><code class="xref py py-func docutils literal notranslate"><span class="pre">marginal_peak()</span></code></a>, the histogram the calibration report draws). That is the
+user’s decision of 2026-11-11, since a roughness zone is read and reported per zone.
+HydroBayesCal saves one dictionary per combination of calibration targets; the
+newest is read (see <a class="reference internal" href="#axqua.validation.calibrated_from" title="axqua.validation.calibrated_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibrated_from()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#axqua.validation.CalibratedSet" title="axqua.validation.CalibratedSet"><em>CalibratedSet</em></a></p>
@@ -6038,6 +6056,73 @@ measurement. Everything goes into <code class="docutils literal notranslate"><sp
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.validation.iteration_entry">
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">iteration_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#iteration_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.iteration_entry" title="Link to this definition"></a></dt>
+<dd><p>The entry of <em>key</em> for iteration <em>index</em> of a HydroBayesCal result, or None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a>)</p></li>
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.validation.last_iteration">
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">last_iteration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#last_iteration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.last_iteration" title="Link to this definition"></a></dt>
+<dd><p>Index of the last iteration a HydroBayesCal result holds, or None.</p>
+<p>HydroBayesCal sets aside one entry per iteration when the calibration starts and fills
+them in as it goes. The entries of the iterations still to come stay <code class="docutils literal notranslate"><span class="pre">None</span></code> (0 in its
+arrays), so the last entry is empty while the calibration runs, and stays empty for a
+calibration that stopped before its last iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.validation.marginal_peak">
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">marginal_peak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#marginal_peak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.marginal_peak" title="Link to this definition"></a></dt>
+<dd><p>Peak of the posterior of one parameter, and the histogram it is read from.</p>
+<p>The peak is the tallest bar of the histogram of the posterior samples over the range
+they occupy (<a class="reference internal" href="#axqua.validation.peak_bins" title="axqua.validation.peak_bins"><code class="xref py py-func docutils literal notranslate"><span class="pre">peak_bins()</span></code></a> bars), refined to the mean of the samples in that bar.
+Tied bars that touch are one flat top and are read together; of tied bars that do
+not touch, the one nearest the posterior median counts. The calibration report draws
+this histogram, so the calibrated value always lies in its tallest bar.</p>
+<p>HydroBayesCal reports the median of this peak over 200 bootstrap resamples instead.
+Where the posterior samples form two groups, the resampled peaks jump between them,
+and their median can fall between the groups, outside the tallest bar of any
+histogram: zone 5 of the inn-KB15 trial after 48 runs gave 12.3 cm, with the tallest
+bar at 6.7 to 9.6 cm.</p>
+<p>Returns <code class="docutils literal notranslate"><span class="pre">(peak,</span> <span class="pre">counts,</span> <span class="pre">edges)</span></code>. For fewer than five samples, or samples that are
+all equal, the peak is NaN and counts and edges are None.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.validation.peak_bins">
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">peak_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#peak_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.peak_bins" title="Link to this definition"></a></dt>
+<dd><p>Number of bars of the histogram from which the peak of one posterior is read.</p>
+<p>HydroBayesCal’s rule: the Freedman-Diaconis width over the range the samples occupy,
+at least the Sturges number, and at most as many bars as hold 25 samples each on
+average, but never fewer than 8. With fewer samples per bar, a bar that is one or two
+samples taller than its neighbors is noise. A row that occurs several times (a
+resampled posterior) counts as one sample with a weight (Kish’s effective size).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>

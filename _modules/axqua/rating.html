@@ -664,10 +664,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">stage_for_discharge</span><span class="p">(</span><span class="n">discharge</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">freeboard</span><span class="o">=</span><span class="mf">10.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Water level [m] at which a **surveyed cross-section** conveys *discharge*.</span>
 
-<span class="sd">    Inverts the section conveyance (:func:`_section_conveyance`) by bisection between</span>
-<span class="sd">    the section thalweg and its highest point plus *freeboard*. This is the normal</span>
-<span class="sd">    (uniform-flow) stage of the section: the level at which the friction slope equals</span>
-<span class="sd">    the bed *slope*.</span>
+<span class="sd">    Inverts the section conveyance (:func:`_section_conveyance`) by bisection between the section thalweg and its highest point plus *freeboard*, raised by *freeboard* at a time until the section carries the discharge. This is the normal (uniform-flow) stage of the section: the level at which the friction slope equals the bed *slope*.</span>
 
 <span class="sd">    Used both by :func:`section_rating` (one stage per requested discharge, written to</span>
 <span class="sd">    a rating CSV) and by the pre-wet initial condition, which needs the normal stage of</span>
@@ -677,6 +674,11 @@
     <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span> <span class="o">=</span> <span class="n">_sorted_section</span><span class="p">(</span><span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
     <span class="n">q_of</span> <span class="o">=</span> <span class="n">_section_conveyance</span><span class="p">(</span><span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
     <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">bed</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">bed</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">freeboard</span><span class="p">)</span>
+    <span class="c1"># A small energy slope (calibration.outflow_slope) can need a level above that bracket; a fixed bracket returned its top for every smaller slope without a word (review of 2026-11-18). The routine of the outflow slope raises it the same way.</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">q_of</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">discharge</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">hi</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">freeboard</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">80</span><span class="p">):</span>
         <span class="n">mid</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">lo</span> <span class="o">+</span> <span class="n">hi</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">q_of</span><span class="p">(</span><span class="n">mid</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">discharge</span><span class="p">:</span>
@@ -868,8 +870,8 @@
                 <span class="s2">"geodata.channel_centerline samples no bed elevation in "</span>
                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, so the reach slope cannot be "</span>
                 <span class="s2">"inferred. Check that the centerline lies over the DEM's covered "</span>
-                <span class="s2">"area, or pass an explicit slope to "</span>
-                <span class="s2">"synthesize_outflow_rating_from_section()."</span><span class="p">)</span>
+                <span class="s2">"area; a script can also pass the slope to "</span>
+                <span class="s2">"synthesize_outflow_rating_from_section(slope=...)."</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">sc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">zc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span></div>
 
 

@@ -2309,18 +2309,9 @@
     <span class="c1"># learning runs with these errors. For a model that cannot reproduce part of the measurements,</span>
     <span class="c1"># such as a water level held up by a riffle the terrain model does not resolve.</span>
     <span class="n">structural_error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"none"</span>
-    <span class="c1"># The outflow level as a calibration parameter: a range [min, max] in m of an offset</span>
-    <span class="c1"># added to the level every situation gets from the rating at its own discharge (or</span>
-    <span class="c1"># to boundaries.prescribed_elevation), one offset for all situations. For a reach</span>
-    <span class="c1"># whose water level is held up by a control the terrain model does not resolve or</span>
-    <span class="c1"># that lies downstream of the model (axqua.solvers.telemac.outflow_offset).</span>
+    <span class="c1"># The outflow level as a calibration parameter: a range [min, max] in m of an offset added to the level every situation gets from the rating at its own discharge (or to boundaries.prescribed_elevation), one offset for all situations. For a reach whose water level is held up by a control the terrain model does not resolve or that lies downstream of the model (axqua.solvers.telemac.outflow_offset).</span>
     <span class="n">outflow_offset</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="c1"># The outflow level as a calibration parameter through the rating of the outflow</span>
-    <span class="c1"># section (rating_method: section): a range [min, max] of the energy slope at the</span>
-    <span class="c1"># outlet [-], in place of the bed slope of the reach that the rating uses. One slope</span>
-    <span class="c1"># for all situations gives one stage-discharge curve; HydroBayesCal samples its</span>
-    <span class="c1"># log10. For a backwater from a control downstream of the model. Not together with</span>
-    <span class="c1"># outflow_offset (axqua.solvers.telemac.outflow_offset).</span>
+    <span class="c1"># The outflow level as a calibration parameter through the rating of the outflow section (rating_method: section): a range [min, max] of the energy slope at the outlet [-], in place of the bed slope of the reach that the rating uses. One slope for all situations gives one stage-discharge curve; HydroBayesCal samples its log10. For a backwater from a control downstream of the model. Not together with outflow_offset (axqua.solvers.telemac.outflow_offset).</span>
     <span class="n">outflow_slope</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="Calibration.from_dict">
