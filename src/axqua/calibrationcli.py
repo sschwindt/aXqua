@@ -9,6 +9,13 @@ calibrated with a lower largest ks, or left out. The plugin asks this before it 
 a calibration, so that the user can confirm the zones or go and look at the measurements
 in QGIS. Nothing of the case is written.
 
+``axqua calibration <case-file> --parameters`` answers instead what the calibration
+parameters of the plugin show (:mod:`axqua.calibration_parameters`): the roughness zones
+of the roughness table, whether the case can calibrate its outflow level by the energy
+slope at the outlet or by an offset, and further parameters that fit the case.
+``--slope MIN MAX`` or ``--offset MIN MAX`` adds the outflow level that range sets at the
+discharge of every calibration situation.
+
 The calibration itself is a job: ``axqua submit <case-file> --kind calibration``.
 """
 
@@ -32,7 +39,39 @@ def _parser() -> argparse.ArgumentParser:
                     "from where its measurement points lie. Run the calibration with "
                     "'axqua submit <case> --kind calibration'.")
     p.add_argument("case", type=Path, help="the case file")
+    p.add_argument("--parameters", action="store_true",
+                   help="list what the case can calibrate besides the roughness zones "
+                        "(the outflow level, further parameters) instead of the zone plan")
+    p.add_argument("--slope", nargs=2, type=float, metavar=("MIN", "MAX"),
+                   help="with --parameters: the outflow level this range of the energy "
+                        "slope at the outlet sets at the discharge of each situation")
+    p.add_argument("--offset", nargs=2, type=float, metavar=("MIN", "MAX"),
+                   help="with --parameters: the same for an offset of the outflow level [m]")
     return _common(p)
+
+
+def _parameter_lines(data: dict) -> list[str]:
+    lines = []
+    for zone in data["zones"]:
+        state = (f"calibrated between {zone['ks_min']:g} and {zone['ks_max']:g} m"
+                 if zone["calibrated"] else f"fixed at {zone['ks']:g} m")
+        lines.append(f"zone {zone['zone']}: {state}")
+    flow = data["outflow"]
+    current = flow["current"]
+    lines.append("outflow level: " + (f"{current['kind']} {current['range']}"
+                                      if current["kind"] else "not calibrated"))
+    for option in ("slope", "offset"):
+        entry = flow[option]
+        lines.append(f"  {option}: " + (f"possible, suggested {entry['suggested']}"
+                                         if entry["available"] else
+                                         f"not possible: {entry['reason']}"))
+    for which, rows in (data.get("preview") or {}).items():
+        for row in rows:
+            lines.append(f"  {which} at {row['discharge']:g} m3/s ({row['name']}): level "
+                         f"{row['low']:.2f} to {row['high']:.2f} m (rating {row['level']:.2f} m)")
+    chosen = [entry["name"] for entry in data["further"] if entry["selected"]]
+    lines.append("further parameters: " + (", ".join(chosen) or "none"))
+    return lines
 
 
 def describe(cfg) -> dict:
@@ -98,6 +137,18 @@ def run_calibration(argv: list[str]) -> int:
     try:
         from axqua.config import load_config
 
+        if (args.slope or args.offset) and not args.parameters:
+            from axqua.core.errors import ConfigError
+
+            raise ConfigError("--slope and --offset belong to --parameters",
+                              subject="arguments", remedy="Add --parameters.")
+        if args.parameters:
+            from axqua.calibration_parameters import choices
+
+            data = choices(load_config(args.case.expanduser()),
+                           slope=tuple(args.slope) if args.slope else None,
+                           offset=tuple(args.offset) if args.offset else None)
+            return emit(command, data, as_json=args.as_json, lines=_parameter_lines(data))
         data = describe(load_config(args.case.expanduser()))
         lines = [f"calibration points from: {', '.join(data['situations'])}"]
         for zone in data["zones"]:

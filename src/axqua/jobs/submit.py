@@ -146,6 +146,9 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
                source_config: str | os.PathLike | None = None,
                validate_env: bool = True, dry_run: bool = False) -> JobSpec | JobDir:
     """Freeze, validate, launch. Returns the :class:`JobDir`, or the spec on a dry run."""
+    refuse = getattr(cfg, "refuse_if_imported", None)
+    if callable(refuse):
+        refuse(f"the job {str(kind)!r}")
     spec = build_spec(cfg, kind, profile=profile, options=options, np=np,
                       workspace=workspace, source_job=source_job, launcher=launcher,
                       source_config=source_config)

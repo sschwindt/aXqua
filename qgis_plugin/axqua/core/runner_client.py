@@ -561,6 +561,17 @@ class RunnerClient:
         return self.call(["case", "write", str(case)], timeout=120,
                          input_text=json.dumps({"data": data})).data or {}
 
+    def case_import(self, case: str | os.PathLike, steering: str | os.PathLike, *,
+                    name: str = "", crs: int = 25832) -> dict:
+        """Write the case file *case* for the TELEMAC steering file *steering*, for
+        post-processing (``axqua case import``). Returns ``{case, steering, solver,
+        geometry, results: [{name, path, exists}], missing}``."""
+        args = ["case", "import", str(case), "--steering", str(steering),
+                "--crs", str(int(crs))]
+        if name:
+            args += ["--name", str(name)]
+        return self._newer_call(args, 120, "Importing a TELEMAC case", FEATURES_SINCE)
+
     def case_new(self, case: str | os.PathLike, name: str = "") -> dict:
         """Create a case file with the entries every case has."""
         args = ["case", "new", str(case)] + (["--name", name] if name else [])
@@ -646,6 +657,20 @@ class RunnerClient:
         warnings, points, needs_confirmation, ...}``: which roughness zones a
         calibration of the case would vary (``axqua calibration``). Writes nothing."""
         return self.call(["calibration", str(case)], timeout=600).data or {}
+
+    def calibration_parameters(self, case: str | os.PathLike, *,
+                               slope: Sequence[float] | None = None,
+                               offset: Sequence[float] | None = None) -> dict:
+        """``{zones, roughness_table, outflow, further, discharges, preview}``: what the
+        case can calibrate besides its roughness zones, and with *slope* or *offset*
+        (``(min, max)``) the outflow level that range sets at each calibration discharge
+        (``axqua calibration --parameters``). Writes nothing."""
+        args = ["calibration", str(case), "--parameters"]
+        for flag, given in (("--slope", slope), ("--offset", offset)):
+            if given is not None:
+                args += [flag, *(repr(float(value)) for value in given)]
+        return self._newer_call(args, 300, "The calibration parameters window",
+                                FEATURES_SINCE)
 
     # -- validation ---------------------------------------------------------------
     def validation_info(self, case: str | os.PathLike) -> dict:
@@ -765,9 +790,14 @@ class RunnerClient:
                 pass
 
     def _survey_call(self, args: list[str], timeout: float) -> dict:
-        """One call of ``axqua survey``. The plugin is updated in QGIS and the program with pip, so a new plugin can meet an aXqua from before the Survey planner; that one answers that it could not understand the arguments, which tells a user nothing."""
+        """One call of ``axqua survey`` (:meth:`_newer_call`)."""
+        return self._newer_call(args, timeout, "the Survey planner", SURVEY_SINCE)
+
+    def _newer_call(self, args: list[str], timeout: float, feature: str, since: str,
+                    input_text: str | None = None) -> dict:
+        """One call of a command or an option that *feature* needs, which aXqua has since version *since*. The plugin is updated in QGIS and the program with pip, so a new plugin can meet an older aXqua; that one answers that it could not understand the arguments, which tells a user nothing."""
         try:
-            return self.call(args, timeout=timeout).data or {}
+            return self.call(args, timeout=timeout, input_text=input_text).data or {}
         except RunnerError as exc:
             if exc.subject != "arguments":
                 raise
@@ -776,7 +806,7 @@ class RunnerClient:
             except AttributeError:                                # a client that never looked for its aXqua
                 version = None
             raise RunnerError(
-                f"the Survey planner needs aXqua {SURVEY_SINCE} or newer, and the aXqua this plugin runs{f' ({version})' if version else ''} does not know it",
+                f"{feature} needs aXqua {since} or newer, and the aXqua this plugin runs{f' ({version})' if version else ''} does not know it",
                 code=exc.code, subject=exc.subject, returncode=exc.returncode, stderr=exc.stderr,
                 remedy="Upgrade it with 'pip install --upgrade axqua' in its Python environment, then restart QGIS.") from exc
 
@@ -854,6 +884,9 @@ ONE_CORE_SINCE = (1, 3, 5)
 
 #: The first aXqua with ``axqua survey`` (the Survey planner of the tab Calibration and validation).
 SURVEY_SINCE = "1.4.0"
+#: The first aXqua with ``axqua calibration --parameters``, ``axqua case import`` and the
+#: map layers of a case's own results in ``axqua export --list``.
+FEATURES_SINCE = "1.5.0"
 
 
 def _version_parts(version: str | None, count: int) -> tuple[int, ...] | None:

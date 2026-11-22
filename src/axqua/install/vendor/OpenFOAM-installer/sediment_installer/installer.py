@@ -12,7 +12,7 @@ import shutil
 import subprocess
 import sys
 
-from .core import (InstallError, capture, checked_download, claim_prefix,
+from .core import (DOWNLOAD_EXIT, DownloadFailed, InstallError, capture, checked_download, claim_prefix,
                    clean_environment, run, safe_extract_tar, sha256, write_generated)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -557,6 +557,9 @@ def main(argv=None):
     try:
         install(args)
         return 0
+    except DownloadFailed as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return DOWNLOAD_EXIT
     except (RuntimeError, OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1

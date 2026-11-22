@@ -190,6 +190,28 @@ def test_a_calibration_that_stopped_early_still_has_calibrated_values(built):
     assert found.estimate == "joint posterior maximum"
 
 
+def test_a_zone_the_case_no_longer_calibrates_keeps_its_nominal_ks(built, tmp_path):
+    """The user's decision of 2026-11-20 for a zone the measurements do not identify:
+    flagged calibration = False after the calibration, it keeps its nominal ks (the middle
+    of its range). The friction table of the built case holds the last run's value, so
+    the validation has to write the nominal one."""
+    table = tmp_path / "roughness-table.csv"
+    table.write_text("zone_id,ks_min,ks_max,calibration\n4,0.05,0.5,False\n6,0.01,0.3,True\n")
+    built.geodata.roughness_table = table
+    _calibrated(built, joint_optimum=[np.array([0.2, 0.3]), np.array([0.04064, 0.1059])])
+    found = validation.calibrated_parameters(built)
+    assert found.as_dict() == pytest.approx({"zone4": 0.275, "zone6": 0.1059})
+    assert found.held == {"zone4": pytest.approx(0.275)}
+    situation = ValidationSituation(name="spring", inflows={1: 0.2, 3: 5.1},
+                                    prescribed_elevation=100.4)
+    setup = validation.build(built, situation, found.as_dict())
+    text = setup.friction.read_text()
+    assert "4\tNIKU\t0.275\tNULL" in text and "6\tNIKU\t0.1059\tNULL" in text
+    # a zone the table still calibrates, or a table that does not say, keeps its value
+    table.write_text("zone_id,ks_min,ks_max\n4,0.05,0.5\n6,0.01,0.3\n")
+    assert validation.calibrated_parameters(built).held == {}
+
+
 def test_a_joint_maximum_of_nan_is_never_applied(built):
     """With one surviving posterior sample HydroBayesCal writes NaN as the joint
     maximum (the example of 2026-10-15); a NaN in the friction table wrecks the run."""

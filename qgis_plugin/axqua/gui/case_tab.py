@@ -53,6 +53,9 @@ class CaseTab(QWidget):
                 ("Add case...", self.add_case, "Add an existing case file to the list"),
                 ("Example case...", self.get_example,
                  "Download a complete case with its data and a guide"),
+                ("Import TELEMAC case...", self.import_case,
+                 "Post-process a TELEMAC case that aXqua did not build, from its "
+                 "steering file"),
                 ("Remove from list", self.remove_case,
                  "Take the active case off the list; the case file stays")):
             button = QPushButton(text)
@@ -142,6 +145,16 @@ class CaseTab(QWidget):
             return
         exec_dialog(ExampleDialog(client, folder=self._start_folder(), parent=self,
                                   on_done=self.ctx.add_case))
+
+    def import_case(self) -> None:
+        """Open the window that writes a case for a TELEMAC steering file and adds it."""
+        from .import_dialog import ImportDialog
+
+        client = self.ctx.client_or_warn()
+        if client is None:
+            return
+        exec_dialog(ImportDialog(client, folder=self._start_folder(), parent=self,
+                                 on_done=self.ctx.add_case))
 
     def _created(self, path: Path) -> None:
         self.ctx.add_case(path)

@@ -18,7 +18,7 @@ from qgis.PyQt.QtWidgets import (QComboBox, QFileDialog, QGroupBox, QHBoxLayout,
 
 from ..compat import CHECKED, UNCHECKED, enum_value
 from ..core import batch, result_loader, styles
-from ..core.runner_client import user_text
+from ..core.runner_client import FEATURES_SINCE, user_text
 from ..core.tasks import run_async
 from . import sections
 from .capability_tab_widget import CapabilityTab
@@ -280,6 +280,29 @@ class QgisPage(QWidget):
         inner.addLayout(row)
         layout.addWidget(box)
 
+        case_box = QGroupBox("Results of the case")
+        case_inner = QVBoxLayout(case_box)
+        case_inner.addWidget(_label(
+            "The TELEMAC results in the folder of the active case, also those of a case "
+            "imported from a steering file, which has no jobs. Select one and click Load."))
+        self.result_list = QListWidget()
+        self.result_list.setMaximumHeight(110)
+        case_inner.addWidget(self.result_list)
+        row = QHBoxLayout()
+        self.load_case_button = QPushButton("Load the selected result")
+        self.load_case_button.clicked.connect(self.load_case_result)
+        row.addWidget(self.load_case_button)
+        refresh = QPushButton("Refresh")
+        refresh.clicked.connect(self.refresh)
+        row.addWidget(refresh)
+        row.addStretch(1)
+        case_inner.addLayout(row)
+        self.case_status = _label("")
+        case_inner.addWidget(self.case_status)
+        layout.addWidget(case_box)
+        self.case_results: list[dict] = []
+        self.case_crs: int | None = None
+
         style_box = QGroupBox("Predefined map styles")
         style_layout = QVBoxLayout(style_box)
         style_layout.addWidget(_label(
@@ -320,6 +343,85 @@ class QgisPage(QWidget):
         print_layout.addLayout(row2)
         layout.addWidget(print_box)
         layout.addStretch(1)
+
+    # -- the results of the case, without a job ---------------------------------------
+    def apply(self, case_view) -> None:
+        """The active case changed, or its state did: listed now if the page is showing,
+        else when it is shown."""
+        if self.isVisible():
+            self.refresh()
+
+    def showEvent(self, event) -> None:          # noqa: N802 - Qt's name
+        super().showEvent(event)
+        self.refresh()
+
+    def refresh(self) -> None:
+        case = self.ctx.project.active_case_path()
+        client = getattr(self.ctx, "client", None)
+        if case is None or not Path(case).exists() or client is None:
+            self.show_case_results({}, note=NO_CASE)
+            return
+        run_async("aXqua: reading the results of the case",
+                  lambda: client.export_list(case),
+                  on_success=self.show_case_results,
+                  on_error=lambda exc: self.show_case_results({}, note=user_text(exc)),
+                  owner=self)
+
+    def show_case_results(self, payload: dict, *, note: str = "") -> None:
+        """List the results of the case that QGIS can put on the map."""
+        payload = payload or {}
+        self.case_results = [row for row in payload.get("results") or []
+                             if row.get("layers")]
+        self.case_crs = payload.get("crs_epsg")
+        self.result_list.clear()
+        for row in self.case_results:
+            frames = row.get("frames")
+            self.result_list.addItem(
+                f"{row.get('name', '')}: {row.get('label', '')}"
+                + (f", {frames} time steps" if frames else ""))
+        if self.case_results:
+            self.result_list.setCurrentRow(0)
+        if note:
+            self.case_status.setText(note)
+        elif self.case_results:
+            self.case_status.setText("")
+        elif payload.get("results") and not any("layers" in row for row in payload["results"]):
+            self.case_status.setText(f"Loading the results of a case needs aXqua "
+                                     f"{FEATURES_SINCE} or newer.")
+        else:
+            self.case_status.setText("This case has no TELEMAC results on the map yet.")
+        self.load_case_button.setEnabled(bool(self.case_results))
+
+    def case_items(self, row: dict) -> list:
+        """The layers of one result of the case, as the loader takes them from a job."""
+        return [result_loader.ResultItem(
+                    name=str(entry.get("name") or Path(entry["path"]).name),
+                    path=Path(entry["path"]), kind=str(entry.get("kind") or "mesh"),
+                    style=str(entry.get("style") or ""),
+                    variable=str(entry.get("variable") or ""),
+                    map_style=str((entry.get("extra") or {}).get("map_style") or ""))
+                for entry in row.get("layers") or []]
+
+    def load_case_result(self) -> None:
+        """Put the selected result of the case on the map, like the results of a job."""
+        index = self.result_list.currentRow()
+        if not 0 <= index < len(self.case_results):
+            self.ctx.warn("Select a result of the case first.")
+            return
+        row = self.case_results[index]
+        case = self.ctx.project.active_case_path()
+        results = result_loader.JobResults(
+            job_id=Path(case).stem if case else "case", root=Path(row["path"]).parent,
+            items=self.case_items(row), crs_epsg=self.case_crs)
+        loader = result_loader.ResultLoader(min_depth=self.ctx.min_depth,
+                                            velocity_cap=self.ctx.velocity_cap)
+        added = loader.load(results)
+        for warning in loader.warnings:
+            self.ctx.warn(warning)
+        self.ctx.info(f"Loaded {len(added)} layer(s) of {row.get('name', '')} into "
+                      f"axqua/{results.job_id}."
+                      + (" The result is shown at its last time step." if loader.at_last_step
+                         else ""))
 
     def apply_style(self) -> None:
         """Draw the layer that is selected in QGIS in the chosen map style."""

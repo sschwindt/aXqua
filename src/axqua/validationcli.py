@@ -42,7 +42,7 @@ def describe(cfg) -> dict:
     try:
         calibrated = validation.calibrated_parameters(cfg)
         found = {"values": calibrated.as_dict(), "estimate": calibrated.estimate,
-                 "source": str(calibrated.source)}
+                 "source": str(calibrated.source), "held": calibrated.held}
     except Exception:                           # noqa: BLE001 - there is none yet
         found = None
     folder = Path(cfg.calibration_dir) / validation.FOLDER
@@ -88,6 +88,10 @@ def run_validation(argv: list[str]) -> int:
         lines.append("calibrated values: " + (
             ", ".join(f"{k} = {v:.4g}" for k, v in data["calibrated"]["values"].items())
             if data["calibrated"] else "none yet; run the calibration first"))
+        held = (data["calibrated"] or {}).get("held") or {}
+        if held:
+            lines.append("held at the nominal ks (no longer calibrated): "
+                         + ", ".join(sorted(held)))
         for report in data["reports"]:
             for quantity, numbers in (report.get("summary") or {}).items():
                 if numbers.get("n"):

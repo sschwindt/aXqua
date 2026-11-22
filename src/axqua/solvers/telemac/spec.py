@@ -60,11 +60,14 @@ def result_files(cfg) -> list[tuple[str, str, Path]]:
     the steering files are written with, so a case that renames a result in its case
     file is followed. The hydrostatic 3D run keeps names of its own.
     """
+    # the name as the case gives it: a steering file may keep its results in a folder of
+    # their own (a case imported from it, axqua.solvers.telemac.importcase)
     steady = Path(str(getattr(cfg, "results_slf", "r2d.slf")))
     rows = [
-        (steady.name, "steady simulation, 2D"),
+        (steady.as_posix(), "steady simulation, 2D"),
         # the name steering.write_hotstart_cas gives the continued run
-        (f"{steady.stem}-hotstart{steady.suffix}", "continued steady simulation, 2D"),
+        (steady.with_name(f"{steady.stem}-hotstart{steady.suffix}").as_posix(),
+         "continued steady simulation, 2D"),
         (getattr(cfg, "results_unsteady_slf", "r2d-unsteady.slf"),
          "unsteady simulation, 2D"),
         (getattr(cfg, "results_hydrology_slf", "r2d-hydrology.slf"),

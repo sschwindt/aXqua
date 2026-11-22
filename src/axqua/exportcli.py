@@ -145,6 +145,15 @@ def run_export(argv: list[str]) -> int:
         if args.list_only:
             rows = [_describe(name, label, path, out_dir)
                     for name, label, path in candidates]
+            if not _is_result(source):
+                # the map layers of each result, as a job's manifest names them, so that
+                # the plugin puts a result of the case on the map without a job
+                from axqua.solvers.telemac.backend import result_layers
+
+                layers = result_layers(cfg)
+                for row in rows:
+                    row["layers"] = [entry for entry in layers
+                                     if Path(entry["path"]) == Path(row["path"])]
             lines = [f"{row['name']}: {row['label']}, {row.get('frames', '?')} time "
                      f"step(s), {row['megabytes']} MB"
                      + (", exported" if (row.get("exported") or {}).get("up_to_date")
@@ -152,7 +161,9 @@ def run_export(argv: list[str]) -> int:
             lines += [f"{case['label']}: {case['folder']} (no conversion needed)"
                       for case in openfoam]
             return emit(command, {"folder": str(out_dir), "results": rows,
-                                  "openfoam": openfoam},
+                                  "openfoam": openfoam,
+                                  "crs_epsg": None if _is_result(source) else int(cfg.crs_epsg),
+                                  "imported": (not _is_result(source)) and cfg.imported},
                         as_json=args.as_json,
                         lines=lines or ["this case has no results yet"])
 

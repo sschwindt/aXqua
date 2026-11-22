@@ -34,6 +34,7 @@ from qgis.PyQt.QtWidgets import (QDoubleSpinBox, QFileDialog, QFormLayout, QGrou
 from ..compat import exec_dialog
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
+from .calibration_parameters_wizard import ParametersBox
 from .case_editor import stored_path
 from .section_pages import SectionPage
 from .survey_box import SurveyBox
@@ -368,6 +369,10 @@ class CalibrationPage(SectionPage):
         self.survey = SurveyBox(context)
         self._layout.insertWidget(self._first_box, self.survey)
         self._first_box += 1
+        # what the calibration varies, set before it is submitted
+        self.parameters = ParametersBox(context)
+        self._layout.insertWidget(self._first_box, self.parameters)
+        self._first_box += 1
         self.validation = ValidationBox(context)
         # above the stretch that keeps the boxes at the top
         self._layout.insertWidget(self._layout.count() - 1, self.validation)
@@ -375,6 +380,7 @@ class CalibrationPage(SectionPage):
     def apply(self, case_view) -> None:
         super().apply(case_view)
         self.survey.setVisible(case_view is not None)
+        self.parameters.setVisible(case_view is not None)
         self.validation.setVisible(case_view is not None)
         # the boxes of the capabilities are inserted from the top; keep this one last
         self._layout.removeWidget(self.validation)

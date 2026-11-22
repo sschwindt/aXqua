@@ -54,6 +54,9 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         when a caller already routes everything to its own compound log, e.g. the
         mesh-convergence study logging the per-level builds to postprocessing/).
     """
+    refuse = getattr(cfg, "refuse_if_imported", None)
+    if callable(refuse):                    # a stand-in for a case may not have it
+        refuse("the build")
     cfg.ensure_dirs()
     # compound logfile for the build, in the simulation (model) output folder. Opened
     # before anything else so that stage 0 and a validation failure are recorded too.

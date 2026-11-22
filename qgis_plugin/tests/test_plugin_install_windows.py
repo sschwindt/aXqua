@@ -95,3 +95,64 @@ def test_one_core_is_named_only_to_an_axqua_that_knows_it(version, sent):
     flags = install_flags({"route": "windows"}, version)
     assert "--native" in flags and ("--one-core" in flags) is sent and "--mpi" not in flags
     assert "--mpi" in install_flags({"route": "windows-mpi"}, version)
+
+
+def test_browse_selects_the_folder_in_which_the_openfoam_folder_is_created(qgis_app, tmp_path, monkeypatch):
+    """The folder dialog of Windows selects only folders that exist and refused a typed new one (the user, 2026-11-19)."""
+    from axqua_plugin.gui import install_wizard
+
+    overview = {"host": {"system": "linux", "supported": True}, "default_jobs": 4,
+                "targets": [{"target": "openfoam", "title": "OpenFOAM", "installed": {}, "running": None,
+                             "last": None, "default_folder": str(tmp_path / "home" / ".local" / "openfoam-sediment-v2406"),
+                             "default_folders": {}}]}
+    (tmp_path / "home" / ".local").mkdir(parents=True)
+    (tmp_path / "home" / ".local" / "something").write_text("")
+    (tmp_path / "empty").mkdir()
+    (tmp_path / "earlier").mkdir()
+    (tmp_path / "earlier" / install_wizard.INSTALLER_MARKER).write_text("{}")
+    wizard = install_wizard.InstallWizard(_Client(), "openfoam", overview)
+    asked = []
+
+    def dialog(_parent, title, start):
+        asked.append((title, start))
+        return answer
+
+    monkeypatch.setattr(install_wizard.QFileDialog, "getExistingDirectory", dialog)
+    for answer, expected in ((str(tmp_path / "home" / ".local"), str(tmp_path / "home" / ".local") + "/openfoam-sediment-v2406"),
+                             (str(tmp_path / "empty"), str(tmp_path / "empty")),
+                             (str(tmp_path / "earlier"), str(tmp_path / "earlier")),
+                             ("", str(tmp_path / "earlier"))):           # cancelled: the field stays
+        wizard._browse("folder", True)
+        assert wizard._widgets["folder"].text() == expected
+    # the dialog opens at a folder that exists, never at the one still to be created
+    assert asked[0] == ("Select the folder in which the installation folder is created", str(tmp_path / "home" / ".local"))
+    assert install_wizard.nearest_existing(str(tmp_path / "a" / "b")) == str(tmp_path)
+    # a folder that cannot be read is no empty one: the installation goes into a new folder inside it
+    assert install_wizard.installation_folder_in("//wsl.localhost/Ubuntu/home/stud", "x") == "//wsl.localhost/Ubuntu/home/stud/x"
+    # a folder of that name that the installer would refuse is not offered: the next free name is
+    taken = tmp_path / "home" / ".local" / "openfoam-sediment-v2406"
+    taken.mkdir()
+    (taken / "from-elsewhere").write_text("")
+    answer = str(tmp_path / "home" / ".local")
+    wizard._browse("folder", True)
+    assert wizard._widgets["folder"].text() == str(taken) + "-2"
+    (taken / install_wizard.INSTALLER_MARKER).write_text("{}")      # an installation of the wizard is continued
+    wizard._browse("folder", True)
+    assert wizard._widgets["folder"].text() == str(taken)
+    wizard.deleteLater()
+
+
+def test_the_wizard_and_the_library_name_the_same_marker():
+    from pathlib import Path
+
+    from axqua_plugin.gui import install_wizard
+
+    recipes = Path(__file__).resolve().parents[2] / "src" / "axqua" / "install" / "recipes.py"
+    assert f'"{install_wizard.INSTALLER_MARKER}"' in recipes.read_text(encoding="utf-8")
+
+
+def test_a_folder_selected_in_wsl_gets_the_new_installation_folder_in_linux_spelling():
+    from axqua_plugin.gui import install_wizard
+
+    folder = r"\\wsl.localhost\Ubuntu\home\stud" + "/openfoam-sediment-v2406"
+    assert install_wizard.linux(folder) == "/home/stud/openfoam-sediment-v2406"

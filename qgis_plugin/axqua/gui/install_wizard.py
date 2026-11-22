@@ -74,8 +74,7 @@ FIELDS = {
     "openfoam": (
         ("scope", "Install for", "choice", SCOPE_HINT),
         ("folder", "Installation folder", "folder",
-         "A folder that does not exist yet, or an empty one. The sediment solvers, "
-         "the outflow boundary and VisIt are installed in it."),
+         "A folder that does not exist yet, or an empty one. The sediment solvers, the outflow boundary and VisIt are installed in it. Browse... selects the folder in which it is created: a selected folder that is not empty gets a new folder inside it. A path can also be typed."),
         ("reuse_openfoam", "OpenFOAM v2406", "openfoam", ""),
         ("jobs", "Processes for compiling", "int", ""),
         ("viewers", "Postprocessors", "choice", VIEWERS_HINT),
@@ -211,6 +210,51 @@ def terminal_argv(command: str) -> list[str]:
         if found:
             return [found, *flags, "bash", "-c", script]
     return []
+
+
+#: Programs whose installation folder must be new or empty (the OpenFOAM installer
+#: refuses any other). The folder dialog of Windows selects only folders that exist and
+#: answered a typed new name with "the path does not exist" (the user, 2026-11-19), so
+#: Browse... selects the folder in which the installation folder is created.
+NEW_FOLDER_TARGETS = ("openfoam",)
+#: The file by which the OpenFOAM installer knows a folder of its own (``recipes.py`` of the library names it too; a test keeps the two equal).
+INSTALLER_MARKER = ".sediment-installer.json"
+
+
+def nearest_existing(path: str) -> str:
+    """*path*, or the nearest folder above it that exists; ``""`` when none does."""
+    if not path:
+        return ""
+    candidate = Path(path)
+    for folder in (candidate, *candidate.parents):
+        try:
+            if folder.is_dir():
+                return str(folder)
+        except OSError:
+            continue
+    return ""
+
+
+def _usable(folder: str) -> bool:
+    """Whether the OpenFOAM installer takes *folder*: absent, empty, or an installation of its own. A folder that cannot be read is not usable."""
+    path = Path(folder)
+    try:
+        if not path.exists():
+            return True
+        return path.is_dir() and (not any(path.iterdir()) or (path / INSTALLER_MARKER).is_file())
+    except OSError:
+        return False
+
+
+def installation_folder_in(chosen: str, name: str) -> str:
+    """The installation folder for a folder selected in the dialog: the folder itself when the installer takes it, else the folder *name* inside it, or ``<name>-2``, ``-3``, ... when *name* is there and taken."""
+    try:
+        if Path(chosen).is_dir() and _usable(chosen):
+            return chosen
+    except OSError:
+        pass
+    inside = chosen.rstrip("/\\") + "/" + name
+    return inside if _usable(inside) else new_folder(inside)
 
 
 def new_folder(folder: str) -> str:
@@ -525,12 +569,23 @@ class InstallWizard(QDialog):
         distro = self._distro()
         if folder and distro and start.startswith("/"):
             start = unc(distro, start)          # the folder is inside WSL; the dialog is of Windows
+        creates = folder and key == "folder" and self.target in NEW_FOLDER_TARGETS
         if folder:
-            chosen = QFileDialog.getExistingDirectory(self, "Select a folder", start)
+            # the dialog opens only a folder that exists, and the installation folder usually does not yet
+            title = ("Select the folder in which the installation folder is created" if creates
+                     else "Select a folder")
+            chosen = QFileDialog.getExistingDirectory(self, title, nearest_existing(start) or start)
         else:
             chosen, _ = QFileDialog.getOpenFileName(self, "Select a file", start)
+        if chosen and creates:
+            chosen = installation_folder_in(chosen, self._folder_name())
         if chosen:
             edit.setText(linux(chosen) if folder and distro else chosen)
+
+    def _folder_name(self) -> str:
+        """The name of the folder an installation creates: that of the default folder."""
+        default = str(self.entry.get("default_folder") or "") or self._widgets["folder"].text()
+        return default.replace("\\", "/").rstrip("/").rsplit("/", 1)[-1] or self.target
 
     def _distro(self) -> str:
         """The WSL distribution this Windows computer installs into, or ``""`` (also for TELEMAC built in Windows itself)."""

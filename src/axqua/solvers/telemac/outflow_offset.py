@@ -416,42 +416,49 @@ def key(cfg, which: str | None = None) -> str:
     return f"calibration.outflow_{which or kind(cfg) or 'offset'}"
 
 
-def check(cfg) -> None:
-    """Refuse a calibration of the outflow level that the case cannot apply."""
-    from axqua.core.boundaries import outlet_level
-    from axqua.core.errors import ConfigError
+def problem(cfg, which: str) -> tuple[str, str] | None:
+    """Why the case cannot calibrate its outflow level by *which* (``"offset"`` or ``"slope"``): ``(message, remedy)``, or None where it can.
 
-    which = kind(cfg) or "offset"
+    The rules of :func:`check`, as an answer rather than an error, so that a form can say why an option is not offered (the calibration parameters of the plugin). A rating curve of the case's own is not looked at here; :func:`check_rating` needs the outflow section for that.
+    """
+    from axqua.core.boundaries import outlet_level
+
     setting = key(cfg, which)
     if cfg.calibration.solver_name != "Telemac2d":
-        raise ConfigError("the outflow level can only be calibrated with TELEMAC-2D "
-                          "(not yet available for TELEMAC-3D)",
-                          subject=setting, remedy=f"Remove {setting}.")
+        return ("the outflow level can only be calibrated with TELEMAC-2D "
+                "(not yet available for TELEMAC-3D)", f"Remove {setting}.")
     level = outlet_level(cfg.outflow_condition)
     if level not in LEVEL_KINDS:
-        raise ConfigError(
-            f"the outflow condition {cfg.outflow_condition!r} prescribes no level that "
-            f"the {which} could change", subject=setting,
-            remedy=f"Use outflow_condition: stage_discharge or elevation, or remove {setting}.")
+        return (f"the outflow condition {cfg.outflow_condition!r} prescribes no level that "
+                f"the {which} could change",
+                f"Use outflow_condition: stage_discharge or elevation, or remove {setting}.")
     if which == "slope" and getattr(cfg, "hydrology_mode", False):
-        raise ConfigError(
-            "a hydrology case is driven by its rain and has no steady discharge whose "
-            "rating an energy slope at the outlet could change", subject=setting,
-            remedy=f"Remove {setting}.")
+        return ("a hydrology case is driven by its rain and has no steady discharge whose "
+                "rating an energy slope at the outlet could change", f"Remove {setting}.")
     method = getattr(cfg.boundaries, "rating_method", "trapezoid")
     if which == "slope" and (level != "rating" or method != "section"):
         source = ("a fixed level (elevation)" if level == "fixed"
                   else f"a rating by the method {method!r}")
-        raise ConfigError(
-            "the energy slope at the outlet is calibrated in the rating of the outflow "
-            f"section, but the case takes its outflow level from {source}", subject=setting,
-            remedy="Use outflow_condition: stage_discharge with rating_method: section, "
-                   "or calibrate an offset (calibration.outflow_offset) instead.")
+        return ("the energy slope at the outlet is calibrated in the rating of the outflow "
+                f"section, but the case takes its outflow level from {source}",
+                "Use outflow_condition: stage_discharge with rating_method: section, "
+                "or calibrate an offset (calibration.outflow_offset) instead.")
     if cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran":
-        raise ConfigError(
-            "the outflow level and a gain-lose reach both need the Fortran file "
-            "HydroBayesCal rewrites; calibrating both is not yet available",
-            subject=setting, remedy=f"Remove {setting} or the gain-lose reach.")
+        return ("the outflow level and a gain-lose reach both need the Fortran file "
+                "HydroBayesCal rewrites; calibrating both is not yet available",
+                f"Remove {setting} or the gain-lose reach.")
+    return None
+
+
+def check(cfg) -> None:
+    """Refuse a calibration of the outflow level that the case cannot apply (:func:`problem`)."""
+    from axqua.core.errors import ConfigError
+
+    which = kind(cfg) or "offset"
+    found = problem(cfg, which)
+    if found is not None:
+        message, remedy = found
+        raise ConfigError(message, subject=key(cfg, which), remedy=remedy)
 
 
 def folder_name(value) -> str:

@@ -249,8 +249,11 @@ class Geodata:
     calibration ground truth in :class:`GroundTruth`.
     """
 
-    dem_initial: Path                    # baseline terrain (GeoTIFF)
-    boundary: Path                       # ROI / max wetted extent polygon (shp/gpkg)
+    # baseline terrain (GeoTIFF) and ROI / max wetted extent polygon (shp/gpkg): every case
+    # that is built needs both (validate() says so); a case imported from a TELEMAC
+    # steering file (project.imported_from) has neither and is post-processed only
+    dem_initial: Path | None = None
+    boundary: Path | None = None
     dem_target: Path | None = None       # optional 2nd DEM for morphodynamic target
     breaklines: Path | None = None       # internal constraint lines (shp/gpkg)
     mesh_zones: Path | None = None       # polygons with a 'Zone Name' (channel/floodplain) for sizing
@@ -2366,6 +2369,10 @@ class Config:
     postproc: PostProcessing = field(default_factory=PostProcessing)
     # where the OpenFOAM case tree is written; defaults to <sim_dir>/openfoam
     openfoam_dir: Path | None = None
+    # A case imported from a TELEMAC steering file aXqua did not build
+    # (``axqua case import``): the steering file. Such a case has no geodata and is
+    # post-processed only; a build or a run is refused (axqua.solvers.telemac.importcase).
+    imported_from: Path | None = None
     # Top-level blocks the YAML actually contained. Every solver section has a
     # dataclass with defaults, so `cfg.openfoam` exists whether or not the case asked
     # for OpenFOAM; this records what was *declared*, which is what decides whether a
@@ -2526,6 +2533,12 @@ class Config:
             # inputs (the STL parts) are validated instead.
             return self.surfaces_produce() if self.surfaces.active else frozenset()
 
+        if self.imported_from is not None:
+            # a TELEMAC case aXqua did not build: its files, not geodata to build from
+            return [("machine", self.telemac.validate_installation),
+                    ("telemac", self.telemac.validate_choice),
+                    ("project", self._check_imported),
+                    ("postproc", self.postproc.validate)]
         return [
             ("machine", self.telemac.validate_installation),
             ("telemac", self.telemac.validate_choice),
@@ -2553,6 +2566,31 @@ class Config:
             ("dem_of_difference", self.dem_of_difference.validate),
             ("dem_of_difference", self._check_difference_data),
         ]
+
+    @property
+    def imported(self) -> bool:
+        """Whether the case was imported from a TELEMAC steering file (``project.imported_from``) and is post-processed only."""
+        return self.imported_from is not None
+
+    def refuse_if_imported(self, what: str) -> None:
+        """Refuse *what* (a build, a job kind) for a case imported from a TELEMAC steering file: it is post-processed only, and a build or a run would write into the folder of a model aXqua did not make."""
+        if self.imported_from is None:
+            return
+        from axqua.core.errors import ConfigError
+
+        raise ConfigError(
+            f"{self.name} is imported from the TELEMAC steering file "
+            f"{Path(self.imported_from).name}: aXqua post-processes its results, but does "
+            f"not build or run it, so {what} is not started",
+            subject="project.imported_from",
+            remedy="Run the steering file with TELEMAC itself, then load its results "
+                   "again. To build a model with aXqua, create a case from geodata.")
+
+    def _check_imported(self) -> None:
+        """An imported case needs its steering file, its geometry file and a result."""
+        from axqua.solvers.telemac import importcase
+
+        importcase.check(self)
 
     def _note_ground_truth(self) -> None:
         # ground truth is non-fatal: it feeds only the calibration/HydroBayesCal
@@ -2902,6 +2940,8 @@ def load_config(path: str | os.PathLike) -> Config:
     openfoam = OpenFoam(**_only_known(OpenFoam, ofdict))
     openfoam_dir = _resolve(cfg_dir, project.get("openfoam_dir")) if \
         project.get("openfoam_dir") else None
+    imported_from = _resolve(cfg_dir, project.get("imported_from")) if \
+        project.get("imported_from") else None
 
     # Post-processing: absent block -> defaults, and nothing consults them
     ppdict = dict(raw.get("postproc") or {})
@@ -2942,6 +2982,7 @@ def load_config(path: str | os.PathLike) -> Config:
         hydrology=hydrology,
         postproc=postproc,
         openfoam_dir=openfoam_dir,
+        imported_from=imported_from,
         declared_blocks=frozenset(raw),
     )
     # apply optional output-filename overrides
@@ -3034,6 +3075,8 @@ def config_to_dict(cfg: "Config", *, base: Path | None = None,
     }}
     if cfg.openfoam_dir is not None:
         out["project"]["openfoam_dir"] = _dump_value(cfg.openfoam_dir, base)
+    if cfg.imported_from is not None:
+        out["project"]["imported_from"] = _dump_value(cfg.imported_from, base)
 
     for f in fields(cfg):
         if f.name in _DUMP_SKIP_TOP or f.name in out["project"]:

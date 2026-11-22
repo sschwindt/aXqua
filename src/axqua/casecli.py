@@ -26,7 +26,7 @@ from pathlib import Path
 
 from axqua.jobcli import _common, _setup_logging, emit, fail, parse_args
 
-CASE_ACTIONS = ("read", "write", "new")
+CASE_ACTIONS = ("read", "write", "new", "import")
 
 
 def run_schema(argv: list[str]) -> int:
@@ -74,6 +74,9 @@ def _all_findings(path: Path) -> list:
     from axqua.core.diagnostics import has_errors
 
     findings = check_case(path)
+    imported = _imported_findings(path)
+    if imported is not None:
+        return findings + imported
     if not has_errors(findings):
         try:
             from axqua.config import load_config
@@ -83,6 +86,26 @@ def _all_findings(path: Path) -> list:
         except Exception:  # noqa: BLE001 - the case check has named what is wrong
             pass
     return findings
+
+
+def _imported_findings(path: Path) -> list | None:
+    """For a case imported from a TELEMAC steering file, a warning per result it names that does not exist yet; None for any other case."""
+    from axqua.core.diagnostics import WARNING, Finding
+
+    try:
+        from axqua.config import load_config
+
+        cfg = load_config(path)
+    except Exception:  # noqa: BLE001 - the case check has named what is wrong
+        return None
+    if cfg.imported_from is None:
+        return None
+    from axqua.solvers.telemac.importcase import missing_results
+
+    return [Finding(WARNING, "axqua.config.incomplete",
+                    f"the result {result} does not exist yet", subject="outputs",
+                    remedy="Run the steering file with TELEMAC, then load its results.")
+            for result in missing_results(cfg)]
 
 
 def _checked(path: Path) -> dict:
@@ -96,14 +119,21 @@ def _lines(path: Path) -> list[str]:
 def run_case(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(
         prog="axqua case",
-        description="Read, write or create a case file. 'write' reads the new content "
-                    "as JSON from standard input, keeps the original as <name>.bak the "
-                    "first time, and reports what a check of the result finds.")
+        description="Read, write, create or import a case file. 'write' reads the new "
+                    "content as JSON from standard input, keeps the original as "
+                    "<name>.bak the first time, and reports what a check of the result "
+                    "finds. 'import' writes a case for a TELEMAC steering file that "
+                    "aXqua did not build, for post-processing: 'axqua case import "
+                    "<new case file> --steering <file.cas>', or the .cas file alone, "
+                    "which puts the case file beside it.")
     parser.add_argument("action", choices=CASE_ACTIONS)
     parser.add_argument("case", type=Path, help="the case file")
     parser.add_argument("--name", default="", help="new: the name of the case")
     parser.add_argument("--crs", type=int, default=25832,
-                        help="new: EPSG code of the coordinate reference system")
+                        help="new, import: EPSG code of the coordinate reference system "
+                             "(a TELEMAC result names none)")
+    parser.add_argument("--steering", type=Path,
+                        help="import: the steering file (.cas) of the TELEMAC case")
     args = parse_args(_common(parser), argv, "case")
     _setup_logging(args)
     command = f"case.{args.action}"
@@ -112,6 +142,23 @@ def run_case(argv: list[str]) -> int:
         from axqua.core.errors import ConfigError
 
         target = Path(args.case)
+        if args.action == "import":
+            from axqua.solvers.telemac.importcase import import_steering
+
+            steering, case_file = args.steering, target
+            if steering is None:
+                if target.suffix.lower() != ".cas":
+                    raise ConfigError("import needs the steering file",
+                                      subject="arguments",
+                                      remedy="Add --steering <file.cas>, or give the .cas "
+                                             "file instead of the case file.")
+                steering, case_file = target, None
+            answer = import_steering(steering, case_file, name=args.name,
+                                     crs_epsg=args.crs)
+            lines = [f"wrote {answer['case']} ({answer['solver']})"]
+            lines += [f"result {r['name']}" + ("" if r["exists"] else " (does not exist yet)")
+                      for r in answer["results"]]
+            return emit(command, answer, as_json=args.as_json, lines=lines)
         if args.action == "read":
             if not target.is_file():
                 raise ConfigError(f"there is no case file {target}", subject=str(target))

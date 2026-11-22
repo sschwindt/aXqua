@@ -1045,8 +1045,8 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    # 7 tabs, 8 sub-tabs, 3 installation wizards, 2 Setup Wizards and the windows of the example case, of Clean Up, of the hydrology data wizard, of the sediment transport wizard and of the survey planner
-    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 8 + 3 + 2 + 5
+    # 7 tabs, 8 sub-tabs, 3 installation wizards, 2 Setup Wizards and the windows of the example case, of the import of a TELEMAC case, of Clean Up, of the hydrology data wizard, of the sediment transport wizard, of the survey planner and of the calibration parameters
+    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 8 + 3 + 2 + 7
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"

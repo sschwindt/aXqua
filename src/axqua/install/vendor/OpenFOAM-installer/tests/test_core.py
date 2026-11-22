@@ -69,6 +69,9 @@ class DownloadTests(unittest.TestCase):
         self.target = Path(self.directory.name) / "cache" / "file.tgz"
         self.body = b"known pinned bytes"
         self.digest = hashlib.sha256(self.body).hexdigest()
+        pauses = mock.patch.object(core, "RETRY_PAUSES", (0, 0, 0))
+        pauses.start()
+        self.addCleanup(pauses.stop)
 
     def test_download_checks_digest_and_preserves_foreign_part(self):
         self.target.parent.mkdir()
@@ -129,7 +132,7 @@ class DownloadTests(unittest.TestCase):
 
     def test_short_body_is_reported_as_incomplete_not_changed_upstream(self):
         expected_bytes = len(self.body) + 20
-        with mock.patch.object(core.urllib.request, "urlopen", return_value=DownloadResponse(
+        with mock.patch.object(core.urllib.request, "urlopen", side_effect=lambda *a, **k: DownloadResponse(
                 self.body, headers={"Content-Length": str(expected_bytes)})):
             with self.assertRaisesRegex(core.InstallError, "Incomplete download") as caught:
                 core.checked_download("https://example.invalid/file", self.digest, self.target)
@@ -141,7 +144,7 @@ class DownloadTests(unittest.TestCase):
 
     def test_partial_http_response_is_rejected_even_when_digest_matches(self):
         with mock.patch.object(core.urllib.request, "urlopen",
-                               return_value=DownloadResponse(self.body, status=206)):
+                               side_effect=lambda *a, **k: DownloadResponse(self.body, status=206)):
             with self.assertRaisesRegex(core.InstallError, "HTTP.*206"):
                 core.checked_download("https://example.invalid/file", self.digest, self.target)
         self.assertFalse(self.target.exists())
@@ -150,7 +153,7 @@ class DownloadTests(unittest.TestCase):
     def test_html_response_is_rejected_even_when_digest_matches(self):
         for response_type in ("text/html; charset=utf-8", "application/xhtml+xml"):
             with self.subTest(response_type=response_type):
-                with mock.patch.object(core.urllib.request, "urlopen", return_value=DownloadResponse(
+                with mock.patch.object(core.urllib.request, "urlopen", side_effect=lambda *a, **k: DownloadResponse(
                         self.body, headers={"Content-Type": response_type})):
                     with self.assertRaisesRegex(core.InstallError, "(?i)unexpected HTML download response"):
                         core.checked_download("https://example.invalid/file", self.digest, self.target)
@@ -177,7 +180,7 @@ class DownloadTests(unittest.TestCase):
     def test_html_failure_redacts_requested_and_final_url_tokens(self):
         requested_url = "https://example.invalid/file?auth=private-request#private-request-fragment"
         final_url = "https://mirror.invalid/file?token=private-response#private-response-fragment"
-        with mock.patch.object(core.urllib.request, "urlopen", return_value=DownloadResponse(
+        with mock.patch.object(core.urllib.request, "urlopen", side_effect=lambda *a, **k: DownloadResponse(
                 self.body, final_url, headers={"Content-Type": "text/html"})):
             with self.assertRaises(core.InstallError) as caught:
                 core.checked_download(requested_url, self.digest, self.target)
@@ -205,11 +208,79 @@ class DownloadTests(unittest.TestCase):
         self.assertFalse(self.target.parent.exists())
 
     def test_network_error_leaves_no_partial_download(self):
-        with mock.patch.object(core.urllib.request, "urlopen", side_effect=OSError("offline")):
-            with self.assertRaisesRegex(OSError, "offline"):
+        with mock.patch.object(core.urllib.request, "urlopen", side_effect=ConnectionResetError("offline")) as urlopen:
+            with self.assertRaisesRegex(core.DownloadFailed, "failed after 4 attempts.*offline"):
                 core.checked_download("https://example.invalid/file", self.digest, self.target)
+        self.assertEqual(urlopen.call_count, core.DOWNLOAD_ATTEMPTS)
         self.assertFalse(self.target.exists())
         self.assertEqual(list(self.target.parent.iterdir()), [])
+
+    def test_a_stalled_mirror_or_a_waiting_page_is_asked_again(self):
+        """SourceForge at times stalls past the read timeout or sends a waiting page; the next request delivers."""
+        for first in (TimeoutError("The read operation timed out"),
+                      DownloadResponse(b"<html>wait</html>", headers={"Content-Type": "text/html"}),
+                      core.urllib.error.HTTPError("https://example.invalid/file", 503, "busy", {}, None),
+                      DownloadResponse(self.body, headers={"Content-Length": str(len(self.body) + 5)})):
+            with self.subTest(first=type(first).__name__):
+                if self.target.exists():
+                    self.target.unlink()
+                answers = iter([first, DownloadResponse(self.body)])
+
+                def answer(*_args, **_kwargs):
+                    item = next(answers)
+                    if isinstance(item, BaseException):
+                        raise item
+                    return item
+
+                printed = io.StringIO()
+                with mock.patch.object(core.urllib.request, "urlopen", side_effect=answer) as urlopen, \
+                        contextlib.redirect_stdout(printed):
+                    result = core.checked_download("https://example.invalid/file", self.digest, self.target)
+                self.assertEqual(result.read_bytes(), self.body)
+                self.assertEqual(urlopen.call_count, 2)
+                self.assertIn("trying again", printed.getvalue())
+                self.assertEqual(list(self.target.parent.glob("*.part-*")), [])
+
+    def test_a_fault_of_this_computer_is_not_asked_again(self):
+        """A full disk, a folder without write permission or a certificate a proxy replaced are no download the server failed to deliver."""
+        import errno
+        import ssl
+        for error in (OSError(errno.ENOSPC, "No space left on device"), PermissionError("denied"),
+                      core.urllib.error.URLError(ssl.SSLCertVerificationError("certificate verify failed"))):
+            with self.subTest(error=type(error).__name__):
+                with mock.patch.object(core.urllib.request, "urlopen", side_effect=error) as urlopen:
+                    with self.assertRaises(type(error)):
+                        core.checked_download("https://example.invalid/file", self.digest, self.target)
+                self.assertEqual(urlopen.call_count, 1)
+        for error in (core.urllib.error.URLError("timed out"), core.urllib.error.URLError(TimeoutError("timed out")),
+                      core.urllib.error.URLError(core.socket.gaierror(-3, "Temporary failure in name resolution")),
+                      core.urllib.error.URLError(ConnectionRefusedError(111, "refused")),
+                      core.socket.timeout("timed out"), core.urllib.error.URLError(core.socket.timeout("timed out")),
+                      core.http.client.IncompleteRead(b""), ssl.SSLEOFError("EOF in violation of protocol")):
+            with self.subTest(error=repr(error)):
+                self.assertTrue(core._retryable(error))
+
+    def test_a_download_that_failed_on_every_attempt_has_an_exit_status_of_its_own(self):
+        """aXqua tells it from other failures by the status, not by the words (axqua.install.download_failed)."""
+        with mock.patch.object(installer, "install", side_effect=core.DownloadFailed("Download failed after 4 attempts: x")), \
+                contextlib.redirect_stderr(io.StringIO()) as said:
+            self.assertEqual(installer.main(["--prefix", self.directory.name]), core.DOWNLOAD_EXIT)
+        self.assertIn("ERROR: Download failed after 4 attempts", said.getvalue())
+        with mock.patch.object(installer, "install", side_effect=core.InstallError("other")), \
+                contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(installer.main(["--prefix", self.directory.name]), 1)
+
+    def test_a_refused_request_and_a_changed_file_are_not_asked_again(self):
+        refused = core.urllib.error.HTTPError("https://example.invalid/file", 404, "gone", {}, None)
+        with mock.patch.object(core.urllib.request, "urlopen", side_effect=refused) as urlopen:
+            with self.assertRaises(core.urllib.error.HTTPError):
+                core.checked_download("https://example.invalid/file", self.digest, self.target)
+        self.assertEqual(urlopen.call_count, 1)
+        with mock.patch.object(core.urllib.request, "urlopen",
+                               side_effect=lambda *a, **k: DownloadResponse(b"changed upstream")) as urlopen:
+            with self.assertRaisesRegex(core.InstallError, "Upstream checksum mismatch"):
+                core.checked_download("https://example.invalid/file", self.digest, self.target)
+        self.assertEqual(urlopen.call_count, 1)
 
     @unittest.skipIf(os.name == "nt", "Windows symlinks require Developer Mode/elevation")
     def test_symlink_cache_cannot_overwrite_foreign_file(self):

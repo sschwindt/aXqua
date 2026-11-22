@@ -1717,6 +1717,35 @@ def _purple(label) -> bool:
     return "#2e014b" in label.styleSheet() and "bold" in label.styleSheet()
 
 
+def test_a_frame_shows_its_note_as_text_that_is_always_visible(qgis_app, tmp_path,
+                                                              monkeypatch):
+    """The note of a frame says what a user has to know before entering a value there
+    (the user's order of 2026-11-20: which edge length wins), as a line of text and not
+    behind a button; a frame without a note gets none."""
+    import copy
+
+    from qgis.PyQt.QtWidgets import QLabel
+
+    from axqua_plugin.gui import case_editor
+
+    schema = copy.deepcopy(PAGED_SCHEMA)
+    mesh = next(page for page in schema["pages"] if page["key"] == "mesh")
+    mesh["frames"][0]["note"] = "The edge length of a mesh zone in its layer wins."
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    editor = case_editor.CaseEditor(_CaseClient(), tmp_path / "reach.axq-case",
+                                    PAGED_CASE, schema)
+    notes = [label for label in editor.findChildren(QLabel)
+             if label.objectName() == "frameNote"]
+    assert [label.text() for label in notes] == [
+        "The edge length of a mesh zone in its layer wins."]
+    assert notes[0].wordWrap()
+    plain, _client = _paged(tmp_path, monkeypatch)
+    assert not [label for label in plain.findChildren(QLabel)
+                if label.objectName() == "frameNote"]
+
+
 def test_the_case_settings_have_the_pages_the_user_named(qgis_app, tmp_path,
                                                          monkeypatch):
     from qgis.PyQt.QtWidgets import QGroupBox, QToolButton

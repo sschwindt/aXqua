@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.4.1
+version=1.5.0
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,44 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.4.1
+changelog=1.5.0
+    - New: import a TELEMAC case (Case Setup > Import TELEMAC case...,
+      'axqua case import'). aXqua writes a case for the steering file of
+      a TELEMAC case it did not build; its results go on the map, into
+      ParaView and VisIt and into a movie. aXqua does not build or run an
+      imported case.
+    - New: the results of the active case on the map without a job
+      (Postprocessing > QGIS, Results of the case).
+    - New: the window Calibration parameters (tab Calibration and
+      validation, 'axqua calibration --parameters'): the roughness zones
+      of the case, the outflow level by the energy slope at the outlet or
+      by an offset, with the outflow levels a range sets at every
+      calibration discharge, and further parameters that fit the case.
+    - New: the energy slope at the outlet as a calibration parameter
+      (calibration.outflow_slope): one stage-discharge curve for all
+      calibration situations, which the validation uses at its own
+      discharge.
+    - The calibrated value of a parameter is the tallest bar of the
+      histogram of its posterior, the histogram the calibration report
+      draws.
+    - A calibration that stopped before its last iteration has a report
+      and calibrated values, from the last iteration that ran.
+    - A roughness zone set to calibration = False after a calibration
+      keeps its nominal ks in the validation.
+    - Case settings: a note in the frame TELEMAC mesh says that the edge
+      length of a mesh zone in its GeoPackage layer wins.
+    - Installing OpenFOAM: a download that the server or the network did
+      not deliver (a timeout, a cut transfer, a waiting page, HTTP 408,
+      429 or 5xx) is asked again up to four times. After the last attempt
+      the installation stops with its own message
+      (axqua.install.download_failed) and continues in the same folder
+      when started again.
+    - Installing OpenFOAM on Windows: Browse... of the installation folder
+      selects the folder in which the installation folder is created,
+      because the folder dialog of Windows selects only folders that
+      exist. A folder the installer would refuse gets the folder
+      openfoam-sediment-v2406 inside it.
+    1.4.1
     - Calibration of the outflow level: the calibration at several
       discharges ('flows' of run_Bayes_cal_multiflow.py) now applies the
       offset; before, every run kept the offset 0.

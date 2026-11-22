@@ -2,15 +2,19 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path, PurePosixPath
 import posixpath
 import shutil
+import socket
+import ssl
 import subprocess
 import tarfile
 import tempfile
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -80,7 +84,52 @@ def capture(argv, env=None, cwd=None, log=None) -> str:
     return result.stdout.strip()
 
 
+#: Pauses (seconds) between the attempts of one download, which is tried once more than
+#: there are pauses. The OpenFOAM archives come through SourceForge, whose mirrors at
+#: times stall past the read timeout or answer with a waiting page instead of the file;
+#: a second request goes to another mirror and usually succeeds.
+RETRY_PAUSES = (10, 30, 60)
+DOWNLOAD_ATTEMPTS = len(RETRY_PAUSES) + 1
+#: HTTP answers worth asking again: request timeout, too many requests, server errors.
+RETRY_HTTP = {408, 429, 500, 502, 503, 504}
+#: Exit status of ``main`` after a download that failed on every attempt (EX_TEMPFAIL).
+DOWNLOAD_EXIT = 75
+
+
+class TransientDownloadError(InstallError):
+    """A download that a new request may deliver: a waiting page, a cut transfer."""
+
+
+class DownloadFailed(InstallError):
+    """A download that failed on every attempt; starting the installation again may succeed."""
+
+
+def _retryable(error: BaseException) -> bool:
+    """Whether a new request may mend *error*: a fault of the server or the network, not of this computer."""
+    if isinstance(error, TransientDownloadError):
+        return True
+    if isinstance(error, urllib.error.HTTPError):
+        return error.code in RETRY_HTTP
+    if isinstance(error, urllib.error.URLError):
+        if not isinstance(error.reason, BaseException):
+            return True                         # a reason in words, such as "timed out"
+        error = error.reason
+    if isinstance(error, ssl.SSLCertVerificationError):
+        return False                            # a proxy or a clock: asking again does not help
+    # timeouts, refused or reset connections, name resolution, cut TLS or HTTP transfers;
+    # a full disk or a folder without write permission is an OSError too and is not retried
+    # socket.timeout is TimeoutError only from Python 3.10 on (Debian 11 has 3.9)
+    return isinstance(error, (TimeoutError, socket.timeout, ConnectionError, socket.gaierror, ssl.SSLError, http.client.HTTPException))
+
+
+def _public(url: str) -> str:
+    """*url* without query and fragment, which may carry expiring tokens."""
+    parts = urllib.parse.urlsplit(url)
+    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+
+
 def checked_download(url: str, expected_sha256: str, destination: Path) -> Path:
+    """Download *url* to *destination* and check its SHA256, asking again after a fault of the server or the network."""
     destination = Path(destination)
     if not url.startswith("https://") or len(expected_sha256) != 64:
         raise InstallError("Downloads require HTTPS and a pinned SHA256")
@@ -95,6 +144,28 @@ def checked_download(url: str, expected_sha256: str, destination: Path) -> Path:
             raise InstallError(f"Cache checksum mismatch: {destination}; preserve/investigate it before retrying")
         return destination
     destination.parent.mkdir(parents=True, exist_ok=True)
+    for attempt, pause in enumerate(RETRY_PAUSES, start=1):
+        try:
+            return _download_once(url, expected_sha256, destination)
+        except Exception as error:      # noqa: BLE001 - sorted by _retryable
+            if not _retryable(error):
+                raise
+            print(f"Download of {destination.name} failed ({_reason(error)}); trying again in {pause} s (attempt {attempt + 1} of {DOWNLOAD_ATTEMPTS})", flush=True)
+            time.sleep(pause)
+    try:
+        return _download_once(url, expected_sha256, destination)
+    except Exception as error:          # noqa: BLE001 - sorted by _retryable
+        if not _retryable(error):
+            raise
+        raise DownloadFailed(f"Download failed after {DOWNLOAD_ATTEMPTS} attempts: {destination.name} from {_public(url)} ({_reason(error)}). The server or the network did not deliver the file; files downloaded before are kept, so starting the installation again continues from here.") from error
+
+
+def _reason(error: BaseException) -> str:
+    text = str(error)
+    return text.splitlines()[0] if text else type(error).__name__
+
+
+def _download_once(url: str, expected_sha256: str, destination: Path) -> Path:
     # Unique temp file; never truncate an existing user's .part file.
     fd, temp_name = tempfile.mkstemp(prefix=destination.name + ".part-", dir=destination.parent)
     temporary = Path(temp_name)
@@ -111,11 +182,11 @@ def checked_download(url: str, expected_sha256: str, destination: Path) -> Path:
             location = urllib.parse.urlunsplit((final_url.scheme, final_url.netloc,
                                                final_url.path, "", ""))
             if response.status != 200:
-                raise InstallError(f"Unexpected download HTTP status {response.status}: {location}; "
+                raise TransientDownloadError(f"Unexpected download HTTP status {response.status}: {location}; "
                                    "a complete HTTP 200 response is required")
             content_type = response.headers.get("Content-Type", "unknown").split(";", 1)[0].strip().lower()
             if content_type in {"text/html", "application/xhtml+xml"}:
-                raise InstallError(f"Unexpected HTML download response: {location}; "
+                raise TransientDownloadError(f"Unexpected HTML download response: {location}; "
                                    "expected the pinned file, not a download/error page")
             content_length = response.headers.get("Content-Length")
             try:
@@ -142,7 +213,7 @@ def checked_download(url: str, expected_sha256: str, destination: Path) -> Path:
                    f"\n  Content-Type: {content_type}"
                    f"\n  Download location: {location}")
         if expected_bytes is not None and total != expected_bytes:
-            raise InstallError(f"Incomplete download: received {total} of {expected_bytes} bytes; "
+            raise TransientDownloadError(f"Incomplete download: received {total} of {expected_bytes} bytes; "
                                "rejecting unverified download" + details)
         if digest.hexdigest() != expected_sha256.lower():
             raise InstallError("Upstream checksum mismatch: received bytes do not match the pinned file; "

@@ -54,6 +54,63 @@ _3D_VARIANTS = {
 }
 
 
+def result_layers(cfg, three_d=None) -> list[dict]:
+    """The map layers of every 2D result of the case that exists, as entries of a result manifest: ``{name, path, kind, style, variable, extra}``.
+
+    A job records them (:meth:`TelemacBackend.export_qgis_results`), and ``axqua export
+    --list`` names them per result, so that the plugin puts a result of the case on the
+    map without a job (a case imported from a steering file has none). *three_d* is the
+    case the 3D runs work in (:func:`axqua.solvers.telemac.threed.three_d_case`).
+    """
+    from axqua.solvers.telemac import threed
+
+    c3 = three_d if three_d is not None else threed.three_d_case(cfg, prepare=False)
+    post = getattr(cfg, "postproc", None)
+    # Which maps the case asks for (postproc.telemac_maps), and the predefined map style
+    # the plugin applies to the depth layer (postproc.map_style); an empty list is a
+    # choice: no map.
+    maps = getattr(post, "telemac_maps", None)
+    maps = set(("depth", "velocity") if maps is None else maps)
+    style = str(getattr(post, "map_style", "") or "")
+    out: list[dict] = []
+    # Results, in the order a user wants them: the thing that was computed first. The
+    # last column is the dataset the velocity is styled by. A 2D result prints the
+    # scalar velocity; the depth-averaged companion of a 3D run carries the two
+    # components only, which QGIS reads as one vector group named VELOCITY. The
+    # hydrostatic 3D run keeps its results under names of its own.
+    for name, label, velocity, case in (
+        (getattr(cfg, "results_slf", None), "TELEMAC result (steady)",
+         "SCALAR VELOCITY", cfg),
+        (getattr(cfg, "results_unsteady_slf", None), "TELEMAC result (unsteady)",
+         "SCALAR VELOCITY", cfg),
+        (getattr(cfg, "results_hydrology_slf", None), "TELEMAC result (hydrology)",
+         "SCALAR VELOCITY", cfg),
+        (getattr(cfg, "results2d_from_3d_slf", None),
+         "TELEMAC-3D result (depth-averaged)", "VELOCITY", c3),
+        (threed.HYDROSTATIC_RESULT_2D,
+         "TELEMAC-3D result, hydrostatic (depth-averaged)", "VELOCITY", c3),
+    ):
+        if not name:
+            continue
+        path = case.model_path(name)
+        if not path.exists():
+            continue
+        if "depth" in maps:
+            out.append({"name": label, "path": str(path), "kind": "mesh",
+                        "style": STYLE_DEPTH, "variable": "WATER DEPTH",
+                        "extra": {"map_style": style} if style else {}})
+        # The same file carries velocity; a second entry lets the plugin add two
+        # differently-styled layers over one dataset without reading it twice.
+        if "velocity" in maps:
+            out.append({"name": f"{label} - velocity", "path": str(path), "kind": "mesh",
+                        "style": STYLE_VELOCITY, "variable": velocity, "extra": {}})
+        if "free-surface" in maps:
+            out.append({"name": f"{label} - free surface", "path": str(path),
+                        "kind": "mesh", "style": "", "variable": "FREE SURFACE",
+                        "extra": {}})
+    return out
+
+
 class TelemacBackend(BaseBackend):
     """TELEMAC-2D / TELEMAC-3D, with GAIA where the case asks for it."""
 
@@ -543,51 +600,16 @@ class TelemacBackend(BaseBackend):
         written: list[Path] = []
         from axqua.solvers.telemac import threed
 
-        post = getattr(cfg, "postproc", None)
         # the 3D runs work in a folder of their own when the case gives them a mesh
         # of their own (mesh.size_scale_3d)
         c3 = threed.three_d_case(cfg, prepare=False)
 
-        # Results, in the order a user wants them: the thing that was computed first.
-        # The last column is the dataset the velocity is styled by. A 2D result prints
-        # the scalar velocity; the depth-averaged companion of a 3D run carries the
-        # two components only, which QGIS reads as one vector group named VELOCITY.
-        # The hydrostatic 3D run keeps its results under names of its own.
-        for name, label, velocity, case in (
-            (getattr(cfg, "results_slf", None), "TELEMAC result (steady)",
-             "SCALAR VELOCITY", cfg),
-            (getattr(cfg, "results_unsteady_slf", None), "TELEMAC result (unsteady)",
-             "SCALAR VELOCITY", cfg),
-            (getattr(cfg, "results_hydrology_slf", None), "TELEMAC result (hydrology)",
-             "SCALAR VELOCITY", cfg),
-            (getattr(cfg, "results2d_from_3d_slf", None),
-             "TELEMAC-3D result (depth-averaged)", "VELOCITY", c3),
-            (threed.HYDROSTATIC_RESULT_2D,
-             "TELEMAC-3D result, hydrostatic (depth-averaged)", "VELOCITY", c3),
-        ):
-            if not name:
-                continue
-            path = case.model_path(name)
-            if not path.exists():
-                continue
-            # Which maps the case asks for (postproc.telemac_maps), and the predefined
-            # map style the plugin applies to the depth layer (postproc.map_style).
-            # (an empty list is a choice: no map)
-            maps = getattr(post, "telemac_maps", None)
-            maps = set(("depth", "velocity") if maps is None else maps)
-            style = str(getattr(post, "map_style", "") or "")
-            if "depth" in maps:
-                ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,
-                           variable="WATER DEPTH", **({"map_style": style} if style else {}))
-            # The same file carries velocity; a second entry lets the plugin add two
-            # differently-styled layers over one dataset without reading it twice.
-            if "velocity" in maps:
-                ctx.record(f"{label} - velocity", path, kind="mesh",
-                           style=STYLE_VELOCITY, variable=velocity)
-            if "free-surface" in maps:
-                ctx.record(f"{label} - free surface", path, kind="mesh",
-                           variable="FREE SURFACE")
-            written.append(path)
+        for entry in result_layers(cfg, c3):
+            path = Path(entry["path"])
+            ctx.record(entry["name"], path, kind=entry["kind"], style=entry["style"],
+                       variable=entry["variable"], **entry["extra"])
+            if path not in written:
+                written.append(path)
 
         # The 3D results themselves are volumes. QGIS reads SELAFIN in 2D only, so they
         # are listed as files and not as layers: offered as layers, each *Load results*

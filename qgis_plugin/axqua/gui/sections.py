@@ -100,10 +100,13 @@ WINDOWS: dict[str, tuple[str, str]] = {
     "setup-openfoam": ("installation/simulation-software", "setup-existing-openfoam"),
     "install-postprocessors": ("installation/postprocessors", "help-postprocessors"),
     "example-case": ("usage/case-setup", "help-example-case"),
+    "import-case": ("usage/case-setup", "help-import-case"),
     "cleanup": ("troubleshooting/tips-logfiles", "help-cleanup"),
     "hydrology-wizard": ("usage/hydrology-simulations", "help-hydrology-wizard"),
     "sediment-wizard": ("usage/hydrology-simulations", "help-sediment-wizard"),
     "survey-wizard": ("usage/calibration-validation", "help-survey-planner"),
+    "calibration-parameters": ("usage/calibration-validation",
+                               "help-calibration-parameters"),
 }
 
 #: Where a capability nobody has placed is shown: with the simulations of its solver.

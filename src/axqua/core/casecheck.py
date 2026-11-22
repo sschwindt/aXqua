@@ -263,9 +263,13 @@ def _advice(raw: dict) -> list[Finding]:
             remedy="Add the TELEMAC block (Solver: telemac2d), or the OpenFOAM block."))
     boundaries = raw.get("boundaries") if isinstance(raw.get("boundaries"), dict) else {}
     hydrology = raw.get("hydrology") if isinstance(raw.get("hydrology"), dict) else {}
-    # a catchment in hydrology mode is driven by its rain, not by a discharge
+    # a catchment in hydrology mode is driven by its rain, not by a discharge; a case
+    # imported from a TELEMAC steering file is post-processed only
     rain_driven = hydrology.get("enabled") is True
-    if (not rain_driven and boundaries.get("prescribed_flowrate") in (None, "")
+    project = raw.get("project") if isinstance(raw.get("project"), dict) else {}
+    imported = bool(project.get("imported_from"))
+    if (not rain_driven and not imported
+            and boundaries.get("prescribed_flowrate") in (None, "")
             and not boundaries.get("inflow")):
         out.append(Finding(
             WARNING, "axqua.config.incomplete",

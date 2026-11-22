@@ -52,7 +52,7 @@ log = logging.getLogger("axqua")
 
 __all__ = ["CalibratedSet", "ValidationReport", "ValidationSetup", "boundaries_of",
            "build", "calibrated_from", "calibrated_parameters", "compare", "evaluate",
-           "inside_model", "iteration_entry", "last_iteration", "marginal_peak",
+           "held_zones", "inside_model", "iteration_entry", "last_iteration", "marginal_peak",
            "peak_bins", "situation_named", "slug", "statistics"]
 
 RESULTS = "auto-saved-results-HydroBayesCal"
@@ -105,6 +105,9 @@ class CalibratedSet:
     values: list[float]
     source: Path
     estimate: str = "per-parameter posterior maximum"
+    #: Roughness zones held at their nominal ks because the case no longer calibrates
+    #: them (:func:`held_zones`), with that ks.
+    held: dict[str, float] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, float]:
         return {name: float(value) for name, value in zip(self.names, self.values)}
@@ -227,7 +230,43 @@ def calibrated_parameters(cfg) -> CalibratedSet:
     source = found[-1]
     with open(source, "rb") as handle:
         data = pickle.load(handle)          # nosec B301 - written by the calibration
-    return calibrated_from(data, source)
+    found = calibrated_from(data, source)
+    held = held_zones(cfg, found.names)
+    if held:
+        found.values = [held.get(name, value) for name, value in zip(found.names, found.values)]
+        found.held = held
+        for name, ks in held.items():
+            log.info("%s is held at its nominal ks of %.4g m: the roughness table no "
+                     "longer calibrates it", name, ks)
+    return found
+
+
+def held_zones(cfg, names) -> dict[str, float]:
+    """Roughness zones among *names* that the case no longer calibrates, with their nominal ks.
+
+    A zone that the roughness table flags ``calibration = False`` after the calibration
+    has run (the user's decision for a zone that the measurements do not identify, zone 1
+    of the inn-KB15 trial on 2026-11-20) keeps its nominal ks: the ``ks`` column of the
+    table, else the middle of its range. The value has to be written explicitly, because
+    HydroBayesCal rewrites the friction table of the built case for every run, so that
+    table holds the value of the last run, not the nominal one.
+    """
+    if cfg.geodata.roughness_table is None:
+        return {}
+    from axqua.core.geodata import read_roughness_zones
+
+    zones = read_roughness_zones(cfg.geodata.roughness_table)
+    held = {}
+    for name in names:
+        match = re.fullmatch(r"zone(\d+)", str(name).strip(), flags=re.IGNORECASE)
+        zone = zones.get(int(match.group(1))) if match else None
+        if zone is None:
+            continue
+        degenerate = (zone.ks_min is not None and zone.ks_max is not None
+                      and zone.ks_max <= zone.ks_min)
+        if zone.calibrate is False or degenerate:
+            held[str(name)] = float(zone.ks)
+    return held
 
 
 def calibrated_from(data: dict, source: Path) -> CalibratedSet:

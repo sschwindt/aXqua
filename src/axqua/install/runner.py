@@ -504,6 +504,13 @@ def execute(folder: str | os.PathLike, *, echo: bool = False,
                         remedy="The program itself is installed. Repeat this step "
                                "later with: " + step.as_dict()["command"]))
                     continue
+                if code == DOWNLOAD_EXIT and plan.get("target") == "openfoam":
+                    add(Finding(
+                        ERROR, "axqua.install.download_failed",
+                        f"'{step.name}' could not download a file: " + _last_words(log_path, 1),
+                        subject=subject,
+                        remedy=f"The download server or the network did not deliver the file, although it was asked several times. Start the installation again with the same folder: what is downloaded and built is kept. The address in the message is not a page to open; the installer downloads the file itself. The complete log is {log_path}."))
+                    return finish("failed", f"'{step.name}' could not download a file", 1)
                 if code:
                     add(Finding(
                         ERROR, "axqua.install.failed",
@@ -660,6 +667,10 @@ def _footer(out, number: int, count: int, name: str, outcome: str, began: float,
     out.flush()
     if echo:
         print(line, end="", flush=True)
+
+
+#: Exit status of the OpenFOAM installer after a download that failed on every attempt (``DOWNLOAD_EXIT`` of the vendored ``sediment_installer/core.py``; a test keeps the two equal).
+DOWNLOAD_EXIT = 75
 
 
 def _last_words(log_path: Path, lines: int = 3) -> str:

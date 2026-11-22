@@ -901,6 +901,36 @@ def test_a_failed_installer_reports_the_end_of_its_log(installers, debian, tmp_p
     assert status["log"] in finding["remedy"]
 
 
+def test_a_download_that_failed_after_the_retries_has_a_code_of_its_own(installers, debian, tmp_path):
+    """On Windows the first OpenFOAM installation stopped after approximately 2 minutes, the read timeout of a download, and the second passed (the user, 2026-11-19)."""
+    import dataclasses
+
+    _script(installers, 'echo "Downloading OpenFOAM-v2406.tgz: 40 MiB"; '
+                        'echo "ERROR: Download failed after 4 attempts: ThirdParty-v2406.tgz from '
+                        'https://dl.openfoam.com/source/v2406/ThirdParty-v2406.tgz (timed out)." >&2; exit 75')
+    # the OpenFOAM installer's status after its retries; the stand-in script is TELEMAC's
+    plan = dataclasses.replace(_plan("telemac", installers, debian, tmp_path), target="openfoam")
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "failed" and "could not download" in status["message"]
+    finding = status["findings"][0]
+    assert finding["code"] == "axqua.install.download_failed"
+    assert "ThirdParty-v2406.tgz" in finding["message"] and "40 MiB" not in finding["message"]
+    assert "same folder" in finding["remedy"] and status["log"] in finding["remedy"]
+    # the same status of another installer, or the same words with another status, is an ordinary failure
+    other = runner.start(_plan("telemac", installers, debian, tmp_path / "other"), detach=False)
+    assert _codes(other["findings"]) == {"axqua.install.failed"}
+    _script(installers, 'echo "ERROR: Download failed after 4 attempts: x" >&2; exit 1')
+    other = runner.start(dataclasses.replace(_plan("telemac", installers, debian, tmp_path / "third"), target="openfoam"),
+                         detach=False)
+    assert _codes(other["findings"]) == {"axqua.install.failed"}
+
+
+def test_the_runner_knows_the_exit_status_of_a_failed_download():
+    vendored = (Path(__file__).resolve().parents[1] / "src" / "axqua" / "install" / "vendor" / "OpenFOAM-installer"
+                / "sediment_installer" / "core.py").read_text(encoding="utf-8")
+    assert f"DOWNLOAD_EXIT = {runner.DOWNLOAD_EXIT}\n" in vendored
+
+
 def test_an_installer_that_claims_success_without_a_build_is_not_believed(
         installers, debian, tmp_path):
     """The TELEMAC script ends with exit code 0 when its own check of the build

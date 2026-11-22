@@ -144,12 +144,16 @@ def condition_met(condition: dict, value_of, block_on) -> bool:
 
     *value_of(key)* is the current value of a setting (its default when unset),
     *block_on(block)* whether a block is switched on. ``{"all": [...]}`` holds when
-    every condition in it holds.
+    every condition in it holds, ``{"key": ..., "set": true}`` when the setting has a
+    value.
     """
     if "all" in condition:
         return all(condition_met(c, value_of, block_on) for c in condition["all"])
     if "block" in condition:
         return bool(block_on(condition["block"]))
+    if "set" in condition:
+        # the entry has a value (project.imported_from has no row and is read from the file)
+        return (not is_unset(value_of(condition.get("key", "")))) == bool(condition["set"])
     return value_of(condition.get("key", "")) in list(condition.get("in") or [])
 
 
@@ -736,6 +740,13 @@ class CaseEditor(EditorDialog):
         if frame.get("switch"):
             switch = dict(frame["switch"])
             inner.addWidget(self._switch_box(switch.pop("block"), switch))
+        if frame.get("note"):
+            # a line to read before entering a value, e.g. which of two settings wins
+            note = QLabel(frame["note"])
+            note.setWordWrap(True)
+            note.setObjectName("frameNote")
+            note.setStyleSheet("font-style: italic;")
+            inner.addWidget(note)
         if frame.get("info"):
             info = QHBoxLayout()
             button = QToolButton()

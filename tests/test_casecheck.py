@@ -206,6 +206,10 @@ def test_the_editor_pages_are_the_ones_the_user_named(tmp_path):
     telemac_mesh = pages[titles.index("Mesh configuration")]["frames"][0]
     assert telemac_mesh["switch"]["block"] == "hydrology"
     assert telemac_mesh["switch"]["seed"] == {"enabled": True}
+    # which edge length wins, said where it is entered (the user's order of 2026-11-20):
+    # the field of the mesh zones layer, the settings of the frame are fallbacks
+    assert "wins" in telemac_mesh["note"] and "Max Edge Length" in telemac_mesh["note"]
+    assert "zones without one" in telemac_mesh["note"]
     assert frames["hydrology"] == ["Rain", "Infiltration (Green-Ampt)", "Wind and sun",
                                    "Outlet and run"]
     # every setting is on exactly one frame, but for the one a switch stands for
@@ -225,9 +229,12 @@ def test_what_is_required_is_on_the_form_and_follows_the_options():
                 "boundaries.liquid_boundaries", "boundaries.prescribed_flowrate"):
         assert by_key[key]["required"] and by_key[key]["essential"], key
     def check(condition) -> None:
-        """A condition has one of the three forms the editor evaluates."""
-        assert set(condition) in ({"key", "in"}, {"block"}, {"all"}), condition
-        if "key" in condition:
+        """A condition has one of the four forms the editor evaluates."""
+        assert set(condition) in ({"key", "in"}, {"key", "set"}, {"block"}, {"all"}), condition
+        if "set" in condition:
+            # the mark of an imported case has no row: the editor reads it from the file
+            assert condition["key"] == "project.imported_from", condition
+        elif "key" in condition:
             assert condition["key"] in by_key, condition
         for part in condition.get("all", ()):
             check(part)
@@ -248,7 +255,10 @@ def test_what_is_required_is_on_the_form_and_follows_the_options():
             for condition in conditions:
                 check(condition)
     assert by_key["boundaries.prescribed_flowrate"]["required_unless"] == [
-        {"block": "hydrology"}]
+        {"block": "hydrology"}, {"key": "project.imported_from", "set": True}]
+    # a case imported from a TELEMAC steering file is post-processed only (2026-11-20)
+    for key in ("geodata.dem_initial", "geodata.boundary", "boundaries.liquid_boundaries"):
+        assert {"key": "project.imported_from", "set": True} in by_key[key]["required_unless"]
     # the outflow level is needed in hydrology mode too when the outlet is a level
     level = {"all": [{"block": "hydrology"},
                      {"key": "hydrology.outlet_condition", "in": ["elevation"]}]}

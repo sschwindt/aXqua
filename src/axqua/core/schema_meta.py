@@ -176,6 +176,17 @@ FRAME_SWITCHES: dict[tuple[str, str], str] = {
     ("mesh", "TELEMAC mesh"): "hydrology",
 }
 
+#: A short line a frame shows above its settings, for what a user has to know before
+#: entering a value there (``(page, frame title)``; the information of a frame, by
+#: contrast, opens on request).
+FRAME_NOTES: dict[tuple[str, str], str] = {
+    # geodata.Dataset.mesh_zones: the field of the layer wins, these are fallbacks
+    ("mesh", "TELEMAC mesh"): (
+        "The edge length of a mesh zone in its GeoPackage layer (field Max Edge Length "
+        "(m)) wins; the edge lengths here apply only to zones without one. The factor "
+        "on all edge lengths applies to both."),
+}
+
 #: Settings a switch stands for, which get no row of their own.
 HIDDEN = frozenset({"hydrology.enabled"})
 
@@ -197,9 +208,15 @@ _HYDROLOGY_LEVEL = {"all": [{"block": "hydrology"},
 #: one suffices), in the form of :data:`REQUIRED_WHEN`. A hydrology case is driven by
 #: its rain, so it needs no discharge, and a closed catchment no outflow line; it
 #: needs an outflow level only when its own outlet is one.
+#: The case was imported from a TELEMAC steering file (``project.imported_from``), for
+#: post-processing only: it has no geodata and no boundary values of its own.
+_IMPORTED = {"key": "project.imported_from", "set": True}
+
 REQUIRED_UNLESS: dict[str, list[dict[str, Any]]] = {
-    "boundaries.prescribed_flowrate": [{"block": "hydrology"}],
-    "boundaries.liquid_boundaries": [{"block": "hydrology"}],
+    "boundaries.prescribed_flowrate": [{"block": "hydrology"}, _IMPORTED],
+    "boundaries.liquid_boundaries": [{"block": "hydrology"}, _IMPORTED],
+    "geodata.dem_initial": [_IMPORTED],
+    "geodata.boundary": [_IMPORTED],
     "boundaries.prescribed_elevation": [
         {"all": [{"block": "hydrology"},
                  {"key": "hydrology.outlet_condition", "in": _OTHER_LEVEL}]}],
@@ -217,8 +234,10 @@ DISABLED_WHEN: dict[str, list[dict[str, Any]]] = {
 
 #: Entries an option makes necessary: ``key -> conditions``, of which one suffices. A
 #: condition is ``{"key": ..., "in": [values]}`` (an unset entry counts with its
-#: default), ``{"block": ...}`` (the block is switched on) or ``{"all": [conditions]}``
-#: (every one of them holds). A plugin older than the ``all`` form reads it as not
+#: default), ``{"key": ..., "set": true}`` (the entry has a value, also one without a
+#: row of its own, such as ``project.imported_from``), ``{"block": ...}`` (the block is
+#: switched on) or ``{"all": [conditions]}`` (every one of them holds). A plugin older
+#: than the ``set`` form reads it as not holding, which keeps a requirement. A plugin older than the ``all`` form reads it as not
 #: holding: in this table that drops a requirement, in :data:`REQUIRED_UNLESS` it keeps
 #: one. No released plugin is affected: 1.0.2 and earlier read no ``required_unless``
 #: at all, and the plugin that brought it brought ``all`` as well.
@@ -767,6 +786,9 @@ def pages(sections: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
                     and not item.get("hidden")]
             if keys:
                 frame = {"title": frame_title, "info": info, "keys": keys}
+                note = FRAME_NOTES.get((key, frame_title))
+                if note:
+                    frame["note"] = note
                 block = FRAME_SWITCHES.get((key, frame_title))
                 if block:
                     frame["switch"] = {"block": block, **SWITCHES[block]}
