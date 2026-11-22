@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/core/schema_meta.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=350a9c04"></script>
+      <script src="../../../_static/documentation_options.js?v=e0a75244"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -528,6 +528,17 @@
     <span class="p">(</span><span class="s2">"mesh"</span><span class="p">,</span> <span class="s2">"TELEMAC mesh"</span><span class="p">):</span> <span class="s2">"hydrology"</span><span class="p">,</span>
 <span class="p">}</span>
 
+<span class="c1">#: A short line a frame shows above its settings, for what a user has to know before</span>
+<span class="c1">#: entering a value there (``(page, frame title)``; the information of a frame, by</span>
+<span class="c1">#: contrast, opens on request).</span>
+<span class="n">FRAME_NOTES</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># geodata.Dataset.mesh_zones: the field of the layer wins, these are fallbacks</span>
+    <span class="p">(</span><span class="s2">"mesh"</span><span class="p">,</span> <span class="s2">"TELEMAC mesh"</span><span class="p">):</span> <span class="p">(</span>
+        <span class="s2">"The edge length of a mesh zone in its GeoPackage layer (field Max Edge Length "</span>
+        <span class="s2">"(m)) wins; the edge lengths here apply only to zones without one. The factor "</span>
+        <span class="s2">"on all edge lengths applies to both."</span><span class="p">),</span>
+<span class="p">}</span>
+
 <span class="c1">#: Settings a switch stands for, which get no row of their own.</span>
 <span class="n">HIDDEN</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"hydrology.enabled"</span><span class="p">})</span>
 
@@ -549,9 +560,15 @@
 <span class="c1">#: one suffices), in the form of :data:`REQUIRED_WHEN`. A hydrology case is driven by</span>
 <span class="c1">#: its rain, so it needs no discharge, and a closed catchment no outflow line; it</span>
 <span class="c1">#: needs an outflow level only when its own outlet is one.</span>
+<span class="c1">#: The case was imported from a TELEMAC steering file (``project.imported_from``), for</span>
+<span class="c1">#: post-processing only: it has no geodata and no boundary values of its own.</span>
+<span class="n">_IMPORTED</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"project.imported_from"</span><span class="p">,</span> <span class="s2">"set"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
 <span class="n">REQUIRED_UNLESS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"boundaries.prescribed_flowrate"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"block"</span><span class="p">:</span> <span class="s2">"hydrology"</span><span class="p">}],</span>
-    <span class="s2">"boundaries.liquid_boundaries"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"block"</span><span class="p">:</span> <span class="s2">"hydrology"</span><span class="p">}],</span>
+    <span class="s2">"boundaries.prescribed_flowrate"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"block"</span><span class="p">:</span> <span class="s2">"hydrology"</span><span class="p">},</span> <span class="n">_IMPORTED</span><span class="p">],</span>
+    <span class="s2">"boundaries.liquid_boundaries"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"block"</span><span class="p">:</span> <span class="s2">"hydrology"</span><span class="p">},</span> <span class="n">_IMPORTED</span><span class="p">],</span>
+    <span class="s2">"geodata.dem_initial"</span><span class="p">:</span> <span class="p">[</span><span class="n">_IMPORTED</span><span class="p">],</span>
+    <span class="s2">"geodata.boundary"</span><span class="p">:</span> <span class="p">[</span><span class="n">_IMPORTED</span><span class="p">],</span>
     <span class="s2">"boundaries.prescribed_elevation"</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span><span class="s2">"all"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"block"</span><span class="p">:</span> <span class="s2">"hydrology"</span><span class="p">},</span>
                  <span class="p">{</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"hydrology.outlet_condition"</span><span class="p">,</span> <span class="s2">"in"</span><span class="p">:</span> <span class="n">_OTHER_LEVEL</span><span class="p">}]}],</span>
@@ -569,8 +586,10 @@
 
 <span class="c1">#: Entries an option makes necessary: ``key -&gt; conditions``, of which one suffices. A</span>
 <span class="c1">#: condition is ``{"key": ..., "in": [values]}`` (an unset entry counts with its</span>
-<span class="c1">#: default), ``{"block": ...}`` (the block is switched on) or ``{"all": [conditions]}``</span>
-<span class="c1">#: (every one of them holds). A plugin older than the ``all`` form reads it as not</span>
+<span class="c1">#: default), ``{"key": ..., "set": true}`` (the entry has a value, also one without a</span>
+<span class="c1">#: row of its own, such as ``project.imported_from``), ``{"block": ...}`` (the block is</span>
+<span class="c1">#: switched on) or ``{"all": [conditions]}`` (every one of them holds). A plugin older</span>
+<span class="c1">#: than the ``set`` form reads it as not holding, which keeps a requirement. A plugin older than the ``all`` form reads it as not</span>
 <span class="c1">#: holding: in this table that drops a requirement, in :data:`REQUIRED_UNLESS` it keeps</span>
 <span class="c1">#: one. No released plugin is affected: 1.0.2 and earlier read no ``required_unless``</span>
 <span class="c1">#: at all, and the plugin that brought it brought ``all`` as well.</span>
@@ -1124,6 +1143,9 @@
                     <span class="ow">and</span> <span class="ow">not</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"hidden"</span><span class="p">)]</span>
             <span class="k">if</span> <span class="n">keys</span><span class="p">:</span>
                 <span class="n">frame</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"title"</span><span class="p">:</span> <span class="n">frame_title</span><span class="p">,</span> <span class="s2">"info"</span><span class="p">:</span> <span class="n">info</span><span class="p">,</span> <span class="s2">"keys"</span><span class="p">:</span> <span class="n">keys</span><span class="p">}</span>
+                <span class="n">note</span> <span class="o">=</span> <span class="n">FRAME_NOTES</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">frame_title</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">note</span><span class="p">:</span>
+                    <span class="n">frame</span><span class="p">[</span><span class="s2">"note"</span><span class="p">]</span> <span class="o">=</span> <span class="n">note</span>
                 <span class="n">block</span> <span class="o">=</span> <span class="n">FRAME_SWITCHES</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">frame_title</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">block</span><span class="p">:</span>
                     <span class="n">frame</span><span class="p">[</span><span class="s2">"switch"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"block"</span><span class="p">:</span> <span class="n">block</span><span class="p">,</span> <span class="o">**</span><span class="n">SWITCHES</span><span class="p">[</span><span class="n">block</span><span class="p">]}</span>

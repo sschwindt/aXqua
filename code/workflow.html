@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/code/workflow.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=350a9c04"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -5759,7 +5759,7 @@ own triangles. A point outside the mesh has no model value; it is counted and le
 of the statistics.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.validation.CalibratedSet">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">CalibratedSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per-parameter</span> <span class="pre">posterior</span> <span class="pre">maximum'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#CalibratedSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.CalibratedSet" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">CalibratedSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'per-parameter</span> <span class="pre">posterior</span> <span class="pre">maximum'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">held</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#CalibratedSet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.CalibratedSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>The parameter values a calibration ended with.</p>
 <dl class="field-list simple">
@@ -5769,6 +5769,7 @@ of the statistics.</p>
 <li><p><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>)</p></li>
 <li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><em>Path</em></a>)</p></li>
 <li><p><strong>estimate</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>held</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>]</em>)</p></li>
 </ul>
 </dd>
 </dl>
@@ -5791,6 +5792,13 @@ of the statistics.</p>
 <dt class="sig sig-object py" id="axqua.validation.CalibratedSet.estimate">
 <span class="sig-name descname"><span class="pre">estimate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'per-parameter</span> <span class="pre">posterior</span> <span class="pre">maximum'</span></span><a class="headerlink" href="#axqua.validation.CalibratedSet.estimate" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.validation.CalibratedSet.held">
+<span class="sig-name descname"><span class="pre">held</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.validation.CalibratedSet.held" title="Link to this definition"></a></dt>
+<dd><p>Roughness zones held at their nominal ks because the case no longer calibrates
+them (<a class="reference internal" href="#axqua.validation.held_zones" title="axqua.validation.held_zones"><code class="xref py py-func docutils literal notranslate"><span class="pre">held_zones()</span></code></a>), with that ks.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="axqua.validation.CalibratedSet.as_dict">
@@ -6045,6 +6053,23 @@ measurement. Everything goes into <code class="docutils literal notranslate"><sp
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#axqua.validation.ValidationReport" title="axqua.validation.ValidationReport"><em>ValidationReport</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.validation.held_zones">
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">held_zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#held_zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.held_zones" title="Link to this definition"></a></dt>
+<dd><p>Roughness zones among <em>names</em> that the case no longer calibrates, with their nominal ks.</p>
+<p>A zone that the roughness table flags <code class="docutils literal notranslate"><span class="pre">calibration</span> <span class="pre">=</span> <span class="pre">False</span></code> after the calibration
+has run (the user’s decision for a zone that the measurements do not identify, zone 1
+of the inn-KB15 trial on 2026-11-20) keeps its nominal ks: the <code class="docutils literal notranslate"><span class="pre">ks</span></code> column of the
+table, else the middle of its range. The value has to be written explicitly, because
+HydroBayesCal rewrites the friction table of the built case for every run, so that
+table holds the value of the last run, not the nominal one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>

@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobs/submit.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bd867006"></script>
+      <script src="../../../_static/documentation_options.js?v=682bbe46"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -507,6 +507,9 @@
                <span class="n">source_config</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                <span class="n">validate_env</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobSpec</span> <span class="o">|</span> <span class="n">JobDir</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Freeze, validate, launch. Returns the :class:`JobDir`, or the spec on a dry run."""</span>
+    <span class="n">refuse</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"refuse_if_imported"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">refuse</span><span class="p">):</span>
+        <span class="n">refuse</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the job </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
     <span class="n">spec</span> <span class="o">=</span> <span class="n">build_spec</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="n">profile</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> <span class="n">np</span><span class="o">=</span><span class="n">np</span><span class="p">,</span>
                       <span class="n">workspace</span><span class="o">=</span><span class="n">workspace</span><span class="p">,</span> <span class="n">source_job</span><span class="o">=</span><span class="n">source_job</span><span class="p">,</span> <span class="n">launcher</span><span class="o">=</span><span class="n">launcher</span><span class="p">,</span>
                       <span class="n">source_config</span><span class="o">=</span><span class="n">source_config</span><span class="p">)</span>

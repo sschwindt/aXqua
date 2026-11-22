@@ -204,7 +204,7 @@ Click *Setup Wizard...* in the row of OpenFOAM on the *Configuration* tab, and s
    * - Setting
      - Meaning
    * - *Installation folder*
-     - A folder that does not exist yet, or an empty one. The installer installs into a new folder or continues an installation of its own, and refuses any other folder.
+     - A folder that does not exist yet, or an empty one. The installer installs into a new folder or continues an installation of its own, and refuses any other folder. *Browse...* therefore selects the folder in which the installation folder is created: a selected folder that is not empty gets the new folder ``openfoam-sediment-v2406`` inside it, while an empty folder and an earlier installation of the wizard are used as they are. The folder dialog of Windows selects only folders that exist; a new folder can be typed into the field directly.
    * - *OpenFOAM v2406*
      - *Use the OpenFOAM v2406 that is installed on this computer* builds the solvers on an existing installation, which takes a few minutes. aXqua enters the installation that it found. Select the file ``etc/bashrc`` of another one with *Browse...*. *Compile OpenFOAM v2406 from its source code* is the choice for a computer without OpenFOAM. It takes several hours and requires about 20 GB of free space.
    * - *Processes for compiling*

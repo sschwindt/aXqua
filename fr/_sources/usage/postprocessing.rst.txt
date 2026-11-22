@@ -32,6 +32,8 @@ QGIS map generation
 
 **Load results.** In the job list below the tabs, select a completed job and click *Load results*. The result layers are added to the QGIS project in a group that is named after the job. aXqua does not copy any files. The layers refer to the result files at their location in ``axqua-case/``. The map shows the last time step of the result, which for a steady simulation is the steady state. The *Temporal Controller* panel of QGIS selects another time step, for example of a simulation with a varying discharge.
 
+**Results of the case.** The box *Results of the case* lists the TELEMAC results in the folder of the active case, also when no job produced them, as for a case imported from a TELEMAC steering file (:ref:`importing a TELEMAC case <help-import-case>`). Select a result and click *Load the selected result*: the layers of water depth and velocity are added as *Load results* adds them, in a group named after the case. *Refresh* reads the folder again, for example after a run with TELEMAC outside aXqua.
+
 .. figure:: ../img/gui-postprocessing-qgis.png
    :alt: The sub-tab QGIS of the tab Postprocessing
    :width: 70%

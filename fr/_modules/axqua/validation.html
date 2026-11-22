@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/validation.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bd867006"></script>
+      <script src="../../_static/documentation_options.js?v=682bbe46"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -405,7 +405,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"CalibratedSet"</span><span class="p">,</span> <span class="s2">"ValidationReport"</span><span class="p">,</span> <span class="s2">"ValidationSetup"</span><span class="p">,</span> <span class="s2">"boundaries_of"</span><span class="p">,</span>
            <span class="s2">"build"</span><span class="p">,</span> <span class="s2">"calibrated_from"</span><span class="p">,</span> <span class="s2">"calibrated_parameters"</span><span class="p">,</span> <span class="s2">"compare"</span><span class="p">,</span> <span class="s2">"evaluate"</span><span class="p">,</span>
-           <span class="s2">"inside_model"</span><span class="p">,</span> <span class="s2">"iteration_entry"</span><span class="p">,</span> <span class="s2">"last_iteration"</span><span class="p">,</span> <span class="s2">"marginal_peak"</span><span class="p">,</span>
+           <span class="s2">"held_zones"</span><span class="p">,</span> <span class="s2">"inside_model"</span><span class="p">,</span> <span class="s2">"iteration_entry"</span><span class="p">,</span> <span class="s2">"last_iteration"</span><span class="p">,</span> <span class="s2">"marginal_peak"</span><span class="p">,</span>
            <span class="s2">"peak_bins"</span><span class="p">,</span> <span class="s2">"situation_named"</span><span class="p">,</span> <span class="s2">"slug"</span><span class="p">,</span> <span class="s2">"statistics"</span><span class="p">]</span>
 
 <span class="n">RESULTS</span> <span class="o">=</span> <span class="s2">"auto-saved-results-HydroBayesCal"</span>
@@ -466,6 +466,9 @@
     <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
     <span class="n">source</span><span class="p">:</span> <span class="n">Path</span>
     <span class="n">estimate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"per-parameter posterior maximum"</span>
+    <span class="c1">#: Roughness zones held at their nominal ks because the case no longer calibrates</span>
+    <span class="c1">#: them (:func:`held_zones`), with that ks.</span>
+    <span class="n">held</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CalibratedSet.as_dict">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.validation.CalibratedSet.as_dict">[docs]</a>
@@ -606,7 +609,46 @@
     <span class="n">source</span> <span class="o">=</span> <span class="n">found</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>          <span class="c1"># nosec B301 - written by the calibration</span>
-    <span class="k">return</span> <span class="n">calibrated_from</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span></div>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">calibrated_from</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+    <span class="n">held</span> <span class="o">=</span> <span class="n">held_zones</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">found</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">held</span><span class="p">:</span>
+        <span class="n">found</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">held</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>
+        <span class="n">found</span><span class="o">.</span><span class="n">held</span> <span class="o">=</span> <span class="n">held</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ks</span> <span class="ow">in</span> <span class="n">held</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> is held at its nominal ks of </span><span class="si">%.4g</span><span class="s2"> m: the roughness table no "</span>
+                     <span class="s2">"longer calibrates it"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ks</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">found</span></div>
+
+
+
+<div class="viewcode-block" id="held_zones">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.held_zones">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">held_zones</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Roughness zones among *names* that the case no longer calibrates, with their nominal ks.</span>
+
+<span class="sd">    A zone that the roughness table flags ``calibration = False`` after the calibration</span>
+<span class="sd">    has run (the user's decision for a zone that the measurements do not identify, zone 1</span>
+<span class="sd">    of the inn-KB15 trial on 2026-11-20) keeps its nominal ks: the ``ks`` column of the</span>
+<span class="sd">    table, else the middle of its range. The value has to be written explicitly, because</span>
+<span class="sd">    HydroBayesCal rewrites the friction table of the built case for every run, so that</span>
+<span class="sd">    table holds the value of the last run, not the nominal one.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.geodata</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_roughness_zones</span>
+
+    <span class="n">zones</span> <span class="o">=</span> <span class="n">read_roughness_zones</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_table</span><span class="p">)</span>
+    <span class="n">held</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">"zone(\d+)"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="n">zone</span> <span class="o">=</span> <span class="n">zones</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="k">if</span> <span class="n">match</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">zone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">degenerate</span> <span class="o">=</span> <span class="p">(</span><span class="n">zone</span><span class="o">.</span><span class="n">ks_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">zone</span><span class="o">.</span><span class="n">ks_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                      <span class="ow">and</span> <span class="n">zone</span><span class="o">.</span><span class="n">ks_max</span> <span class="o">&lt;=</span> <span class="n">zone</span><span class="o">.</span><span class="n">ks_min</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">zone</span><span class="o">.</span><span class="n">calibrate</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">degenerate</span><span class="p">:</span>
+            <span class="n">held</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">zone</span><span class="o">.</span><span class="n">ks</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">held</span></div>
 
 
 

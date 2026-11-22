@@ -148,6 +148,11 @@ The *Check* tab of an installation wizard, the *Installation* tab of a failed in
 
     The lines ``remote: Retry later`` and ``error: 429`` mean that the download server of TELEMAC temporarily refuses further requests, which occurs after many downloads from one network in a short time. Wait a few minutes and start the installation again.
 
+.. _axqua-install-download-failed:
+
+``'...' could not download a file``
+    The installer downloads the source code of OpenFOAM and its third-party libraries from SourceForge, whose download servers at times do not answer in time or send a waiting page instead of the file. The installer asks four times, with pauses of up to one minute, before it stops with this message. Start the installation again with the same folder: what is downloaded and built is kept, and the next request usually goes to another download server. The address in the message names the file; it is not a page to open, because the installer downloads and checks the file itself. If the message repeats, check the internet connection of the WSL distribution (or of the Linux computer), for example with ``curl -I https://dl.openfoam.com``.
+
 .. _axqua-install-output-missing:
 
 ``the installer finished, but did not produce ...``

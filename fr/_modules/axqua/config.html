@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/config.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bd867006"></script>
+      <script src="../../_static/documentation_options.js?v=682bbe46"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -628,8 +628,11 @@
 <span class="sd">    calibration ground truth in :class:`GroundTruth`.</span>
 <span class="sd">    """</span>
 
-    <span class="n">dem_initial</span><span class="p">:</span> <span class="n">Path</span>                    <span class="c1"># baseline terrain (GeoTIFF)</span>
-    <span class="n">boundary</span><span class="p">:</span> <span class="n">Path</span>                       <span class="c1"># ROI / max wetted extent polygon (shp/gpkg)</span>
+    <span class="c1"># baseline terrain (GeoTIFF) and ROI / max wetted extent polygon (shp/gpkg): every case</span>
+    <span class="c1"># that is built needs both (validate() says so); a case imported from a TELEMAC</span>
+    <span class="c1"># steering file (project.imported_from) has neither and is post-processed only</span>
+    <span class="n">dem_initial</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">boundary</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">dem_target</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># optional 2nd DEM for morphodynamic target</span>
     <span class="n">breaklines</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># internal constraint lines (shp/gpkg)</span>
     <span class="n">mesh_zones</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># polygons with a 'Zone Name' (channel/floodplain) for sizing</span>
@@ -2889,6 +2892,10 @@
     <span class="n">postproc</span><span class="p">:</span> <span class="n">PostProcessing</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">PostProcessing</span><span class="p">)</span>
     <span class="c1"># where the OpenFOAM case tree is written; defaults to &lt;sim_dir&gt;/openfoam</span>
     <span class="n">openfoam_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># A case imported from a TELEMAC steering file aXqua did not build</span>
+    <span class="c1"># (``axqua case import``): the steering file. Such a case has no geodata and is</span>
+    <span class="c1"># post-processed only; a build or a run is refused (axqua.solvers.telemac.importcase).</span>
+    <span class="n">imported_from</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># Top-level blocks the YAML actually contained. Every solver section has a</span>
     <span class="c1"># dataclass with defaults, so `cfg.openfoam` exists whether or not the case asked</span>
     <span class="c1"># for OpenFOAM; this records what was *declared*, which is what decides whether a</span>
@@ -3072,6 +3079,12 @@
             <span class="c1"># inputs (the STL parts) are validated instead.</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surfaces_produce</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">active</span> <span class="k">else</span> <span class="nb">frozenset</span><span class="p">()</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imported_from</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># a TELEMAC case aXqua did not build: its files, not geodata to build from</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="s2">"machine"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">validate_installation</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">"telemac"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">validate_choice</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">"project"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_imported</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">"postproc"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">postproc</span><span class="o">.</span><span class="n">validate</span><span class="p">)]</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="p">(</span><span class="s2">"machine"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">validate_installation</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"telemac"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">validate_choice</span><span class="p">),</span>
@@ -3100,6 +3113,34 @@
             <span class="p">(</span><span class="s2">"dem_of_difference"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_difference_data</span><span class="p">),</span>
         <span class="p">]</span></div>
 
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">imported</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether the case was imported from a TELEMAC steering file (``project.imported_from``) and is post-processed only."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">imported_from</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Config.refuse_if_imported">
+<a class="viewcode-back" href="../../code/configuration.html#axqua.config.Config.refuse_if_imported">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">refuse_if_imported</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">what</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refuse *what* (a build, a job kind) for a case imported from a TELEMAC steering file: it is post-processed only, and a build or a run would write into the folder of a model aXqua did not make."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imported_from</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is imported from the TELEMAC steering file "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">imported_from</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: aXqua post-processes its results, but does "</span>
+            <span class="sa">f</span><span class="s2">"not build or run it, so </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> is not started"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"project.imported_from"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the steering file with TELEMAC itself, then load its results "</span>
+                   <span class="s2">"again. To build a model with aXqua, create a case from geodata."</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_imported</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""An imported case needs its steering file, its geometry file and a result."""</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">importcase</span>
+
+        <span class="n">importcase</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_note_ground_truth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># ground truth is non-fatal: it feeds only the calibration/HydroBayesCal</span>
@@ -3455,6 +3496,8 @@
     <span class="n">openfoam</span> <span class="o">=</span> <span class="n">OpenFoam</span><span class="p">(</span><span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="n">OpenFoam</span><span class="p">,</span> <span class="n">ofdict</span><span class="p">))</span>
     <span class="n">openfoam_dir</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">cfg_dir</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"openfoam_dir"</span><span class="p">))</span> <span class="k">if</span> \
         <span class="n">project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"openfoam_dir"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">imported_from</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">cfg_dir</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"imported_from"</span><span class="p">))</span> <span class="k">if</span> \
+        <span class="n">project</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"imported_from"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="c1"># Post-processing: absent block -&gt; defaults, and nothing consults them</span>
     <span class="n">ppdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"postproc"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span>
@@ -3495,6 +3538,7 @@
         <span class="n">hydrology</span><span class="o">=</span><span class="n">hydrology</span><span class="p">,</span>
         <span class="n">postproc</span><span class="o">=</span><span class="n">postproc</span><span class="p">,</span>
         <span class="n">openfoam_dir</span><span class="o">=</span><span class="n">openfoam_dir</span><span class="p">,</span>
+        <span class="n">imported_from</span><span class="o">=</span><span class="n">imported_from</span><span class="p">,</span>
         <span class="n">declared_blocks</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">raw</span><span class="p">),</span>
     <span class="p">)</span>
     <span class="c1"># apply optional output-filename overrides</span>
@@ -3590,6 +3634,8 @@
     <span class="p">}}</span>
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">out</span><span class="p">[</span><span class="s2">"project"</span><span class="p">][</span><span class="s2">"openfoam_dir"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_dump_value</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam_dir</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">imported_from</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">"project"</span><span class="p">][</span><span class="s2">"imported_from"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_dump_value</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">imported_from</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">_DUMP_SKIP_TOP</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="s2">"project"</span><span class="p">]:</span>

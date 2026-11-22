@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/backend.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=bd867006"></script>
+      <script src="../../../../_static/documentation_options.js?v=682bbe46"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -405,6 +405,66 @@
     <span class="s2">"hydrodyn"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"hotstart3d_hydrodyn.cas"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
     <span class="s2">"unsteady"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"unsteady3d.cas"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
 <span class="p">}</span>
+
+
+<div class="viewcode-block" id="result_layers">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.backend.result_layers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">result_layers</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">three_d</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The map layers of every 2D result of the case that exists, as entries of a result manifest: ``{name, path, kind, style, variable, extra}``.</span>
+
+<span class="sd">    A job records them (:meth:`TelemacBackend.export_qgis_results`), and ``axqua export</span>
+<span class="sd">    --list`` names them per result, so that the plugin puts a result of the case on the</span>
+<span class="sd">    map without a job (a case imported from a steering file has none). *three_d* is the</span>
+<span class="sd">    case the 3D runs work in (:func:`axqua.solvers.telemac.threed.three_d_case`).</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">threed</span>
+
+    <span class="n">c3</span> <span class="o">=</span> <span class="n">three_d</span> <span class="k">if</span> <span class="n">three_d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">threed</span><span class="o">.</span><span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">prepare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">post</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"postproc"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># Which maps the case asks for (postproc.telemac_maps), and the predefined map style</span>
+    <span class="c1"># the plugin applies to the depth layer (postproc.map_style); an empty list is a</span>
+    <span class="c1"># choice: no map.</span>
+    <span class="n">maps</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="s2">"telemac_maps"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">maps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="s2">"depth"</span><span class="p">,</span> <span class="s2">"velocity"</span><span class="p">)</span> <span class="k">if</span> <span class="n">maps</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">maps</span><span class="p">)</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="s2">"map_style"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Results, in the order a user wants them: the thing that was computed first. The</span>
+    <span class="c1"># last column is the dataset the velocity is styled by. A 2D result prints the</span>
+    <span class="c1"># scalar velocity; the depth-averaged companion of a 3D run carries the two</span>
+    <span class="c1"># components only, which QGIS reads as one vector group named VELOCITY. The</span>
+    <span class="c1"># hydrostatic 3D run keeps its results under names of its own.</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">case</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (steady)"</span><span class="p">,</span>
+         <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
+        <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_unsteady_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (unsteady)"</span><span class="p">,</span>
+         <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
+        <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_hydrology_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (hydrology)"</span><span class="p">,</span>
+         <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
+        <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results2d_from_3d_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+         <span class="s2">"TELEMAC-3D result (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">,</span> <span class="n">c3</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_2D</span><span class="p">,</span>
+         <span class="s2">"TELEMAC-3D result, hydrostatic (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">,</span> <span class="n">c3</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="s2">"depth"</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span> <span class="s2">"path"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"mesh"</span><span class="p">,</span>
+                        <span class="s2">"style"</span><span class="p">:</span> <span class="n">STYLE_DEPTH</span><span class="p">,</span> <span class="s2">"variable"</span><span class="p">:</span> <span class="s2">"WATER DEPTH"</span><span class="p">,</span>
+                        <span class="s2">"extra"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"map_style"</span><span class="p">:</span> <span class="n">style</span><span class="p">}</span> <span class="k">if</span> <span class="n">style</span> <span class="k">else</span> <span class="p">{}})</span>
+        <span class="c1"># The same file carries velocity; a second entry lets the plugin add two</span>
+        <span class="c1"># differently-styled layers over one dataset without reading it twice.</span>
+        <span class="k">if</span> <span class="s2">"velocity"</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> - velocity"</span><span class="p">,</span> <span class="s2">"path"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"mesh"</span><span class="p">,</span>
+                        <span class="s2">"style"</span><span class="p">:</span> <span class="n">STYLE_VELOCITY</span><span class="p">,</span> <span class="s2">"variable"</span><span class="p">:</span> <span class="n">velocity</span><span class="p">,</span> <span class="s2">"extra"</span><span class="p">:</span> <span class="p">{}})</span>
+        <span class="k">if</span> <span class="s2">"free-surface"</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> - free surface"</span><span class="p">,</span> <span class="s2">"path"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+                        <span class="s2">"kind"</span><span class="p">:</span> <span class="s2">"mesh"</span><span class="p">,</span> <span class="s2">"style"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span> <span class="s2">"variable"</span><span class="p">:</span> <span class="s2">"FREE SURFACE"</span><span class="p">,</span>
+                        <span class="s2">"extra"</span><span class="p">:</span> <span class="p">{}})</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
 
 
 <div class="viewcode-block" id="TelemacBackend">
@@ -918,51 +978,16 @@
         <span class="n">written</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">threed</span>
 
-        <span class="n">post</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"postproc"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="c1"># the 3D runs work in a folder of their own when the case gives them a mesh</span>
         <span class="c1"># of their own (mesh.size_scale_3d)</span>
         <span class="n">c3</span> <span class="o">=</span> <span class="n">threed</span><span class="o">.</span><span class="n">three_d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">prepare</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="c1"># Results, in the order a user wants them: the thing that was computed first.</span>
-        <span class="c1"># The last column is the dataset the velocity is styled by. A 2D result prints</span>
-        <span class="c1"># the scalar velocity; the depth-averaged companion of a 3D run carries the</span>
-        <span class="c1"># two components only, which QGIS reads as one vector group named VELOCITY.</span>
-        <span class="c1"># The hydrostatic 3D run keeps its results under names of its own.</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">case</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (steady)"</span><span class="p">,</span>
-             <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
-            <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_unsteady_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (unsteady)"</span><span class="p">,</span>
-             <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
-            <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results_hydrology_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"TELEMAC result (hydrology)"</span><span class="p">,</span>
-             <span class="s2">"SCALAR VELOCITY"</span><span class="p">,</span> <span class="n">cfg</span><span class="p">),</span>
-            <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"results2d_from_3d_slf"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-             <span class="s2">"TELEMAC-3D result (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">,</span> <span class="n">c3</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_2D</span><span class="p">,</span>
-             <span class="s2">"TELEMAC-3D result, hydrostatic (depth-averaged)"</span><span class="p">,</span> <span class="s2">"VELOCITY"</span><span class="p">,</span> <span class="n">c3</span><span class="p">),</span>
-        <span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">case</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="k">continue</span>
-            <span class="c1"># Which maps the case asks for (postproc.telemac_maps), and the predefined</span>
-            <span class="c1"># map style the plugin applies to the depth layer (postproc.map_style).</span>
-            <span class="c1"># (an empty list is a choice: no map)</span>
-            <span class="n">maps</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="s2">"telemac_maps"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">maps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="s2">"depth"</span><span class="p">,</span> <span class="s2">"velocity"</span><span class="p">)</span> <span class="k">if</span> <span class="n">maps</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">maps</span><span class="p">)</span>
-            <span class="n">style</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="s2">"map_style"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">"depth"</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
-                <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"mesh"</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">STYLE_DEPTH</span><span class="p">,</span>
-                           <span class="n">variable</span><span class="o">=</span><span class="s2">"WATER DEPTH"</span><span class="p">,</span> <span class="o">**</span><span class="p">({</span><span class="s2">"map_style"</span><span class="p">:</span> <span class="n">style</span><span class="p">}</span> <span class="k">if</span> <span class="n">style</span> <span class="k">else</span> <span class="p">{}))</span>
-            <span class="c1"># The same file carries velocity; a second entry lets the plugin add two</span>
-            <span class="c1"># differently-styled layers over one dataset without reading it twice.</span>
-            <span class="k">if</span> <span class="s2">"velocity"</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
-                <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> - velocity"</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"mesh"</span><span class="p">,</span>
-                           <span class="n">style</span><span class="o">=</span><span class="n">STYLE_VELOCITY</span><span class="p">,</span> <span class="n">variable</span><span class="o">=</span><span class="n">velocity</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">"free-surface"</span> <span class="ow">in</span> <span class="n">maps</span><span class="p">:</span>
-                <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> - free surface"</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"mesh"</span><span class="p">,</span>
-                           <span class="n">variable</span><span class="o">=</span><span class="s2">"FREE SURFACE"</span><span class="p">)</span>
-            <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">result_layers</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">c3</span><span class="p">):</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"path"</span><span class="p">])</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">path</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">],</span> <span class="n">style</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">"style"</span><span class="p">],</span>
+                       <span class="n">variable</span><span class="o">=</span><span class="n">entry</span><span class="p">[</span><span class="s2">"variable"</span><span class="p">],</span> <span class="o">**</span><span class="n">entry</span><span class="p">[</span><span class="s2">"extra"</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">written</span><span class="p">:</span>
+                <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
         <span class="c1"># The 3D results themselves are volumes. QGIS reads SELAFIN in 2D only, so they</span>
         <span class="c1"># are listed as files and not as layers: offered as layers, each *Load results*</span>

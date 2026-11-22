@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/code/telemac.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=bd867006"></script>
+      <script src="../_static/documentation_options.js?v=682bbe46"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -4268,6 +4268,21 @@ and a second implementation would drift the moment one of them was fixed.</p>
 <p>This module is loaded <strong>only</strong> through <code class="docutils literal notranslate"><span class="pre">BackendSpec.load()</span></code>. It imports gmsh, numpy and
 the rest transitively, so it must never be imported by <code class="docutils literal notranslate"><span class="pre">spec.py</span></code> or by the package
 <code class="docutils literal notranslate"><span class="pre">__init__</span></code> - <code class="docutils literal notranslate"><span class="pre">tests/test_capabilities.py</span></code> asserts exactly that from a subprocess.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.backend.result_layers">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.backend.</span></span><span class="sig-name descname"><span class="pre">result_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">three_d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/backend.html#result_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.backend.result_layers" title="Lien vers cette définition"></a></dt>
+<dd><p>The map layers of every 2D result of the case that exists, as entries of a result manifest: <code class="docutils literal notranslate"><span class="pre">{name,</span> <span class="pre">path,</span> <span class="pre">kind,</span> <span class="pre">style,</span> <span class="pre">variable,</span> <span class="pre">extra}</span></code>.</p>
+<p>A job records them (<a class="reference internal" href="#axqua.solvers.telemac.backend.TelemacBackend.export_qgis_results" title="axqua.solvers.telemac.backend.TelemacBackend.export_qgis_results"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TelemacBackend.export_qgis_results()</span></code></a>), and <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">export</span>
+<span class="pre">--list</span></code> names them per result, so that the plugin puts a result of the case on the
+map without a job (a case imported from a steering file has none). <em>three_d</em> is the
+case the 3D runs work in (<a class="reference internal" href="#axqua.solvers.telemac.threed.three_d_case" title="axqua.solvers.telemac.threed.three_d_case"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.solvers.telemac.threed.three_d_case()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)">dict</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.backend.TelemacBackend">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.backend.</span></span><span class="sig-name descname"><span class="pre">TelemacBackend</span></span><a class="reference internal" href="../_modules/axqua/solvers/telemac/backend.html#TelemacBackend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.backend.TelemacBackend" title="Lien vers cette définition"></a></dt>

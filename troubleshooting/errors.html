@@ -18,7 +18,7 @@
     <link rel="canonical" href="https://axqua.eu/troubleshooting/errors.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=350a9c04"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Click to show';</script>
@@ -486,6 +486,10 @@
 <dl id="axqua-install-failed">
 <dt><code class="docutils literal notranslate"><span class="pre">'...'</span> <span class="pre">ended</span> <span class="pre">with</span> <span class="pre">an</span> <span class="pre">error</span></code></dt><dd><p>A step of the installation failed. The message quotes the last lines of the installation log, which normally name the cause, and gives the location of the complete log. Typical causes are a missing system package, an interrupted download and a full drive. Correct the cause and start the installation again with the same folder: the installer continues with what is already downloaded and built.</p>
 <p>The lines <code class="docutils literal notranslate"><span class="pre">remote:</span> <span class="pre">Retry</span> <span class="pre">later</span></code> and <code class="docutils literal notranslate"><span class="pre">error:</span> <span class="pre">429</span></code> mean that the download server of TELEMAC temporarily refuses further requests, which occurs after many downloads from one network in a short time. Wait a few minutes and start the installation again.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-download-failed">
+<dt><code class="docutils literal notranslate"><span class="pre">'...'</span> <span class="pre">could</span> <span class="pre">not</span> <span class="pre">download</span> <span class="pre">a</span> <span class="pre">file</span></code></dt><dd><p>The installer downloads the source code of OpenFOAM and its third-party libraries from SourceForge, whose download servers at times do not answer in time or send a waiting page instead of the file. The installer asks four times, with pauses of up to one minute, before it stops with this message. Start the installation again with the same folder: what is downloaded and built is kept, and the next request usually goes to another download server. The address in the message names the file; it is not a page to open, because the installer downloads and checks the file itself. If the message repeats, check the internet connection of the WSL distribution (or of the Linux computer), for example with <code class="docutils literal notranslate"><span class="pre">curl</span> <span class="pre">-I</span> <span class="pre">https://dl.openfoam.com</span></code>.</p>
 </dd>
 </dl>
 <dl class="simple" id="axqua-install-output-missing">

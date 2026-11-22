@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/pipeline.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=4875470e"></script>
+      <script src="../../../../_static/documentation_options.js?v=9dd8894e"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -412,6 +412,9 @@
 <span class="sd">        when a caller already routes everything to its own compound log, e.g. the</span>
 <span class="sd">        mesh-convergence study logging the per-level builds to postprocessing/).</span>
 <span class="sd">    """</span>
+    <span class="n">refuse</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"refuse_if_imported"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">refuse</span><span class="p">):</span>                    <span class="c1"># a stand-in for a case may not have it</span>
+        <span class="n">refuse</span><span class="p">(</span><span class="s2">"the build"</span><span class="p">)</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
     <span class="c1"># compound logfile for the build, in the simulation (model) output folder. Opened</span>
     <span class="c1"># before anything else so that stage 0 and a validation failure are recorded too.</span>

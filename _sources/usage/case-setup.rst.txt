@@ -26,6 +26,14 @@ An **aXqua case** is the complete description of one free-surface water body for
 
 A case file contains nothing that is specific to a computer. Where the simulation software is installed is stored in the profile of the computer (:ref:`plugin-profile`). A case folder can therefore be copied to another computer, or published together with a study, and used there without changes.
 
+.. _help-import-case:
+
+**Importing a TELEMAC case.** A TELEMAC case that aXqua did not build can be post-processed with aXqua as well: its results are put on the map in QGIS, exported for ParaView and VisIt, and made into a movie (:doc:`postprocessing`). On the *Case Setup* tab, *Import TELEMAC case...* opens a window that asks for the steering file (``.cas``) of the case, for the case file to write (by default beside the steering file, named after it), for a name, and for the coordinate reference system, because a TELEMAC result does not say in which system it is; the default is the one of the QGIS project. aXqua reads the geometry file, the boundary conditions file and the results file (``RESULTS FILE``, or ``3D RESULT FILE`` and ``2D RESULT FILE`` of TELEMAC-3D) from the steering file, writes a case file that points at them, and adds the case to the list. The results of the case are then listed on the tab *Postprocessing*. An imported case has no terrain model and no outline, so aXqua does not build or run it, and it writes nothing into the folder of the TELEMAC case except the case file, if it is kept there. A result that does not exist yet is reported by *Check*; run the steering file with TELEMAC, and click *Refresh* on the tab *Postprocessing*. In a terminal:
+
+.. code-block:: bash
+
+   axqua case import my-reach.axq-case --steering run/t2d_reach.cas --crs 25832
+
 .. _help-example-case:
 
 **Example cases.** Two complete cases are available for trying out every step before a case of one's own is set up. ``example-isar`` describes a braided reach of the Isar River of 6.6 ha at a discharge of 2.4 m³/s, with a coarse mesh, so that the model is built in one minute and a steady simulation takes about two minutes. It includes the velocity and depth measurements of two field campaigns at two discharges, so that the calibration and the validation can be tried as well. ``example-agrohydrology`` is an arable field of 5.6 ha on a hillslope in Lower Bavaria under a rain of 42 mm in 7 hours, for the hydrology mode (:ref:`help-hydrology`): Green-Ampt infiltration with two soils, sheet flow over the field, and the runoff that leaves it over three of its edges. Each example is a folder that contains the case file, the input data in the subfolder ``user-sources/``, and a guide (``README.md``) that explains every step from the build to the loading of the result in QGIS. The folders have a size of a few megabytes. Their terrain models are cut to the outline of the model, which is all that aXqua reads of a terrain model.
@@ -275,7 +283,7 @@ The computational mesh divides the region of interest into triangles. Small tria
 * ``floodplain`` zones receive larger triangles of regular shape;
 * ``refinement`` zones receive small triangles of regular shape, for example around a structure.
 
-The edge length of each zone is read from the field ``Max Edge Length (m)`` of the mesh zone layer, so that the resolution is set in QGIS. The ``mesh`` block provides the values that apply where this field is empty:
+The edge length of each zone is read from the field ``Max Edge Length (m)`` of the mesh zone layer, so that the resolution is set in QGIS. The ``mesh`` block provides the values that apply where this field is empty; where the layer gives an edge length, the layer wins, as a note at the top of the frame *TELEMAC mesh* says. The factor on all edge lengths (``size_scale``) applies to both:
 
 .. code-block:: yaml
 

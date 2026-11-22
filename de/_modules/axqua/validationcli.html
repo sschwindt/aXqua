@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/validationcli.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=4875470e"></script>
+      <script src="../../_static/documentation_options.js?v=9dd8894e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -397,7 +397,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">calibrated</span> <span class="o">=</span> <span class="n">validation</span><span class="o">.</span><span class="n">calibrated_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
         <span class="n">found</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"values"</span><span class="p">:</span> <span class="n">calibrated</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">"estimate"</span><span class="p">:</span> <span class="n">calibrated</span><span class="o">.</span><span class="n">estimate</span><span class="p">,</span>
-                 <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">calibrated</span><span class="o">.</span><span class="n">source</span><span class="p">)}</span>
+                 <span class="s2">"source"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">calibrated</span><span class="o">.</span><span class="n">source</span><span class="p">),</span> <span class="s2">"held"</span><span class="p">:</span> <span class="n">calibrated</span><span class="o">.</span><span class="n">held</span><span class="p">}</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                           <span class="c1"># noqa: BLE001 - there is none yet</span>
         <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">validation</span><span class="o">.</span><span class="n">FOLDER</span>
@@ -446,6 +446,10 @@
         <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"calibrated values: "</span> <span class="o">+</span> <span class="p">(</span>
             <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"calibrated"</span><span class="p">][</span><span class="s2">"values"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">"calibrated"</span><span class="p">]</span> <span class="k">else</span> <span class="s2">"none yet; run the calibration first"</span><span class="p">))</span>
+        <span class="n">held</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"calibrated"</span><span class="p">]</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"held"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">held</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"held at the nominal ks (no longer calibrated): "</span>
+                         <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">held</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">report</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"reports"</span><span class="p">]:</span>
             <span class="k">for</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">numbers</span> <span class="ow">in</span> <span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"summary"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">numbers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"n"</span><span class="p">):</span>

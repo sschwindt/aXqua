@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/install/runner.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=bd867006"></script>
+      <script src="../../../_static/documentation_options.js?v=682bbe46"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Cliquez pour afficher';</script>
@@ -877,6 +877,13 @@
                         <span class="n">remedy</span><span class="o">=</span><span class="s2">"The program itself is installed. Repeat this step "</span>
                                <span class="s2">"later with: "</span> <span class="o">+</span> <span class="n">step</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">"command"</span><span class="p">]))</span>
                     <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">DOWNLOAD_EXIT</span> <span class="ow">and</span> <span class="n">plan</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"target"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"openfoam"</span><span class="p">:</span>
+                    <span class="n">add</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span>
+                        <span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.download_failed"</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' could not download a file: "</span> <span class="o">+</span> <span class="n">_last_words</span><span class="p">(</span><span class="n">log_path</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                        <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"The download server or the network did not deliver the file, although it was asked several times. Start the installation again with the same folder: what is downloaded and built is kept. The address in the message is not a page to open; the installer downloads the file itself. The complete log is </span><span class="si">{</span><span class="n">log_path</span><span class="si">}</span><span class="s2">."</span><span class="p">))</span>
+                    <span class="k">return</span> <span class="n">finish</span><span class="p">(</span><span class="s2">"failed"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' could not download a file"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">code</span><span class="p">:</span>
                     <span class="n">add</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span>
                         <span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.install.failed"</span><span class="p">,</span>
@@ -1034,6 +1041,10 @@
     <span class="n">out</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">echo</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="c1">#: Exit status of the OpenFOAM installer after a download that failed on every attempt (``DOWNLOAD_EXIT`` of the vendored ``sediment_installer/core.py``; a test keeps the two equal).</span>
+<span class="n">DOWNLOAD_EXIT</span> <span class="o">=</span> <span class="mi">75</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_last_words</span><span class="p">(</span><span class="n">log_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

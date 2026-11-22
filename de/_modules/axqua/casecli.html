@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/casecli.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=4875470e"></script>
+      <script src="../../_static/documentation_options.js?v=9dd8894e"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
@@ -379,7 +379,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobcli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_common</span><span class="p">,</span> <span class="n">_setup_logging</span><span class="p">,</span> <span class="n">emit</span><span class="p">,</span> <span class="n">fail</span><span class="p">,</span> <span class="n">parse_args</span>
 
-<span class="n">CASE_ACTIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"read"</span><span class="p">,</span> <span class="s2">"write"</span><span class="p">,</span> <span class="s2">"new"</span><span class="p">)</span>
+<span class="n">CASE_ACTIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"read"</span><span class="p">,</span> <span class="s2">"write"</span><span class="p">,</span> <span class="s2">"new"</span><span class="p">,</span> <span class="s2">"import"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="run_schema">
@@ -433,6 +433,9 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.diagnostics</span><span class="w"> </span><span class="kn">import</span> <span class="n">has_errors</span>
 
     <span class="n">findings</span> <span class="o">=</span> <span class="n">check_case</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">imported</span> <span class="o">=</span> <span class="n">_imported_findings</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">imported</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">findings</span> <span class="o">+</span> <span class="n">imported</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_errors</span><span class="p">(</span><span class="n">findings</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
@@ -442,6 +445,26 @@
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - the case check has named what is wrong</span>
             <span class="k">pass</span>
     <span class="k">return</span> <span class="n">findings</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_imported_findings</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""For a case imported from a TELEMAC steering file, a warning per result it names that does not exist yet; None for any other case."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.diagnostics</span><span class="w"> </span><span class="kn">import</span> <span class="n">WARNING</span><span class="p">,</span> <span class="n">Finding</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - the case check has named what is wrong</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">imported_from</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.importcase</span><span class="w"> </span><span class="kn">import</span> <span class="n">missing_results</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">Finding</span><span class="p">(</span><span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.config.incomplete"</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"the result </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2"> does not exist yet"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"outputs"</span><span class="p">,</span>
+                    <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the steering file with TELEMAC, then load its results."</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">missing_results</span><span class="p">(</span><span class="n">cfg</span><span class="p">)]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_checked</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -457,14 +480,21 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">run_case</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
         <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua case"</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">"Read, write or create a case file. 'write' reads the new content "</span>
-                    <span class="s2">"as JSON from standard input, keeps the original as &lt;name&gt;.bak the "</span>
-                    <span class="s2">"first time, and reports what a check of the result finds."</span><span class="p">)</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Read, write, create or import a case file. 'write' reads the new "</span>
+                    <span class="s2">"content as JSON from standard input, keeps the original as "</span>
+                    <span class="s2">"&lt;name&gt;.bak the first time, and reports what a check of the result "</span>
+                    <span class="s2">"finds. 'import' writes a case for a TELEMAC steering file that "</span>
+                    <span class="s2">"aXqua did not build, for post-processing: 'axqua case import "</span>
+                    <span class="s2">"&lt;new case file&gt; --steering &lt;file.cas&gt;', or the .cas file alone, "</span>
+                    <span class="s2">"which puts the case file beside it."</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"action"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">CASE_ACTIONS</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"case"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"the case file"</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--name"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"new: the name of the case"</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--crs"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">25832</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s2">"new: EPSG code of the coordinate reference system"</span><span class="p">)</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"new, import: EPSG code of the coordinate reference system "</span>
+                             <span class="s2">"(a TELEMAC result names none)"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--steering"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"import: the steering file (.cas) of the TELEMAC case"</span><span class="p">)</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_common</span><span class="p">(</span><span class="n">parser</span><span class="p">),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">)</span>
     <span class="n">_setup_logging</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"case.</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">action</span><span class="si">}</span><span class="s2">"</span>
@@ -473,6 +503,23 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
 
         <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">case</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"import"</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.importcase</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_steering</span>
+
+            <span class="n">steering</span><span class="p">,</span> <span class="n">case_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">steering</span><span class="p">,</span> <span class="n">target</span>
+            <span class="k">if</span> <span class="n">steering</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">".cas"</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"import needs the steering file"</span><span class="p">,</span>
+                                      <span class="n">subject</span><span class="o">=</span><span class="s2">"arguments"</span><span class="p">,</span>
+                                      <span class="n">remedy</span><span class="o">=</span><span class="s2">"Add --steering &lt;file.cas&gt;, or give the .cas "</span>
+                                             <span class="s2">"file instead of the case file."</span><span class="p">)</span>
+                <span class="n">steering</span><span class="p">,</span> <span class="n">case_file</span> <span class="o">=</span> <span class="n">target</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="n">answer</span> <span class="o">=</span> <span class="n">import_steering</span><span class="p">(</span><span class="n">steering</span><span class="p">,</span> <span class="n">case_file</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                     <span class="n">crs_epsg</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">answer</span><span class="p">[</span><span class="s1">'case'</span><span class="p">]</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">answer</span><span class="p">[</span><span class="s1">'solver'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">]</span>
+            <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"result </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="p">(</span><span class="s2">""</span> <span class="k">if</span> <span class="n">r</span><span class="p">[</span><span class="s2">"exists"</span><span class="p">]</span> <span class="k">else</span> <span class="s2">" (does not exist yet)"</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">answer</span><span class="p">[</span><span class="s2">"results"</span><span class="p">]]</span>
+            <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">answer</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">lines</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"read"</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"there is no case file </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
