@@ -415,7 +415,8 @@ def test_a_run_counts_as_one_of_the_case_only_where_it_works_in_its_folder(
     assert hbc.solver_running("telemac2d", model, extra=("steady2d",))
 
 
-def _hydrobayescal_until(built, monkeypatch, tmp_path, flat_from: int):
+def _hydrobayescal_until(built, monkeypatch, tmp_path, flat_from: int,
+                         max_runs: int | None = 60):
     """Stand-in for HydroBayesCal: an initial design of 4 runs, then active learning up
     to the max_runs of the configuration, from as many saved runs as its init_runs. The
     log evidence and relative entropy wander until *flat_from* runs, then stay flat."""
@@ -424,7 +425,7 @@ def _hydrobayescal_until(built, monkeypatch, tmp_path, flat_from: int):
     built.calibration.structural_error = "unreachable"
     built.calibration.calibration_quantities = ["WATER DEPTH"]
     built.calibration.until_converged = True
-    built.calibration.init_runs, built.calibration.max_runs = 4, 60
+    built.calibration.init_runs, built.calibration.max_runs = 4, max_runs
     launched, restarts_seen = [], []
 
     def tables(folder, tag, runs):
@@ -509,3 +510,27 @@ def test_the_active_learning_stops_at_max_runs_when_it_does_not_converge(
     code, launched, _ = _hydrobayescal_until(built, monkeypatch, tmp_path, flat_from=99)
     assert code == 0 and launched[-1] == (True, 59, 60)
     assert [top for _, _, top in launched[1:]] == [29, 34, 39, 44, 49, 54, 59, 60]
+
+
+def test_without_a_limit_the_active_learning_runs_until_it_converges_and_warns_meanwhile(
+        built, monkeypatch, tmp_path, caplog):
+    """The user's rule of 2026-11-23: enough iterations for the evidence and the relative
+    entropy to converge, not a maximum fixed beforehand; a warning while they show no
+    sign of leveling off. Here they jump by 3 at every run until run 70."""
+    import logging
+
+    with caplog.at_level(logging.WARNING, logger="axqua.calibration_convergence"):
+        code, launched, _ = _hydrobayescal_until(built, monkeypatch, tmp_path,
+                                                 flat_from=70, max_runs=None)
+    assert code == 0
+    tops = [top for _, _, top in launched]
+    # the configuration of the first pass states its own end: 4 initial + 25 iterations
+    assert tops[:2] == [29, 29]
+    # past the 4 + 50 runs of a fixed budget, until runs 70 to 74 are flat
+    assert tops[2:] == list(range(34, 75, 5)) and launched[-1] == (True, 69, 74)
+    warnings = [r.getMessage() for r in caplog.records
+                if r.name == "axqua.calibration_convergence"]
+    assert warnings and all("no sign of a plateau" in w for w in warnings)
+    assert "the log evidence varied by 3.00" in warnings[0]
+    converged, _ = bayescal.evidence_converged(built.calibration_path(bayescal.MULTIFLOW))
+    assert converged

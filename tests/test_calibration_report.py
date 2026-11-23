@@ -154,3 +154,28 @@ def test_a_failing_figure_leaves_the_rest_of_the_report(tmp_path, monkeypatch, c
     written = calibration_report.write_report(cfg, folder)
     assert "map" not in written and "posteriors" in written and "summary" in written
     assert "map not written: no display" in caplog.text
+
+
+def test_a_curve_that_still_changes_as_much_as_before_shows_no_sign_of_a_plateau():
+    """The user's rule of 2026-11-23: a warning only where the evidence and the relative
+    entropy show no sign of leveling off; the learning goes on either way."""
+    from axqua.calibration_report import convergence, settling
+
+    iterations = np.arange(31)
+    steady_rise = 0.8 * iterations                    # 4 per window of five, no end in sight
+    leveling = 20.0 * (1.0 - np.exp(-iterations / 8.0))
+    flat = np.full(31, 5.0)
+    state = settling(steady_rise, flat)
+    assert state["settling"] is False and state["still_changing"] == ["log_bme"]
+    assert state["ranges"]["log_bme"] == pytest.approx((3.2, 3.2))
+    assert settling(leveling, flat)["settling"] is True
+    assert settling(flat, flat)["settling"] is True
+    # too few windows to compare: no judgment
+    assert settling(steady_rise[:11], flat[:11])["settling"] is None
+    # the verdict of convergence() carries it, and so does its text
+    state = convergence(steady_rise, flat)
+    assert not state["converged"] and state["settling"] is False
+    from axqua.calibration_report import _convergence_text
+
+    assert "no sign of a plateau yet" in _convergence_text(state)
+    assert "no sign" not in _convergence_text(convergence(leveling, flat))
