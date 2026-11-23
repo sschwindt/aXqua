@@ -40,7 +40,9 @@ OPTION_FIELDS = {
     "calibration": [("prepare_only", "Prepare only (write inputs, do not launch)",
                      "bool", False),
                     ("resume", "Continue from the saved initial simulations", "bool",
-                     False)],
+                     False),
+                    ("extend", "Continue the active learning from all saved simulations",
+                     "bool", False)],
     "openfoam-run": [("n_processors", "MPI ranks", "int", 0),
                      ("reconstruct", "Reconstruct afterwards", "bool", True),
                      ("to_vtk", "Convert to VTK for QGIS", "bool", False)],
@@ -215,7 +217,7 @@ class CapabilityTab(QWidget):
                 on_success=self._submitted,
                 on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
 
-        if kind not in CHECKED_ZONES or options.get("resume"):
+        if kind not in CHECKED_ZONES or options.get("resume") or options.get("extend"):
             submit()
             return
         # which roughness zones the points can calibrate: asked first, so that a zone

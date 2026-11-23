@@ -403,6 +403,12 @@ CURATED: dict[str, dict[str, Any]] = {
     "calibration.calibration_quantities": _c("Calibration targets", "yaml"),
     "calibration.init_runs": _c("Simulations before the surrogate model", "int"),
     "calibration.max_runs": _c("Simulations in total", "int"),
+    "calibration.until_converged": _c(
+        "Run the active learning until it converges", "bool",
+        help="The active learning runs at least 25 iterations and then continues in "
+             "steps of five until, over the last five, neither the logarithm of the "
+             "model evidence nor the relative entropy varies by more than 1, or until "
+             "Simulations in total is reached. Off: exactly Simulations in total."),
     "calibration.hotstart": _c(
         "Start each simulation from the steady result", "bool",
         help="Each simulation of the calibration continues from the converged steady "
@@ -411,7 +417,10 @@ CURATED: dict[str, dict[str, Any]] = {
     "calibration.hotstart_duration": _c(
         "Simulated time of each simulation", "number", "s",
         help="Leave empty to use 1.2 times the residence time of the reach: the "
-             "volume of water in the steady result divided by the discharge."),
+             "volume of water in the steady result divided by the discharge. When the "
+             "calibration varies the outflow level, the volume of the reach filled to "
+             "the highest outflow level of the range, plus the 600 s over which the "
+             "level rises."),
     "calibration.prior_samples": _c(
         "Prior samples for the posterior", "int",
         help="Parameter sets drawn from the ranges at which the surrogate model is "
@@ -420,7 +429,7 @@ CURATED: dict[str, dict[str, Any]] = {
              "measurements keeps few of them, so raise it when the log reports few "
              "accepted samples (Inn KB15: 60,000). Default 5,000."),
     "calibration.structural_error": _c(
-        "Model error at points the model cannot reach", "choice",
+        "Model error at points the simulated flow cannot reach", "choice",
         choices=("none", "unreachable"),
         help="unreachable: after the initial simulations, a point whose measured value "
              "lies outside the range of all simulated values gets that distance added "

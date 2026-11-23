@@ -15,7 +15,8 @@ order of 2026-11-11, after the inn-KB15 trial):
   left out), the calibration points and the inflow and outflow lines, in the colors of the
   posterior panels;
 * ``evidence.png``: the Bayesian model evidence and the relative entropy over the
-  iterations of the active learning (HydroBayesCal's own figure needs LaTeX);
+  iterations of the active learning (HydroBayesCal's own figure needs LaTeX), with the
+  verdict of :func:`convergence` on whether the learning has reached a plateau;
 * ``roughness-zones-calibrated.gpkg``: the zones with ``zone``, ``ks_cm``, ``status`` and
   ``label``, which *Load results* adds to QGIS labeled;
 * ``calibration-report.json``: the numbers behind the figures.
@@ -47,6 +48,72 @@ SURFACE, INK, INK2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#
 
 _ZONE = re.compile(r"^zone(\d+)$")
 
+#: When the active learning has converged (the user's order of 2026-11-22: until the
+#: evidence and the relative entropy converge by a literature-informed value, for a
+#: literature-informed number of iterations). Oladyshkin et al. (2020, Entropy 22, 890)
+#: stop the active learning once the Bayesian model evidence and the relative entropy
+#: reach a plateau, and Mouris et al. (2023, Modeling Earth Systems and Environment 9,
+#: 3643-3661) judged convergence on the last five iterations. A plateau is therefore
+#: :data:`CONVERGENCE_WINDOW` iterations over which neither the natural logarithm of the
+#: evidence nor the relative entropy varies by more than :data:`CONVERGENCE_TOLERANCE`.
+#: Both are measured in nats, and a factor below e between two evidences, that is, a
+#: Bayes factor below e, is "not worth more than a bare mention" (Kass and Raftery 1995,
+#: Journal of the American Statistical Association 90, 773-795: 2 ln B < 2). A plateau
+#: also needs :data:`CONVERGENCE_MINIMUM` iterations of active learning before it: in
+#: Oladyshkin et al. (2020) and in Schwindt et al. (2023, Water Resources Research 59,
+#: e2022WR033660), three-parameter calibrations began to converge after 25 iterations,
+#: and in Mouris et al. (2023) four parameters after 46. Earlier, short plateaus are
+#: false: the inn-KB15 trial had one at iterations 5 to 9, before its evidence fell by
+#: 1.9 at iteration 12.
+CONVERGENCE_WINDOW = 5
+CONVERGENCE_TOLERANCE = 1.0
+CONVERGENCE_MINIMUM = 25
+
+
+def convergence(log_bme, relative_entropy, runs=None, *, window: int = CONVERGENCE_WINDOW,
+                tolerance: float = CONVERGENCE_TOLERANCE,
+                minimum: int = CONVERGENCE_MINIMUM) -> dict:
+    """Has the active learning converged? The evidence and the relative entropy per iteration.
+
+    The first entry belongs to the emulator of the initial design, the others to one
+    active-learning iteration each. The learning has converged when, over the last
+    *window* iterations of active learning, the natural logarithm of the evidence and the
+    relative entropy each vary by at most *tolerance* (:data:`CONVERGENCE_TOLERANCE`),
+    and at least *minimum* iterations of active learning have run
+    (:data:`CONVERGENCE_MINIMUM`). ``plateau_since`` is the first iteration of the
+    trailing run of such windows, and ``plateau_since_run`` the number of parameter sets
+    simulated by then (from *runs*); the ranges are those of the last window, and
+    ``plateau`` says whether the last window alone holds, whatever the number of
+    iterations.
+    """
+    log_bme = np.asarray(log_bme, dtype=float)
+    entropy = np.asarray(relative_entropy, dtype=float)
+    count = min(log_bme.size, entropy.size)
+    result = {"window": int(window), "tolerance": float(tolerance),
+              "minimum": int(minimum), "iterations": max(count - 1, 0),
+              "converged": False, "plateau": False,
+              "log_bme_range": None, "relative_entropy_range": None,
+              "plateau_since": None, "plateau_since_run": None}
+    if count - 1 < window:
+        return result
+    held = []
+    for end in range(window, count):
+        part = slice(end - window + 1, end + 1)
+        spans = (float(np.ptp(log_bme[part])), float(np.ptp(entropy[part])))
+        held.append(all(np.isfinite(spans)) and max(spans) <= tolerance)
+    result["log_bme_range"], result["relative_entropy_range"] = spans
+    result["plateau"] = bool(held[-1])
+    result["converged"] = bool(held[-1]) and count - 1 >= minimum
+    if held[-1]:
+        first = len(held) - 1
+        while first > 0 and held[first - 1]:
+            first -= 1
+        since = first + 1                          # the first iteration of that window
+        result["plateau_since"] = since
+        if runs is not None and len(runs) > since:
+            result["plateau_since_run"] = int(runs[since])
+    return result
+
 
 def _zone(name: str) -> int | None:
     match = _ZONE.match(str(name).strip())
@@ -60,6 +127,44 @@ def _dictionary(folder: Path) -> tuple[Path, dict] | None:
         return None
     with open(found[-1], "rb") as handle:
         return found[-1], pickle.load(handle)      # nosec B301 - written by the calibration
+
+
+def evidence_history(source: Path, data: dict) -> dict:
+    """Log evidence and relative entropy per iteration, over every pass of the active learning.
+
+    A calibration that continued its active learning (``calibration.until_converged``)
+    ran HydroBayesCal more than once, and each pass began its BAL dictionary anew; the
+    finished ones are kept beside *source* as ``BAL_dictionary.upto-<runs>.pkl``
+    (:func:`axqua.bayescal.archive_dictionary`). Their histories are joined by the
+    number of runs: a pass starts with the emulator of the runs the one before ended
+    with, which then counts once, with the values of the later pass.
+    """
+    from axqua.validation import last_iteration
+
+    def history(values, index):
+        if values is None or index is None:
+            return []
+        return [float(v) if v is not None else None for v in list(values)[:index + 1]]
+
+    found = {}
+    archives = sorted(Path(source).parent.glob("BAL_dictionary.upto-*.pkl"),
+                      key=lambda p: int(re.sub(r"\D", "", p.name.split("upto-")[1]) or 0))
+    for item in [*archives, None]:
+        if item is None:
+            part = data
+        else:
+            with open(item, "rb") as handle:
+                part = pickle.load(handle)          # nosec B301 - written by the calibration
+        index = last_iteration(part)
+        runs = history(part.get("N_tp"), index)
+        bme = history(part.get("log_BME"), index)
+        entropy = history(part.get("RE"), index)
+        for n, b, e in zip(runs, bme, entropy):
+            if n is not None and b is not None and e is not None:
+                found[int(n)] = (b, e)
+    order = sorted(found)
+    return {"runs": order, "log_bme": [found[n][0] for n in order],
+            "relative_entropy": [found[n][1] for n in order]}
 
 
 def _points(folder: Path):
@@ -157,22 +262,15 @@ def summarize(cfg, folder: Path) -> dict | None:
         }
         entry["verdict"] = _verdict(info, entry["flags"], entry["variance_reduction"])
         parameters.append(entry)
-    def history(key):
-        values = data.get(key)
-        if values is None or index is None:
-            return []
-        return [float(v) for v in list(values)[:index + 1] if v is not None]
-
+    evidence = evidence_history(source, data)
+    evidence["convergence"] = convergence(evidence["log_bme"],
+                                          evidence["relative_entropy"], evidence["runs"])
     return {
         "source": str(source),
         "estimate": calibrated.estimate,
         "parameters": parameters,
         "zone_plan": plan,
-        "evidence": {
-            "runs": [int(v) for v in history("N_tp")],
-            "log_bme": history("log_BME"),
-            "relative_entropy": history("RE"),
-        },
+        "evidence": evidence,
         "posterior_size": int(len(np.atleast_2d(last("posterior")))),
         "_posterior": np.atleast_2d(np.asarray(last("posterior"), dtype=float)),
     }
@@ -272,6 +370,26 @@ def plot_posteriors(summary: dict, path: Path) -> Path:
     return path
 
 
+def _convergence_text(state: dict) -> str:
+    """One line on the convergence of the active learning, for the evidence figure and the log."""
+    window, tolerance = state["window"], state["tolerance"]
+    if state["log_bme_range"] is None:
+        return (f"Not converged: fewer than {window} active-learning iterations, so no "
+                f"plateau can be judged yet.")
+    ranges = (f"over the last {window} iterations, the log evidence varies by "
+              f"{state['log_bme_range']:.2f} and the relative entropy by "
+              f"{state['relative_entropy_range']:.2f} (limit {tolerance:g} each)")
+    if state["converged"]:
+        since = (f", on this plateau since parameter set {state['plateau_since_run']}"
+                 if state.get("plateau_since_run") is not None else "")
+        return f"Converged: {ranges}{since}."
+    if state.get("plateau"):
+        return (f"Not converged yet: {ranges}, but only {state['iterations']} of the at "
+                f"least {state['minimum']} active-learning iterations before a plateau "
+                f"counts have run.")
+    return f"Not converged: {ranges}; more active learning could still change the result."
+
+
 def plot_evidence(summary: dict, path: Path) -> Path | None:
     """Log Bayesian model evidence and relative entropy over the training runs."""
     from matplotlib.ticker import MaxNLocator
@@ -281,19 +399,27 @@ def plot_evidence(summary: dict, path: Path) -> Path | None:
         return None
     plt = _style()
     runs = evidence["runs"] or list(range(len(evidence["log_bme"])))
-    fig, axes = plt.subplots(1, 2, figsize=(11, 3.6), facecolor=SURFACE)
+    state = evidence.get("convergence") or convergence(evidence["log_bme"],
+                                                       evidence["relative_entropy"], runs)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.0), facecolor=SURFACE)
+    window = state["window"]
     for ax, values, label in ((axes[0], evidence["log_bme"], "log of the model evidence"),
                               (axes[1], evidence["relative_entropy"], "relative entropy")):
         ax.set_facecolor(SURFACE)
         if values:
-            ax.plot(runs[:len(values)], values, color=COLORS[0], lw=2, marker="o", ms=4)
+            x = runs[:len(values)]
+            if len(values) > window:
+                # the iterations the verdict rests on
+                ax.axvspan(x[-window] - 0.5, x[-1] + 0.5, color=GRID, lw=0, zorder=0)
+            ax.plot(x, values, color=COLORS[0], lw=2, marker="o", ms=4)
         ax.set_xlabel("TELEMAC parameter sets")
         ax.xaxis.set_major_locator(MaxNLocator(integer=True, steps=[1, 2, 5, 10]))  # no run 32.5
         ax.set_title(label, loc="left", fontweight="bold")
         ax.grid(color=GRID, lw=0.8)
         for side in ("top", "right"):
             ax.spines[side].set_visible(False)
-    fig.tight_layout()
+    fig.text(0.01, 0.01, _convergence_text(state), color=INK2, fontsize=10, va="bottom")
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     fig.savefig(path, dpi=150, facecolor=SURFACE)
     plt.close(fig)
     return path
@@ -411,12 +537,93 @@ def plot_zone_map(cfg, summary: dict, zones, tables, path: Path) -> Path:
     return path
 
 
-def write_report(cfg, folder: Path) -> dict:
-    """Write the report of the calibration in *folder*; returns ``{what: path}``."""
+#: The line with which TELEMAC's launcher opens the listing of every run.
+_RUN_START = re.compile(r"Running your CAS file\(s\) for:")
+_TITLE = re.compile(r"MOTCAR\(\s*1\)=\s*(.+)")
+
+
+def run_balances(listing: Path, tolerance: float) -> dict | None:
+    """Was every TELEMAC run of the calibration steady at its end? From the job's own log.
+
+    *listing* is the output of the calibration job (``solver/stdout.log`` of the job
+    folder), which holds the listing of every run TELEMAC made for HydroBayesCal. Each
+    run is judged by :func:`axqua.solvers.telemac.flux_convergence.net_imbalance`: the
+    trend of the stored volume over the last third of the run (at least 500 s) relative
+    to the inflow, against *tolerance* (``hydrodynamics.flux_tolerance``). The user's
+    rule of 2026-11-22: the runs have to last until the discharge has converged; the
+    inn-KB15 trial of 2026-11-16 to 19 did not, with 49 of its 150 runs ending with
+    inflow and outflow more than 0.1 % apart over their last 500 s, up to 5.4 %. None
+    when the log holds no run.
+    """
+    import tempfile
+
+    from axqua.solvers.telemac.flux_convergence import (NET_SHARE, NET_WINDOW,
+                                                        net_imbalance, net_window)
+    from axqua.solvers.telemac.sortie import read_sortie
+
+    text = Path(listing).read_text(errors="replace")
+    starts = [m.start() for m in _RUN_START.finditer(text)]
+    if not starts:
+        return None
+    runs = []
+    with tempfile.TemporaryDirectory() as scratch:
+        for k, start in enumerate(starts):
+            end = starts[k + 1] if k + 1 < len(starts) else len(text)
+            part = Path(scratch) / f"run-{k}.sortie"
+            part.write_text(text[start:end])
+            title = _TITLE.search(text[start:end])
+            entry = {"run": k + 1, "title": title.group(1).strip() if title else "",
+                     "end": None, "window": None, "net": None, "swing": None}
+            try:
+                history = read_sortie(part)
+            except (ValueError, OSError):
+                runs.append(entry)                   # a run that stopped before its first printout
+                continue
+            entry["end"] = float(history.time[-1]) if history.time.size else None
+            measured = net_imbalance(history.time, history.gross_in, history.gross_out)
+            if measured is not None:
+                entry["window"] = net_window(history.time)
+                entry["net"], entry["swing"] = measured
+            runs.append(entry)
+    judged = [r for r in runs if r["net"] is not None]
+    off = [r for r in judged if r["net"] > tolerance]
+    return {"window_share": NET_SHARE, "window_min": NET_WINDOW,
+            "tolerance": float(tolerance), "runs": len(runs),
+            "judged": len(judged), "unbalanced": len(off),
+            "worst_net": max((r["net"] for r in judged), default=None),
+            "unbalanced_runs": [{key: r[key] for key in
+                                 ("run", "title", "end", "window", "net", "swing")}
+                                for r in off]}
+
+
+def _job_listing() -> Path | None:
+    """The output of the running job, when the report is written inside one."""
+    import os
+
+    folder = os.environ.get("AXQUA_JOB_DIR")
+    if not folder:
+        return None
+    path = Path(folder) / "solver" / "stdout.log"
+    return path if path.is_file() else None
+
+
+def write_report(cfg, folder: Path, listing: Path | None = None) -> dict:
+    """Write the report of the calibration in *folder*; returns ``{what: path}``.
+
+    *listing* is the output of the calibration job with the listings of its TELEMAC
+    runs (default: that of the job this runs in), for :func:`run_balances`.
+    """
     folder = Path(folder)
     summary = summarize(cfg, folder)
     if summary is None:
         return {}
+    listing = listing or _job_listing()
+    if listing is not None:
+        try:
+            summary["run_balance"] = run_balances(
+                listing, float(cfg.hydrodynamics.flux_tolerance))
+        except Exception as exc:                  # noqa: BLE001 - the rest of the report stands
+            log.warning("calibration report: the balance of the runs not read: %s", exc)
     out = folder / FOLDER
     out.mkdir(parents=True, exist_ok=True)
     written: dict[str, Path] = {}
@@ -464,4 +671,18 @@ def write_report(cfg, folder: Path) -> dict:
         if entry["value"] is not None:
             log.info("calibrated %s = %s (%s)", entry["name"],
                      _value_text(entry["value"], entry["zone"] is not None, entry["name"]), entry["verdict"])
+    state = summary["evidence"]["convergence"]
+    (log.info if state["converged"] else log.warning)(
+        "active learning: %s", _convergence_text(state))
+    balance = summary.get("run_balance")
+    if balance:
+        text = (f"{balance['unbalanced']} of {balance['judged']} TELEMAC runs ended with "
+                f"the volume in the reach still changing by more than "
+                f"{100 * balance['tolerance']:g} % of the inflow over the last third of "
+                f"the run")
+        if balance["unbalanced"]:
+            log.warning("calibration runs: %s (worst %.2f %%); lengthen them with "
+                        "calibration.hotstart_duration", text, 100 * balance["worst_net"])
+        else:
+            log.info("calibration runs: %s", text)
     return written

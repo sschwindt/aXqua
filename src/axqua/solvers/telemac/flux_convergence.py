@@ -126,6 +126,71 @@ def relative_imbalance(gross_in, gross_out) -> np.ndarray:
         return np.abs(q_in - q_out) / q_in
 
 
+#: The shortest window [s] of :func:`net_imbalance`.
+NET_WINDOW = 500.0
+#: The share of a run, counted from its end, that :func:`net_imbalance` judges it over.
+#: A simulated reach need not become fully steady. Where the bed friction is small, large
+#: horizontal flow structures, such as recirculating flow in a pool, keep the flow
+#: unsteady: they are many times wider than the depth, so the depth-averaged equations
+#: resolve them instead of the turbulence model, and the friction no longer damps them
+#: (Chu, Wu and Khayat 1991, J. Hydraul. Eng. 117(10)). Inflow and outflow then differ
+#: at every printout by an amount no run length removes (Inn KB15, 2026-11-08: outflow
+#: +/- 1 %), and the stored volume swings: in a test run on KB15 at 45.8 m3/s with the smallest roughness and the highest
+#: outflow level (2026-11-22), by +/- 134 m3 with a period of approximately 1,700 s,
+#: while the volume stayed within 0.1 % of its final value from 3,800 s on. Over 500 s,
+#: inflow and outflow of that settled run differed by up to 1.2 % on average; the trend
+#: of the stored volume over the last third of the run (2,200 s, more than one period)
+#: stayed below 0.13 % at every time the run could have ended between 5,500 and 7,000 s,
+#: and below 0.02 % in the runs without that swing.
+NET_SHARE = 1.0 / 3.0
+
+
+def net_window(times) -> float:
+    """The window [s] that :func:`net_imbalance` judges a run over: its last third, at least :data:`NET_WINDOW`."""
+    t = np.asarray(times, dtype=float)
+    span = float(t[-1] - t[0]) if t.size else 0.0
+    return max(NET_WINDOW, NET_SHARE * span)
+
+
+def net_imbalance(times, gross_in, gross_out, *, window: float | None = None
+                  ) -> tuple[float, float] | None:
+    """The discharge balance at the end of a run: net and swing over its last *window* seconds.
+
+    ``net`` is the trend of the volume stored in the reach over the window, the
+    least-squares slope of ``integral(Q_in - Q_out) dt``, relative to the mean inflow:
+    the share of the inflow by which the reach still fills or drains, which goes to zero
+    when the run is steady. It is a trend and not the difference of the stored volume
+    between the two ends of the window, because the volume of an unsteady flow swings, and
+    the two ends can fall on opposite phases of the swing. ``swing`` is the mean relative
+    imbalance per printout over the same window (:func:`relative_imbalance`), which
+    stays as large as the unsteady flow makes it. *window* defaults to :func:`net_window`. None
+    when the run is shorter than the window or has fewer than three printouts in it.
+    """
+    t = np.asarray(times, dtype=float)
+    q_in = np.abs(np.asarray(gross_in, dtype=float))
+    q_out = np.abs(np.asarray(gross_out, dtype=float))
+    if t.size < 3:
+        return None
+    if window is None:
+        window = net_window(t)
+    if t[-1] - t[0] < window:
+        return None
+    inside = t >= t[-1] - window
+    if inside.sum() < 3:
+        return None
+    t, q_in, q_out = t[inside], q_in[inside], q_out[inside]
+    trapezoid = getattr(np, "trapezoid", None) or np.trapz
+    volume_in = trapezoid(q_in, t)
+    if volume_in <= 0:
+        return None
+    rate = q_in - q_out
+    stored = np.concatenate(([0.0], np.cumsum(0.5 * (rate[1:] + rate[:-1]) * np.diff(t))))
+    slope = np.polyfit(t - t[0], stored, 1)[0]
+    net = abs(slope) * (t[-1] - t[0]) / volume_in
+    swing = float(np.nanmean(relative_imbalance(q_in, q_out)))
+    return float(net), swing
+
+
 def convergence_rate(imbalance) -> np.ndarray:
     """Convergence rate ``iota_t = log_{eps_t}(eps_{t+1})``, aligned with ``eps[1:]``.
 

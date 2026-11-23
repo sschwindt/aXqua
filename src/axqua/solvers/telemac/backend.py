@@ -400,6 +400,7 @@ class TelemacBackend(BaseBackend):
     def _calibration(self, cfg, *, ctx: Any = None, flows: list | None = None,
                      launch_mode: str = "run", force: bool = False,
                      prepare_only: bool = False, resume: bool = False,
+                     extend: bool = False,
                      calibration_quantities: list | None = None,
                      extraction_quantities: list | None = None,
                      vel_err_floor: float | None = None,
@@ -418,7 +419,8 @@ class TelemacBackend(BaseBackend):
                                                       launch_mode=launch_mode,
                                                       force=force)
         else:
-            kwargs: dict[str, Any] = {"prepare_only": prepare_only, "resume": resume}
+            kwargs: dict[str, Any] = {"prepare_only": prepare_only, "resume": resume,
+                                      "extend": extend}
             if calibration_quantities:
                 kwargs["calibration_quantities"] = tuple(calibration_quantities)
             if extraction_quantities:
@@ -458,7 +460,8 @@ class TelemacBackend(BaseBackend):
 
         from axqua import validation
         from axqua.solvers.telemac import sortie
-        from axqua.solvers.telemac.flux_convergence import relative_imbalance
+        from axqua.solvers.telemac.flux_convergence import (net_imbalance, net_window,
+                                                            relative_imbalance)
 
         chosen = validation.situation_named(cfg, situation or None)
         setup = None
@@ -474,18 +477,27 @@ class TelemacBackend(BaseBackend):
             listing = sortie.latest_sortie(cfg.model_dir, setup.cas.name)
             if listing is not None:
                 history = sortie.read_sortie(listing)
-                tail = relative_imbalance(history.gross_in, history.gross_out)[-10:]
-                if tail.size:
-                    balance = float(np.nanmean(tail))
+                measured = net_imbalance(history.time, history.gross_in,
+                                         history.gross_out)
+                if measured is None:
+                    tail = relative_imbalance(history.gross_in, history.gross_out)[-10:]
+                    measured = ((float(np.nanmean(tail)),) * 2) if tail.size else None
+                if measured is not None:
+                    balance, swing = measured
+                    window = net_window(history.time)
                     setup.notes.append(
-                        "Discharge balance at the end of the validation run: inflow "
-                        f"and outflow differ by {100 * balance:.2f} %.")
+                        "Discharge balance at the end of the validation run: over the "
+                        f"last {window:.0f} s, the volume in the reach changed at a rate "
+                        f"of {100 * balance:.3f} % of the inflow, and inflow and outflow "
+                        f"differed by {100 * swing:.2f} % from one printout to the next "
+                        "(unsteady flow).")
         report = validation.evaluate(cfg, chosen, setup)
         if balance is not None and balance > float(cfg.hydrodynamics.flux_tolerance):
             report.notes.append(
-                "The validation run had not reached a steady state: inflow and outflow "
-                f"still differed by {100 * balance:.2f} %. Increase the duration of "
-                "the validation situation.")
+                "The validation run had not reached a steady state: over its last "
+                f"{window:.0f} s, the volume in the reach still changed at a rate of "
+                f"{100 * balance:.2f} % of the inflow. Increase the duration of the "
+                "validation situation.")
         if ctx is not None:
             folder = Path(cfg.calibration_dir) / validation.FOLDER
             tag = validation.slug(chosen.name)

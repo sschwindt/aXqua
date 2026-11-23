@@ -511,3 +511,69 @@ def test_sortie_2d_listing_is_still_read_as_2d(tmp_path):
     s = read_sortie(path)
     assert s.dimension == "2d"
     assert s.volume_error == pytest.approx([-0.1008281e-14, -0.1008281e-14])
+
+
+def test_the_net_imbalance_ignores_the_swing_of_an_unsteady_flow_and_sees_a_filling_reach():
+    """A reach whose flow stays unsteady: inflow and outflow differ by 1 % at every
+    printout, but their mean over the window balances. A reach that still fills keeps
+    a net difference however its outflow swings."""
+    from axqua.solvers.telemac.flux_convergence import NET_WINDOW, net_imbalance, net_window
+
+    t = np.arange(0.0, 4000.0, 20.0)
+    q_in = np.full(t.size, 50.0)
+    swinging = q_in * (1 + 0.01 * np.sin(2 * np.pi * t / 100.0))
+    net, swing = net_imbalance(t, q_in, swinging)
+    assert NET_WINDOW == 500.0 and net_window(t) == pytest.approx(3980.0 / 3)
+    assert net < 1e-4 and swing == pytest.approx(0.0064, rel=0.1)
+    filling = swinging - 0.25                    # 0.5 % of the inflow stays in the reach
+    net, _ = net_imbalance(t, q_in, filling)
+    assert net == pytest.approx(0.005, rel=0.02)
+    assert net_imbalance(t[:20], q_in[:20], swinging[:20]) is None   # shorter than 500 s
+
+
+def test_a_slow_swing_of_the_stored_volume_is_not_taken_for_a_filling_reach():
+    """Inn KB15 at 45.8 m3/s with the smallest roughness (2026-11-22): the stored volume
+    swings by +/- 134 m3 with a period of approximately 1,700 s in a settled run. Over
+    500 s, inflow and outflow then differ by up to 0.9 %; the trend of the stored volume
+    over the last third of the run stays below the tolerance of 0.1 % at any phase."""
+    from axqua.solvers.telemac.flux_convergence import net_imbalance
+
+    t = np.arange(0.0, 6601.0, 16.0)
+    q_in = np.full(t.size, 45.8)
+    amplitude, period = 134.0, 1670.0
+    nets, shorts = [], []
+    for phase in np.linspace(0.0, 2 * np.pi, 24, endpoint=False):
+        # the outflow that makes the stored volume swing by amplitude * sin(...)
+        q_out = q_in - amplitude * 2 * np.pi / period * np.cos(2 * np.pi * t / period + phase)
+        nets.append(net_imbalance(t, q_in, q_out)[0])
+        shorts.append(net_imbalance(t, q_in, q_out, window=500.0)[0])
+    assert max(nets) < 1e-3
+    assert max(shorts) > 5e-3
+    filling = q_out - 0.1                        # 0.22 % of the inflow stays in the reach
+    assert net_imbalance(t, q_in, filling)[0] > 1e-3
+
+
+def test_the_calibration_report_reads_the_balance_of_every_run_from_the_job_log(tmp_path):
+    """The job log holds the listings of all runs one after the other, each opened by
+    TELEMAC's launcher line; a run that still fills its reach is named."""
+    from axqua.calibration_report import run_balances
+
+    times = np.arange(20.0, 2020.0, 20.0)
+    steady = _two_boundary(0.004 * np.sin(times / 15.0))           # unsteady flow only
+    filling = _two_boundary(np.full(times.size, 0.006))            # 0.6 % stays inside
+    text = ""
+    for k, fluxes in enumerate((steady, filling, steady)):
+        path = _write_sortie(tmp_path, fluxes, times=times, stamp=f"run{k}",
+                             study=f"case calibration flow-{k}")
+        text += ("Running your CAS file(s) for:\n MOTCAR(  1)= case calibration "
+                 f"flow-{k}\n" + path.read_text())
+    text += "Running your CAS file(s) for:\n MOTCAR(  1)= case calibration cut\n"
+    log = tmp_path / "stdout.log"
+    log.write_text(text)
+    balance = run_balances(log, 1e-3)
+    assert (balance["runs"], balance["judged"], balance["unbalanced"]) == (4, 3, 1)
+    (off,) = balance["unbalanced_runs"]
+    assert off["run"] == 2 and off["title"] == "case calibration flow-1"
+    assert off["net"] == pytest.approx(0.006, rel=0.01)
+    assert off["window"] == pytest.approx(660.0, abs=20.0)        # the last third of 1,980 s
+    assert (balance["window_share"], balance["window_min"]) == (pytest.approx(1 / 3), 500.0)

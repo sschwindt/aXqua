@@ -203,3 +203,25 @@ def test_without_a_discharge_or_a_duration_the_hotstart_is_a_config_error(cfg):
     assert caught.value.subject == "calibration.hotstart_duration"
     cfg.hydrodynamics.duration = 900.0
     assert bayescal.calibration_hotstart_duration(cfg) == 900.0
+
+
+def test_a_raised_outflow_level_counts_the_water_it_backs_up(cfg, monkeypatch):
+    """The user's rule of 2026-11-22: a run lasts until its discharge has converged. A
+    calibrated outflow level fills the reach up to the highest level of its range, so
+    the residence time is that of the reach filled to it (Inn KB15: 250,000 instead of
+    134,000 m3), as a level pool over the steady result."""
+    _steady_result(cfg.model_dir, depth=1.0)
+    selafin.write_initial_state(cfg.model_dir / "r2d.slf", X, Y, IKLE, IPOBO,
+                                np.full(4, 1.0), bottom=np.array([0.0, 0.0, 0.5, 0.5]),
+                                double_precision=False)
+    later = os.stat(cfg.model_dir / "geometry.slf").st_mtime + 10
+    os.utime(cfg.model_dir / "r2d.slf", (later, later))
+    cfg.calibration.outflow_slope = [1.0e-5, 2.0e-3]
+    monkeypatch.setattr(bayescal, "outflow_top_level", lambda cfg, q: 3.0)
+    # depths 3.0, 3.0, 2.5, 2.5: 275 m3 at 0.01 m3/s, 27,500 s
+    expected = np.ceil(bayescal.HOTSTART_RESIDENCE_TIMES * 27500.0 / 100) * 100 + 600.0
+    assert bayescal.calibration_hotstart_duration(cfg) == pytest.approx(expected)
+    # a level below the water of the steady result changes nothing
+    monkeypatch.setattr(bayescal, "outflow_top_level", lambda cfg, q: 0.5)
+    expected = np.ceil(bayescal.HOTSTART_RESIDENCE_TIMES * 10000.0 / 100) * 100 + 600.0
+    assert bayescal.calibration_hotstart_duration(cfg) == pytest.approx(expected)

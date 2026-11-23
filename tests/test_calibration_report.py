@@ -94,10 +94,44 @@ def test_a_calibration_that_has_not_reached_its_last_iteration_has_a_report(tmp_
         pickle.dump(data, handle)
     written = write_report(cfg, folder)
     summary = json.loads(written["summary"].read_text())
-    assert summary["evidence"] == {"runs": [16, 17], "log_bme": [-60.0, -59.0],
-                                   "relative_entropy": [1.0, 2.0]}
+    evidence = summary["evidence"]
+    assert {key: evidence[key] for key in ("runs", "log_bme", "relative_entropy")} == {
+        "runs": [16, 17], "log_bme": [-60.0, -59.0], "relative_entropy": [1.0, 2.0]}
+    assert evidence["convergence"]["iterations"] == 1
+    assert not evidence["convergence"]["converged"]
     assert summary["posterior_size"] == 400
     assert summary["parameters"][0]["joint_maximum"] == 0.125
+
+
+def test_the_active_learning_has_converged_on_a_plateau_after_enough_iterations():
+    """A plateau is five iterations over which the log evidence and the relative entropy
+    each vary by at most 1 (Kass and Raftery's bare mention), after at least 25
+    iterations of active learning; earlier plateaus are false (the inn-KB15 trial had one
+    at iterations 5 to 9, then its evidence fell by 1.9)."""
+    from axqua.calibration_report import (CONVERGENCE_MINIMUM, CONVERGENCE_WINDOW,
+                                          _convergence_text, convergence)
+
+    assert (CONVERGENCE_WINDOW, CONVERGENCE_MINIMUM) == (5, 25)
+    runs = list(range(30, 61))
+    # 30 iterations: wandering, then flat within 0.8 from iteration 21 on
+    log_bme = [-60.0 - 2.0 * (i % 2) for i in range(21)] + [-68.0 + 0.8 * (i % 2)
+                                                             for i in range(10)]
+    entropy = [5.0 + (i % 3) for i in range(21)] + [4.5 + 0.1 * i for i in range(10)]
+    state = convergence(log_bme, entropy, runs)
+    assert state["converged"] and state["plateau"] and state["iterations"] == 30
+    assert state["log_bme_range"] == pytest.approx(0.8)
+    assert state["relative_entropy_range"] == pytest.approx(0.4)
+    assert (state["plateau_since"], state["plateau_since_run"]) == (21, 51)
+    assert _convergence_text(state).startswith("Converged:")
+    # the same plateau after 20 iterations is not enough
+    early = convergence(log_bme[:21 - 10] + log_bme[21:], entropy[:11] + entropy[21:])
+    assert early["plateau"] and not early["converged"]
+    assert "only 20 of the at least 25" in _convergence_text(early)
+    # a jump of more than 1 in the last window
+    jump = convergence(log_bme[:-1] + [-70.0], entropy)
+    assert not jump["converged"] and jump["log_bme_range"] == pytest.approx(2.8)
+    assert _convergence_text(jump).startswith("Not converged:")
+    assert not convergence([-1.0, -1.0, -1.0], [1.0, 1.0, 1.0])["converged"]
 
 
 def test_a_folder_without_a_finished_calibration_has_no_report(tmp_path):

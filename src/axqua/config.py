@@ -1771,6 +1771,11 @@ class Calibration:
     # every evaluation is a TELEMAC run per flow. False = the old fixed-size design.
     adaptive_init_runs: bool = True
     init_runs_min: int | None = None       # first block; None -> 2**ceil(log2(4*n_par))
+    # Run the active learning until the log evidence and the relative entropy reach a
+    # plateau (calibration_report.convergence: at least 25 iterations, then steps of
+    # five), at most max_runs in total (bayescal._launch_in_passes). False: exactly
+    # max_runs, as before.
+    until_converged: bool = False
     # BAL point selection: 'auto' exploits the posterior until more than one
     # well-separated mode is detected, then adds exploration. Pure exploitation is
     # how a local maximum survives to the end of a calibration.

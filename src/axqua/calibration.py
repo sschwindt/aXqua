@@ -395,16 +395,22 @@ def _refuse_continued_keywords(cfg: Config, names: list[str], control_file: str)
 
 def emit_hbc_config(cfg: Config, calibration_csv: Path | None, *,
                     complete_bal_mode: bool = True, only_bal_mode: bool = False,
-                    parameters: list | None = None) -> Path:
+                    parameters: list | None = None,
+                    budget: tuple | None = None) -> Path:
     """Emit a HydroBayesCal ``config_Telemac.py`` for the produced case.
 
     *complete_bal_mode* False runs the initial simulations only; *only_bal_mode* True
     (with *complete_bal_mode*) continues from the saved initial simulations with the
     active learning (HydroBayesCal's two execution switches). *parameters* are the
     ones to calibrate (default :func:`telemac_parameters`; a calibration passes those of
-    its zone plan, :func:`axqua.calibration_zones.zone_plan`).
+    its zone plan, :func:`axqua.calibration_zones.zone_plan`). *budget* ``(init_runs,
+    max_runs, adaptive)`` replaces the case's run counts, and the adaptive initial
+    design unless *adaptive* is None, for the passes of
+    :func:`axqua.bayescal._launch_in_passes`.
     """
     c = cfg.calibration
+    init_runs, max_runs, adaptive = budget or (c.init_runs, c.max_runs, None)
+    adaptive = bool(c.adaptive_init_runs) if adaptive is None else bool(adaptive)
     parameters = telemac_parameters(cfg) if parameters is None else list(parameters)
     params = [p.name for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
@@ -497,14 +503,14 @@ extraction = {{
 }}
 
 sampling = {{
-    'init_runs': {c.init_runs},
-    'max_runs': {c.max_runs},
+    'init_runs': {init_runs},
+    'max_runs': {max_runs},
     'parameter_distribution': 'uniform',
     'parameter_sampling_method': {c.parameter_sampling_method!r},
     # HydroBayesCal >= 1.5: grow the initial design in Sobol blocks and stop when
     # it is measurably sufficient. init_runs is the ceiling, so this can only save
     # runs; the saved ones become BAL iterations.
-    'adaptive_init_runs': {bool(c.adaptive_init_runs)},
+    'adaptive_init_runs': {adaptive},
     'init_runs_min': {c.init_runs_min!r},
     # exploit the posterior until >1 well-separated mode is found, then explore
     'bal_exploration_tradeoff': {c.bal_exploration_tradeoff!r},

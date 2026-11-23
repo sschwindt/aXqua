@@ -323,8 +323,18 @@ CALIBRATION_OFFSET_CAS = "calibration2d-offset.cas"
 #: volume rose 5 % and the inflow-outflow imbalance stayed below 0.1 % from 2,949 s
 #: on (1.2 residence times), the depth and velocity at the 30 verticals then within
 #: 0.06 % and 0.3 % of their final values on average; at the lower bounds the volume
-#: fell 10 % and was flat from about 2,000 s, while the flow kept shedding eddies
-#: (outflow +/- 1 %), which no run length removes.
+#: fell 10 % and was flat from about 2,000 s, while the outflow kept swinging by
+#: +/- 1 %, which no run length removes (the bed friction then no longer damps large
+#: horizontal flow structures in the slow lower reach; see flux_convergence.NET_SHARE). Confirmed on 2026-11-22 with the
+#: highest outflow level the energy slope can set (:func:`outflow_top_level`) and runs
+#: continued to 9,000 s: at 55.4 m3/s with the largest roughness the reach filled from
+#: 133,700 to 266,800 m3 (the level pool estimates 5 % less), inflow and outflow agreed
+#: within 0.1 % over every 500 s from 3,400 s on, and the velocity at the 68 calibration points
+#: was within 0.8 cm/s of its final value at 5,300 s and 0.2 cm/s at 6,600 s, against
+#: up to 4.4 cm/s at the 3,500 s of the earlier trial (derived duration 6,200 s); at
+#: 45.8 m3/s with the smallest roughness (6,600 s) the volume stayed within 0.1 % of its
+#: final 218,400 m3 from 3,800 s on, while the unsteady flow of the slow lower reach
+#: swung it by +/- 134 m3.
 HOTSTART_RESIDENCE_TIMES = 1.2
 #: The shortest such run [s], for a reach whose water is replaced within minutes.
 HOTSTART_MIN_DURATION = 600.0
@@ -383,6 +393,33 @@ def case_discharge(cfg: Config) -> float | None:
     return float(sum(inflows.values())) if inflows else None
 
 
+def outflow_top_level(cfg: Config, discharge: float) -> float | None:
+    """The highest outflow level [m] the calibration can set at *discharge*, or None.
+
+    With ``calibration.outflow_slope`` the normal stage of the outflow section at the
+    smallest energy slope of the range, with ``calibration.outflow_offset`` the level
+    of the rating plus the largest offset; None when the case does not calibrate its
+    outflow level or has no outflow section to compute it on.
+    """
+    from axqua.solvers.telemac import outflow_offset
+
+    which = outflow_offset.kind(cfg)
+    if which is None:
+        return None
+    try:
+        section = outflow_offset.section_of(cfg)
+    except Exception as exc:                      # noqa: BLE001 - the seed volume then
+        log.warning("the outflow section could not be read (%s), so the duration of "
+                    "the calibration runs counts the volume of the steady result only",
+                    exc)
+        return None
+    if which == "slope":
+        low, _ = cfg.calibration.outflow_slope
+        return float(section.stage(discharge, float(low)))
+    _, high = cfg.calibration.outflow_offset
+    return float(section.stage(discharge)) + float(high)
+
+
 def calibration_hotstart_duration(cfg: Config) -> float:
     """Simulated time [s] of a calibration run that starts from the steady result.
 
@@ -391,7 +428,13 @@ def calibration_hotstart_duration(cfg: Config) -> float:
     100 s, plus the ramp of the outflow offset when the case calibrates it: the residence time is the volume of water in the converged result over the
     discharge, the time in which the reach exchanges its water once. A changed
     roughness changes the stored volume, and the flow has settled once that change
-    has passed the outflow.
+    has passed the outflow. When the case calibrates its outflow level, the volume is
+    that of the reach with the highest level the calibration can set
+    (:func:`outflow_top_level`), filled as a level pool over the steady result: a
+    raised outflow level backs the water up through the reach, which stores up to
+    twice the water then (Inn KB15 at the smallest energy slope, 2026-11-22), and the
+    run settles only once that volume has been exchanged. Before, the volume of the
+    steady result alone left 49 of the 150 runs of the KB15 trial unsettled.
     """
     import numpy as np
 
@@ -415,8 +458,23 @@ def calibration_hotstart_duration(cfg: Config) -> float:
     # single precision, which at a UTM northing is a spacing of 0.5 m)
     mesh = SelafinFile(cfg.model_path(cfg.geometry_slf))
     x, y, ikle = mesh.x, mesh.y, mesh.ikle
-    h = SelafinFile(cfg.model_path(cfg.results_slf)).frame(
-        -1, ["WATER DEPTH"])["WATER DEPTH"].astype(float)
+    result = SelafinFile(cfg.model_path(cfg.results_slf))
+    names = [n for n in ("WATER DEPTH", "BOTTOM", "FREE SURFACE") if n in result.var_names]
+    frame = result.frame(-1, names)
+    h = frame["WATER DEPTH"].astype(float)
+    top = outflow_top_level(cfg, discharge)
+    if top is not None:
+        if "BOTTOM" in frame:
+            bed = frame["BOTTOM"].astype(float)
+        elif "FREE SURFACE" in frame:
+            bed = frame["FREE SURFACE"].astype(float) - h
+        else:
+            bed = None
+            log.warning("%s holds neither BOTTOM nor FREE SURFACE, so the duration of "
+                        "the calibration runs counts the volume of the steady result "
+                        "only", result.path.name)
+        if bed is not None:
+            h = np.maximum(h, top - bed)
     area = 0.5 * np.abs((x[ikle[:, 1]] - x[ikle[:, 0]]) * (y[ikle[:, 2]] - y[ikle[:, 0]])
                         - (x[ikle[:, 2]] - x[ikle[:, 0]]) * (y[ikle[:, 1]] - y[ikle[:, 0]]))
     volume = float((area * h[ikle].mean(axis=1)).sum())
@@ -486,7 +544,8 @@ def run_single_flow_calibration(
         vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
         depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
         prepare_only: bool = False, resume: bool = False,
-        checkout: Path | None = None, env: str | None = None) -> int:
+        checkout: Path | None = None, env: str | None = None,
+        extend: bool = False) -> int:
     """End-to-end single-discharge calibration of the built case.
 
     Compiles the calibration CSV, ensures the ``.cas`` prints the target,
@@ -510,7 +569,8 @@ def run_single_flow_calibration(
     # the zones of the roughness table and the rows of the target workbook too, not
     # only the list of the case file (the Inn KB15 case printed "parameters: []"),
     # less the zones the points say nothing about (calibration_zones)
-    parameters = settle_zone_plan(cfg, [table], Path(cfg.calibration_dir), resume=resume)
+    parameters = settle_zone_plan(cfg, [table], Path(cfg.calibration_dir),
+                                  resume=resume or extend)
     if "SCALAR VELOCITY_DATA" in table:
         print(f"  scalar velocity [m/s]: {table['SCALAR VELOCITY_DATA'].min():.3f} .. "
               f"{table['SCALAR VELOCITY_DATA'].max():.3f}")
@@ -534,9 +594,10 @@ def run_single_flow_calibration(
                   f"{cfg.model_path('user_fortran')}/user_sl.f; aXqua's own runs put the "
                   "neutral value back (offset 0, or the slope of the reach)")
 
-    def emit(complete: bool, only_bal: bool) -> Path:
+    def emit(complete: bool, only_bal: bool, budget=None) -> Path:
         return emit_hbc_config(cfg, csv, complete_bal_mode=complete,
-                               only_bal_mode=only_bal, parameters=parameters)
+                               only_bal_mode=only_bal, parameters=parameters,
+                               budget=budget)
 
     driver = stage_driver(cfg.calibration_dir, "bal_telemac.py", checkout=checkout)
     folder = Path(cfg.calibration_dir)
@@ -544,7 +605,7 @@ def run_single_flow_calibration(
         cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
         driver=driver, restarts={"calibration": folder / RESTART_OUTPUTS},
         csvs={"calibration": Path(csv)}, folder=folder, env=env,
-        note="HydroBayesCal calibration")
+        note="HydroBayesCal calibration", extend=extend)
     if code == 0 and not prepare_only:
         report(cfg, folder)
     return code
@@ -934,7 +995,7 @@ extraction = {{
 
 
 # --------------------------------------------------------------------------- #
-# model error at points the model cannot reach (calibration.structural_error)
+# model error at points the simulated flow cannot reach (calibration.structural_error)
 # --------------------------------------------------------------------------- #
 #: What a calibration does with a measured value that no parameter set within the
 #: ranges reproduces: keep the measurement error (``none``), or add the misfit that
@@ -1436,7 +1497,8 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
                               depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
                               prepare_only: bool = False, resume: bool = False,
                               force: bool = False,
-                              checkout: Path | None = None) -> int:
+                              checkout: Path | None = None,
+                              extend: bool = False) -> int:
     """Calibrate one set of parameters against the measurements of several situations.
 
     Each situation of :func:`calibration_situations` gets its calibration points and
@@ -1497,14 +1559,17 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
         csvs[tag] = csv
         tables.append(table)
         print(f"  {situation.name}: Q = {q:g} m3/s, {len(table)} points -> {cas}")
-    parameters = settle_zone_plan(cfg, tables, folder, resume=resume)
+    parameters = settle_zone_plan(cfg, tables, folder, resume=resume or extend)
     ready_outflow_offset(cfg, parameters, [f"steady2d-{tag}.cas" for tag in tags])
 
-    def emit(complete: bool, only_bal: bool) -> Path:
+    def emit(complete: bool, only_bal: bool, budget=None) -> Path:
+        init_runs, max_runs, adaptive = budget or (cfg.calibration.init_runs,
+                                                   cfg.calibration.max_runs, None)
         return emit_multiflow_config(
             cfg, folder, cfg.model_dir, flows, csvs, n_cpus=cfg.telemac.n_processors,
-            init_runs=cfg.calibration.init_runs, max_runs=cfg.calibration.max_runs,
-            complete_bal_mode=complete, only_bal_mode=only_bal, parameters=parameters)
+            init_runs=init_runs, max_runs=max_runs,
+            complete_bal_mode=complete, only_bal_mode=only_bal, parameters=parameters,
+            adaptive_init_runs=adaptive)
 
     driver = stage_driver(folder, "bal_telemac_multiflow.py", checkout=checkout,
                           also=("bal_telemac.py",))
@@ -1512,7 +1577,7 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
     code = _launch_in_passes(
         cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
         driver=driver, restarts=restarts, csvs=csvs, folder=folder,
-        note=f"HydroBayesCal calibration at {len(flows)} discharges")
+        note=f"HydroBayesCal calibration at {len(flows)} discharges", extend=extend)
     if code == 0 and not prepare_only:
         report(cfg, folder)
     return code
@@ -1570,10 +1635,110 @@ def settle_zone_plan(cfg: Config, tables, folder: Path, *, resume: bool = False)
     return plan.parameters
 
 
+# --------------------------------------------------------------------------- #
+# the active learning until it converges (calibration.until_converged)
+# --------------------------------------------------------------------------- #
+#: The suffix of the restart files of the initial design, kept when a pass of the
+#: active learning makes all saved runs the restart design (:func:`extend_restart`):
+#: the model error of points the simulated flow cannot reach is measured on them.
+DESIGN = ".design"
+#: The name of an archived BAL dictionary: the one of a finished pass, ``<n>`` runs.
+ARCHIVE = "BAL_dictionary.upto-{runs}.pkl"
+
+
+def _results_folder(restart: Path) -> Path:
+    """The results folder of HydroBayesCal that *restart* (``initial-model-outputs.json``) belongs to."""
+    return Path(restart).parent.parent
+
+
+def _calibration_data(results: Path, cfg: Config) -> Path:
+    return Path(results) / "calibration-data" / "_".join(cfg.calibration.calibration_quantities)
+
+
+def design_outputs(restart: Path) -> Path:
+    """The outputs of the initial design: the kept copy once a pass has extended the restart design."""
+    kept = Path(restart).with_name(Path(restart).stem + DESIGN + Path(restart).suffix)
+    return kept if kept.is_file() else Path(restart)
+
+
+def runs_saved(cfg: Config, restart: Path) -> int:
+    """The runs HydroBayesCal has saved for the situation of *restart*: rows of its collocation table."""
+    folder = _calibration_data(_results_folder(restart), cfg)
+    table = folder / f"collocation-points-{folder.name}.csv"
+    if not table.is_file():
+        return 0
+    return max(0, sum(1 for line in table.read_text().splitlines() if line.strip()) - 1)
+
+
+def extend_restart(cfg: Config, restart: Path) -> int:
+    """Make every saved run of a situation its restart design; returns their number.
+
+    HydroBayesCal's ``only_bal_mode`` trains the emulator on the restart design and
+    continues the active learning from there, so a pass that starts from all saved runs
+    continues the learning instead of repeating it. The restart files of the initial
+    design are kept beside them with :data:`DESIGN` in their names (once), because the
+    model error of points the simulated flow cannot reach is measured on them
+    (:func:`design_outputs`). The saved runs are HydroBayesCal's own tables: the
+    collocation points and the detailed outputs, one entry per run and point.
+    """
+    import json
+    import shutil
+
+    restart = Path(restart)
+    folder = _calibration_data(_results_folder(restart), cfg)
+    table = folder / f"collocation-points-{folder.name}.csv"
+    detailed = [p for p in folder.glob("*-detailed.json") if "validation" not in p.name]
+    if not table.is_file() or len(detailed) != 1:
+        from axqua.core.errors import ConfigError
+        raise ConfigError(f"no saved runs to continue from in {folder}",
+                          subject=str(folder),
+                          remedy="Run the calibration without continuing it first.")
+    runs = runs_saved(cfg, restart)
+    outputs = json.loads(detailed[0].read_text())
+    counts = {len(values) for values in outputs.values()}
+    if counts != {runs}:
+        raise ValueError(f"{detailed[0].name} holds {sorted(counts)} runs per point, "
+                         f"{table.name} {runs}")
+    points = restart.with_name("initial-collocation-points.csv")
+    for path in (restart, points):
+        kept = path.with_name(path.stem + DESIGN + path.suffix)
+        if path.is_file() and not kept.is_file():
+            shutil.copy2(path, kept)
+    shutil.copy2(table, points)
+    restart.write_text(json.dumps(outputs))
+    return runs
+
+
+def evidence_converged(folder: Path) -> tuple[bool, dict]:
+    """The verdict of :func:`axqua.calibration_report.convergence` on the calibration in *folder*, over all its passes."""
+    from axqua.calibration_report import _dictionary, convergence, evidence_history
+
+    found = _dictionary(folder)
+    if found is None:
+        return False, {}
+    history = evidence_history(*found)
+    state = convergence(history["log_bme"], history["relative_entropy"], history["runs"])
+    return bool(state["converged"]), state
+
+
+def archive_dictionary(folder: Path, runs: int) -> Path | None:
+    """Keep the BAL dictionary of a finished pass, before the next pass overwrites it."""
+    import shutil
+
+    from axqua.calibration_report import _dictionary
+
+    found = _dictionary(folder)
+    if found is None:
+        return None
+    target = found[0].with_name(ARCHIVE.format(runs=runs))
+    shutil.copy2(found[0], target)
+    return target
+
+
 def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: bool,
                       emit, driver: Path, restarts: dict[str, Path],
                       csvs: dict[str, Path], folder: Path, note: str,
-                      env: str | None = None) -> int:
+                      env: str | None = None, extend: bool = False) -> int:
     """Launch a HydroBayesCal driver once, or in two passes for the model error.
 
     One pass (``structural_error: none``): initial simulations and active learning in
@@ -1584,12 +1749,27 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
     again with the active learning only, on the saved simulations. With *resume*, the
     first pass is skipped: the initial simulations of an earlier calibration of the
     case are used, which have to exist for every situation (*restarts*: situation ->
-    HydroBayesCal's ``initial-model-outputs.json``). *emit(complete, only_bal)* writes
-    the driver configuration for HydroBayesCal's two execution switches.
+    HydroBayesCal's ``initial-model-outputs.json``). *emit(complete, only_bal,
+    budget=None)* writes the driver configuration for HydroBayesCal's two execution
+    switches; *budget* ``(init_runs, max_runs, adaptive)`` replaces the run counts of
+    the case (``adaptive`` None keeps the case's adaptive initial design).
+
+    With ``calibration.until_converged``, the active learning first runs
+    :data:`axqua.calibration_report.CONVERGENCE_MINIMUM` iterations and then continues
+    in passes of :data:`~axqua.calibration_report.CONVERGENCE_WINDOW` iterations, each
+    from all runs saved so far (:func:`extend_restart`, the BAL dictionary of the
+    finished pass archived by :func:`archive_dictionary`), until
+    :func:`evidence_converged` or ``max_runs`` in total. *extend* continues a finished
+    calibration of the case from all its saved runs: up to ``max_runs`` in one pass, or
+    in such passes with ``until_converged``.
     """
+    from axqua.calibration_report import CONVERGENCE_MINIMUM, CONVERGENCE_WINDOW
     from axqua.core.errors import ConfigError
 
     passes = mode == "unreachable"
+    until = bool(getattr(cfg.calibration, "until_converged", False))
+    ceiling = int(cfg.calibration.max_runs)
+    init_runs = int(cfg.calibration.init_runs)
     if prepare_only:
         config_path = emit(not passes, False)
         print(f"HydroBayesCal config -> {config_path}")
@@ -1597,17 +1777,46 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
             print("structural_error: unreachable - the driver runs the initial "
                   "simulations first; the errors are then completed and the active "
                   "learning runs in a second pass.")
+        if until:
+            print(f"until_converged: the active learning runs {CONVERGENCE_MINIMUM} "
+                  f"iterations, then steps of {CONVERGENCE_WINDOW} until it converges, "
+                  f"at most {ceiling} runs in total.")
         print("\n--prepare-only: not launched. Run it with:")
         print(f"  cd {driver.parent} && {sys.executable} {driver.name} "
               f"--config {config_path}")
         return 0
+
+    def saved() -> int:
+        return min(runs_saved(cfg, path) for path in restarts.values())
+
+    def misfit() -> None:
+        records = {tag: Path(csv).with_name(f"model-error-{tag}.csv")
+                   for tag, csv in csvs.items()}
+        try:
+            apply_unreachable_misfit(csvs, {tag: design_outputs(path)
+                                            for tag, path in restarts.items()},
+                                     list(cfg.calibration.calibration_quantities),
+                                     records)
+        except (ValueError, KeyError) as exc:
+            raise ConfigError(
+                f"the model error could not be computed from the initial "
+                f"simulations: {exc}", subject=str(folder),
+                remedy="The initial simulations are kept. Correct the cause and "
+                       "start the calibration again with 'resume'.") from exc
+        for record in records.values():
+            print(f"model error at points the simulated flow cannot reach -> {record}")
+
+    code = 0
     with case_as_built(cfg):
-        if not resume:
-            config_path = emit(not passes, False)
+        if not (resume or extend):
+            budget = None
+            if until and not passes:
+                budget = (init_runs, min(ceiling, init_runs + CONVERGENCE_MINIMUM), None)
+            config_path = emit(not passes, False, budget)
             print(f"HydroBayesCal config -> {config_path}")
             code = launch(cfg, driver, config_path, env=env,
                           note=note + (", initial simulations" if passes else ""))
-            if code != 0 or not passes:
+            if code != 0 or not (passes or until):
                 return code
         missing = [tag for tag, path in restarts.items() if not path.is_file()]
         if missing:
@@ -1616,21 +1825,42 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
                 subject=str(folder),
                 remedy="Run the calibration without 'resume' first.")
         if passes:
-            records = {tag: Path(csv).with_name(f"model-error-{tag}.csv")
-                       for tag, csv in csvs.items()}
-            try:
-                apply_unreachable_misfit(csvs, restarts,
-                                         list(cfg.calibration.calibration_quantities),
-                                         records)
-            except (ValueError, KeyError) as exc:
-                raise ConfigError(
-                    f"the model error could not be computed from the initial "
-                    f"simulations: {exc}", subject=str(folder),
-                    remedy="The initial simulations are kept. Correct the cause and "
-                           "start the calibration again with 'resume'.") from exc
-            for record in records.values():
-                print(f"model error at points the model cannot reach -> {record}")
-        config_path = emit(True, True)
-        print(f"HydroBayesCal config -> {config_path}")
-        return launch(cfg, driver, config_path, env=env,
-                      note=note + ", active learning on the saved simulations")
+            misfit()
+        if (resume or extend or passes) and not extend:
+            budget = None
+            if until:
+                design = saved()
+                budget = (design, min(ceiling, design + CONVERGENCE_MINIMUM), False)
+            config_path = emit(True, True, budget)
+            print(f"HydroBayesCal config -> {config_path}")
+            code = launch(cfg, driver, config_path, env=env,
+                          note=note + ", active learning on the saved simulations")
+            if code != 0 or not until:
+                return code
+        while True:
+            done = saved()
+            if not extend:
+                converged, state = evidence_converged(folder)
+                if converged:
+                    print(f"active learning converged after {done} runs")
+                    return code
+            if done >= ceiling:
+                if until:
+                    log.warning("the active learning has not converged within %d runs "
+                                "(calibration.max_runs); the report says how far it is",
+                                ceiling)
+                else:
+                    print(f"{done} runs saved, calibration.max_runs is {ceiling}: "
+                          "nothing to continue")
+                return code
+            step = min(ceiling, done + CONVERGENCE_WINDOW) if until else ceiling
+            archive_dictionary(folder, done)
+            for path in restarts.values():
+                extend_restart(cfg, path)
+            extend = False
+            config_path = emit(True, True, (done, step, False))
+            print(f"HydroBayesCal config -> {config_path}")
+            code = launch(cfg, driver, config_path, env=env,
+                          note=note + f", active learning from {done} saved runs")
+            if code != 0 or not until:
+                return code

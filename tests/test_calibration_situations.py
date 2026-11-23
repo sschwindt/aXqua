@@ -170,7 +170,8 @@ def test_the_calibration_job_runs_the_situations(built, monkeypatch):
     monkeypatch.setattr(bayescal, "run_single_flow_calibration",
                         lambda *a, **k: pytest.fail("ran the single-flow calibration"))
     assert TelemacBackend()._calibration(built, prepare_only=True) == 0
-    assert seen == {"prepare_only": True, "resume": False, "force": False}
+    assert seen == {"prepare_only": True, "resume": False, "force": False,
+                    "extend": False}
     # the options of the job reach the situations as they reach a single flow
     seen.clear()
     TelemacBackend()._calibration(built, force=True,
@@ -250,7 +251,7 @@ def test_a_case_with_only_situations_counts_as_configured_for_calibration(built)
 
 
 # --------------------------------------------------------------------------- #
-# model error at points the model cannot reach (calibration.structural_error)
+# model error at points the simulated flow cannot reach (calibration.structural_error)
 # --------------------------------------------------------------------------- #
 def test_only_the_misfit_outside_the_simulated_range_is_added():
     points = pd.DataFrame({"id": [1, 2, 3], "x": [0.0] * 3, "y": [0.0] * 3,
@@ -410,3 +411,99 @@ def test_a_run_counts_as_one_of_the_case_only_where_it_works_in_its_folder(
     assert not hbc.solver_running("telemac2d", model, extra=("steady2d",))
     monkeypatch.chdir(model / "steady2d.cas_2026-11-10")
     assert hbc.solver_running("telemac2d", model, extra=("steady2d",))
+
+
+def _hydrobayescal_until(built, monkeypatch, tmp_path, flat_from: int):
+    """Stand-in for HydroBayesCal: an initial design of 4 runs, then active learning up
+    to the max_runs of the configuration, from as many saved runs as its init_runs. The
+    log evidence and relative entropy wander until *flat_from* runs, then stay flat."""
+    import re
+
+    built.calibration.structural_error = "unreachable"
+    built.calibration.calibration_quantities = ["WATER DEPTH"]
+    built.calibration.until_converged = True
+    built.calibration.init_runs, built.calibration.max_runs = 4, 60
+    launched, restarts_seen = [], []
+
+    def tables(folder, tag, runs):
+        data = folder / f"flow-{tag}" / "auto-saved-results-HydroBayesCal" / \
+            "calibration-data" / "WATER DEPTH"
+        data.mkdir(parents=True, exist_ok=True)
+        (data / "collocation-points-WATER DEPTH.csv").write_text(
+            "zone1\n" + "".join(f"{0.01 * (k + 1)}\n" for k in range(runs)))
+        (data / f"extraction-data-{tag}-detailed.json").write_text(json.dumps(
+            {"1": [{"WATER DEPTH": 0.7 + 0.001 * k} for k in range(runs)]}))
+
+    def launch(cfg, driver, config_path, **kwargs):
+        text = Path(config_path).read_text()
+        folder = Path(config_path).parent
+        only_bal = "'only_bal_mode': True" in text
+        init = int(re.search(r"'init_runs': (\d+)", text).group(1))
+        top = int(re.search(r"'max_runs': (\d+)", text).group(1))
+        launched.append((only_bal, init, top))
+        tags = ("august-2026", "march-2026")
+        if not only_bal:                              # the initial design
+            for tag in tags:
+                restart = folder / f"flow-{tag}" / bayescal.RESTART_OUTPUTS
+                restart.parent.mkdir(parents=True, exist_ok=True)
+                restart.write_text(json.dumps({"1": [{"WATER DEPTH": 0.7},
+                                                     {"WATER DEPTH": 0.8}] * 2}))
+                tables(folder, tag, 4)
+            return 0
+        restart = folder / "flow-august-2026" / bayescal.RESTART_OUTPUTS
+        restarts_seen.append(len(json.loads(restart.read_text())["1"]))
+        for tag in tags:
+            tables(folder, tag, top)
+        runs = np.arange(init, top + 1)
+        wander = np.where(runs < flat_from, 3.0 * (runs % 2), 0.0)
+        dictionary = folder / "auto-saved-results-HydroBayesCal" / "calibration-data" / \
+            "WATER DEPTH" / "BAL_dictionary.pkl"
+        dictionary.parent.mkdir(parents=True, exist_ok=True)
+        with open(dictionary, "wb") as handle:
+            pickle.dump({"N_tp": runs.astype(float), "log_BME": -60.0 - wander,
+                         "RE": 5.0 + wander, "calibration_parameters": ["zone1"],
+                         "param_values": [[0.01, 0.3]],
+                         "posterior": [np.full((50, 1), 0.1)] * runs.size}, handle)
+        return 0
+
+    monkeypatch.setattr(bayescal, "launch", launch)
+    monkeypatch.setattr(bayescal, "situation_points",
+                        lambda cfg, situation, folder, **_: _points(folder, situation))
+    monkeypatch.setattr(bayescal, "stage_driver",
+                        lambda folder, name, **_: tmp_path / name)
+    monkeypatch.setattr(bayescal, "report", lambda cfg, folder: {})
+    code = bayescal.run_situation_calibration(built)
+    return code, launched, restarts_seen
+
+
+def test_the_active_learning_continues_from_all_saved_runs_until_it_converges(
+        built, monkeypatch, tmp_path):
+    """The user's order of 2026-11-22: run the active learning until the log evidence and
+    the relative entropy converge. 25 iterations first, then steps of five, each pass
+    from every run saved so far; the model error stays that of the initial design."""
+    code, launched, restarts = _hydrobayescal_until(built, monkeypatch, tmp_path,
+                                                    flat_from=33)
+    assert code == 0
+    # initial design; 25 iterations; then 29 -> 34 (still wandering) and 34 -> 39 (flat)
+    assert launched == [(False, 4, 60), (True, 4, 29), (True, 29, 34), (True, 34, 39)]
+    assert restarts == [4, 29, 34]
+    folder = built.calibration_path(bayescal.MULTIFLOW)
+    flow = folder / "flow-march-2026" / bayescal.RESTART_OUTPUTS
+    design = bayescal.design_outputs(flow)
+    assert design.name == "initial-model-outputs.design.json"
+    assert len(json.loads(design.read_text())["1"]) == 4
+    archives = sorted(p.name for p in folder.rglob("BAL_dictionary.upto-*.pkl"))
+    assert archives == ["BAL_dictionary.upto-29.pkl", "BAL_dictionary.upto-34.pkl"]
+    # applied once, from the initial design
+    points = pd.read_csv(folder / "points-march-2026.csv")
+    assert points["WATER DEPTH_ERROR"].tolist() == pytest.approx([np.hypot(0.02, 0.2)])
+    converged, state = bayescal.evidence_converged(folder)
+    # run 32 is even, so it lies on the plateau already
+    assert converged and state["iterations"] == 35 and state["plateau_since_run"] == 32
+
+
+def test_the_active_learning_stops_at_max_runs_when_it_does_not_converge(
+        built, monkeypatch, tmp_path):
+    code, launched, _ = _hydrobayescal_until(built, monkeypatch, tmp_path, flat_from=99)
+    assert code == 0 and launched[-1] == (True, 59, 60)
+    assert [top for _, _, top in launched[1:]] == [29, 34, 39, 44, 49, 54, 59, 60]
