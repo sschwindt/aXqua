@@ -710,19 +710,56 @@ def _calibration_progress(cfg, ctx: Any, *, folder: str = ""):
     Without a job context there is nobody to report to, and the driver's own output
     is on the terminal anyway. The multi-flow driver works in its own *folder* (its
     log is in the results folder below it, :func:`axqua.hbc.driver_logs`) and runs
-    each parameter set once per flow; its stock models count their
-    runs per flow, so the counter reports the parameter set of the flow at work.
+    each parameter set once per situation; the progress then names the situation at
+    work, its place among the situations and the stage (initial design or active
+    learning). The total is the ``max_runs`` the calibration recorded when it started
+    (:func:`axqua.bayescal.record_run_budget`); without a limit, the initial runs while
+    the initial design runs, and none during the active learning.
     """
     from contextlib import nullcontext
 
     if ctx is None:
         return nullcontext()
-    from axqua import hbc
+    import json
 
-    total = int(cfg.calibration.max_runs or 0) or None
-    return hbc.RunCounter(
-        hbc.driver_logs(Path(cfg.calibration_dir) / folder),
-        lambda run: ctx.progress(iteration=run, max_iterations=total))
+    from axqua import bayescal, hbc
+
+    here = Path(cfg.calibration_dir) / folder
+    names: dict[str, str] = {}
+    if folder:
+        try:
+            from axqua.validation import slug
+
+            names = {slug(s.name): s.name for s in bayescal.calibration_situations(cfg)}
+        except Exception:                # noqa: BLE001 - progress must not stop a run
+            names = {}
+    order = list(names)
+
+    def total(stage: str | None) -> int | None:
+        """The planned runs: max_runs, or without a limit the initial design while it runs.
+
+        0 once the active learning of a calibration without a limit runs: the status
+        keeps a field that is reported as None, and the 64 of the initial design would
+        stay; the job list and ``axqua status`` show no total for 0.
+        """
+        try:
+            budget = json.loads((here / bayescal.RUN_BUDGET).read_text())
+        except (OSError, ValueError):
+            return int(cfg.calibration.max_runs or 0) or None
+        if budget.get("max_runs") is not None:
+            return int(budget["max_runs"])
+        if stage == hbc.STAGE_DESIGN and budget.get("init_runs") is not None:
+            return int(budget["init_runs"])
+        return 0
+
+    def report(run: int, *, flow: str | None = None, stage: str | None = None) -> None:
+        fields = {"iteration": run, "max_iterations": total(stage), "stage": stage}
+        if flow is not None:
+            fields.update(flow=names.get(flow, flow), n_flows=len(order) or None,
+                          flow_index=order.index(flow) + 1 if flow in order else None)
+        ctx.progress(**{key: value for key, value in fields.items() if value is not None})
+
+    return hbc.RunCounter(hbc.driver_logs(here), report)
 
 
 def _sink_for(ctx: Any, name: str):

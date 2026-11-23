@@ -362,6 +362,7 @@ def _points(folder, situation):
 
 def test_the_active_learning_runs_with_the_errors_the_initial_runs_complete(
         built, monkeypatch, tmp_path):
+    built.calibration.until_converged = False   # the passes, not the convergence loop
     code, launched = _two_passes(built, monkeypatch, tmp_path)
     # initial simulations only, then the active learning on the saved ones
     assert (code, launched) == (0, [(False, False), (True, True)])
@@ -374,6 +375,7 @@ def test_the_active_learning_runs_with_the_errors_the_initial_runs_complete(
 
 def test_a_resumed_calibration_uses_the_saved_runs_and_needs_them(
         built, monkeypatch, tmp_path):
+    built.calibration.until_converged = False   # the passes, not the convergence loop
     with pytest.raises(ConfigError, match="no saved initial simulations"):
         _two_passes(built, monkeypatch, tmp_path, resume=True)
     _two_passes(built, monkeypatch, tmp_path)               # saves the runs

@@ -401,14 +401,23 @@ CURATED: dict[str, dict[str, Any]] = {
     "calibration.parameters": _c("Calibration parameters", "yaml",
                                  help="One entry per parameter: name, min and max."),
     "calibration.calibration_quantities": _c("Calibration targets", "yaml"),
-    "calibration.init_runs": _c("Simulations before the surrogate model", "int"),
-    "calibration.max_runs": _c("Simulations in total", "int"),
+    "calibration.init_runs": _c(
+        "Simulations before the surrogate model", "int",
+        help="Empty: 10 per calibration parameter, rounded up to a power of two "
+             "(Loeppky et al. 2009; an even Sobol design), for example 64 for four "
+             "parameters."),
+    "calibration.max_runs": _c(
+        "Simulations in total", "int",
+        help="Empty: no limit, the active learning runs until it converges; without "
+             "that option, the simulations before the surrogate model plus 50 "
+             "iterations of active learning."),
     "calibration.until_converged": _c(
         "Run the active learning until it converges", "bool",
-        help="The active learning runs at least 25 iterations and then continues in "
-             "steps of five until, over the last five, neither the logarithm of the "
-             "model evidence nor the relative entropy varies by more than 1, or until "
-             "Simulations in total is reached. Off: exactly Simulations in total."),
+        help="On by default. The active learning runs at least 25 iterations and then "
+             "continues in steps of five until, over the last five, neither the "
+             "logarithm of the model evidence nor the relative entropy varies by more "
+             "than 1; a warning says when the two show no sign of leveling off. A value "
+             "in Simulations in total limits it. Off: exactly Simulations in total."),
     "calibration.hotstart": _c(
         "Start each simulation from the steady result", "bool",
         help="Each simulation of the calibration continues from the converged steady "

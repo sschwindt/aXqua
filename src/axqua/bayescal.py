@@ -45,6 +45,7 @@ Lessons baked in (see the module functions):
 
 from __future__ import annotations
 
+import json
 import logging
 import shutil
 import sys
@@ -601,11 +602,12 @@ def run_single_flow_calibration(
 
     driver = stage_driver(cfg.calibration_dir, "bal_telemac.py", checkout=checkout)
     folder = Path(cfg.calibration_dir)
+    runs = record_run_budget(cfg, folder, parameters)
     code = _launch_in_passes(
         cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
         driver=driver, restarts={"calibration": folder / RESTART_OUTPUTS},
         csvs={"calibration": Path(csv)}, folder=folder, env=env,
-        note="HydroBayesCal calibration", extend=extend)
+        note="HydroBayesCal calibration", extend=extend, runs=runs[:2])
     if code == 0 and not prepare_only:
         report(cfg, folder)
     return code
@@ -867,7 +869,7 @@ def write_flow_cas(cfg: Config, base_cas: Path, flow: FlowSpec, rating_dir: Path
 
 def emit_multiflow_config(cfg: Config, out_dir: Path, model_dir: Path,
                           flows: list[FlowSpec], csv_paths: dict[str, Path], *,
-                          n_cpus: int, init_runs: int, max_runs: int,
+                          n_cpus: int, init_runs: int, max_runs: int | None,
                           complete_bal_mode: bool = True,
                           only_bal_mode: bool = False,
                           prior_samples: int | None = None,
@@ -893,6 +895,12 @@ def emit_multiflow_config(cfg: Config, out_dir: Path, model_dir: Path,
         c, "prior_samples", 5000)
     adaptive = bool(getattr(c, "adaptive_init_runs", True)
                     if adaptive_init_runs is None else adaptive_init_runs)
+    from axqua.calibration import run_budget
+
+    from axqua.calibration import pass_ceiling
+
+    first = min(run_budget(c, len(parameters))[2], int(init_runs))
+    max_runs = pass_ceiling(init_runs, max_runs)
     flow_entries = ",\n".join(
         "        {{'name': {n!r}, 'control_file': {cf!r},\n"
         "         'results_filename_base': {rb!r},\n"
@@ -950,10 +958,12 @@ sampling = {{
     'parameter_distribution': 'uniform',
     'parameter_sampling_method': {c.parameter_sampling_method!r},
     # HydroBayesCal >= 1.5: grow the initial design in Sobol blocks and stop when
-    # it is measurably sufficient. init_runs is the ceiling, so this can only save
-    # runs - and here one run means one TELEMAC simulation PER FLOW.
+    # it is measurably sufficient. init_runs is the ceiling and init_runs_min the
+    # first block, 10 runs per parameter rounded up to a power of two unless the case
+    # sets it (axqua.calibration.run_budget), so the design never stops below that.
+    # One run here means one TELEMAC simulation PER FLOW.
     'adaptive_init_runs': {adaptive},
-    'init_runs_min': {getattr(c, "init_runs_min", None)!r},
+    'init_runs_min': {first},
     # exploit the posterior until >1 well-separated mode is found, then explore
     'bal_exploration_tradeoff': {getattr(c, "bal_exploration_tradeoff", "auto")!r},
     'tp_selection_criteria': 'dkl',
@@ -1334,10 +1344,21 @@ def run_multiflow_calibration(
             raise SystemExit(f"resume: no completed initial design for {missing}; "
                              "run the initial design (launch_mode='run') first")
 
+    from axqua.calibration import telemac_parameters
+
+    from axqua.calibration import default_iterations
+
+    init_runs, max_runs, _ = record_run_budget(
+        cfg, multiflow_dir,
+        telemac_parameters(cfg) if parameters is None else parameters)
+    if max_runs is None:
+        # this route launches the driver once and has no convergence loop
+        # (run_situation_calibration has): a fixed number of iterations
+        max_runs = init_runs + default_iterations()
     config_path = emit_multiflow_config(
         cfg, multiflow_dir, cfg.model_dir, flows, csv_paths,
-        n_cpus=cfg.telemac.n_processors, init_runs=cfg.calibration.init_runs,
-        max_runs=cfg.calibration.max_runs, only_bal_mode=resume, parameters=parameters)
+        n_cpus=cfg.telemac.n_processors, init_runs=init_runs,
+        max_runs=max_runs, only_bal_mode=resume, parameters=parameters)
     print(f"multiflow config -> {config_path}"
           + (" (only_bal_mode: reusing completed initial designs)" if resume else ""))
     driver = stage_driver(multiflow_dir, "bal_telemac_multiflow.py",
@@ -1561,10 +1582,10 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
         print(f"  {situation.name}: Q = {q:g} m3/s, {len(table)} points -> {cas}")
     parameters = settle_zone_plan(cfg, tables, folder, resume=resume or extend)
     ready_outflow_offset(cfg, parameters, [f"steady2d-{tag}.cas" for tag in tags])
+    runs = record_run_budget(cfg, folder, parameters)
 
     def emit(complete: bool, only_bal: bool, budget=None) -> Path:
-        init_runs, max_runs, adaptive = budget or (cfg.calibration.init_runs,
-                                                   cfg.calibration.max_runs, None)
+        init_runs, max_runs, adaptive = budget or (runs[0], runs[1], None)
         return emit_multiflow_config(
             cfg, folder, cfg.model_dir, flows, csvs, n_cpus=cfg.telemac.n_processors,
             init_runs=init_runs, max_runs=max_runs,
@@ -1577,7 +1598,8 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
     code = _launch_in_passes(
         cfg, mode=mode, resume=resume, prepare_only=prepare_only, emit=emit,
         driver=driver, restarts=restarts, csvs=csvs, folder=folder,
-        note=f"HydroBayesCal calibration at {len(flows)} discharges", extend=extend)
+        note=f"HydroBayesCal calibration at {len(flows)} discharges", extend=extend,
+        runs=runs[:2])
     if code == 0 and not prepare_only:
         report(cfg, folder)
     return code
@@ -1596,6 +1618,46 @@ def report(cfg: Config, folder: Path) -> dict:
     if written:
         print(f"calibration report -> {Path(folder) / 'report'}")
     return written
+
+
+#: The run budget of a calibration, next to its driver configuration (:func:`record_run_budget`).
+RUN_BUDGET = "run-budget.json"
+
+
+def record_run_budget(cfg: Config, folder: Path, parameters) -> tuple[int, int | None, int]:
+    """The initial runs, the total runs and the first block of a calibration, recorded.
+
+    From :func:`axqua.calibration.check_run_budget` for the *parameters* calibrated (the
+    zone plan's), which warns where the case sets fewer initial runs than the rule. The
+    budget is written to :data:`RUN_BUDGET` in *folder*: the job's progress reads the
+    total from it, and the report and the user can see how it came about.
+    """
+    from axqua.calibration import (RUNS_PER_PARAMETER, check_run_budget,
+                                   recommended_initial_runs)
+
+    parameters = list(parameters)
+    init_runs, max_runs, first = check_run_budget(cfg.calibration, len(parameters))
+    record = {
+        "parameters": [p.name for p in parameters],
+        "init_runs": init_runs,
+        "max_runs": max_runs,
+        "first_block": first,
+        "recommended_init_runs": recommended_initial_runs(len(parameters)),
+        "rule": f"{RUNS_PER_PARAMETER} initial runs per parameter (Loeppky, Sacks and "
+                f"Welch 2009), rounded up to a power of two (even Sobol design)",
+        "init_runs_from": "case" if cfg.calibration.init_runs is not None else "rule",
+        "max_runs_from": ("case" if cfg.calibration.max_runs is not None
+                          else "none: until the evidence converges" if max_runs is None
+                          else "rule"),
+    }
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / RUN_BUDGET).write_text(json.dumps(record, indent=2) + "\n")
+    limit = (f"at most {max_runs} in total" if max_runs is not None
+             else "active learning until the evidence converges, without a limit")
+    print(f"run budget: {init_runs} initial runs (first block {first}), {limit} "
+          f"-> {folder / RUN_BUDGET}")
+    return init_runs, max_runs, first
 
 
 def settle_zone_plan(cfg: Config, tables, folder: Path, *, resume: bool = False) -> list:
@@ -1735,10 +1797,31 @@ def archive_dictionary(folder: Path, runs: int) -> Path | None:
     return target
 
 
+#: Warnings about the convergence of the active learning; the job copies them into its results.
+convergence_log = logging.getLogger("axqua.calibration_convergence")
+
+
+def _warn_no_plateau(state: dict) -> None:
+    """Say that the evidence and the relative entropy show no sign of leveling off."""
+    names = {"log_bme": "the log evidence", "relative_entropy": "the relative entropy"}
+    parts = [f"{names[name]} varied by {last:.2f} over the last {state['window']} "
+             f"iterations, no less than over a typical earlier window ({typical:.2f})"
+             for name, (last, typical) in state.get("settling_ranges", {}).items()
+             if name in state.get("still_changing", [])]
+    convergence_log.warning(
+        "after %d iterations of active learning, the calibration shows no sign of a "
+        "plateau: %s. The active learning continues. Check evidence.png; a parameter "
+        "range that is too narrow or measurements the model cannot reproduce can keep "
+        "the evidence from leveling off. A cancelled calibration continues later from "
+        "all its saved simulations with the job option extend.",
+        state.get("iterations", 0), "; ".join(parts) or "both still change")
+
+
 def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: bool,
                       emit, driver: Path, restarts: dict[str, Path],
                       csvs: dict[str, Path], folder: Path, note: str,
-                      env: str | None = None, extend: bool = False) -> int:
+                      env: str | None = None, extend: bool = False,
+                      runs: tuple[int, int | None] | None = None) -> int:
     """Launch a HydroBayesCal driver once, or in two passes for the model error.
 
     One pass (``structural_error: none``): initial simulations and active learning in
@@ -1752,24 +1835,40 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
     HydroBayesCal's ``initial-model-outputs.json``). *emit(complete, only_bal,
     budget=None)* writes the driver configuration for HydroBayesCal's two execution
     switches; *budget* ``(init_runs, max_runs, adaptive)`` replaces the run counts of
-    the case (``adaptive`` None keeps the case's adaptive initial design).
+    the case (``adaptive`` None keeps the case's adaptive initial design). *runs*
+    ``(init_runs, max_runs)`` are those of :func:`record_run_budget`, by default the
+    case's own.
 
     With ``calibration.until_converged``, the active learning first runs
     :data:`axqua.calibration_report.CONVERGENCE_MINIMUM` iterations and then continues
     in passes of :data:`~axqua.calibration_report.CONVERGENCE_WINDOW` iterations, each
     from all runs saved so far (:func:`extend_restart`, the BAL dictionary of the
     finished pass archived by :func:`archive_dictionary`), until
-    :func:`evidence_converged` or ``max_runs`` in total. *extend* continues a finished
-    calibration of the case from all its saved runs: up to ``max_runs`` in one pass, or
-    in such passes with ``until_converged``.
+    :func:`evidence_converged`, with no limit unless the case sets ``max_runs`` (None in
+    *runs*). Where the evidence and the relative entropy show no sign of leveling off
+    (:func:`axqua.calibration_report.settling`), a warning says so at every check and the
+    learning goes on: the user's rule of 2026-11-23 is enough iterations for them to
+    converge, not a number fixed beforehand. *extend* continues a finished calibration
+    of the case from all its saved runs: up to ``max_runs`` in one pass, or in such
+    passes with ``until_converged``.
     """
     from axqua.calibration_report import CONVERGENCE_MINIMUM, CONVERGENCE_WINDOW
     from axqua.core.errors import ConfigError
 
     passes = mode == "unreachable"
-    until = bool(getattr(cfg.calibration, "until_converged", False))
-    ceiling = int(cfg.calibration.max_runs)
-    init_runs = int(cfg.calibration.init_runs)
+    until = bool(getattr(cfg.calibration, "until_converged", True))
+    if runs is None:
+        from axqua.calibration import run_budget, telemac_parameters
+
+        runs = run_budget(cfg.calibration, len(telemac_parameters(cfg)))[:2]
+    init_runs, ceiling = int(runs[0]), (None if runs[1] is None else int(runs[1]))
+    if ceiling is None and not until:
+        from axqua.calibration import default_iterations
+
+        ceiling = init_runs + default_iterations()
+
+    def capped(total: int) -> int:
+        return total if ceiling is None else min(ceiling, total)
     if prepare_only:
         config_path = emit(not passes, False)
         print(f"HydroBayesCal config -> {config_path}")
@@ -1780,7 +1879,8 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
         if until:
             print(f"until_converged: the active learning runs {CONVERGENCE_MINIMUM} "
                   f"iterations, then steps of {CONVERGENCE_WINDOW} until it converges, "
-                  f"at most {ceiling} runs in total.")
+                  + (f"at most {ceiling} runs in total." if ceiling is not None
+                     else "without a limit on the number of runs."))
         print("\n--prepare-only: not launched. Run it with:")
         print(f"  cd {driver.parent} && {sys.executable} {driver.name} "
               f"--config {config_path}")
@@ -1811,7 +1911,7 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
         if not (resume or extend):
             budget = None
             if until and not passes:
-                budget = (init_runs, min(ceiling, init_runs + CONVERGENCE_MINIMUM), None)
+                budget = (init_runs, capped(init_runs + CONVERGENCE_MINIMUM), None)
             config_path = emit(not passes, False, budget)
             print(f"HydroBayesCal config -> {config_path}")
             code = launch(cfg, driver, config_path, env=env,
@@ -1830,7 +1930,7 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
             budget = None
             if until:
                 design = saved()
-                budget = (design, min(ceiling, design + CONVERGENCE_MINIMUM), False)
+                budget = (design, capped(design + CONVERGENCE_MINIMUM), False)
             config_path = emit(True, True, budget)
             print(f"HydroBayesCal config -> {config_path}")
             code = launch(cfg, driver, config_path, env=env,
@@ -1844,7 +1944,9 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
                 if converged:
                     print(f"active learning converged after {done} runs")
                     return code
-            if done >= ceiling:
+                if until and state.get("settling") is False:
+                    _warn_no_plateau(state)
+            if ceiling is not None and done >= ceiling:
                 if until:
                     log.warning("the active learning has not converged within %d runs "
                                 "(calibration.max_runs); the report says how far it is",
@@ -1853,7 +1955,7 @@ def _launch_in_passes(cfg: Config, *, mode: str, resume: bool, prepare_only: boo
                     print(f"{done} runs saved, calibration.max_runs is {ceiling}: "
                           "nothing to continue")
                 return code
-            step = min(ceiling, done + CONVERGENCE_WINDOW) if until else ceiling
+            step = capped(done + CONVERGENCE_WINDOW) if until else ceiling
             archive_dictionary(folder, done)
             for path in restarts.values():
                 extend_restart(cfg, path)

@@ -501,6 +501,17 @@ def emit_openfoam_config(cfg: Config, *, template: Path, csv: Path,
     **copied per run** rather than referenced in place.
     """
     c = cfg.calibration
+    from axqua.calibration import run_budget
+
+    planned, ceiling, first = run_budget(c, len(parameters))
+    init_runs = planned if init_runs is None else int(init_runs)
+    if max_runs is None:
+        # no convergence loop on this path: a fixed number of active-learning iterations
+        from axqua.calibration import default_iterations
+
+        max_runs = ceiling if ceiling is not None else init_runs + default_iterations()
+    max_runs = int(max_runs)
+    first = min(first, init_runs)
     names = [_canonical(p.name) for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
     model_dir = Path(out_dir) / "simulations"
@@ -582,12 +593,12 @@ calibration = {{
 
 sampling = {{
     'n_cpus':    {n_processors},
-    'init_runs': {init_runs if init_runs is not None else c.init_runs},
-    'max_runs':  {max_runs if max_runs is not None else c.max_runs},
+    'init_runs': {init_runs},
+    'max_runs':  {max_runs},
     'parameter_distribution':    'uniform',
     'parameter_sampling_method': {c.parameter_sampling_method!r},
     'adaptive_init_runs': {bool(c.adaptive_init_runs)},
-    'init_runs_min':      {c.init_runs_min!r},
+    'init_runs_min':      {first},
     'tp_selection_criteria': 'dkl',
     'eval_steps':     1,
     # prior samples the surrogate is predicted at ({len(names)} parameter(s)); a sharp

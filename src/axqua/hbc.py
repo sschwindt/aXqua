@@ -290,12 +290,23 @@ def launch_driver(environment: SolverEnvironment, driver: Path, config_path: Pat
 #: it writes there each time it starts a run of the full model. The driver announces a
 #: run twice. ``Running  full complexity model # 3`` counts within the initial design and
 #: ``... model after BAL # 1`` within the active learning, so both start again at 1;
-#: ``Running full complexity model 9`` counts through both, and is the one read here.
+#: ``Running full complexity model 9`` counts through both, and is the number reported.
+#: The other two say which stage the run belongs to.
 DRIVER_LOG = "logfile.log"
 #: The results folder of a HydroBayesCal driver. Since HydroBayesCal 1.12.0 the driver
 #: writes ``logfile.log`` there; before, it wrote it into its working folder.
 DRIVER_RESULTS = "auto-saved-results-HydroBayesCal"
-_MODEL_RUN = re.compile(r"Running\s+full\s+complexity\s+model\s+(\d+)\b")
+#: The stages of a calibration, as :class:`RunCounter` reports them.
+STAGE_DESIGN = "initial design"
+STAGE_LEARNING = "active learning"
+#: What the counter reads, in the order the driver writes it. A multi-flow driver
+#: announces each flow (``multiflow: === flow 'august-2026' ===``) and then runs the
+#: parameter sets of that flow; in its initial design each flow counts from 1 again.
+_EVENT = re.compile(
+    r"multiflow: === flow '(?P<flow>[^']*)' ==="
+    r"|Running\s+full\s+complexity\s+model\s+after\s+BAL\s+#\s*(?P<learning>\d+)"
+    r"|Running\s+full\s+complexity\s+model\s+#\s*(?P<design>\d+)"
+    r"|Running\s+full\s+complexity\s+model\s+(?P<run>\d+)\b")
 
 
 class RunCounter:
@@ -308,11 +319,18 @@ class RunCounter:
     that is enough to say "run 7 of 12".
 
     Used as a context manager around the launch. A thread reads what the log has
-    gained every *interval* seconds and calls *report* with the highest run number
-    seen, once per change. Only lines written after entry count, so the log of an
-    earlier calibration in the same folder is not replayed. Nothing here can fail a
-    calibration: an unreadable log and a failing *report* are both ignored, and a
-    driver that words the line differently simply reports no progress.
+    gained every *interval* seconds and calls ``report(run, flow=..., stage=...)``
+    once per change: *run* is the number of the parameter set, *flow* the situation a
+    multi-flow driver is running (None for one situation) and *stage*
+    :data:`STAGE_DESIGN` or :data:`STAGE_LEARNING` (None until the driver has said).
+    The run number is reported only when it grows within a flow, and a new flow starts
+    the count again: the initial design of a multi-flow driver runs all its parameter
+    sets for one flow before the next, each from 1. Only reporting a growing number
+    froze the multi-flow calibration of Inn KB15 (2026-11-22) at the last run of its
+    first flow for as long as the second ran. Only lines written after entry count, so
+    the log of an earlier calibration in the same folder is not replayed. Nothing here
+    can fail a calibration: an unreadable log and a failing *report* are both ignored,
+    and a driver that words the line differently simply reports no progress.
 
     *logfile* may be a list of paths: all of them are followed, because the driver
     writes its log into its results folder since HydroBayesCal 1.12.0 and into its
@@ -320,13 +338,15 @@ class RunCounter:
     """
 
     def __init__(self, logfile: Path | str | Sequence[Path | str],
-                 report: Callable[[int], None], *, interval: float = 5.0) -> None:
+                 report: Callable[..., None], *, interval: float = 5.0) -> None:
         paths = [logfile] if isinstance(logfile, (str, Path)) else list(logfile)
         self.logfiles = [Path(path) for path in paths]
         self.logfile = self.logfiles[0]
         self.report = report
         self.interval = interval
         self.run = 0
+        self.flow: str | None = None
+        self.stage: str | None = None
         self._offsets = {path: 0 for path in self.logfiles}
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -353,14 +373,25 @@ class RunCounter:
             self.poll()
 
     def poll(self) -> None:
-        """Read what the logs have gained and report a new run number, if there is one."""
+        """Read what the logs have gained and report what changed, if anything did."""
         text = "".join(self._gained(path) for path in self.logfiles)
-        runs = [int(number) for number in _MODEL_RUN.findall(text)]
-        if not runs or max(runs) <= self.run:
+        changed = False
+        for event in _EVENT.finditer(text):
+            if event["flow"] is not None:
+                if event["flow"] != self.flow:
+                    self.flow, self.run = event["flow"], 0
+                    changed = True
+            elif event["learning"] is not None or event["design"] is not None:
+                stage = STAGE_LEARNING if event["learning"] is not None else STAGE_DESIGN
+                changed = changed or stage != self.stage
+                self.stage = stage
+            elif int(event["run"]) > self.run:
+                self.run = int(event["run"])
+                changed = True
+        if not changed or self.run < 1:
             return
-        self.run = max(runs)
         try:
-            self.report(self.run)
+            self.report(self.run, flow=self.flow, stage=self.stage)
         except Exception:                # noqa: BLE001 - reporting must not stop a run
             pass
 

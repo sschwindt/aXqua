@@ -100,7 +100,7 @@ class Job:
         objective. A single set of columns would leave most of them empty.
 
         A job that waits for another job of its case says that first: its progress is
-        still empty, and "iter 0" beside STARTING reads as a job that hangs.
+        still empty, and "run 0" beside STARTING reads as a job that hangs.
         """
         if self.phase.startswith("waiting for") and not self.is_terminal:
             return self.phase
@@ -120,9 +120,16 @@ class Job:
                 text += "  (question pending)"
             return text
         if kind == "calibration":
+            # run = the parameter set; a calibration at several discharges runs each
+            # set once per situation, so the situation and its place are shown too
             it, mx = p.get("iteration"), p.get("max_iterations")
             best = _number(p.get("best_objective"))
-            text = f"iter {it or 0}" + (f"/{mx}" if mx else "")
+            text = f"run {it or 0}" + (f"/{mx}" if mx else "")
+            if p.get("stage"):
+                text += f", {p['stage']}"
+            if p.get("flow"):
+                k, n = p.get("flow_index"), p.get("n_flows")
+                text += f", {p['flow']}" + (f" ({k}/{n})" if k and n else "")
             return text + (f"  best {best:.4g}" if best is not None else "")
         if kind == "preprocessing":
             return f"{p.get('step_name') or ''} {p.get('step', 0)}/{p.get('n_steps', 5)}"

@@ -506,8 +506,12 @@ class CalibrationProgress(Progress):
     iteration: int | None = None
     max_iterations: int | None = None
     best_objective: float | None = None
+    #: the situation a calibration at several discharges is running, its place among
+    #: them, and the stage: "initial design" or "active learning"
     flow: str | None = None
     n_flows: int | None = None
+    flow_index: int | None = None
+    stage: str | None = None
 
 
 @dataclass

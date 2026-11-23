@@ -19,6 +19,107 @@ from axqua.config import Config
 from axqua import ground_truth
 
 log = logging.getLogger("axqua")
+#: Warnings about the size of the initial design; the job copies them into its results.
+design_log = logging.getLogger("axqua.calibration_design")
+
+#: Initial runs per calibration parameter: the sample size n = 10 d that Loeppky, Sacks
+#: and Welch (2009, Technometrics 51(4)) recommend for the initial design of a computer
+#: experiment that a Gaussian process is fitted to. HydroBayesCal applies the same rule
+#: (``surrogate.initial_design.recommended_init_runs``).
+RUNS_PER_PARAMETER = 10
+#: The smallest initial design, HydroBayesCal's floor: below it a Gaussian process over
+#: more than one parameter is no surrogate worth the name.
+MINIMUM_INITIAL_RUNS = 16
+
+
+def recommended_initial_runs(n_parameters: int) -> int:
+    """The initial runs a calibration of *n_parameters* needs.
+
+    Ten per parameter (:data:`RUNS_PER_PARAMETER`), at least
+    :data:`MINIMUM_INITIAL_RUNS`, rounded up to the next power of two: the initial design
+    is a Sobol sequence, whose points are evenly spread over the parameter ranges only
+    at 2**m points (the balance property of a Sobol sequence). Four parameters: 40 runs,
+    so 64.
+    """
+    floor = max(RUNS_PER_PARAMETER * max(int(n_parameters), 1), MINIMUM_INITIAL_RUNS)
+    return 1 << (floor - 1).bit_length()
+
+
+def default_iterations() -> int:
+    """Iterations of active learning of a calibration that runs a fixed number of them.
+
+    That is a calibration with ``until_converged: false`` and no ``max_runs``. Twice
+    :data:`axqua.calibration_report.CONVERGENCE_MINIMUM`: the plateau of the evidence
+    counts only after that many iterations, and the number leaves as many again for a
+    plateau that comes later. With ``until_converged`` (the default), the active
+    learning has no such number: it runs until the plateau holds.
+    """
+    from axqua.calibration_report import CONVERGENCE_MINIMUM
+
+    return 2 * CONVERGENCE_MINIMUM
+
+
+def run_budget(calibration, n_parameters: int) -> tuple[int, int | None, int]:
+    """``(init_runs, max_runs, first block)`` of a calibration of *n_parameters*.
+
+    ``init_runs`` is the case's, or :func:`recommended_initial_runs` where the case sets
+    none. ``max_runs`` is the case's; where the case sets none, it is None (no limit)
+    when the active learning runs until it converges (``until_converged``, the user's
+    rule of 2026-11-23: enough iterations for the evidence and the relative entropy to
+    converge, not a number fixed beforehand), and ``init_runs`` plus
+    :func:`default_iterations` otherwise. The first block of HydroBayesCal's staged
+    initial design is the case's ``init_runs_min``, or the recommended size: the design
+    grows beyond it only where HydroBayesCal finds it insufficient, and never stops
+    below the rule.
+    """
+    recommended = recommended_initial_runs(n_parameters)
+    init_runs = int(calibration.init_runs) if calibration.init_runs is not None else recommended
+    if calibration.max_runs is not None:
+        max_runs: int | None = int(calibration.max_runs)
+    elif getattr(calibration, "until_converged", True):
+        max_runs = None
+    else:
+        max_runs = init_runs + default_iterations()
+    first = calibration.init_runs_min
+    first = min(int(first) if first is not None else recommended, init_runs)
+    return init_runs, max_runs, first
+
+
+def pass_ceiling(init_runs: int, max_runs: int | None) -> int:
+    """The ``max_runs`` a HydroBayesCal configuration states, which needs a number.
+
+    The case's limit, or without one the initial runs plus the
+    :data:`~axqua.calibration_report.CONVERGENCE_MINIMUM` iterations that the first
+    pass of active learning runs (:func:`axqua.bayescal._launch_in_passes`).
+    """
+    if max_runs is not None:
+        return int(max_runs)
+    from axqua.calibration_report import CONVERGENCE_MINIMUM
+
+    return int(init_runs) + CONVERGENCE_MINIMUM
+
+
+def check_run_budget(calibration, n_parameters: int) -> tuple[int, int | None, int]:
+    """:func:`run_budget`, with a warning where the case sets fewer runs than the rule."""
+    init_runs, max_runs, first = run_budget(calibration, n_parameters)
+    recommended = recommended_initial_runs(n_parameters)
+    if init_runs < recommended:
+        design_log.warning(
+            "calibration.init_runs = %d is below the %d initial runs that %d calibration "
+            "parameters need (%d per parameter, rounded up to a power of two for an even "
+            "Sobol design). Remove init_runs from the case file to use the rule, or "
+            "calibrate fewer parameters.", init_runs, recommended, n_parameters,
+            RUNS_PER_PARAMETER)
+    if max_runs is not None and max_runs <= init_runs:
+        from axqua.core.errors import ConfigError
+
+        raise ConfigError(
+            f"calibration.max_runs = {max_runs} leaves no run for the active learning "
+            f"after {init_runs} initial runs",
+            subject="calibration.max_runs",
+            remedy=f"Raise max_runs above {init_runs}, or remove it from the case file: "
+                   "the active learning then runs until it converges.")
+    return init_runs, max_runs, first
 
 
 def _scalar_velocity_with_error(df: pd.DataFrame) -> tuple[pd.Series, pd.Series | None]:
@@ -409,9 +510,14 @@ def emit_hbc_config(cfg: Config, calibration_csv: Path | None, *,
     :func:`axqua.bayescal._launch_in_passes`.
     """
     c = cfg.calibration
-    init_runs, max_runs, adaptive = budget or (c.init_runs, c.max_runs, None)
-    adaptive = bool(c.adaptive_init_runs) if adaptive is None else bool(adaptive)
     parameters = telemac_parameters(cfg) if parameters is None else list(parameters)
+    init_runs, max_runs, first = run_budget(c, len(parameters))
+    adaptive = None
+    if budget:
+        init_runs, max_runs, adaptive = budget
+    max_runs = pass_ceiling(init_runs, max_runs)
+    adaptive = bool(c.adaptive_init_runs) if adaptive is None else bool(adaptive)
+    first = min(first, int(init_runs))
     params = [p.name for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
     # which case HydroBayesCal drives: the built steady 2D case by default, or the
@@ -508,10 +614,11 @@ sampling = {{
     'parameter_distribution': 'uniform',
     'parameter_sampling_method': {c.parameter_sampling_method!r},
     # HydroBayesCal >= 1.5: grow the initial design in Sobol blocks and stop when
-    # it is measurably sufficient. init_runs is the ceiling, so this can only save
-    # runs; the saved ones become BAL iterations.
+    # it is measurably sufficient. init_runs is the ceiling and init_runs_min the
+    # first block, 10 runs per parameter rounded up to a power of two unless the case
+    # sets it (axqua.calibration.run_budget), so the design never stops below that.
     'adaptive_init_runs': {adaptive},
-    'init_runs_min': {c.init_runs_min!r},
+    'init_runs_min': {first},
     # exploit the posterior until >1 well-separated mode is found, then explore
     'bal_exploration_tradeoff': {c.bal_exploration_tradeoff!r},
     'tp_selection_criteria': 'dkl',

@@ -512,7 +512,12 @@ def test_a_refresh_keeps_live_progress_from_being_blanked(tmp_path):
      "50%"),
     ({"kind": "ladder", "levels_done": 2, "levels_total": 4}, "level 2/4"),
     ({"kind": "calibration", "iteration": 12, "max_iterations": 50,
-      "best_objective": 0.0472}, "iter 12/50"),
+      "best_objective": 0.0472}, "run 12/50"),
+    ({"kind": "calibration", "iteration": 11, "max_iterations": 114,
+      "stage": "initial design", "flow": "September 2025", "flow_index": 2,
+      "n_flows": 3}, "run 11/114, initial design, September 2025 (2/3)"),
+    ({"kind": "calibration", "iteration": 70, "max_iterations": 0,
+      "stage": "active learning"}, "run 70, active learning"),
     ({"kind": "openfoam_build", "cells": 1579074}, "1,579,074 cells"),
 ])
 def test_progress_reads_correctly_for_every_job_kind(progress, expected):
@@ -994,7 +999,7 @@ def test_the_plugin_passes_a_security_scan():
 
 
 def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
-    """Its progress is still empty, and "iter 0" beside STARTING reads as a job that
+    """Its progress is still empty, and "run 0" beside STARTING reads as a job that
     hangs."""
     from axqua_plugin.core.job_model import Job as JobRow
 
@@ -1005,7 +1010,7 @@ def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
     running = JobRow(job_id="b", root=Path("."), state="RUNNING", kind="calibration", phase="",
                      progress={"kind": "calibration", "iteration": 5,
                                "max_iterations": 12})
-    assert running.progress_text == "iter 5/12"
+    assert running.progress_text == "run 5/12"
     # a phase left over on a job that has ended is not a reason to say it waits
     ended = JobRow(job_id="b", root=Path("."), state="CANCELLED", kind="calibration",
                    phase="waiting for x", progress={"kind": "calibration"})

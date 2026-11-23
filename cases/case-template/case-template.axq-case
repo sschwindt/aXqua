@@ -765,8 +765,12 @@ calibration:
   calibration_quantities: ["WATER DEPTH"]                    # measured columns used for calibration
   extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]  # quantities pulled from results
   measurement_error: 0.10      # fraction of the measured value
-  init_runs: 30                # initial design samples
-  max_runs: 50                 # total runs (initial + active-learning iterations)
+  # init_runs: 64              # initial design samples; empty: 10 per calibration
+  #                            # parameter, rounded up to a power of two (64 for four)
+  # max_runs: 114              # limit of the total runs (initial + active learning);
+  #                            # empty: no limit, the active learning runs until the
+  #                            # evidence and the relative entropy converge
+  # until_converged: true      # default; false runs exactly max_runs (empty: init + 50)
   # Start each run from the converged steady result (r2d.slf) instead of repeating
   # the steady run from its dry or pre-wetted start; needs a completed steady run.
   # hotstart: true

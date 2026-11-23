@@ -1750,9 +1750,14 @@ class Calibration:
         default_factory=lambda: ["WATER DEPTH", "SCALAR VELOCITY"]
     )
     measurement_error: float = 0.10    # fraction of measured value
-    # BAL / sampling settings (passed through to config_Telemac.py)
-    init_runs: int = 30
-    max_runs: int = 50
+    # BAL / sampling settings (passed through to config_Telemac.py). None derives them
+    # from the number of calibrated parameters (calibration.run_budget): init_runs 10
+    # per parameter, rounded up to a power of two (Loeppky, Sacks and Welch 2009; an
+    # even Sobol design). max_runs None is no limit while until_converged holds (the
+    # active learning runs until it converges), else init_runs plus twice the 25
+    # iterations the convergence check needs at least.
+    init_runs: int | None = None
+    max_runs: int | None = None
     parameter_sampling_method: str = "sobol"
     gp_library: str = "gpy"
     # HydroBayesCal predicts the surrogate at prior_samples points and keeps a prior
@@ -1766,16 +1771,18 @@ class Calibration:
     # HydroBayesCal >= 1.5 grows the initial design in Sobol blocks and stops as
     # soon as it is measurably sufficient (GP leave-one-out predictivity, error-bar
     # calibration, posterior resolution, stability), instead of always running
-    # init_runs. init_runs stays the ceiling, so this only ever saves simulations -
-    # which matters here, where the design size scales with the parameter count and
-    # every evaluation is a TELEMAC run per flow. False = the old fixed-size design.
+    # init_runs. init_runs stays the ceiling and the first block is the rule of
+    # init_runs (10 per parameter, a power of two), so the design never stops below
+    # it and grows beyond it only where HydroBayesCal measures it insufficient.
+    # False = all init_runs in one block.
     adaptive_init_runs: bool = True
-    init_runs_min: int | None = None       # first block; None -> 2**ceil(log2(4*n_par))
+    init_runs_min: int | None = None       # first block; None -> the rule of init_runs
     # Run the active learning until the log evidence and the relative entropy reach a
     # plateau (calibration_report.convergence: at least 25 iterations, then steps of
-    # five), at most max_runs in total (bayescal._launch_in_passes). False: exactly
-    # max_runs, as before.
-    until_converged: bool = False
+    # five), with no limit unless the case sets max_runs; a warning where the two show
+    # no sign of leveling off (bayescal._launch_in_passes). The default since the
+    # user's rule of 2026-11-23. False: exactly max_runs.
+    until_converged: bool = True
     # BAL point selection: 'auto' exploits the posterior until more than one
     # well-separated mode is detected, then adds exploration. Pure exploitation is
     # how a local maximum survives to the end of a calibration.

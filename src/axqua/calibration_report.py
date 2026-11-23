@@ -68,6 +68,50 @@ _ZONE = re.compile(r"^zone(\d+)$")
 CONVERGENCE_WINDOW = 5
 CONVERGENCE_TOLERANCE = 1.0
 CONVERGENCE_MINIMUM = 25
+#: The fewest consecutive windows of :data:`CONVERGENCE_WINDOW` iterations from which
+#: :func:`convergence` judges whether the indicators are leveling off: the last and at
+#: least two before it.
+SETTLING_WINDOWS = 3
+
+
+def _window_ranges(values: np.ndarray, window: int) -> list[float]:
+    """Ranges of *values* in consecutive windows of *window* entries, ending at the last
+    entry and oldest first; entry 0 (the initial design) belongs to none."""
+    ranges = []
+    end = values.size
+    while end - window >= 1:
+        ranges.append(float(np.ptp(values[end - window:end])))
+        end -= window
+    return ranges[::-1]
+
+
+def settling(log_bme, relative_entropy, *, window: int = CONVERGENCE_WINDOW,
+             tolerance: float = CONVERGENCE_TOLERANCE) -> dict:
+    """Do the evidence and the relative entropy show a sign of leveling off?
+
+    The iterations of active learning are cut into consecutive windows of *window*
+    iterations, ending at the last one. An indicator levels off when it varies by at most
+    *tolerance* over the last window, or by less than over a typical earlier window (the
+    median of their ranges): its changes are getting smaller. A curve that still rises or
+    jumps as much as before shows no sign of a plateau. ``settling`` is True when both
+    indicators level off, False when one does not, and None while there are fewer than
+    :data:`SETTLING_WINDOWS` windows; ``ranges`` holds the range of the last window and
+    the median of the earlier ones per indicator.
+    """
+    result: dict = {"settling": None, "still_changing": [], "ranges": {}}
+    signs = []
+    for name, values in (("log_bme", log_bme), ("relative_entropy", relative_entropy)):
+        ranges = _window_ranges(np.asarray(values, dtype=float), window)
+        if len(ranges) < SETTLING_WINDOWS or not np.all(np.isfinite(ranges)):
+            return result
+        last, typical = ranges[-1], float(np.median(ranges[:-1]))
+        result["ranges"][name] = (last, typical)
+        sign = last <= tolerance or last < typical
+        signs.append(sign)
+        if not sign:
+            result["still_changing"].append(name)
+    result["settling"] = all(signs)
+    return result
 
 
 def convergence(log_bme, relative_entropy, runs=None, *, window: int = CONVERGENCE_WINDOW,
@@ -84,7 +128,7 @@ def convergence(log_bme, relative_entropy, runs=None, *, window: int = CONVERGEN
     trailing run of such windows, and ``plateau_since_run`` the number of parameter sets
     simulated by then (from *runs*); the ranges are those of the last window, and
     ``plateau`` says whether the last window alone holds, whatever the number of
-    iterations.
+    iterations. ``settling`` and ``still_changing`` are those of :func:`settling`.
     """
     log_bme = np.asarray(log_bme, dtype=float)
     entropy = np.asarray(relative_entropy, dtype=float)
@@ -93,9 +137,13 @@ def convergence(log_bme, relative_entropy, runs=None, *, window: int = CONVERGEN
               "minimum": int(minimum), "iterations": max(count - 1, 0),
               "converged": False, "plateau": False,
               "log_bme_range": None, "relative_entropy_range": None,
-              "plateau_since": None, "plateau_since_run": None}
+              "plateau_since": None, "plateau_since_run": None,
+              "settling": None, "still_changing": [], "settling_ranges": {}}
     if count - 1 < window:
         return result
+    trend = settling(log_bme[:count], entropy[:count], window=window, tolerance=tolerance)
+    result["settling"], result["still_changing"] = trend["settling"], trend["still_changing"]
+    result["settling_ranges"] = trend["ranges"]
     held = []
     for end in range(window, count):
         part = slice(end - window + 1, end + 1)
@@ -387,6 +435,9 @@ def _convergence_text(state: dict) -> str:
         return (f"Not converged yet: {ranges}, but only {state['iterations']} of the at "
                 f"least {state['minimum']} active-learning iterations before a plateau "
                 f"counts have run.")
+    if state.get("settling") is False:
+        return (f"Not converged: {ranges}, no less than over a typical earlier window "
+                f"of {window} iterations, so there is no sign of a plateau yet.")
     return f"Not converged: {ranges}; more active learning could still change the result."
 
 

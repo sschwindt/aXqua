@@ -64,8 +64,10 @@ WRITE_INTERVAL = 20.0      # [s]
 N_AVG_TIMESTEPS = 5        # average the last 5 writes (100 s) at each point
 N_PROCESSORS: int | None = None    # None -> openfoam.n_processors
 
-# None -> calibration.init_runs / max_runs from the config. Size these from ONE
-# timed run at the settings above rather than from another reach's numbers.
+# None -> calibration.init_runs / max_runs of the config, or where the config sets
+# none, 10 initial runs per parameter rounded up to a power of two and 50 iterations
+# of active learning (axqua.calibration.run_budget). Check the time from ONE timed run
+# at the settings above.
 INIT_RUNS: int | None = None
 MAX_RUNS: int | None = None
 

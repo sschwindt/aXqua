@@ -26,7 +26,12 @@ def _counter(tmp_path, text=""):
     if text:
         log.write_text(text)
     seen: list[int] = []
-    return log, seen, hbc.RunCounter(log, seen.append, interval=3600.0)
+    return log, seen, hbc.RunCounter(log, _runs(seen), interval=3600.0)
+
+
+def _runs(seen):
+    """A listener that keeps the run numbers only."""
+    return lambda run, **context: seen.append(run)
 
 
 def test_each_new_model_run_is_reported_once(tmp_path):
@@ -70,7 +75,7 @@ def test_a_log_started_afresh_is_read_from_its_beginning(tmp_path):
 
 
 def test_a_missing_log_and_a_failing_listener_do_not_stop_anything(tmp_path):
-    def broken(run):
+    def broken(run, **context):
         raise RuntimeError("the dashboard is gone")
 
     counter = hbc.RunCounter(tmp_path / "no-such-folder" / hbc.DRIVER_LOG, broken,
@@ -87,7 +92,7 @@ def test_a_missing_log_and_a_failing_listener_do_not_stop_anything(tmp_path):
 def test_the_thread_reports_without_being_asked(tmp_path):
     log = tmp_path / hbc.DRIVER_LOG
     seen: list[int] = []
-    with hbc.RunCounter(log, seen.append, interval=0.02) as counter:
+    with hbc.RunCounter(log, _runs(seen), interval=0.02) as counter:
         log.write_text(RUN.format(n=5))
         for _ in range(200):
             if seen:
@@ -130,3 +135,84 @@ def test_the_log_in_the_results_folder_of_hydrobayescal_1_12_is_followed(tmp_pat
         (results / hbc.DRIVER_LOG).write_text(RUN.format(n=3))
         counter.poll()
     assert reported == [{"iteration": 3, "max_iterations": 50}]
+
+
+#: Lines of the multi-flow calibration of Inn KB15 (job 2026-11-22-...-e666db): the
+#: initial design runs all parameter sets of one situation, each from 1, then the next.
+def _flow(name):
+    return f"2026-11-23 05:34:55,486 - multiflow: === flow '{name}' ===\n"
+
+
+def _design(n):
+    return (f"2026-11-23 05:34:55,486 -  Running  full complexity model # {n}  with "
+            f"collocation point : [0.27, 0.09, 0.28, -4.92] \n" + RUN.format(n=n))
+
+
+def _learning(k, n):
+    return (f"2026-11-23 05:34:55,486 -  Running  full complexity model after BAL # {k} "
+            f"with collocation point : [0.27, 0.09, 0.28, -4.92] \n" + RUN.format(n=n))
+
+
+def test_each_situation_of_a_multiflow_calibration_counts_its_runs_afresh(tmp_path):
+    """The status of the KB15 calibration stood at run 16 of the first situation for as
+    long as the second ran, because only a growing number was reported."""
+    log = tmp_path / hbc.DRIVER_LOG
+    seen = []
+    with hbc.RunCounter(log, lambda run, **context: seen.append((run, context)),
+                        interval=3600.0) as counter:
+        log.write_text(_flow("august-2026") + _design(15) + _design(16))
+        counter.poll()
+        with log.open("a") as handle:
+            handle.write(_flow("september-2025") + _design(1))
+        counter.poll()
+        with log.open("a") as handle:
+            handle.write(_design(2))
+        counter.poll()
+    design = hbc.STAGE_DESIGN
+    assert seen == [(16, {"flow": "august-2026", "stage": design}),
+                    (1, {"flow": "september-2025", "stage": design}),
+                    (2, {"flow": "september-2025", "stage": design})]
+
+
+def test_the_active_learning_is_reported_for_every_situation_it_runs(tmp_path):
+    """Each iteration runs the new parameter set once per situation, all with one number."""
+    log = tmp_path / hbc.DRIVER_LOG
+    seen = []
+    with hbc.RunCounter(log, lambda run, **context: seen.append((run, context)),
+                        interval=3600.0) as counter:
+        log.write_text(_flow("march-2026") + _design(64))
+        counter.poll()
+        with log.open("a") as handle:
+            handle.write(_flow("august-2026") + _learning(1, 65)
+                         + _flow("september-2025") + _learning(1, 65))
+        counter.poll()
+    learning = hbc.STAGE_LEARNING
+    assert seen == [(64, {"flow": "march-2026", "stage": hbc.STAGE_DESIGN}),
+                    (65, {"flow": "september-2025", "stage": learning})]
+    assert (counter.flow, counter.stage, counter.run) == ("september-2025", learning, 65)
+
+
+def test_a_job_names_the_situation_its_place_and_the_planned_total(tmp_path):
+    """The total is the max_runs the calibration recorded when it started, which the
+    case may leave to the rule, and the situation is shown by the name the case gives it."""
+    import json
+
+    from axqua.bayescal import RUN_BUDGET
+
+    reported = []
+    situations = [SimpleNamespace(name=name)
+                  for name in ("August 2026", "September 2025", "March 2026")]
+    cfg = SimpleNamespace(calibration_dir=tmp_path,
+                          calibration=SimpleNamespace(max_runs=None, situations=situations),
+                          ground_truth=SimpleNamespace(sources=[], measurements=None,
+                                                       targets=None))
+    ctx = SimpleNamespace(progress=lambda **fields: reported.append(fields))
+    results = tmp_path / "multiflow" / hbc.DRIVER_RESULTS
+    results.mkdir(parents=True)
+    (tmp_path / "multiflow" / RUN_BUDGET).write_text(json.dumps({"max_runs": 114}))
+    with _calibration_progress(cfg, ctx, folder="multiflow") as counter:
+        (results / hbc.DRIVER_LOG).write_text(_flow("september-2025") + _design(11))
+        counter.poll()
+    assert reported == [{"iteration": 11, "max_iterations": 114,
+                         "stage": hbc.STAGE_DESIGN, "flow": "September 2025",
+                         "n_flows": 3, "flow_index": 2}]

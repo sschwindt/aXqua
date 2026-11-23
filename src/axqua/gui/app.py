@@ -67,7 +67,7 @@ TEMPLATE: dict = {
                       "graphic_printout_period": 500, "listing_printout_period": 500},
     "calibration": {"calibration_quantities": ["WATER DEPTH"],
                     "extraction_quantities": ["WATER DEPTH", "SCALAR VELOCITY"],
-                    "measurement_error": 0.10, "init_runs": 30, "max_runs": 50,
+                    "measurement_error": 0.10, "init_runs": None, "max_runs": None,
                     "parameter_sampling_method": "sobol", "gp_library": "gpy",
                     "parameters": [{"name": "zone1", "min": 0.02, "max": 0.04,
                                     "comment": ""}]},
@@ -710,10 +710,13 @@ with tabs[9]:
     cal["measurement_error"] = c1.number_input(
         "Measurement error (fraction)",
         value=float(_get(cfg, "calibration", "measurement_error", default=0.10)), format="%.2f")
+    # 0 leaves them to the rule of axqua.calibration.run_budget
     cal["init_runs"] = int(c2.number_input(
-        "Initial runs", value=int(_get(cfg, "calibration", "init_runs", default=30)), step=1))
+        "Initial runs (0: 10 per parameter, a power of two)", min_value=0,
+        value=int(_get(cfg, "calibration", "init_runs", default=0) or 0), step=1)) or None
     cal["max_runs"] = int(c3.number_input(
-        "Max runs", value=int(_get(cfg, "calibration", "max_runs", default=50)), step=1))
+        "Max runs (0: until it converges)", min_value=0,
+        value=int(_get(cfg, "calibration", "max_runs", default=0) or 0), step=1)) or None
     c1, c2 = st.columns(2)
     samp = _get(cfg, "calibration", "parameter_sampling_method", default="sobol")
     cal["parameter_sampling_method"] = c1.selectbox(
