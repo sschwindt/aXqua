@@ -2248,11 +2248,22 @@
         <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">,</span> <span class="s2">"SCALAR VELOCITY"</span><span class="p">]</span>
     <span class="p">)</span>
     <span class="n">measurement_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.10</span>    <span class="c1"># fraction of measured value</span>
-    <span class="c1"># BAL / sampling settings (passed through to config_Telemac.py)</span>
-    <span class="n">init_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span>
-    <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="c1"># BAL / sampling settings (passed through to config_Telemac.py). None derives them</span>
+    <span class="c1"># from the number of calibrated parameters (calibration.run_budget): init_runs 10</span>
+    <span class="c1"># per parameter, rounded up to a power of two (Loeppky, Sacks and Welch 2009; an</span>
+    <span class="c1"># even Sobol design). max_runs None is no limit while until_converged holds (the</span>
+    <span class="c1"># active learning runs until it converges), else init_runs plus twice the 25</span>
+    <span class="c1"># iterations the convergence check needs at least.</span>
+    <span class="n">init_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">parameter_sampling_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"sobol"</span>
     <span class="n">gp_library</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"gpy"</span>
+    <span class="c1"># Mean of the gpytorch emulators (HydroBayesCal sampling['gp_mean'], PR 33 of</span>
+    <span class="c1"># 2026-11-17): "constant" (the emulator of HydroBayesCal up to 1.13), "linear", or</span>
+    <span class="c1"># "hydraulic", a trend that follows the physics of each parameter (bed friction law,</span>
+    <span class="c1"># ks and Cmu of the OpenFOAM model through the log layer). On a k-epsilon channel the</span>
+    <span class="c1"># hydraulic mean cut the emulator error of the velocity by a factor of 4 to 8.</span>
+    <span class="n">gp_mean</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"constant"</span>
     <span class="c1"># HydroBayesCal predicts the surrogate at prior_samples points and keeps a prior</span>
     <span class="c1"># sample with probability likelihood / largest likelihood. Since 1.12.2 it predicts</span>
     <span class="c1"># in pieces, so memory grows in proportion to the number (before, one dense</span>
@@ -2264,11 +2275,18 @@
     <span class="c1"># HydroBayesCal &gt;= 1.5 grows the initial design in Sobol blocks and stops as</span>
     <span class="c1"># soon as it is measurably sufficient (GP leave-one-out predictivity, error-bar</span>
     <span class="c1"># calibration, posterior resolution, stability), instead of always running</span>
-    <span class="c1"># init_runs. init_runs stays the ceiling, so this only ever saves simulations -</span>
-    <span class="c1"># which matters here, where the design size scales with the parameter count and</span>
-    <span class="c1"># every evaluation is a TELEMAC run per flow. False = the old fixed-size design.</span>
+    <span class="c1"># init_runs. init_runs stays the ceiling and the first block is the rule of</span>
+    <span class="c1"># init_runs (10 per parameter, a power of two), so the design never stops below</span>
+    <span class="c1"># it and grows beyond it only where HydroBayesCal measures it insufficient.</span>
+    <span class="c1"># False = all init_runs in one block.</span>
     <span class="n">adaptive_init_runs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">init_runs_min</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># first block; None -&gt; 2**ceil(log2(4*n_par))</span>
+    <span class="n">init_runs_min</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># first block; None -&gt; the rule of init_runs</span>
+    <span class="c1"># Run the active learning until the log evidence and the relative entropy reach a</span>
+    <span class="c1"># plateau (calibration_report.convergence: at least 25 iterations, then steps of</span>
+    <span class="c1"># five), with no limit unless the case sets max_runs; a warning where the two show</span>
+    <span class="c1"># no sign of leveling off (bayescal._launch_in_passes). The default since the</span>
+    <span class="c1"># user's rule of 2026-11-23. False: exactly max_runs.</span>
+    <span class="n">until_converged</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="c1"># BAL point selection: 'auto' exploits the posterior until more than one</span>
     <span class="c1"># well-separated mode is detected, then adds exploration. Pure exploitation is</span>
     <span class="c1"># how a local maximum survives to the end of a calibration.</span>

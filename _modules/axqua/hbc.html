@@ -394,8 +394,15 @@
 <span class="c1">#: starts the Sobol design at the first point of the sequence, so that a design of</span>
 <span class="c1">#: 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the</span>
 <span class="c1">#: scikit-learn emulator (``gp_library: skl``) run with TELEMAC; 1.13.0 reads the</span>
-<span class="c1">#: per-parameter posterior peaks over bootstrap resamples, which aXqua applies.</span>
-<span class="n">HBC_MINIMUM</span> <span class="o">=</span> <span class="s2">"1.13.0"</span>
+<span class="c1">#: per-parameter posterior peaks over bootstrap resamples, which aXqua applies;</span>
+<span class="c1">#: 1.14.0 trains the hyperparameters of the single-output emulator (they had stayed</span>
+<span class="c1">#: near their initial values: on a k-epsilon test model the velocity error at 16 runs</span>
+<span class="c1">#: fell from 0.11 to 0.031), scales the parameters to [0, 1] by default, and brings</span>
+<span class="c1">#: the mean of the surrogate model that ``calibration.gp_mean`` selects; 1.14.1</span>
+<span class="c1">#: trains the single-output emulator alike for every solver (300 iterations at a</span>
+<span class="c1">#: learning rate of 0.1; 1.14.0 kept 150 at 0.07 for TELEMAC and 100 at 0.5 for</span>
+<span class="c1">#: OpenFOAM).</span>
+<span class="n">HBC_MINIMUM</span> <span class="o">=</span> <span class="s2">"1.14.1"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -452,7 +459,8 @@
             <span class="s2">"tried the lowest part of each parameter range, and before 1.12.2 the "</span>
             <span class="s2">"scikit-learn emulator failed with TELEMAC; before 1.13.0 the "</span>
             <span class="s2">"per-parameter peak of a flat posterior depended on where its histogram "</span>
-            <span class="s2">"bins started, and aXqua reports those peaks. Upgrade it in the "</span>
+            <span class="s2">"bins started, and aXqua reports those peaks; before 1.14.0 the emulator "</span>
+            <span class="s2">"of a single calibration target did not train its length scales. Upgrade it in the "</span>
             <span class="s2">"environment of aXqua:</span><span class="se">\n</span><span class="s2">"</span>
             <span class="s2">"    pip install -U hydrobayescal"</span>
         <span class="p">)</span>
@@ -660,12 +668,23 @@
 <span class="c1">#: it writes there each time it starts a run of the full model. The driver announces a</span>
 <span class="c1">#: run twice. ``Running  full complexity model # 3`` counts within the initial design and</span>
 <span class="c1">#: ``... model after BAL # 1`` within the active learning, so both start again at 1;</span>
-<span class="c1">#: ``Running full complexity model 9`` counts through both, and is the one read here.</span>
+<span class="c1">#: ``Running full complexity model 9`` counts through both, and is the number reported.</span>
+<span class="c1">#: The other two say which stage the run belongs to.</span>
 <span class="n">DRIVER_LOG</span> <span class="o">=</span> <span class="s2">"logfile.log"</span>
 <span class="c1">#: The results folder of a HydroBayesCal driver. Since HydroBayesCal 1.12.0 the driver</span>
 <span class="c1">#: writes ``logfile.log`` there; before, it wrote it into its working folder.</span>
 <span class="n">DRIVER_RESULTS</span> <span class="o">=</span> <span class="s2">"auto-saved-results-HydroBayesCal"</span>
-<span class="n">_MODEL_RUN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Running\s+full\s+complexity\s+model\s+(\d+)\b"</span><span class="p">)</span>
+<span class="c1">#: The stages of a calibration, as :class:`RunCounter` reports them.</span>
+<span class="n">STAGE_DESIGN</span> <span class="o">=</span> <span class="s2">"initial design"</span>
+<span class="n">STAGE_LEARNING</span> <span class="o">=</span> <span class="s2">"active learning"</span>
+<span class="c1">#: What the counter reads, in the order the driver writes it. A multi-flow driver</span>
+<span class="c1">#: announces each flow (``multiflow: === flow 'august-2026' ===``) and then runs the</span>
+<span class="c1">#: parameter sets of that flow; in its initial design each flow counts from 1 again.</span>
+<span class="n">_EVENT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"multiflow: === flow '(?P&lt;flow&gt;[^']*)' ==="</span>
+    <span class="sa">r</span><span class="s2">"|Running\s+full\s+complexity\s+model\s+after\s+BAL\s+#\s*(?P&lt;learning&gt;\d+)"</span>
+    <span class="sa">r</span><span class="s2">"|Running\s+full\s+complexity\s+model\s+#\s*(?P&lt;design&gt;\d+)"</span>
+    <span class="sa">r</span><span class="s2">"|Running\s+full\s+complexity\s+model\s+(?P&lt;run&gt;\d+)\b"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="RunCounter">
@@ -680,11 +699,18 @@
 <span class="sd">    that is enough to say "run 7 of 12".</span>
 
 <span class="sd">    Used as a context manager around the launch. A thread reads what the log has</span>
-<span class="sd">    gained every *interval* seconds and calls *report* with the highest run number</span>
-<span class="sd">    seen, once per change. Only lines written after entry count, so the log of an</span>
-<span class="sd">    earlier calibration in the same folder is not replayed. Nothing here can fail a</span>
-<span class="sd">    calibration: an unreadable log and a failing *report* are both ignored, and a</span>
-<span class="sd">    driver that words the line differently simply reports no progress.</span>
+<span class="sd">    gained every *interval* seconds and calls ``report(run, flow=..., stage=...)``</span>
+<span class="sd">    once per change: *run* is the number of the parameter set, *flow* the situation a</span>
+<span class="sd">    multi-flow driver is running (None for one situation) and *stage*</span>
+<span class="sd">    :data:`STAGE_DESIGN` or :data:`STAGE_LEARNING` (None until the driver has said).</span>
+<span class="sd">    The run number is reported only when it grows within a flow, and a new flow starts</span>
+<span class="sd">    the count again: the initial design of a multi-flow driver runs all its parameter</span>
+<span class="sd">    sets for one flow before the next, each from 1. Only reporting a growing number</span>
+<span class="sd">    froze the multi-flow calibration of Inn KB15 (2026-11-22) at the last run of its</span>
+<span class="sd">    first flow for as long as the second ran. Only lines written after entry count, so</span>
+<span class="sd">    the log of an earlier calibration in the same folder is not replayed. Nothing here</span>
+<span class="sd">    can fail a calibration: an unreadable log and a failing *report* are both ignored,</span>
+<span class="sd">    and a driver that words the line differently simply reports no progress.</span>
 
 <span class="sd">    *logfile* may be a list of paths: all of them are followed, because the driver</span>
 <span class="sd">    writes its log into its results folder since HydroBayesCal 1.12.0 and into its</span>
@@ -692,13 +718,15 @@
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logfile</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span>
-                 <span class="n">report</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                 <span class="n">report</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">logfile</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">logfile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">report</span> <span class="o">=</span> <span class="n">report</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span> <span class="o">=</span> <span class="p">{</span><span class="n">path</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_thread</span><span class="p">:</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -727,14 +755,25 @@
 <div class="viewcode-block" id="RunCounter.poll">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.hbc.RunCounter.poll">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">poll</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Read what the logs have gained and report a new run number, if there is one."""</span>
+<span class="w">        </span><span class="sd">"""Read what the logs have gained and report what changed, if anything did."""</span>
         <span class="n">text</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gained</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">logfiles</span><span class="p">)</span>
-        <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">number</span><span class="p">)</span> <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="n">_MODEL_RUN</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">runs</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">_EVENT</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="s2">"flow"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="s2">"flow"</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">"flow"</span><span class="p">],</span> <span class="mi">0</span>
+                    <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">event</span><span class="p">[</span><span class="s2">"learning"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">event</span><span class="p">[</span><span class="s2">"design"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">stage</span> <span class="o">=</span> <span class="n">STAGE_LEARNING</span> <span class="k">if</span> <span class="n">event</span><span class="p">[</span><span class="s2">"learning"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">STAGE_DESIGN</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="n">changed</span> <span class="ow">or</span> <span class="n">stage</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stage</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stage</span> <span class="o">=</span> <span class="n">stage</span>
+            <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"run"</span><span class="p">])</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">"run"</span><span class="p">])</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">changed</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">flow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">flow</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stage</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                <span class="c1"># noqa: BLE001 - reporting must not stop a run</span>
             <span class="k">pass</span></div>
 

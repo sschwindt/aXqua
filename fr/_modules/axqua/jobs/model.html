@@ -524,6 +524,8 @@
     <span class="n">CALIBRATION</span> <span class="o">=</span> <span class="s2">"calibration"</span>
     <span class="n">CALIBRATION_MULTIFLOW</span> <span class="o">=</span> <span class="s2">"calibration-multiflow"</span>
     <span class="n">VALIDATION</span> <span class="o">=</span> <span class="s2">"validation"</span>
+    <span class="n">OPENFOAM_CALIBRATION</span> <span class="o">=</span> <span class="s2">"openfoam-calibration"</span>
+    <span class="n">OPENFOAM_VALIDATION</span> <span class="o">=</span> <span class="s2">"openfoam-validation"</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
@@ -548,7 +550,8 @@
                <span class="s2">"of-build"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_BUILD</span><span class="p">,</span> <span class="s2">"of-run"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_RUN</span><span class="p">,</span>
                <span class="s2">"fine-sediment-build"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_BUILD</span><span class="p">,</span>
                <span class="s2">"fine-sediment"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_RUN</span><span class="p">,</span>
-               <span class="s2">"of-meshconv"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_MESH_CONVERGENCE</span><span class="p">}</span>
+               <span class="s2">"of-meshconv"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_MESH_CONVERGENCE</span><span class="p">,</span>
+               <span class="s2">"of-bal"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_CALIBRATION</span><span class="p">,</span> <span class="s2">"of-val"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_VALIDATION</span><span class="p">}</span>
     <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">aliases</span><span class="p">[</span><span class="n">text</span><span class="p">]</span>
     <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
@@ -837,6 +840,57 @@
     <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
+<div class="viewcode-block" id="OpenFoamCalibrationOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamCalibrationOptions">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamCalibrationOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The Bayesian calibration of the OpenFOAM model at the discharges of the calibration</span>
+<span class="sd">    situations (:func:`axqua.solvers.openfoam.calibration.run_openfoam_situation_calibration`).</span>
+
+<span class="sd">    The runs are coarse and under a rigid lid that follows a TELEMAC result at each</span>
+<span class="sd">    discharge, which the job runs first where it is missing (:mod:`axqua.openfoam_situations`).</span>
+<span class="sd">    *smoke* runs three short runs per situation instead, to test the chain; *resume*</span>
+<span class="sd">    continues from the initial runs of an earlier calibration.</span>
+<span class="sd">    """</span>
+
+    <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">smoke</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">rebuild</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">cell_size_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span>
+    <span class="n">end_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">600.0</span>
+    <span class="n">write_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+    <span class="n">n_avg_timesteps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: MPI processes of the TELEMAC runs that give the water surfaces (case's own when empty)</span>
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="OpenFoamValidationOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamValidationOptions">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamValidationOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The calibrated OpenFOAM model in a validation situation (:mod:`axqua.solvers.openfoam.validation`).</span>
+
+<span class="sd">    *free_surface* runs the production model (its own resolution, two phases) instead</span>
+<span class="sd">    of the settings of the calibration runs.</span>
+<span class="sd">    """</span>
+
+    <span class="n">situation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">free_surface</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">compare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">cell_size_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span>
+    <span class="n">end_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">600.0</span>
+    <span class="n">write_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+    <span class="n">n_avg_timesteps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: What tells the study of the calibration capability that this is a validation.</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
 <div class="viewcode-block" id="MultiflowCalibrationOptions">
 <a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.MultiflowCalibrationOptions">[docs]</a>
 <span class="nd">@dataclass</span>
@@ -963,8 +1017,12 @@
     <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">best_objective</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: the situation a calibration at several discharges is running, its place among</span>
+    <span class="c1">#: them, and the stage: "initial design" or "active learning"</span>
     <span class="n">flow</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">n_flows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+    <span class="n">n_flows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">flow_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
@@ -1087,6 +1145,15 @@
         <span class="n">JobKind</span><span class="o">.</span><span class="n">VALIDATION</span><span class="p">,</span> <span class="s2">"val"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span>
         <span class="s2">"Validation with data of another flow situation"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span>
         <span class="s2">"study"</span><span class="p">,</span> <span class="n">ValidationOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_CALIBRATION</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_CALIBRATION</span><span class="p">,</span> <span class="s2">"ofbal"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">,</span>
+        <span class="s2">"HydroBayesCal calibration of the OpenFOAM model"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span>
+        <span class="s2">"study"</span><span class="p">,</span> <span class="n">OpenFoamCalibrationOptions</span><span class="p">,</span> <span class="n">CalibrationProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_VALIDATION</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_VALIDATION</span><span class="p">,</span> <span class="s2">"ofval"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">,</span>
+        <span class="s2">"Validation of the OpenFOAM model with data of another flow situation"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span> <span class="s2">"study"</span><span class="p">,</span> <span class="n">OpenFoamValidationOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span>
+        <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
 <span class="p">}</span>
 
 

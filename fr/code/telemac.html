@@ -2597,6 +2597,65 @@ a boundary that momentarily reverses.</p>
 </dl>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.flux_convergence.NET_WINDOW">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.flux_convergence.</span></span><span class="sig-name descname"><span class="pre">NET_WINDOW</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500.0</span></span><a class="headerlink" href="#axqua.solvers.telemac.flux_convergence.NET_WINDOW" title="Lien vers cette définition"></a></dt>
+<dd><p>The shortest window [s] of <a class="reference internal" href="#axqua.solvers.telemac.flux_convergence.net_imbalance" title="axqua.solvers.telemac.flux_convergence.net_imbalance"><code class="xref py py-func docutils literal notranslate"><span class="pre">net_imbalance()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.flux_convergence.NET_SHARE">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.flux_convergence.</span></span><span class="sig-name descname"><span class="pre">NET_SHARE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.3333333333333333</span></span><a class="headerlink" href="#axqua.solvers.telemac.flux_convergence.NET_SHARE" title="Lien vers cette définition"></a></dt>
+<dd><p>The share of a run, counted from its end, that <a class="reference internal" href="#axqua.solvers.telemac.flux_convergence.net_imbalance" title="axqua.solvers.telemac.flux_convergence.net_imbalance"><code class="xref py py-func docutils literal notranslate"><span class="pre">net_imbalance()</span></code></a> judges it over.
+A simulated reach need not become fully steady. Where the bed friction is small, large
+horizontal flow structures, such as recirculating flow in a pool, keep the flow
+unsteady: they are many times wider than the depth, so the depth-averaged equations
+resolve them instead of the turbulence model, and the friction no longer damps them
+(Chu, Wu and Khayat 1991, J. Hydraul. Eng. 117(10)). Inflow and outflow then differ
+at every printout by an amount no run length removes (Inn KB15, 2026-11-08: outflow
++/- 1 %), and the stored volume swings: in a test run on KB15 at 45.8 m3/s with the smallest roughness and the highest
+outflow level (2026-11-22), by +/- 134 m3 with a period of approximately 1,700 s,
+while the volume stayed within 0.1 % of its final value from 3,800 s on. Over 500 s,
+inflow and outflow of that settled run differed by up to 1.2 % on average; the trend
+of the stored volume over the last third of the run (2,200 s, more than one period)
+stayed below 0.13 % at every time the run could have ended between 5,500 and 7,000 s,
+and below 0.02 % in the runs without that swing.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.flux_convergence.net_window">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.flux_convergence.</span></span><span class="sig-name descname"><span class="pre">net_window</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/flux_convergence.html#net_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.flux_convergence.net_window" title="Lien vers cette définition"></a></dt>
+<dd><p>The window [s] that <a class="reference internal" href="#axqua.solvers.telemac.flux_convergence.net_imbalance" title="axqua.solvers.telemac.flux_convergence.net_imbalance"><code class="xref py py-func docutils literal notranslate"><span class="pre">net_imbalance()</span></code></a> judges a run over: its last third, at least <a class="reference internal" href="#axqua.solvers.telemac.flux_convergence.NET_WINDOW" title="axqua.solvers.telemac.flux_convergence.NET_WINDOW"><code class="xref py py-data docutils literal notranslate"><span class="pre">NET_WINDOW</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.solvers.telemac.flux_convergence.net_imbalance">
+<span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.flux_convergence.</span></span><span class="sig-name descname"><span class="pre">net_imbalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gross_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gross_out</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/flux_convergence.html#net_imbalance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.flux_convergence.net_imbalance" title="Lien vers cette définition"></a></dt>
+<dd><p>The discharge balance at the end of a run: net and swing over its last <em>window</em> seconds.</p>
+<p><code class="docutils literal notranslate"><span class="pre">net</span></code> is the trend of the volume stored in the reach over the window, the
+least-squares slope of <code class="docutils literal notranslate"><span class="pre">integral(Q_in</span> <span class="pre">-</span> <span class="pre">Q_out)</span> <span class="pre">dt</span></code>, relative to the mean inflow:
+the share of the inflow by which the reach still fills or drains, which goes to zero
+when the run is steady. It is a trend and not the difference of the stored volume
+between the two ends of the window, because the volume of an unsteady flow swings, and
+the two ends can fall on opposite phases of the swing. <code class="docutils literal notranslate"><span class="pre">swing</span></code> is the mean relative
+imbalance per printout over the same window (<a class="reference internal" href="#axqua.solvers.telemac.flux_convergence.relative_imbalance" title="axqua.solvers.telemac.flux_convergence.relative_imbalance"><code class="xref py py-func docutils literal notranslate"><span class="pre">relative_imbalance()</span></code></a>), which
+stays as large as the unsteady flow makes it. <em>window</em> defaults to <a class="reference internal" href="#axqua.solvers.telemac.flux_convergence.net_window" title="axqua.solvers.telemac.flux_convergence.net_window"><code class="xref py py-func docutils literal notranslate"><span class="pre">net_window()</span></code></a>. None
+when the run is shorter than the window or has fewer than three printouts in it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>window</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a>] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.solvers.telemac.flux_convergence.convergence_rate">
 <span class="sig-prename descclassname"><span class="pre">axqua.solvers.telemac.flux_convergence.</span></span><span class="sig-name descname"><span class="pre">convergence_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imbalance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/solvers/telemac/flux_convergence.html#convergence_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.solvers.telemac.flux_convergence.convergence_rate" title="Lien vers cette définition"></a></dt>

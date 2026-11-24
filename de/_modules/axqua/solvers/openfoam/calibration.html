@@ -386,6 +386,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
@@ -858,8 +859,14 @@
                          <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
                          <span class="n">init_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                          <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                         <span class="n">only_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+                         <span class="n">only_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                         <span class="n">flows</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Write ``config_OpenFOAM.py`` for the staged ``bal_openfoam.py``.</span>
+
+<span class="sd">    With *flows* (``name``, ``case_template_dir``, ``calibration_pts_file_path`` per</span>
+<span class="sd">    calibration situation) it writes ``config_OpenFOAM_multiflow.py`` for</span>
+<span class="sd">    ``bal_openfoam_multiflow.py`` instead, whose ``multiflow`` block names them; *template*</span>
+<span class="sd">    and *csv* are then those of the first situation.</span>
 
 <span class="sd">    Deliberately not a parameterisation of :func:`axqua.calibration.emit_hbc_config`:</span>
 <span class="sd">    the OpenFOAM schema uses ``simulation`` where TELEMAC uses</span>
@@ -868,6 +875,17 @@
 <span class="sd">    **copied per run** rather than referenced in place.</span>
 <span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_budget</span>
+
+    <span class="n">planned</span><span class="p">,</span> <span class="n">ceiling</span><span class="p">,</span> <span class="n">first</span> <span class="o">=</span> <span class="n">run_budget</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">))</span>
+    <span class="n">init_runs</span> <span class="o">=</span> <span class="n">planned</span> <span class="k">if</span> <span class="n">init_runs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">init_runs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_runs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># no convergence loop on this path: a fixed number of active-learning iterations</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_iterations</span>
+
+        <span class="n">max_runs</span> <span class="o">=</span> <span class="n">ceiling</span> <span class="k">if</span> <span class="n">ceiling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">init_runs</span> <span class="o">+</span> <span class="n">default_iterations</span><span class="p">()</span>
+    <span class="n">max_runs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_runs</span><span class="p">)</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">init_runs</span><span class="p">)</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">_canonical</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="n">ranges</span> <span class="o">=</span> <span class="p">[[</span><span class="n">p</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">max</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="n">model_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"simulations"</span>
@@ -890,10 +908,12 @@
                      <span class="s2">"pre-spun once into 0/ so that every run starts from the "</span>
                      <span class="s2">"same settled interface"</span><span class="p">)</span>
 
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"config_OpenFOAM_multiflow.py"</span> <span class="k">if</span> <span class="n">flows</span> <span class="k">else</span> <span class="s2">"config_OpenFOAM.py"</span>
+    <span class="n">driver_name</span> <span class="o">=</span> <span class="s2">"bal_openfoam_multiflow.py"</span> <span class="k">if</span> <span class="n">flows</span> <span class="k">else</span> <span class="s2">"bal_openfoam.py"</span>
     <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'''"""HydroBayesCal OpenFOAM config generated by axqua for case '</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">'.</span>
 
 <span class="s1">Run a surrogate-assisted Bayesian calibration with:</span>
-<span class="s1">    python bal_openfoam.py --config </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s2">"config_OpenFOAM.py"</span><span class="si">}</span>
+<span class="s1">    python </span><span class="si">{</span><span class="n">driver_name</span><span class="si">}</span><span class="s1"> --config </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">name</span><span class="si">}</span>
 
 <span class="s1">The case at 'case_template_dir' is COPIED for every run. It is </span><span class="si">{</span><span class="n">mode_note</span><span class="si">}</span>
 <span class="s1">(see axqua.solvers.openfoam.calibration.campaign_config) - NOT the case that</span>
@@ -949,12 +969,12 @@
 
 <span class="s1">sampling = </span><span class="se">{{</span>
 <span class="s1">    'n_cpus':    </span><span class="si">{</span><span class="n">n_processors</span><span class="si">}</span><span class="s1">,</span>
-<span class="s1">    'init_runs': </span><span class="si">{</span><span class="n">init_runs</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">init_runs</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">c</span><span class="o">.</span><span class="n">init_runs</span><span class="si">}</span><span class="s1">,</span>
-<span class="s1">    'max_runs':  </span><span class="si">{</span><span class="n">max_runs</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">max_runs</span><span class="w"> </span><span class="ow">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="kc">None</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">c</span><span class="o">.</span><span class="n">max_runs</span><span class="si">}</span><span class="s1">,</span>
+<span class="s1">    'init_runs': </span><span class="si">{</span><span class="n">init_runs</span><span class="si">}</span><span class="s1">,</span>
+<span class="s1">    'max_runs':  </span><span class="si">{</span><span class="n">max_runs</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    'parameter_distribution':    'uniform',</span>
 <span class="s1">    'parameter_sampling_method': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">parameter_sampling_method</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    'adaptive_init_runs': </span><span class="si">{</span><span class="nb">bool</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">adaptive_init_runs</span><span class="p">)</span><span class="si">}</span><span class="s1">,</span>
-<span class="s1">    'init_runs_min':      </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">init_runs_min</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    'init_runs_min':      </span><span class="si">{</span><span class="n">first</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    'tp_selection_criteria': 'dkl',</span>
 <span class="s1">    'eval_steps':     1,</span>
 <span class="s1">    # prior samples the surrogate is predicted at (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s1"> parameter(s)); a sharp</span>
@@ -964,6 +984,7 @@
 <span class="s1">    'mc_samples_al':  2000,</span>
 <span class="s1">    'mc_exploration': 1000,</span>
 <span class="s1">    'gp_library':     </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_library</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    'gp_mean':        </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_mean</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    'include_surrogate_error': True,</span>
 <span class="s1">    'bal_exploration_tradeoff': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">bal_exploration_tradeoff</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="se">}}</span>
@@ -976,9 +997,27 @@
 <span class="s1">    'user_param_values':      False,</span>
 <span class="se">}}</span>
 <span class="s1">'''</span>
+    <span class="k">if</span> <span class="n">flows</span><span class="p">:</span>
+        <span class="n">entries</span> <span class="o">=</span> <span class="s2">",</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s2">"        {{'name': </span><span class="si">{n!r}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"         'case_template_dir': </span><span class="si">{t!r}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"         'calibration_pts_file_path': </span><span class="si">{c!r}</span><span class="s2">}}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">n</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]),</span> <span class="n">t</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">"case_template_dir"</span><span class="p">]),</span>
+                <span class="n">c</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">"calibration_pts_file_path"</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flows</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1"># One case template and one calibration-points CSV per calibration situation; each</span>
+<span class="s1"># runs in &lt;model_dir&gt;/flow-&lt;name&gt;. paths['case_template_dir'] and</span>
+<span class="s1"># paths['calibration_pts_file_path'] above are the first situation's.</span>
+<span class="s1">multiflow = </span><span class="se">{{</span>
+<span class="s1">    'flows': [</span>
+<span class="si">{</span><span class="n">entries</span><span class="si">}</span><span class="s1">,</span>
+<span class="s1">    ],</span>
+<span class="se">}}</span>
+<span class="s1">'''</span>
     <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
     <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">"config_OpenFOAM.py"</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">name</span>
     <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">path</span></div>
 
@@ -1002,11 +1041,15 @@
                   <span class="n">extraction_quantities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                   <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                   <span class="n">vertical_err_floor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                  <span class="n">z_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"model-relative"</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+                  <span class="n">z_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"model-relative"</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">point_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">min_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Compile the ground truth into the component-velocity CSV.</span>
 
-<span class="sd">    A separate file from the TELEMAC ``measurements-calibration.csv``: the same 30</span>
-<span class="sd">    points, but ``U_x``/``U_y``/``U_z`` columns instead of ``SCALAR VELOCITY``.</span>
+<span class="sd">    A separate file from the TELEMAC ``measurements-calibration.csv``: the same</span>
+<span class="sd">    points, but with the OpenFOAM names of the quantities (``U_MAG``, ``U_x``, ...).</span>
+<span class="sd">    *path* overrides its location, *point_filter* leaves out points</span>
+<span class="sd">    (:func:`axqua.calibration.build_calibration_csv`).</span>
 <span class="sd">    """</span>
     <span class="c1"># build_calibration_csv reads the quantities off cfg.calibration, so give it a</span>
     <span class="c1"># copy carrying the OpenFOAM names rather than mutating the caller's config.</span>
@@ -1027,18 +1070,30 @@
     <span class="k">if</span> <span class="n">z_mode</span> <span class="o">==</span> <span class="s2">"model-relative"</span><span class="p">:</span>
         <span class="n">resolver</span> <span class="o">=</span> <span class="n">model_relative_z_resolver</span><span class="p">(</span>
             <span class="n">campaign</span><span class="p">,</span> <span class="n">out_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">),</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
-            <span class="n">cache</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">campaign</span><span class="o">.</span><span class="n">openfoam_case_dir</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"column-geometry.npz"</span><span class="p">)</span>
+            <span class="n">cache</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">campaign</span><span class="o">.</span><span class="n">openfoam_case_dir</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"column-geometry.npz"</span><span class="p">,</span>
+            <span class="n">min_points</span><span class="o">=</span><span class="n">min_points</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">z_mode</span> <span class="o">!=</span> <span class="s2">"measured"</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown z_mode </span><span class="si">{</span><span class="n">z_mode</span><span class="si">!r}</span><span class="s2">; expected "</span>
                          <span class="s2">"'model-relative' or 'measured'"</span><span class="p">)</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="n">build_calibration_csv</span><span class="p">(</span>
-        <span class="n">scratch</span><span class="p">,</span> <span class="n">floors</span><span class="o">=</span><span class="n">floors</span><span class="p">,</span> <span class="n">z_resolver</span><span class="o">=</span><span class="n">resolver</span><span class="p">,</span>
-        <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"measurements-calibration-openfoam.csv"</span><span class="p">)</span>
+        <span class="n">scratch</span><span class="p">,</span> <span class="n">floors</span><span class="o">=</span><span class="n">floors</span><span class="p">,</span> <span class="n">z_resolver</span><span class="o">=</span><span class="n">resolver</span><span class="p">,</span> <span class="n">point_filter</span><span class="o">=</span><span class="n">point_filter</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"measurements-calibration-openfoam.csv"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span>
             <span class="s2">"no ground truth to calibrate against. Set ground_truth.sources (or "</span>
             <span class="s2">"ground_truth.measurements / ground_truth.targets) in case-config.yml."</span><span class="p">)</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">lost</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="s2">"z"</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">lost</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%d</span><span class="s2"> of </span><span class="si">%d</span><span class="s2"> measurement points lie outside the water of the OpenFOAM "</span>
+                    <span class="s2">"lattice (shallow margins, columns the coarse lattice drops) and are "</span>
+                    <span class="s2">"left out: </span><span class="si">%s</span><span class="s2"> (see target-placement.csv)"</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">lost</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">),</span>
+                    <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">lost</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">]))</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="n">lost</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">table</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">path</span>
 
 
@@ -1179,6 +1234,303 @@
 
 
 <span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># calibration situations: one parameter set against several discharges</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1">#: Sub-folder of :data:`CAMPAIGN_SUBDIR` for a calibration at several discharges.</span>
+<span class="n">MULTIFLOW_SUBDIR</span> <span class="o">=</span> <span class="s2">"multiflow"</span>
+<span class="c1">#: The calibration quantity of the situations: the horizontal speed at 0.6 h above</span>
+<span class="c1">#: the riverbed. FlowTracker components are in the frame of the probe, which was</span>
+<span class="c1">#: turned into the local flow at each vertical, so they cannot be compared with the</span>
+<span class="c1">#: east and north components of the model (the user, 2026-11-17).</span>
+<span class="n">SITUATION_QUANTITIES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"U_MAG"</span><span class="p">,)</span>
+<span class="n">SITUATION_EXTRACTION</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"U_MAG"</span><span class="p">,</span> <span class="s2">"U_x"</span><span class="p">,</span> <span class="s2">"U_y"</span><span class="p">,</span> <span class="s2">"U_z"</span><span class="p">,</span> <span class="s2">"TKE"</span><span class="p">)</span>
+<span class="c1">#: The HydroBayesCal release that brings ``bal_openfoam_multiflow.py``</span>
+<span class="c1">#: (``MultiflowOpenFOAMModel``), released on 2026-11-20.</span>
+<span class="n">HBC_MULTIFLOW_MINIMUM</span> <span class="o">=</span> <span class="s2">"1.15.0"</span>
+
+
+<div class="viewcode-block" id="require_multiflow_driver">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.calibration.require_multiflow_driver">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_multiflow_driver</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Refuse an installed HydroBayesCal that cannot calibrate at several discharges.</span>
+
+<span class="sd">    Checked before the TELEMAC runs of the situations, which the job starts first; an unreadable version passes, and staging the driver still checks that it exists.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="n">installed</span> <span class="o">=</span> <span class="n">hbc</span><span class="o">.</span><span class="n">hbc_version</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">hbc</span><span class="o">.</span><span class="n">hbc_too_old</span><span class="p">(</span><span class="n">installed</span><span class="p">,</span> <span class="n">HBC_MULTIFLOW_MINIMUM</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the installed HydroBayesCal </span><span class="si">{</span><span class="n">installed</span><span class="si">}</span><span class="s2"> cannot calibrate OpenFOAM at "</span>
+            <span class="s2">"several discharges"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"hydroBayesCal"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Install HydroBayesCal </span><span class="si">{</span><span class="n">HBC_MULTIFLOW_MINIMUM</span><span class="si">}</span><span class="s2"> or newer "</span>
+                   <span class="s2">"(pip install --upgrade hydroBayesCal)."</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rating_at</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The outflow rating of a situation, as the TELEMAC run of that situation has it.</span>
+
+<span class="sd">    A case without a measured stage-discharge curve derives its outflow level from the channel geometry for its own discharge; a situation derives its own for its discharge (as :func:`axqua.validation.with_boundaries_of` does for the TELEMAC run whose water surface the model follows), written to *path*.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_rating_if_missing</span>
+
+    <span class="n">given</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span>
+    <span class="k">if</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"rating"</span> <span class="ow">or</span> <span class="p">(</span><span class="n">given</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+        <span class="k">return</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="situation_config">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.calibration.situation_config">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">situation_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">situation</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Config</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A copy of *cfg* at the discharge of one calibration situation, with its measurements.</span>
+
+<span class="sd">    *situation* is a mapping with ``name``, ``tag``, ``discharge`` and ``sources``</span>
+<span class="sd">    (as :mod:`axqua.openfoam_situations` hands it over). The measurements are compiled</span>
+<span class="sd">    into ``ground-truth-&lt;tag&gt;.xlsx`` in *folder*. Inflow lines with their own target</span>
+<span class="sd">    flows keep their split and are scaled to the situation's total.</span>
+<span class="sd">    """</span>
+    <span class="n">there</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="p">[</span><span class="s2">"discharge"</span><span class="p">])</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="o">=</span> <span class="n">q</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">situation_discharge</span> <span class="o">=</span> <span class="n">q</span>          <span class="c1"># read by case._inlet_discharges</span>
+    <span class="n">_rating_at</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"rating-</span><span class="si">{</span><span class="n">situation</span><span class="p">[</span><span class="s1">'tag'</span><span class="p">]</span><span class="si">}</span><span class="s2">.csv"</span><span class="p">)</span>
+    <span class="n">sources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sources"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="n">sources</span><span class="p">:</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="n">sources</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"ground-truth-</span><span class="si">{</span><span class="n">situation</span><span class="p">[</span><span class="s1">'tag'</span><span class="p">]</span><span class="si">}</span><span class="s2">.xlsx"</span>
+    <span class="k">return</span> <span class="n">there</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_template_record</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What the campaign template of a situation was built from, beside it."""</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"case-template.json"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_template_source</span><span class="p">(</span><span class="n">situation</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">cell_size_factor</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"seed"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"seed"</span><span class="p">)),</span> <span class="s2">"seed_stamp"</span><span class="p">:</span> <span class="n">situation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"seed_stamp"</span><span class="p">),</span>
+            <span class="s2">"discharge"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="p">[</span><span class="s2">"discharge"</span><span class="p">]),</span>
+            <span class="s2">"cell_size_factor"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">cell_size_factor</span><span class="p">)}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_template_outdated</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">situation</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">cell_size_factor</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                       <span class="o">*</span><span class="p">,</span> <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the campaign template of a situation was built from another water surface,</span>
+<span class="sd">    discharge or lattice than this calibration has (a new TELEMAC run after the TELEMAC</span>
+<span class="sd">    calibration changed, for example). Such a template is rebuilt; resuming over it is</span>
+<span class="sd">    refused, because the runs done would no longer match the ones to come."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"case-template"</span> <span class="o">/</span> <span class="s2">"constant"</span> <span class="o">/</span> <span class="s2">"polyMesh"</span> <span class="o">/</span> <span class="s2">"faces"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">built</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">_template_record</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">built</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">built</span> <span class="o">==</span> <span class="n">_template_source</span><span class="p">(</span><span class="n">situation</span><span class="p">,</span> <span class="n">cell_size_factor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">resume</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"cannot resume: the case template of </span><span class="si">{</span><span class="n">situation</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2"> was built from "</span>
+            <span class="s2">"another water surface, discharge or cell size factor than this calibration "</span>
+            <span class="s2">"has. Run the calibration without resume."</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"the case template of </span><span class="si">%s</span><span class="s2"> was built from another water surface, discharge "</span>
+             <span class="s2">"or cell size factor: rebuilding it"</span><span class="p">,</span> <span class="n">situation</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="run_openfoam_situation_calibration">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.calibration.run_openfoam_situation_calibration">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_openfoam_situation_calibration</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">situations</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="p">,</span>
+        <span class="n">calibration_quantities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">SITUATION_QUANTITIES</span><span class="p">,</span>
+        <span class="n">extraction_quantities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">SITUATION_EXTRACTION</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cell_size_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+        <span class="n">end_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">600.0</span><span class="p">,</span>
+        <span class="n">write_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">,</span>
+        <span class="n">n_avg_timesteps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">init_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
+        <span class="n">vertical_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">VERTICAL_ERROR_FLOOR</span><span class="p">,</span>
+        <span class="n">launch_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"prepare"</span><span class="p">,</span>
+        <span class="n">rebuild</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">point_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Calibrate the OpenFOAM case against the measurements of several situations.</span>
+
+<span class="sd">    Every situation gets its own campaign template (rigid lid, coarse lattice, see</span>
+<span class="sd">    :func:`campaign_config`), built at its discharge and seeded from its own 2D</span>
+<span class="sd">    result (``seed``: the water surface the rigid lid follows, from a TELEMAC run at</span>
+<span class="sd">    that discharge with the calibrated TELEMAC values), and its own points CSV.</span>
+<span class="sd">    HydroBayesCal's ``bal_openfoam_multiflow.py`` runs every tested parameter set in</span>
+<span class="sd">    every situation and fits them jointly. Everything goes to</span>
+<span class="sd">    ``calibration-validation/openfoam/multiflow/`` (``.../smoke/`` for the smoke test).</span>
+
+<span class="sd">    *point_filter* is called per situation with the copy of the config of that</span>
+<span class="sd">    situation and the table of its points, and returns which to keep: the rules of the</span>
+<span class="sd">    case that need its 2D mesh (inside the model, away from inflow and outflow lines)</span>
+<span class="sd">    come in this way, since this backend does not read TELEMAC files. *launch_mode* is</span>
+<span class="sd">    that of :func:`run_openfoam_calibration`.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.hotstart</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_hotstart</span>
+
+    <span class="k">if</span> <span class="n">launch_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"prepare"</span><span class="p">,</span> <span class="s2">"smoke"</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span> <span class="s2">"resume"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown launch_mode </span><span class="si">{</span><span class="n">launch_mode</span><span class="si">!r}</span><span class="s2">; expected one of "</span>
+                         <span class="s2">"prepare, smoke, run, resume"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">situations</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"the case names no calibration situations"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.situations"</span><span class="p">,</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the measurement file and the discharge of each "</span>
+                                 <span class="s2">"situation under Measurement files in the case settings."</span><span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">"tag"</span><span class="p">])</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">situations</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"two calibration situations have the same name"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.situations"</span><span class="p">,</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Give every situation a name of its own."</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+    <span class="n">smoke</span> <span class="o">=</span> <span class="n">launch_mode</span> <span class="o">==</span> <span class="s2">"smoke"</span>
+    <span class="n">n_processors</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_processors</span> <span class="k">if</span> <span class="n">n_processors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                       <span class="k">else</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">n_processors</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">picked</span> <span class="o">=</span> <span class="n">openfoam_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"calibrating </span><span class="si">%s</span><span class="s2"> against </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%d</span><span class="s2"> situations"</span><span class="p">,</span>
+             <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">picked</span><span class="p">),</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">calibration_quantities</span><span class="p">),</span>
+             <span class="nb">len</span><span class="p">(</span><span class="n">situations</span><span class="p">))</span>
+
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">CAMPAIGN_SUBDIR</span> <span class="o">/</span> <span class="n">MULTIFLOW_SUBDIR</span>
+    <span class="k">if</span> <span class="n">smoke</span><span class="p">:</span>
+        <span class="n">out_dir</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">"smoke"</span>
+    <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">averaged</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">smoke</span> <span class="k">else</span> <span class="n">n_avg_timesteps</span>
+
+    <span class="n">flows</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">total_points</span> <span class="o">=</span> <span class="p">[],</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">situation</span> <span class="ow">in</span> <span class="n">situations</span><span class="p">:</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">situation</span><span class="p">[</span><span class="s2">"tag"</span><span class="p">])</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">situation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"seed"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">seed</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"situation </span><span class="si">{</span><span class="n">situation</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">: no 2D result to take the water surface "</span>
+                <span class="s2">"from"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">seed</span> <span class="ow">or</span> <span class="n">tag</span><span class="p">),</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"The rigid lid of the calibration runs follows the water surface "</span>
+                       <span class="s2">"of a TELEMAC run at the discharge of the situation. Submit the "</span>
+                       <span class="s2">"OpenFOAM calibration as a job, which runs it first."</span><span class="p">)</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">tag</span>
+        <span class="n">there</span> <span class="o">=</span> <span class="n">situation_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">load_hotstart</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+        <span class="n">campaign</span> <span class="o">=</span> <span class="n">campaign_config</span><span class="p">(</span>
+            <span class="n">there</span><span class="p">,</span> <span class="n">cell_size_factor</span><span class="o">=</span><span class="n">cell_size_factor</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="p">(</span><span class="mf">30.0</span> <span class="k">if</span> <span class="n">smoke</span> <span class="k">else</span> <span class="n">end_time</span><span class="p">),</span>
+            <span class="n">write_interval</span><span class="o">=</span><span class="p">(</span><span class="mf">10.0</span> <span class="k">if</span> <span class="n">smoke</span> <span class="k">else</span> <span class="n">write_interval</span><span class="p">),</span>
+            <span class="n">n_processors</span><span class="o">=</span><span class="n">n_processors</span><span class="p">,</span> <span class="n">n_avg_timesteps</span><span class="o">=</span><span class="n">averaged</span><span class="p">)</span>
+        <span class="n">campaign</span><span class="o">.</span><span class="n">openfoam_dir</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="s2">"case-template"</span>
+        <span class="n">check_turbulence</span><span class="p">(</span><span class="n">campaign</span><span class="p">,</span> <span class="n">picked</span><span class="p">)</span>
+        <span class="n">fresh</span> <span class="o">=</span> <span class="n">_template_outdated</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">cell_size_factor</span><span class="p">,</span>
+                                   <span class="n">resume</span><span class="o">=</span><span class="p">(</span><span class="n">launch_mode</span> <span class="o">==</span> <span class="s2">"resume"</span><span class="p">))</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">stage_case_template</span><span class="p">(</span><span class="n">campaign</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">rebuild</span><span class="o">=</span><span class="n">rebuild</span> <span class="ow">or</span> <span class="n">fresh</span><span class="p">,</span>
+                                       <span class="n">parameters</span><span class="o">=</span><span class="n">picked</span><span class="p">,</span> <span class="n">n_avg_timesteps</span><span class="o">=</span><span class="n">averaged</span><span class="p">)</span>
+        <span class="n">_template_record</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_template_source</span><span class="p">(</span><span class="n">situation</span><span class="p">,</span> <span class="n">cell_size_factor</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">keep</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">point_filter</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">,</span> <span class="n">there</span><span class="o">=</span><span class="n">there</span><span class="p">:</span> <span class="n">point_filter</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">df</span><span class="p">)))</span>
+        <span class="n">csv</span> <span class="o">=</span> <span class="n">_velocity_csv</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">campaign</span><span class="p">,</span> <span class="n">out_dir</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+                            <span class="n">calibration_quantities</span><span class="o">=</span><span class="n">calibration_quantities</span><span class="p">,</span>
+                            <span class="n">extraction_quantities</span><span class="o">=</span><span class="n">extraction_quantities</span><span class="p">,</span>
+                            <span class="n">vel_err_floor</span><span class="o">=</span><span class="n">vel_err_floor</span><span class="p">,</span>
+                            <span class="n">vertical_err_floor</span><span class="o">=</span><span class="n">vertical_err_floor</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+                            <span class="n">path</span><span class="o">=</span><span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"measurements-calibration-openfoam-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span><span class="p">,</span>
+                            <span class="n">point_filter</span><span class="o">=</span><span class="n">keep</span><span class="p">,</span> <span class="n">min_points</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">n_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">csv</span><span class="p">))</span>
+        <span class="n">total_points</span> <span class="o">+=</span> <span class="n">n_points</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">situation</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">: Q = </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="p">[</span><span class="s1">'discharge'</span><span class="p">])</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m3/s, "</span>
+              <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> points, seed </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">template</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">tag</span><span class="p">,</span> <span class="s2">"case_template_dir"</span><span class="p">:</span> <span class="n">template</span><span class="p">,</span>
+                      <span class="s2">"calibration_pts_file_path"</span><span class="p">:</span> <span class="n">csv</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">first</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="p">(</span><span class="n">campaign</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">csv</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">total_points</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"only </span><span class="si">{</span><span class="n">total_points</span><span class="si">}</span><span class="s2"> measurement points of all situations lie in the water "</span>
+            <span class="s2">"of the OpenFOAM model"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">out_dir</span><span class="p">),</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"See target-placement.csv of each situation. A finer lattice "</span>
+                   <span class="s2">"(a smaller cell size factor) keeps more points at shallow margins."</span><span class="p">)</span>
+    <span class="n">campaign</span><span class="p">,</span> <span class="n">template</span><span class="p">,</span> <span class="n">csv</span> <span class="o">=</span> <span class="n">first</span>
+    <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit_openfoam_config</span><span class="p">(</span>
+        <span class="n">campaign</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">csv</span><span class="o">=</span><span class="n">csv</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">picked</span><span class="p">,</span>
+        <span class="n">calibration_quantities</span><span class="o">=</span><span class="n">calibration_quantities</span><span class="p">,</span>
+        <span class="n">extraction_quantities</span><span class="o">=</span><span class="n">extraction_quantities</span><span class="p">,</span> <span class="n">out_dir</span><span class="o">=</span><span class="n">out_dir</span><span class="p">,</span>
+        <span class="n">n_avg_timesteps</span><span class="o">=</span><span class="n">averaged</span><span class="p">,</span> <span class="n">n_processors</span><span class="o">=</span><span class="n">n_processors</span><span class="p">,</span>
+        <span class="n">init_runs</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span> <span class="k">if</span> <span class="n">smoke</span> <span class="k">else</span> <span class="n">init_runs</span><span class="p">),</span> <span class="n">max_runs</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span> <span class="k">if</span> <span class="n">smoke</span> <span class="k">else</span> <span class="n">max_runs</span><span class="p">),</span>
+        <span class="n">only_bal_mode</span><span class="o">=</span><span class="p">(</span><span class="n">launch_mode</span> <span class="o">==</span> <span class="s2">"resume"</span><span class="p">),</span> <span class="n">flows</span><span class="o">=</span><span class="n">flows</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">hbc</span><span class="o">.</span><span class="n">stage_driver</span><span class="p">(</span><span class="n">out_dir</span><span class="p">,</span> <span class="s2">"bal_openfoam_multiflow.py"</span><span class="p">,</span> <span class="n">checkout</span><span class="o">=</span><span class="n">checkout</span><span class="p">,</span>
+                                  <span class="n">also</span><span class="o">=</span><span class="p">(</span><span class="s2">"bal_openfoam.py"</span><span class="p">,),</span> <span class="n">replacements</span><span class="o">=</span><span class="n">_DRIVER_PATCHES</span><span class="p">,</span>
+                                  <span class="n">required</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_DRIVER_PATCHES</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"the installed HydroBayesCal cannot calibrate OpenFOAM at several discharges"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"hydroBayesCal"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Install HydroBayesCal </span><span class="si">{</span><span class="n">HBC_MULTIFLOW_MINIMUM</span><span class="si">}</span><span class="s2"> or newer "</span>
+                   <span class="s2">"(pip install --upgrade hydroBayesCal)."</span><span class="p">,</span> <span class="n">cause</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">calibration inputs in </span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="n">driver</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">launch_mode</span> <span class="o">==</span> <span class="s2">"prepare"</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">prepared only. Launch it with:</span><span class="se">\n</span><span class="s2">"</span>
+              <span class="sa">f</span><span class="s2">"  python </span><span class="si">{</span><span class="n">driver</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> --config </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">launch_mode</span> <span class="o">==</span> <span class="s2">"resume"</span><span class="p">:</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span>
+                   <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">out_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"flow-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">"</span> <span class="o">/</span> <span class="s2">"auto-saved-results-HydroBayesCal"</span>
+                           <span class="o">/</span> <span class="s2">"restart_data"</span> <span class="o">/</span> <span class="s2">"initial-model-outputs.json"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"cannot resume: no completed initial design of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2"> in "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">. Run the calibration without resume first."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">hbc</span><span class="o">.</span><span class="n">solver_running</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"a </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> run of this calibration is already active in "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">. Wait for it, or pass force=True if you know it is unrelated."</span><span class="p">)</span>
+    <span class="n">environment</span> <span class="o">=</span> <span class="n">hbc</span><span class="o">.</span><span class="n">solver_environment</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">environment</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">bashrc</span><span class="p">)</span>
+    <span class="n">note</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"OpenFOAM calibration smoke test at several discharges"</span> <span class="k">if</span> <span class="n">smoke</span>
+            <span class="k">else</span> <span class="sa">f</span><span class="s2">"OpenFOAM Bayesian calibration at </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">flows</span><span class="p">)</span><span class="si">}</span><span class="s2"> discharges"</span><span class="p">)</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">hbc</span><span class="o">.</span><span class="n">launch_driver</span><span class="p">(</span><span class="n">environment</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">note</span><span class="p">,</span>
+                             <span class="n">env</span><span class="o">=</span><span class="p">{</span><span class="s2">"HBC_MPI_LAUNCHER"</span><span class="p">:</span> <span class="n">environment</span><span class="o">.</span><span class="n">mpi_launcher</span> <span class="ow">or</span> <span class="s2">"mpirun"</span><span class="p">})</span>
+    <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">smoke</span><span class="p">:</span>
+        <span class="n">_report</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">code</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_report</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The calibration report (posteriors, evidence; :mod:`axqua.calibration_report`);</span>
+<span class="sd">    a failure is a warning, never a failed calibration."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_report</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">written</span> <span class="o">=</span> <span class="n">write_report</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                      <span class="c1"># noqa: BLE001 - the calibration is done</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the calibration report could not be written: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">written</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Calibration report: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span>
+                       <span class="n">kind</span><span class="o">=</span><span class="s2">"figure"</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".png"</span> <span class="k">else</span> <span class="s2">"file"</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
 <span class="c1"># using the posterior</span>
 <span class="c1"># --------------------------------------------------------------------------- #</span>
 <div class="viewcode-block" id="read_posterior">
@@ -1292,7 +1644,7 @@
                               <span class="n">margin</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
                               <span class="n">min_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
                               <span class="n">cache</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                              <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                              <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">min_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""A ``z_resolver`` that puts each target at its measured RELATIVE depth.</span>
 
 <span class="sd">    ``z = bed_model(x, y) + f * depth_model(x, y)``, with ``f`` derived from the</span>
@@ -1303,7 +1655,10 @@
 <span class="sd">    added, and the DEM has a depth-proportional bias.</span>
 
 <span class="sd">    Writes ``target-placement.csv`` beside the calibration inputs so every target's</span>
-<span class="sd">    position is auditable rather than implicit.</span>
+<span class="sd">    position is auditable rather than implicit. A target outside the model's water</span>
+<span class="sd">    (outside the lattice, or in a column shallower than *min_depth*) gets ``NaN``, and</span>
+<span class="sd">    :func:`_velocity_csv` leaves it out: HydroBayesCal would otherwise read the nearest</span>
+<span class="sd">    cell, wherever that is.</span>
 <span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.ground_truth</span><span class="w"> </span><span class="kn">import</span> <span class="n">relative_height</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.model_column</span><span class="w"> </span><span class="kn">import</span> <span class="n">openfoam_column</span>
@@ -1342,8 +1697,8 @@
 
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"target placement: </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> usable (f from </span><span class="si">%s</span><span class="s2">, column from </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
                  <span class="nb">int</span><span class="p">(</span><span class="n">usable</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">f_source</span><span class="p">,</span> <span class="n">column</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-        <span class="n">_assert_targets_placed</span><span class="p">(</span><span class="n">audit</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">z</span>
+        <span class="n">_assert_targets_placed</span><span class="p">(</span><span class="n">audit</span><span class="p">,</span> <span class="n">min_points</span><span class="o">=</span><span class="n">min_points</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">usable</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">resolve</span></div>
 

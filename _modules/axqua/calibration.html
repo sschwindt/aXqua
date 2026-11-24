@@ -371,6 +371,122 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">ground_truth</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+<span class="c1">#: Warnings about the size of the initial design; the job copies them into its results.</span>
+<span class="n">design_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua.calibration_design"</span><span class="p">)</span>
+
+<span class="c1">#: Initial runs per calibration parameter: the sample size n = 10 d that Loeppky, Sacks</span>
+<span class="c1">#: and Welch (2009, Technometrics 51(4)) recommend for the initial design of a computer</span>
+<span class="c1">#: experiment that a Gaussian process is fitted to. HydroBayesCal applies the same rule</span>
+<span class="c1">#: (``surrogate.initial_design.recommended_init_runs``).</span>
+<span class="n">RUNS_PER_PARAMETER</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="c1">#: The smallest initial design, HydroBayesCal's floor: below it a Gaussian process over</span>
+<span class="c1">#: more than one parameter is no surrogate worth the name.</span>
+<span class="n">MINIMUM_INITIAL_RUNS</span> <span class="o">=</span> <span class="mi">16</span>
+
+
+<div class="viewcode-block" id="recommended_initial_runs">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.recommended_initial_runs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">recommended_initial_runs</span><span class="p">(</span><span class="n">n_parameters</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The initial runs a calibration of *n_parameters* needs.</span>
+
+<span class="sd">    Ten per parameter (:data:`RUNS_PER_PARAMETER`), at least</span>
+<span class="sd">    :data:`MINIMUM_INITIAL_RUNS`, rounded up to the next power of two: the initial design</span>
+<span class="sd">    is a Sobol sequence, whose points are evenly spread over the parameter ranges only</span>
+<span class="sd">    at 2**m points (the balance property of a Sobol sequence). Four parameters: 40 runs,</span>
+<span class="sd">    so 64.</span>
+<span class="sd">    """</span>
+    <span class="n">floor</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">RUNS_PER_PARAMETER</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_parameters</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="n">MINIMUM_INITIAL_RUNS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">floor</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="default_iterations">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.default_iterations">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_iterations</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Iterations of active learning of a calibration that runs a fixed number of them.</span>
+
+<span class="sd">    That is a calibration with ``until_converged: false`` and no ``max_runs``. Twice</span>
+<span class="sd">    :data:`axqua.calibration_report.CONVERGENCE_MINIMUM`: the plateau of the evidence</span>
+<span class="sd">    counts only after that many iterations, and the number leaves as many again for a</span>
+<span class="sd">    plateau that comes later. With ``until_converged`` (the default), the active</span>
+<span class="sd">    learning has no such number: it runs until the plateau holds.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONVERGENCE_MINIMUM</span>
+
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">CONVERGENCE_MINIMUM</span></div>
+
+
+
+<div class="viewcode-block" id="run_budget">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.run_budget">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_budget</span><span class="p">(</span><span class="n">calibration</span><span class="p">,</span> <span class="n">n_parameters</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(init_runs, max_runs, first block)`` of a calibration of *n_parameters*.</span>
+
+<span class="sd">    ``init_runs`` is the case's, or :func:`recommended_initial_runs` where the case sets</span>
+<span class="sd">    none. ``max_runs`` is the case's; where the case sets none, it is None (no limit)</span>
+<span class="sd">    when the active learning runs until it converges (``until_converged``, the user's</span>
+<span class="sd">    rule of 2026-11-23: enough iterations for the evidence and the relative entropy to</span>
+<span class="sd">    converge, not a number fixed beforehand), and ``init_runs`` plus</span>
+<span class="sd">    :func:`default_iterations` otherwise. The first block of HydroBayesCal's staged</span>
+<span class="sd">    initial design is the case's ``init_runs_min``, or the recommended size: the design</span>
+<span class="sd">    grows beyond it only where HydroBayesCal finds it insufficient, and never stops</span>
+<span class="sd">    below the rule.</span>
+<span class="sd">    """</span>
+    <span class="n">recommended</span> <span class="o">=</span> <span class="n">recommended_initial_runs</span><span class="p">(</span><span class="n">n_parameters</span><span class="p">)</span>
+    <span class="n">init_runs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">calibration</span><span class="o">.</span><span class="n">init_runs</span><span class="p">)</span> <span class="k">if</span> <span class="n">calibration</span><span class="o">.</span><span class="n">init_runs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">recommended</span>
+    <span class="k">if</span> <span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">calibration</span><span class="p">,</span> <span class="s2">"until_converged"</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">max_runs</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">max_runs</span> <span class="o">=</span> <span class="n">init_runs</span> <span class="o">+</span> <span class="n">default_iterations</span><span class="p">()</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">calibration</span><span class="o">.</span><span class="n">init_runs_min</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="k">if</span> <span class="n">first</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">recommended</span><span class="p">,</span> <span class="n">init_runs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">first</span></div>
+
+
+
+<div class="viewcode-block" id="pass_ceiling">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.pass_ceiling">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pass_ceiling</span><span class="p">(</span><span class="n">init_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The ``max_runs`` a HydroBayesCal configuration states, which needs a number.</span>
+
+<span class="sd">    The case's limit, or without one the initial runs plus the</span>
+<span class="sd">    :data:`~axqua.calibration_report.CONVERGENCE_MINIMUM` iterations that the first</span>
+<span class="sd">    pass of active learning runs (:func:`axqua.bayescal._launch_in_passes`).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">max_runs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_runs</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONVERGENCE_MINIMUM</span>
+
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">init_runs</span><span class="p">)</span> <span class="o">+</span> <span class="n">CONVERGENCE_MINIMUM</span></div>
+
+
+
+<div class="viewcode-block" id="check_run_budget">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.check_run_budget">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_run_budget</span><span class="p">(</span><span class="n">calibration</span><span class="p">,</span> <span class="n">n_parameters</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">""":func:`run_budget`, with a warning where the case sets fewer runs than the rule."""</span>
+    <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">first</span> <span class="o">=</span> <span class="n">run_budget</span><span class="p">(</span><span class="n">calibration</span><span class="p">,</span> <span class="n">n_parameters</span><span class="p">)</span>
+    <span class="n">recommended</span> <span class="o">=</span> <span class="n">recommended_initial_runs</span><span class="p">(</span><span class="n">n_parameters</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">init_runs</span> <span class="o">&lt;</span> <span class="n">recommended</span><span class="p">:</span>
+        <span class="n">design_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"calibration.init_runs = </span><span class="si">%d</span><span class="s2"> is below the </span><span class="si">%d</span><span class="s2"> initial runs that </span><span class="si">%d</span><span class="s2"> calibration "</span>
+            <span class="s2">"parameters need (</span><span class="si">%d</span><span class="s2"> per parameter, rounded up to a power of two for an even "</span>
+            <span class="s2">"Sobol design). Remove init_runs from the case file to use the rule, or "</span>
+            <span class="s2">"calibrate fewer parameters."</span><span class="p">,</span> <span class="n">init_runs</span><span class="p">,</span> <span class="n">recommended</span><span class="p">,</span> <span class="n">n_parameters</span><span class="p">,</span>
+            <span class="n">RUNS_PER_PARAMETER</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_runs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">max_runs</span> <span class="o">&lt;=</span> <span class="n">init_runs</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"calibration.max_runs = </span><span class="si">{</span><span class="n">max_runs</span><span class="si">}</span><span class="s2"> leaves no run for the active learning "</span>
+            <span class="sa">f</span><span class="s2">"after </span><span class="si">{</span><span class="n">init_runs</span><span class="si">}</span><span class="s2"> initial runs"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.max_runs"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Raise max_runs above </span><span class="si">{</span><span class="n">init_runs</span><span class="si">}</span><span class="s2">, or remove it from the case file: "</span>
+                   <span class="s2">"the active learning then runs until it converges."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">first</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_scalar_velocity_with_error</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
@@ -380,11 +496,11 @@
 <span class="sd">    cannot drift apart: they are the same quantity under two solvers' names, and</span>
 <span class="sd">    the error propagation is the part that would be easy to get subtly different.</span>
 
-<span class="sd">    sigma_V = (1/V) * sqrt(sum_i (c_i * sigma_i)^2)</span>
+<span class="sd">    sigma_V = (1/V) * sqrt(sum_i (c_i * sigma_i)^2), over the horizontal components ``u`` and ``v`` (:func:`axqua.ground_truth.scalar_velocity`).</span>
 <span class="sd">    """</span>
     <span class="n">vel</span> <span class="o">=</span> <span class="n">ground_truth</span><span class="o">.</span><span class="n">scalar_velocity</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
     <span class="n">terms</span> <span class="o">=</span> <span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_err"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
-             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="ow">and</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_err"</span> <span class="ow">in</span> <span class="n">df</span><span class="p">]</span>
+             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="ow">and</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">_err"</span> <span class="ow">in</span> <span class="n">df</span><span class="p">]</span>
     <span class="n">err</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">terms</span><span class="p">:</span>
         <span class="n">safe_v</span> <span class="o">=</span> <span class="n">vel</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
@@ -410,7 +526,7 @@
     <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"SCALAR VELOCITY"</span> <span class="ow">and</span> <span class="s2">"u_mag"</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
         <span class="n">err</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"u_mag_std"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"u_mag_std"</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="s2">"u_mag"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">err</span>
-    <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"SCALAR VELOCITY"</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"SCALAR VELOCITY"</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">)):</span>
         <span class="k">return</span> <span class="n">_scalar_velocity_with_error</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
     <span class="c1"># --- OpenFOAM field names (axqua.solvers.openfoam.calibration) ------------</span>
     <span class="c1"># HydroBayesCal's OpenFOAM binding extracts U_x/U_y/U_z/U_MAG/TKE, not the</span>
@@ -423,7 +539,7 @@
     <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"U_MAG"</span> <span class="ow">and</span> <span class="s2">"u_mag"</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
         <span class="n">err</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"u_mag_std"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"u_mag_std"</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="s2">"u_mag"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">err</span>
-    <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"U_MAG"</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"U_MAG"</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">)):</span>
         <span class="k">return</span> <span class="n">_scalar_velocity_with_error</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"TKE"</span> <span class="ow">and</span> <span class="s2">"tke"</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="s2">"tke"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="kc">None</span>
@@ -509,6 +625,7 @@
                           <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">z_resolver</span><span class="p">:</span> <span class="s2">"Callable[[pd.DataFrame], np.ndarray] | None"</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">point_filter</span><span class="p">:</span> <span class="s2">"Callable[[pd.DataFrame], np.ndarray] | None"</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Write the HydroBayesCal calibration-points CSV from the tidy ground truth.</span>
 
@@ -543,6 +660,8 @@
 <span class="sd">    ``hydraulics-3d``). They must not share a category: ``compile_ground_truth``</span>
 <span class="sd">    concatenates sources that do, which would silently hand both calibrations the</span>
 <span class="sd">    union of the two row sets.</span>
+
+<span class="sd">    *point_filter* returns, for the table of points, which rows to keep. A solver adapter that may not reach into the mesh of another solver is handed the rules of the case this way: the OpenFOAM calibration leaves out the points outside the 2D model and those near an inflow or outflow line (:mod:`axqua.openfoam_situations`).</span>
 <span class="sd">    """</span>
     <span class="n">compile_ground_truth</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>            <span class="c1"># no-op when the table is user-supplied</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">sources</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">measurements</span> <span class="ow">is</span> <span class="kc">None</span> \
@@ -567,6 +686,11 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="n">category</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">_pick_table</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="n">quantities</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">point_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">point_filter</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">keep</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">),):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the point filter returned </span><span class="si">{</span><span class="n">keep</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s2"> points"</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">z_resolver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">z_column</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">z_resolver</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -767,17 +891,28 @@
 <a class="viewcode-back" href="../../code/workflow.html#axqua.calibration.emit_hbc_config">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">calibration_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                     <span class="n">complete_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="n">parameters</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+                    <span class="n">parameters</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">budget</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Emit a HydroBayesCal ``config_Telemac.py`` for the produced case.</span>
 
 <span class="sd">    *complete_bal_mode* False runs the initial simulations only; *only_bal_mode* True</span>
 <span class="sd">    (with *complete_bal_mode*) continues from the saved initial simulations with the</span>
 <span class="sd">    active learning (HydroBayesCal's two execution switches). *parameters* are the</span>
 <span class="sd">    ones to calibrate (default :func:`telemac_parameters`; a calibration passes those of</span>
-<span class="sd">    its zone plan, :func:`axqua.calibration_zones.zone_plan`).</span>
+<span class="sd">    its zone plan, :func:`axqua.calibration_zones.zone_plan`). *budget* ``(init_runs,</span>
+<span class="sd">    max_runs, adaptive)`` replaces the case's run counts, and the adaptive initial</span>
+<span class="sd">    design unless *adaptive* is None, for the passes of</span>
+<span class="sd">    :func:`axqua.bayescal._launch_in_passes`.</span>
 <span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">first</span> <span class="o">=</span> <span class="n">run_budget</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">))</span>
+    <span class="n">adaptive</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">budget</span><span class="p">:</span>
+        <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">adaptive</span> <span class="o">=</span> <span class="n">budget</span>
+    <span class="n">max_runs</span> <span class="o">=</span> <span class="n">pass_ceiling</span><span class="p">(</span><span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">)</span>
+    <span class="n">adaptive</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">adaptive_init_runs</span><span class="p">)</span> <span class="k">if</span> <span class="n">adaptive</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">adaptive</span><span class="p">)</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">init_runs</span><span class="p">))</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="n">ranges</span> <span class="o">=</span> <span class="p">[[</span><span class="n">p</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">max</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
     <span class="c1"># which case HydroBayesCal drives: the built steady 2D case by default, or the</span>
@@ -869,15 +1004,16 @@
 <span class="se">}}</span>
 
 <span class="s1">sampling = </span><span class="se">{{</span>
-<span class="s1">    'init_runs': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">init_runs</span><span class="si">}</span><span class="s1">,</span>
-<span class="s1">    'max_runs': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">max_runs</span><span class="si">}</span><span class="s1">,</span>
+<span class="s1">    'init_runs': </span><span class="si">{</span><span class="n">init_runs</span><span class="si">}</span><span class="s1">,</span>
+<span class="s1">    'max_runs': </span><span class="si">{</span><span class="n">max_runs</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    'parameter_distribution': 'uniform',</span>
 <span class="s1">    'parameter_sampling_method': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">parameter_sampling_method</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    # HydroBayesCal &gt;= 1.5: grow the initial design in Sobol blocks and stop when</span>
-<span class="s1">    # it is measurably sufficient. init_runs is the ceiling, so this can only save</span>
-<span class="s1">    # runs; the saved ones become BAL iterations.</span>
-<span class="s1">    'adaptive_init_runs': </span><span class="si">{</span><span class="nb">bool</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">adaptive_init_runs</span><span class="p">)</span><span class="si">}</span><span class="s1">,</span>
-<span class="s1">    'init_runs_min': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">init_runs_min</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    # it is measurably sufficient. init_runs is the ceiling and init_runs_min the</span>
+<span class="s1">    # first block, 10 runs per parameter rounded up to a power of two unless the case</span>
+<span class="s1">    # sets it (axqua.calibration.run_budget), so the design never stops below that.</span>
+<span class="s1">    'adaptive_init_runs': </span><span class="si">{</span><span class="n">adaptive</span><span class="si">}</span><span class="s1">,</span>
+<span class="s1">    'init_runs_min': </span><span class="si">{</span><span class="n">first</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    # exploit the posterior until &gt;1 well-separated mode is found, then explore</span>
 <span class="s1">    'bal_exploration_tradeoff': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">bal_exploration_tradeoff</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    'tp_selection_criteria': 'dkl',</span>
@@ -888,6 +1024,7 @@
 <span class="s1">    'mc_samples_al': 2000,</span>
 <span class="s1">    'mc_exploration': 1000,</span>
 <span class="s1">    'gp_library': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_library</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    'gp_mean': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_mean</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    # 'variables': one multi-output GPE per location, its outputs the calibration</span>
 <span class="s1">    # quantities (calibration.multitask_selection)</span>
 <span class="s1">    'multitask_selection': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">multitask_selection</span><span class="si">!r}</span><span class="s1">,</span>

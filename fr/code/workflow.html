@@ -953,7 +953,8 @@ own column names and returns one row per <em>reading</em>, keyed by the same <co
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.ground_truth.scalar_velocity">
 <span class="sig-prename descclassname"><span class="pre">axqua.ground_truth.</span></span><span class="sig-name descname"><span class="pre">scalar_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/ground_truth.html#scalar_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.ground_truth.scalar_velocity" title="Lien vers cette définition"></a></dt>
-<dd><p>Depth-averaged scalar velocity magnitude from the components present.</p>
+<dd><p>Horizontal speed from the components <code class="docutils literal notranslate"><span class="pre">u</span></code> and <code class="docutils literal notranslate"><span class="pre">v</span></code>.</p>
+<p>The vertical component is left out: what a 2D model computes and what a velocity survey is compared with is the horizontal speed, and a side-looking probe’s <code class="docutils literal notranslate"><span class="pre">w</span></code> is mostly the tilt of its mounting (KB15, September 2025: mean <code class="docutils literal notranslate"><span class="pre">|w|</span></code> 0.25 m/s against a horizontal speed of 0.28 m/s). Before 2026-11-17 it was included, which inflated the OpenFOAM <code class="docutils literal notranslate"><span class="pre">U_MAG</span></code> targets of that survey by 40 %; the TELEMAC targets were always built from <code class="docutils literal notranslate"><span class="pre">u</span></code> and <code class="docutils literal notranslate"><span class="pre">v</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>)</p>
@@ -3982,9 +3983,133 @@ it overrides <em>n_time_steps</em>.</p>
 HydroBayesCal reads (<code class="docutils literal notranslate"><span class="pre">id,</span> <span class="pre">x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">&lt;QTY&gt;_DATA,</span> <span class="pre">&lt;QTY&gt;_ERROR</span></code> columns) and emits
 a <code class="docutils literal notranslate"><span class="pre">config_Telemac.py</span></code> wiring the produced case to the calibration parameters
 and BAL settings declared in the axqua config.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.calibration.design_log">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">design_log</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Logger</span> <span class="pre">axqua.calibration_design</span> <span class="pre">(WARNING)&gt;</span></span><a class="headerlink" href="#axqua.calibration.design_log" title="Lien vers cette définition"></a></dt>
+<dd><p>Warnings about the size of the initial design; the job copies them into its results.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.calibration.RUNS_PER_PARAMETER">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">RUNS_PER_PARAMETER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></span><a class="headerlink" href="#axqua.calibration.RUNS_PER_PARAMETER" title="Lien vers cette définition"></a></dt>
+<dd><p>the sample size n = 10 d that Loeppky, Sacks
+and Welch (2009, Technometrics 51(4)) recommend for the initial design of a computer
+experiment that a Gaussian process is fitted to. HydroBayesCal applies the same rule
+(<code class="docutils literal notranslate"><span class="pre">surrogate.initial_design.recommended_init_runs</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Initial runs per calibration parameter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.calibration.MINIMUM_INITIAL_RUNS">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">MINIMUM_INITIAL_RUNS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></span><a class="headerlink" href="#axqua.calibration.MINIMUM_INITIAL_RUNS" title="Lien vers cette définition"></a></dt>
+<dd><p>below it a Gaussian process over
+more than one parameter is no surrogate worth the name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The smallest initial design, HydroBayesCal’s floor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.calibration.recommended_initial_runs">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">recommended_initial_runs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#recommended_initial_runs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.recommended_initial_runs" title="Lien vers cette définition"></a></dt>
+<dd><p>The initial runs a calibration of <em>n_parameters</em> needs.</p>
+<p>Ten per parameter (<a class="reference internal" href="#axqua.calibration.RUNS_PER_PARAMETER" title="axqua.calibration.RUNS_PER_PARAMETER"><code class="xref py py-data docutils literal notranslate"><span class="pre">RUNS_PER_PARAMETER</span></code></a>), at least
+<a class="reference internal" href="#axqua.calibration.MINIMUM_INITIAL_RUNS" title="axqua.calibration.MINIMUM_INITIAL_RUNS"><code class="xref py py-data docutils literal notranslate"><span class="pre">MINIMUM_INITIAL_RUNS</span></code></a>, rounded up to the next power of two: the initial design
+is a Sobol sequence, whose points are evenly spread over the parameter ranges only
+at 2**m points (the balance property of a Sobol sequence). Four parameters: 40 runs,
+so 64.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.calibration.default_iterations">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">default_iterations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#default_iterations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.default_iterations" title="Lien vers cette définition"></a></dt>
+<dd><p>Iterations of active learning of a calibration that runs a fixed number of them.</p>
+<p>That is a calibration with <code class="docutils literal notranslate"><span class="pre">until_converged:</span> <span class="pre">false</span></code> and no <code class="docutils literal notranslate"><span class="pre">max_runs</span></code>. Twice
+<code class="xref py py-data docutils literal notranslate"><span class="pre">axqua.calibration_report.CONVERGENCE_MINIMUM</span></code>: the plateau of the evidence
+counts only after that many iterations, and the number leaves as many again for a
+plateau that comes later. With <code class="docutils literal notranslate"><span class="pre">until_converged</span></code> (the default), the active
+learning has no such number: it runs until the plateau holds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.calibration.run_budget">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">run_budget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#run_budget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.run_budget" title="Lien vers cette définition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(init_runs,</span> <span class="pre">max_runs,</span> <span class="pre">first</span> <span class="pre">block)</span></code> of a calibration of <em>n_parameters</em>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">init_runs</span></code> is the case’s, or <a class="reference internal" href="#axqua.calibration.recommended_initial_runs" title="axqua.calibration.recommended_initial_runs"><code class="xref py py-func docutils literal notranslate"><span class="pre">recommended_initial_runs()</span></code></a> where the case sets
+none. <code class="docutils literal notranslate"><span class="pre">max_runs</span></code> is the case’s; where the case sets none, it is None (no limit)
+when the active learning runs until it converges (<code class="docutils literal notranslate"><span class="pre">until_converged</span></code>, the user’s
+rule of 2026-11-23: enough iterations for the evidence and the relative entropy to
+converge, not a number fixed beforehand), and <code class="docutils literal notranslate"><span class="pre">init_runs</span></code> plus
+<a class="reference internal" href="#axqua.calibration.default_iterations" title="axqua.calibration.default_iterations"><code class="xref py py-func docutils literal notranslate"><span class="pre">default_iterations()</span></code></a> otherwise. The first block of HydroBayesCal’s staged
+initial design is the case’s <code class="docutils literal notranslate"><span class="pre">init_runs_min</span></code>, or the recommended size: the design
+grows beyond it only where HydroBayesCal finds it insufficient, and never stops
+below the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a> | None, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.calibration.pass_ceiling">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">pass_ceiling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_runs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#pass_ceiling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.pass_ceiling" title="Lien vers cette définition"></a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">max_runs</span></code> a HydroBayesCal configuration states, which needs a number.</p>
+<p>The case’s limit, or without one the initial runs plus the
+<code class="xref py py-data docutils literal notranslate"><span class="pre">CONVERGENCE_MINIMUM</span></code> iterations that the first
+pass of active learning runs (<code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.bayescal._launch_in_passes()</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init_runs</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>max_runs</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.calibration.check_run_budget">
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">check_run_budget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#check_run_budget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.check_run_budget" title="Lien vers cette définition"></a></dt>
+<dd><p><a class="reference internal" href="#axqua.calibration.run_budget" title="axqua.calibration.run_budget"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_budget()</span></code></a>, with a warning where the case sets fewer runs than the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a> | None, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.calibration.build_calibration_csv">
-<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">build_calibration_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">floors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_resolver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#build_calibration_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.build_calibration_csv" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">build_calibration_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">floors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_resolver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#build_calibration_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.build_calibration_csv" title="Lien vers cette définition"></a></dt>
 <dd><p>Write the HydroBayesCal calibration-points CSV from the tidy ground truth.</p>
 <p>The tidy table is compiled from <code class="docutils literal notranslate"><span class="pre">ground_truth.sources</span></code> when given, otherwise
 read from a user-authored <code class="docutils literal notranslate"><span class="pre">ground_truth.measurements</span></code>. Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if neither
@@ -4013,6 +4138,7 @@ per-reading - by compiling them as separate categories (<code class="docutils li
 <code class="docutils literal notranslate"><span class="pre">hydraulics-3d</span></code>). They must not share a category: <code class="docutils literal notranslate"><span class="pre">compile_ground_truth</span></code>
 concatenates sources that do, which would silently hand both calibrations the
 union of the two row sets.</p>
+<p><em>point_filter</em> returns, for the table of points, which rows to keep. A solver adapter that may not reach into the mesh of another solver is handed the rules of the case this way: the OpenFOAM calibration leaves out the points outside the 2D model and those near an inflow or outflow line (<code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.openfoam_situations</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4021,6 +4147,7 @@ union of the two row sets.</p>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>z_resolver</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(dans Python v3.15)"><em>Callable</em></a><em>[</em><em>[</em><em>pandas.DataFrame</em><em>]</em><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)"><em>numpy.ndarray</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>category</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>point_filter</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(dans Python v3.15)"><em>Callable</em></a><em>[</em><em>[</em><em>pandas.DataFrame</em><em>]</em><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)"><em>numpy.ndarray</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
@@ -4126,13 +4253,16 @@ reach, else None.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.calibration.emit_hbc_config">
-<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">emit_hbc_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_csv</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#emit_hbc_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.emit_hbc_config" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.calibration.</span></span><span class="sig-name descname"><span class="pre">emit_hbc_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_csv</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_bal_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">budget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/calibration.html#emit_hbc_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.calibration.emit_hbc_config" title="Lien vers cette définition"></a></dt>
 <dd><p>Emit a HydroBayesCal <code class="docutils literal notranslate"><span class="pre">config_Telemac.py</span></code> for the produced case.</p>
 <p><em>complete_bal_mode</em> False runs the initial simulations only; <em>only_bal_mode</em> True
 (with <em>complete_bal_mode</em>) continues from the saved initial simulations with the
 active learning (HydroBayesCal’s two execution switches). <em>parameters</em> are the
 ones to calibrate (default <a class="reference internal" href="#axqua.calibration.telemac_parameters" title="axqua.calibration.telemac_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">telemac_parameters()</span></code></a>; a calibration passes those of
-its zone plan, <code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.calibration_zones.zone_plan()</span></code>).</p>
+its zone plan, <code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.calibration_zones.zone_plan()</span></code>). <em>budget</em> <code class="docutils literal notranslate"><span class="pre">(init_runs,</span>
+<span class="pre">max_runs,</span> <span class="pre">adaptive)</span></code> replaces the case’s run counts, and the adaptive initial
+design unless <em>adaptive</em> is None, for the passes of
+<code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.bayescal._launch_in_passes()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4141,6 +4271,7 @@ its zone plan, <code class="xref py py-func docutils literal notranslate"><span 
 <li><p><strong>complete_bal_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>only_bal_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><em>list</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>budget</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
@@ -4339,8 +4470,18 @@ the four calibrated zones at their prior bounds: at the upper bounds the stored
 volume rose 5 % and the inflow-outflow imbalance stayed below 0.1 % from 2,949 s
 on (1.2 residence times), the depth and velocity at the 30 verticals then within
 0.06 % and 0.3 % of their final values on average; at the lower bounds the volume
-fell 10 % and was flat from about 2,000 s, while the flow kept shedding eddies
-(outflow +/- 1 %), which no run length removes.</p>
+fell 10 % and was flat from about 2,000 s, while the outflow kept swinging by
++/- 1 %, which no run length removes (the bed friction then no longer damps large
+horizontal flow structures in the slow lower reach; see flux_convergence.NET_SHARE). Confirmed on 2026-11-22 with the
+highest outflow level the energy slope can set (<a class="reference internal" href="#axqua.bayescal.outflow_top_level" title="axqua.bayescal.outflow_top_level"><code class="xref py py-func docutils literal notranslate"><span class="pre">outflow_top_level()</span></code></a>) and runs
+continued to 9,000 s: at 55.4 m3/s with the largest roughness the reach filled from
+133,700 to 266,800 m3 (the level pool estimates 5 % less), inflow and outflow agreed
+within 0.1 % over every 500 s from 3,400 s on, and the velocity at the 68 calibration points
+was within 0.8 cm/s of its final value at 5,300 s and 0.2 cm/s at 6,600 s, against
+up to 4.4 cm/s at the 3,500 s of the earlier trial (derived duration 6,200 s); at
+45.8 m3/s with the smallest roughness (6,600 s) the volume stayed within 0.1 % of its
+final 218,400 m3 from 3,800 s on, while the unsteady flow of the slow lower reach
+swung it by +/- 134 m3.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -4380,6 +4521,27 @@ written its <code class="docutils literal notranslate"><span class="pre">liquid-
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.outflow_top_level">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">outflow_top_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discharge</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#outflow_top_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.outflow_top_level" title="Lien vers cette définition"></a></dt>
+<dd><p>The highest outflow level [m] the calibration can set at <em>discharge</em>, or None.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">calibration.outflow_slope</span></code> the normal stage of the outflow section at the
+smallest energy slope of the range, with <code class="docutils literal notranslate"><span class="pre">calibration.outflow_offset</span></code> the level
+of the rating plus the largest offset; None when the case does not calibrate its
+outflow level or has no outflow section to compute it on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>discharge</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="axqua.bayescal.calibration_hotstart_duration">
 <span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">calibration_hotstart_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#calibration_hotstart_duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.calibration_hotstart_duration" title="Lien vers cette définition"></a></dt>
 <dd><p>Simulated time [s] of a calibration run that starts from the steady result.</p>
@@ -4388,7 +4550,13 @@ written its <code class="docutils literal notranslate"><span class="pre">liquid-
 100 s, plus the ramp of the outflow offset when the case calibrates it: the residence time is the volume of water in the converged result over the
 discharge, the time in which the reach exchanges its water once. A changed
 roughness changes the stored volume, and the flow has settled once that change
-has passed the outflow.</p>
+has passed the outflow. When the case calibrates its outflow level, the volume is
+that of the reach with the highest level the calibration can set
+(<a class="reference internal" href="#axqua.bayescal.outflow_top_level" title="axqua.bayescal.outflow_top_level"><code class="xref py py-func docutils literal notranslate"><span class="pre">outflow_top_level()</span></code></a>), filled as a level pool over the steady result: a
+raised outflow level backs the water up through the reach, which stores up to
+twice the water then (Inn KB15 at the smallest energy slope, 2026-11-22), and the
+run settles only once that volume has been exchanged. Before, the volume of the
+steady result alone left 49 of the 150 runs of the KB15 trial unsettled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
@@ -4419,7 +4587,7 @@ has passed the outflow.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.bayescal.run_single_flow_calibration">
-<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">run_single_flow_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraction_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#run_single_flow_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.run_single_flow_calibration" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">run_single_flow_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraction_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#run_single_flow_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.run_single_flow_calibration" title="Lien vers cette définition"></a></dt>
 <dd><p>End-to-end single-discharge calibration of the built case.</p>
 <p>Compiles the calibration CSV, ensures the <code class="docutils literal notranslate"><span class="pre">.cas</span></code> prints the target,
 emits the HydroBayesCal config, stages the driver and (unless
@@ -4437,6 +4605,7 @@ simulations an earlier calibration saved. Returns the driver exit code (0 when
 <li><p><strong>resume</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>checkout</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>env</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>extend</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
@@ -4691,7 +4860,7 @@ block of per-flow steering/CSV entries). <em>parameters</em> as in
 <li><p><strong>csv_paths</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a><em>]</em>)</p></li>
 <li><p><strong>n_cpus</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
 <li><p><strong>init_runs</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
-<li><p><strong>max_runs</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>max_runs</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>complete_bal_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>only_bal_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>prior_samples</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em> | </em><em>None</em>)</p></li>
@@ -4945,6 +5114,18 @@ one of the case’s discharge.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.case_situation">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">case_situation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#case_situation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.case_situation" title="Lien vers cette définition"></a></dt>
+<dd><p>The situation of the case’s own discharge, measured in <code class="docutils literal notranslate"><span class="pre">ground_truth</span></code>.</p>
+<p>No sources of its own: its measurements are those of <code class="docutils literal notranslate"><span class="pre">ground_truth</span></code>, and its boundary values are those of the case (the discharge of each inflow line where the case gives no total, and the outflow level too, which <code class="docutils literal notranslate"><span class="pre">outflow_condition:</span> <span class="pre">elevation</span></code> requires of every situation).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="axqua.bayescal.situation_points">
 <span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">situation_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">situation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#situation_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.situation_points" title="Lien vers cette définition"></a></dt>
 <dd><p>The calibration-points CSV of one situation, by the rules of the single-flow table.</p>
@@ -5017,7 +5198,7 @@ of the case for 1.2 residence times at the situation’s discharge
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.bayescal.run_situation_calibration">
-<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">run_situation_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraction_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#run_situation_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.run_situation_calibration" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">run_situation_calibration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extraction_quantities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth_err_floor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepare_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#run_situation_calibration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.run_situation_calibration" title="Lien vers cette définition"></a></dt>
 <dd><p>Calibrate one set of parameters against the measurements of several situations.</p>
 <p>Each situation of <a class="reference internal" href="#axqua.bayescal.calibration_situations" title="axqua.bayescal.calibration_situations"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibration_situations()</span></code></a> gets its calibration points and
 its own steering file; HydroBayesCal’s multi-flow driver runs every tested
@@ -5038,6 +5219,7 @@ run of the case is active, unless <em>force</em>. Returns the driver exit code (
 <li><p><strong>resume</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 <li><p><strong>checkout</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>extend</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
@@ -5064,6 +5246,33 @@ a failure is a warning, never a failed calibration.</p>
 </dl>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.RUN_BUDGET">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">RUN_BUDGET</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'run-budget.json'</span></span><a class="headerlink" href="#axqua.bayescal.RUN_BUDGET" title="Lien vers cette définition"></a></dt>
+<dd><p>The run budget of a calibration, next to its driver configuration (<a class="reference internal" href="#axqua.bayescal.record_run_budget" title="axqua.bayescal.record_run_budget"><code class="xref py py-func docutils literal notranslate"><span class="pre">record_run_budget()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.record_run_budget">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">record_run_budget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#record_run_budget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.record_run_budget" title="Lien vers cette définition"></a></dt>
+<dd><p>The initial runs, the total runs and the first block of a calibration, recorded.</p>
+<p>From <a class="reference internal" href="#axqua.calibration.check_run_budget" title="axqua.calibration.check_run_budget"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.calibration.check_run_budget()</span></code></a> for the <em>parameters</em> calibrated (the
+zone plan’s), which warns where the case sets fewer initial runs than the rule. The
+budget is written to <a class="reference internal" href="#axqua.bayescal.RUN_BUDGET" title="axqua.bayescal.RUN_BUDGET"><code class="xref py py-data docutils literal notranslate"><span class="pre">RUN_BUDGET</span></code></a> in <em>folder</em>: the job’s progress reads the
+total from it, and the report and the user can see how it came about.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a> | None, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.bayescal.settle_zone_plan">
 <span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">settle_zone_plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">resume</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#settle_zone_plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.settle_zone_plan" title="Lien vers cette définition"></a></dt>
@@ -5086,6 +5295,117 @@ other ranges is refused.</p>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.DESIGN">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">DESIGN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.design'</span></span><a class="headerlink" href="#axqua.bayescal.DESIGN" title="Lien vers cette définition"></a></dt>
+<dd><p>The suffix of the restart files of the initial design, kept when a pass of the
+active learning makes all saved runs the restart design (<a class="reference internal" href="#axqua.bayescal.extend_restart" title="axqua.bayescal.extend_restart"><code class="xref py py-func docutils literal notranslate"><span class="pre">extend_restart()</span></code></a>):
+the model error of points the simulated flow cannot reach is measured on them.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.ARCHIVE">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">ARCHIVE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'BAL_dictionary.upto-{runs}.pkl'</span></span><a class="headerlink" href="#axqua.bayescal.ARCHIVE" title="Lien vers cette définition"></a></dt>
+<dd><p>the one of a finished pass, <code class="docutils literal notranslate"><span class="pre">&lt;n&gt;</span></code> runs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The name of an archived BAL dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.design_outputs">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">design_outputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#design_outputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.design_outputs" title="Lien vers cette définition"></a></dt>
+<dd><p>The outputs of the initial design: the kept copy once a pass has extended the restart design.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.runs_saved">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">runs_saved</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#runs_saved"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.runs_saved" title="Lien vers cette définition"></a></dt>
+<dd><p>The runs HydroBayesCal has saved for the situation of <em>restart</em>: rows of its collocation table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.extend_restart">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">extend_restart</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restart</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#extend_restart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.extend_restart" title="Lien vers cette définition"></a></dt>
+<dd><p>Make every saved run of a situation its restart design; returns their number.</p>
+<p>HydroBayesCal’s <code class="docutils literal notranslate"><span class="pre">only_bal_mode</span></code> trains the emulator on the restart design and
+continues the active learning from there, so a pass that starts from all saved runs
+continues the learning instead of repeating it. The restart files of the initial
+design are kept beside them with <a class="reference internal" href="#axqua.bayescal.DESIGN" title="axqua.bayescal.DESIGN"><code class="xref py py-data docutils literal notranslate"><span class="pre">DESIGN</span></code></a> in their names (once), because the
+model error of points the simulated flow cannot reach is measured on them
+(<a class="reference internal" href="#axqua.bayescal.design_outputs" title="axqua.bayescal.design_outputs"><code class="xref py py-func docutils literal notranslate"><span class="pre">design_outputs()</span></code></a>). The saved runs are HydroBayesCal’s own tables: the
+collocation points and the detailed outputs, one entry per run and point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cfg</strong> (<a class="reference internal" href="configuration.html#axqua.config.Config" title="axqua.config.Config"><em>Config</em></a>)</p></li>
+<li><p><strong>restart</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.evidence_converged">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">evidence_converged</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#evidence_converged"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.evidence_converged" title="Lien vers cette définition"></a></dt>
+<dd><p>The verdict of <code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.calibration_report.convergence()</span></code> on the calibration in <em>folder</em>, over all its passes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)">bool</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)">dict</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.bayescal.archive_dictionary">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">archive_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/bayescal.html#archive_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.bayescal.archive_dictionary" title="Lien vers cette définition"></a></dt>
+<dd><p>Keep the BAL dictionary of a finished pass, before the next pass overwrites it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>runs</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.bayescal.convergence_log">
+<span class="sig-prename descclassname"><span class="pre">axqua.bayescal.</span></span><span class="sig-name descname"><span class="pre">convergence_log</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Logger</span> <span class="pre">axqua.calibration_convergence</span> <span class="pre">(WARNING)&gt;</span></span><a class="headerlink" href="#axqua.bayescal.convergence_log" title="Lien vers cette définition"></a></dt>
+<dd><p>Warnings about the convergence of the active learning; the job copies them into its results.</p>
 </dd></dl>
 
 <p id="module-axqua.campaigns">Multi-campaign FlowTracker -&gt; per-flow HydroBayesCal calibration-point CSVs.</p>
@@ -5249,18 +5569,25 @@ this module: locating HydroBayesCal, staging a driver out of it with the patches
 axqua needs, and running that driver inside the right solver environment.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="axqua.hbc.HBC_MINIMUM">
-<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">HBC_MINIMUM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'1.13.0'</span></span><a class="headerlink" href="#axqua.hbc.HBC_MINIMUM" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">HBC_MINIMUM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'1.14.1'</span></span><a class="headerlink" href="#axqua.hbc.HBC_MINIMUM" title="Lien vers cette définition"></a></dt>
 <dd><p>Oldest HydroBayesCal that aXqua runs a calibration with; the same floor as the
 <code class="docutils literal notranslate"><span class="pre">calibration</span></code> extra in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> (a test keeps the two equal). 1.12.1
 starts the Sobol design at the first point of the sequence, so that a design of
 16 runs puts one run into each sixteenth of every parameter range; 1.12.2 lets the
 scikit-learn emulator (<code class="docutils literal notranslate"><span class="pre">gp_library:</span> <span class="pre">skl</span></code>) run with TELEMAC; 1.13.0 reads the
-per-parameter posterior peaks over bootstrap resamples, which aXqua applies.</p>
+per-parameter posterior peaks over bootstrap resamples, which aXqua applies;
+1.14.0 trains the hyperparameters of the single-output emulator (they had stayed
+near their initial values: on a k-epsilon test model the velocity error at 16 runs
+fell from 0.11 to 0.031), scales the parameters to [0, 1] by default, and brings
+the mean of the surrogate model that <code class="docutils literal notranslate"><span class="pre">calibration.gp_mean</span></code> selects; 1.14.1
+trains the single-output emulator alike for every solver (300 iterations at a
+learning rate of 0.1; 1.14.0 kept 150 at 0.07 for TELEMAC and 100 at 0.5 for
+OpenFOAM).</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.hbc.hbc_too_old">
-<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">hbc_too_old</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">installed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1.13.0'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/hbc.html#hbc_too_old"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.hbc.hbc_too_old" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">hbc_too_old</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">installed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1.14.1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/hbc.html#hbc_too_old"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.hbc.hbc_too_old" title="Lien vers cette définition"></a></dt>
 <dd><p>Whether <em>installed</em> is below <em>minimum</em>; an unreadable version passes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
@@ -5403,7 +5730,8 @@ which is exactly the sort of thing not to do to the caller’s own process.</p>
 it writes there each time it starts a run of the full model. The driver announces a
 run twice. <code class="docutils literal notranslate"><span class="pre">Running</span>&#160; <span class="pre">full</span> <span class="pre">complexity</span> <span class="pre">model</span> <span class="pre">#</span> <span class="pre">3</span></code> counts within the initial design and
 <code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">model</span> <span class="pre">after</span> <span class="pre">BAL</span> <span class="pre">#</span> <span class="pre">1</span></code> within the active learning, so both start again at 1;
-<code class="docutils literal notranslate"><span class="pre">Running</span> <span class="pre">full</span> <span class="pre">complexity</span> <span class="pre">model</span> <span class="pre">9</span></code> counts through both, and is the one read here.</p>
+<code class="docutils literal notranslate"><span class="pre">Running</span> <span class="pre">full</span> <span class="pre">complexity</span> <span class="pre">model</span> <span class="pre">9</span></code> counts through both, and is the number reported.
+The other two say which stage the run belongs to.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -5411,6 +5739,12 @@ run twice. <code class="docutils literal notranslate"><span class="pre">Running<
 <span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">DRIVER_RESULTS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'auto-saved-results-HydroBayesCal'</span></span><a class="headerlink" href="#axqua.hbc.DRIVER_RESULTS" title="Lien vers cette définition"></a></dt>
 <dd><p>The results folder of a HydroBayesCal driver. Since HydroBayesCal 1.12.0 the driver
 writes <code class="docutils literal notranslate"><span class="pre">logfile.log</span></code> there; before, it wrote it into its working folder.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.hbc.STAGE_DESIGN">
+<span class="sig-prename descclassname"><span class="pre">axqua.hbc.</span></span><span class="sig-name descname"><span class="pre">STAGE_DESIGN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'initial</span> <span class="pre">design'</span></span><a class="headerlink" href="#axqua.hbc.STAGE_DESIGN" title="Lien vers cette définition"></a></dt>
+<dd><p>The stages of a calibration, as <a class="reference internal" href="#axqua.hbc.RunCounter" title="axqua.hbc.RunCounter"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunCounter</span></code></a> reports them.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -5424,11 +5758,18 @@ so the job stood at « iteration 0 » from the first minute to the last. The d
 does write one line per model run to <code class="docutils literal notranslate"><span class="pre">logfile.log</span></code> in its results folder, and
 that is enough to say « run 7 of 12 ».</p>
 <p>Used as a context manager around the launch. A thread reads what the log has
-gained every <em>interval</em> seconds and calls <em>report</em> with the highest run number
-seen, once per change. Only lines written after entry count, so the log of an
-earlier calibration in the same folder is not replayed. Nothing here can fail a
-calibration: an unreadable log and a failing <em>report</em> are both ignored, and a
-driver that words the line differently simply reports no progress.</p>
+gained every <em>interval</em> seconds and calls <code class="docutils literal notranslate"><span class="pre">report(run,</span> <span class="pre">flow=...,</span> <span class="pre">stage=...)</span></code>
+once per change: <em>run</em> is the number of the parameter set, <em>flow</em> the situation a
+multi-flow driver is running (None for one situation) and <em>stage</em>
+<a class="reference internal" href="#axqua.hbc.STAGE_DESIGN" title="axqua.hbc.STAGE_DESIGN"><code class="xref py py-data docutils literal notranslate"><span class="pre">STAGE_DESIGN</span></code></a> or <code class="xref py py-data docutils literal notranslate"><span class="pre">STAGE_LEARNING</span></code> (None until the driver has said).
+The run number is reported only when it grows within a flow, and a new flow starts
+the count again: the initial design of a multi-flow driver runs all its parameter
+sets for one flow before the next, each from 1. Only reporting a growing number
+froze the multi-flow calibration of Inn KB15 (2026-11-22) at the last run of its
+first flow for as long as the second ran. Only lines written after entry count, so
+the log of an earlier calibration in the same folder is not replayed. Nothing here
+can fail a calibration: an unreadable log and a failing <em>report</em> are both ignored,
+and a driver that words the line differently simply reports no progress.</p>
 <p><em>logfile</em> may be a list of paths: all of them are followed, because the driver
 writes its log into its results folder since HydroBayesCal 1.12.0 and into its
 working folder before (<a class="reference internal" href="#axqua.hbc.driver_logs" title="axqua.hbc.driver_logs"><code class="xref py py-func docutils literal notranslate"><span class="pre">driver_logs()</span></code></a>).</p>
@@ -5436,15 +5777,25 @@ working folder before (<a class="reference internal" href="#axqua.hbc.driver_log
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>logfile</strong> (<em>Path</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>Sequence</em><em>[</em><em>Path</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
-<li><p><strong>report</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>]</em>)</p></li>
+<li><p><strong>report</strong> (<em>Callable</em><em>[</em><em>...</em><em>, </em><em>None</em><em>]</em>)</p></li>
 <li><p><strong>interval</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.hbc.RunCounter.flow">
+<span class="sig-name descname"><span class="pre">flow</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#axqua.hbc.RunCounter.flow" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.hbc.RunCounter.stage">
+<span class="sig-name descname"><span class="pre">stage</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#axqua.hbc.RunCounter.stage" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="axqua.hbc.RunCounter.poll">
 <span class="sig-name descname"><span class="pre">poll</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/hbc.html#RunCounter.poll"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.hbc.RunCounter.poll" title="Lien vers cette définition"></a></dt>
-<dd><p>Read what the logs have gained and report a new run number, if there is one.</p>
+<dd><p>Read what the logs have gained and report what changed, if anything did.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -5969,11 +6320,16 @@ discharges of another situation: number, inflow or outflow, calibrated discharge
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.validation.build">
-<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">situation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.build" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">situation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'validation'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'validation'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.build" title="Lien vers cette définition"></a></dt>
 <dd><p>Write the steering file of the validation run into the model folder.</p>
+<p><em>stem</em> names its files (<code class="docutils literal notranslate"><span class="pre">&lt;stem&gt;-&lt;situation&gt;.cas</span></code> and the results), <em>role</em> is <code class="docutils literal notranslate"><span class="pre">validation</span></code> or <code class="docutils literal notranslate"><span class="pre">calibration</span></code> for the messages about the situation. The OpenFOAM calibration takes its water surfaces from such runs of its calibration situations (<code class="docutils literal notranslate"><span class="pre">stem=&quot;openfoam-seed&quot;</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.openfoam_situations</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>]</em>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>]</em>)</p></li>
+<li><p><strong>stem</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>role</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#axqua.validation.ValidationSetup" title="axqua.validation.ValidationSetup"><em>ValidationSetup</em></a></p>
@@ -6004,14 +6360,15 @@ the posterior sample; <a class="reference internal" href="#axqua.validation.Cali
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.validation.calibrated_parameters">
-<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">calibrated_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#calibrated_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.calibrated_parameters" title="Lien vers cette définition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.validation.</span></span><span class="sig-name descname"><span class="pre">calibrated_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/validation.html#calibrated_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.validation.calibrated_parameters" title="Lien vers cette définition"></a></dt>
 <dd><p>The per-parameter posterior maxima of the newest calibration of this case.</p>
 <p>The peak of each parameter’s own posterior: the tallest bar of the histogram of its
 posterior samples in the last iteration the calibration finished
 (<a class="reference internal" href="#axqua.validation.marginal_peak" title="axqua.validation.marginal_peak"><code class="xref py py-func docutils literal notranslate"><span class="pre">marginal_peak()</span></code></a>, the histogram the calibration report draws). That is the
 user’s decision of 2026-11-11, since a roughness zone is read and reported per zone.
 HydroBayesCal saves one dictionary per combination of calibration targets; the
-newest is read (see <a class="reference internal" href="#axqua.validation.calibrated_from" title="axqua.validation.calibrated_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibrated_from()</span></code></a>).</p>
+newest is read (see <a class="reference internal" href="#axqua.validation.calibrated_from" title="axqua.validation.calibrated_from"><code class="xref py py-func docutils literal notranslate"><span class="pre">calibrated_from()</span></code></a>).
+<em>roots</em> replaces the folders searched (the OpenFOAM calibration writes into <code class="docutils literal notranslate"><span class="pre">calibration-validation/openfoam</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#axqua.validation.CalibratedSet" title="axqua.validation.CalibratedSet"><em>CalibratedSet</em></a></p>

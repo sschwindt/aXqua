@@ -397,6 +397,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
@@ -690,8 +691,18 @@
 <span class="c1">#: volume rose 5 % and the inflow-outflow imbalance stayed below 0.1 % from 2,949 s</span>
 <span class="c1">#: on (1.2 residence times), the depth and velocity at the 30 verticals then within</span>
 <span class="c1">#: 0.06 % and 0.3 % of their final values on average; at the lower bounds the volume</span>
-<span class="c1">#: fell 10 % and was flat from about 2,000 s, while the flow kept shedding eddies</span>
-<span class="c1">#: (outflow +/- 1 %), which no run length removes.</span>
+<span class="c1">#: fell 10 % and was flat from about 2,000 s, while the outflow kept swinging by</span>
+<span class="c1">#: +/- 1 %, which no run length removes (the bed friction then no longer damps large</span>
+<span class="c1">#: horizontal flow structures in the slow lower reach; see flux_convergence.NET_SHARE). Confirmed on 2026-11-22 with the</span>
+<span class="c1">#: highest outflow level the energy slope can set (:func:`outflow_top_level`) and runs</span>
+<span class="c1">#: continued to 9,000 s: at 55.4 m3/s with the largest roughness the reach filled from</span>
+<span class="c1">#: 133,700 to 266,800 m3 (the level pool estimates 5 % less), inflow and outflow agreed</span>
+<span class="c1">#: within 0.1 % over every 500 s from 3,400 s on, and the velocity at the 68 calibration points</span>
+<span class="c1">#: was within 0.8 cm/s of its final value at 5,300 s and 0.2 cm/s at 6,600 s, against</span>
+<span class="c1">#: up to 4.4 cm/s at the 3,500 s of the earlier trial (derived duration 6,200 s); at</span>
+<span class="c1">#: 45.8 m3/s with the smallest roughness (6,600 s) the volume stayed within 0.1 % of its</span>
+<span class="c1">#: final 218,400 m3 from 3,800 s on, while the unsteady flow of the slow lower reach</span>
+<span class="c1">#: swung it by +/- 134 m3.</span>
 <span class="n">HOTSTART_RESIDENCE_TIMES</span> <span class="o">=</span> <span class="mf">1.2</span>
 <span class="c1">#: The shortest such run [s], for a reach whose water is replaced within minutes.</span>
 <span class="n">HOTSTART_MIN_DURATION</span> <span class="o">=</span> <span class="mf">600.0</span>
@@ -756,6 +767,36 @@
 
 
 
+<div class="viewcode-block" id="outflow_top_level">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.outflow_top_level">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">outflow_top_level</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The highest outflow level [m] the calibration can set at *discharge*, or None.</span>
+
+<span class="sd">    With ``calibration.outflow_slope`` the normal stage of the outflow section at the</span>
+<span class="sd">    smallest energy slope of the range, with ``calibration.outflow_offset`` the level</span>
+<span class="sd">    of the rating plus the largest offset; None when the case does not calibrate its</span>
+<span class="sd">    outflow level or has no outflow section to compute it on.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">outflow_offset</span>
+
+    <span class="n">which</span> <span class="o">=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">kind</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">which</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">section</span> <span class="o">=</span> <span class="n">outflow_offset</span><span class="o">.</span><span class="n">section_of</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                      <span class="c1"># noqa: BLE001 - the seed volume then</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the outflow section could not be read (</span><span class="si">%s</span><span class="s2">), so the duration of "</span>
+                    <span class="s2">"the calibration runs counts the volume of the steady result only"</span><span class="p">,</span>
+                    <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">which</span> <span class="o">==</span> <span class="s2">"slope"</span><span class="p">:</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">outflow_slope</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">stage</span><span class="p">(</span><span class="n">discharge</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">low</span><span class="p">)))</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">outflow_offset</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">stage</span><span class="p">(</span><span class="n">discharge</span><span class="p">))</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="calibration_hotstart_duration">
 <a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.calibration_hotstart_duration">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">calibration_hotstart_duration</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -766,7 +807,13 @@
 <span class="sd">    100 s, plus the ramp of the outflow offset when the case calibrates it: the residence time is the volume of water in the converged result over the</span>
 <span class="sd">    discharge, the time in which the reach exchanges its water once. A changed</span>
 <span class="sd">    roughness changes the stored volume, and the flow has settled once that change</span>
-<span class="sd">    has passed the outflow.</span>
+<span class="sd">    has passed the outflow. When the case calibrates its outflow level, the volume is</span>
+<span class="sd">    that of the reach with the highest level the calibration can set</span>
+<span class="sd">    (:func:`outflow_top_level`), filled as a level pool over the steady result: a</span>
+<span class="sd">    raised outflow level backs the water up through the reach, which stores up to</span>
+<span class="sd">    twice the water then (Inn KB15 at the smallest energy slope, 2026-11-22), and the</span>
+<span class="sd">    run settles only once that volume has been exchanged. Before, the volume of the</span>
+<span class="sd">    steady result alone left 49 of the 150 runs of the KB15 trial unsettled.</span>
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -790,8 +837,23 @@
     <span class="c1"># single precision, which at a UTM northing is a spacing of 0.5 m)</span>
     <span class="n">mesh</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">))</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ikle</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">ikle</span>
-    <span class="n">h</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">))</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span>
-        <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">])[</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">))</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"WATER DEPTH"</span><span class="p">,</span> <span class="s2">"BOTTOM"</span><span class="p">,</span> <span class="s2">"FREE SURFACE"</span><span class="p">)</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">var_names</span><span class="p">]</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">outflow_top_level</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">top</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"BOTTOM"</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+            <span class="n">bed</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">"BOTTOM"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">"FREE SURFACE"</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+            <span class="n">bed</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">"FREE SURFACE"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">-</span> <span class="n">h</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bed</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> holds neither BOTTOM nor FREE SURFACE, so the duration of "</span>
+                        <span class="s2">"the calibration runs counts the volume of the steady result "</span>
+                        <span class="s2">"only"</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">top</span> <span class="o">-</span> <span class="n">bed</span><span class="p">)</span>
     <span class="n">area</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span>
                         <span class="o">-</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]])</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">ikle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]))</span>
     <span class="n">volume</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">area</span> <span class="o">*</span> <span class="n">h</span><span class="p">[</span><span class="n">ikle</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
@@ -867,7 +929,8 @@
         <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">VELOCITY_ERROR_FLOOR</span><span class="p">,</span>
         <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span><span class="p">,</span>
         <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">extend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""End-to-end single-discharge calibration of the built case.</span>
 
 <span class="sd">    Compiles the calibration CSV, ensures the ``.cas`` prints the target,</span>
@@ -891,7 +954,8 @@
     <span class="c1"># the zones of the roughness table and the rows of the target workbook too, not</span>
     <span class="c1"># only the list of the case file (the Inn KB15 case printed "parameters: []"),</span>
     <span class="c1"># less the zones the points say nothing about (calibration_zones)</span>
-    <span class="n">parameters</span> <span class="o">=</span> <span class="n">settle_zone_plan</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="p">[</span><span class="n">table</span><span class="p">],</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">),</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">settle_zone_plan</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="p">[</span><span class="n">table</span><span class="p">],</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">),</span>
+                                  <span class="n">resume</span><span class="o">=</span><span class="n">resume</span> <span class="ow">or</span> <span class="n">extend</span><span class="p">)</span>
     <span class="k">if</span> <span class="s2">"SCALAR VELOCITY_DATA"</span> <span class="ow">in</span> <span class="n">table</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  scalar velocity [m/s]: </span><span class="si">{</span><span class="n">table</span><span class="p">[</span><span class="s1">'SCALAR VELOCITY_DATA'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> .. "</span>
               <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table</span><span class="p">[</span><span class="s1">'SCALAR VELOCITY_DATA'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -915,17 +979,19 @@
                   <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s1">'user_fortran'</span><span class="p">)</span><span class="si">}</span><span class="s2">/user_sl.f; aXqua's own runs put the "</span>
                   <span class="s2">"neutral value back (offset 0, or the slope of the reach)"</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">only_bal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">only_bal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">budget</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">csv</span><span class="p">,</span> <span class="n">complete_bal_mode</span><span class="o">=</span><span class="n">complete</span><span class="p">,</span>
-                               <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">only_bal</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+                               <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">only_bal</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+                               <span class="n">budget</span><span class="o">=</span><span class="n">budget</span><span class="p">)</span>
 
     <span class="n">driver</span> <span class="o">=</span> <span class="n">stage_driver</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">,</span> <span class="s2">"bal_telemac.py"</span><span class="p">,</span> <span class="n">checkout</span><span class="o">=</span><span class="n">checkout</span><span class="p">)</span>
     <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">record_run_budget</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">_launch_in_passes</span><span class="p">(</span>
         <span class="n">cfg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span> <span class="n">prepare_only</span><span class="o">=</span><span class="n">prepare_only</span><span class="p">,</span> <span class="n">emit</span><span class="o">=</span><span class="n">emit</span><span class="p">,</span>
         <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="n">restarts</span><span class="o">=</span><span class="p">{</span><span class="s2">"calibration"</span><span class="p">:</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">RESTART_OUTPUTS</span><span class="p">},</span>
         <span class="n">csvs</span><span class="o">=</span><span class="p">{</span><span class="s2">"calibration"</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">csv</span><span class="p">)},</span> <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
-        <span class="n">note</span><span class="o">=</span><span class="s2">"HydroBayesCal calibration"</span><span class="p">)</span>
+        <span class="n">note</span><span class="o">=</span><span class="s2">"HydroBayesCal calibration"</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="n">extend</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">prepare_only</span><span class="p">:</span>
         <span class="n">report</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">code</span></div>
@@ -1214,7 +1280,7 @@
 <a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.emit_multiflow_config">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">emit_multiflow_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
                           <span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">FlowSpec</span><span class="p">],</span> <span class="n">csv_paths</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">n_cpus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">init_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                          <span class="n">n_cpus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">init_runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">complete_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                           <span class="n">only_bal_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                           <span class="n">prior_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1240,6 +1306,12 @@
         <span class="n">c</span><span class="p">,</span> <span class="s2">"prior_samples"</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
     <span class="n">adaptive</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s2">"adaptive_init_runs"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">adaptive_init_runs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">adaptive_init_runs</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_budget</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">pass_ceiling</span>
+
+    <span class="n">first</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">run_budget</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">))[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">init_runs</span><span class="p">))</span>
+    <span class="n">max_runs</span> <span class="o">=</span> <span class="n">pass_ceiling</span><span class="p">(</span><span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">)</span>
     <span class="n">flow_entries</span> <span class="o">=</span> <span class="s2">",</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
         <span class="s2">"        {{'name': </span><span class="si">{n!r}</span><span class="s2">, 'control_file': </span><span class="si">{cf!r}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">"</span>
         <span class="s2">"         'results_filename_base': </span><span class="si">{rb!r}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">"</span>
@@ -1297,10 +1369,12 @@
 <span class="s1">    'parameter_distribution': 'uniform',</span>
 <span class="s1">    'parameter_sampling_method': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">parameter_sampling_method</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    # HydroBayesCal &gt;= 1.5: grow the initial design in Sobol blocks and stop when</span>
-<span class="s1">    # it is measurably sufficient. init_runs is the ceiling, so this can only save</span>
-<span class="s1">    # runs - and here one run means one TELEMAC simulation PER FLOW.</span>
+<span class="s1">    # it is measurably sufficient. init_runs is the ceiling and init_runs_min the</span>
+<span class="s1">    # first block, 10 runs per parameter rounded up to a power of two unless the case</span>
+<span class="s1">    # sets it (axqua.calibration.run_budget), so the design never stops below that.</span>
+<span class="s1">    # One run here means one TELEMAC simulation PER FLOW.</span>
 <span class="s1">    'adaptive_init_runs': </span><span class="si">{</span><span class="n">adaptive</span><span class="si">}</span><span class="s1">,</span>
-<span class="s1">    'init_runs_min': </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="s2">"init_runs_min"</span><span class="p">,</span><span class="w"> </span><span class="kc">None</span><span class="p">)</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    'init_runs_min': </span><span class="si">{</span><span class="n">first</span><span class="si">}</span><span class="s1">,</span>
 <span class="s1">    # exploit the posterior until &gt;1 well-separated mode is found, then explore</span>
 <span class="s1">    'bal_exploration_tradeoff': </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="s2">"bal_exploration_tradeoff"</span><span class="p">,</span><span class="w"> </span><span class="s2">"auto"</span><span class="p">)</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    'tp_selection_criteria': 'dkl',</span>
@@ -1311,6 +1385,7 @@
 <span class="s1">    'mc_samples_al': 2000,</span>
 <span class="s1">    'mc_exploration': 1000,</span>
 <span class="s1">    'gp_library': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_library</span><span class="si">!r}</span><span class="s1">,</span>
+<span class="s1">    'gp_mean': </span><span class="si">{</span><span class="n">c</span><span class="o">.</span><span class="n">gp_mean</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">    # 'variables': one multi-output GPE per location, its outputs the calibration</span>
 <span class="s1">    # quantities (calibration.multitask_selection)</span>
 <span class="s1">    'multitask_selection': </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="s2">"multitask_selection"</span><span class="p">,</span><span class="w"> </span><span class="s2">"variables"</span><span class="p">)</span><span class="si">!r}</span><span class="s1">,</span>
@@ -1343,7 +1418,7 @@
 
 
 <span class="c1"># --------------------------------------------------------------------------- #</span>
-<span class="c1"># model error at points the model cannot reach (calibration.structural_error)</span>
+<span class="c1"># model error at points the simulated flow cannot reach (calibration.structural_error)</span>
 <span class="c1"># --------------------------------------------------------------------------- #</span>
 <span class="c1">#: What a calibration does with a measured value that no parameter set within the</span>
 <span class="c1">#: ranges reproduces: keep the measurement error (``none``), or add the misfit that</span>
@@ -1705,10 +1780,21 @@
             <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="sa">f</span><span class="s2">"resume: no completed initial design for </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">; "</span>
                              <span class="s2">"run the initial design (launch_mode='run') first"</span><span class="p">)</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">telemac_parameters</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_iterations</span>
+
+    <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">record_run_budget</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">multiflow_dir</span><span class="p">,</span>
+        <span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parameters</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_runs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># this route launches the driver once and has no convergence loop</span>
+        <span class="c1"># (run_situation_calibration has): a fixed number of iterations</span>
+        <span class="n">max_runs</span> <span class="o">=</span> <span class="n">init_runs</span> <span class="o">+</span> <span class="n">default_iterations</span><span class="p">()</span>
     <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit_multiflow_config</span><span class="p">(</span>
         <span class="n">cfg</span><span class="p">,</span> <span class="n">multiflow_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">flows</span><span class="p">,</span> <span class="n">csv_paths</span><span class="p">,</span>
-        <span class="n">n_cpus</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span><span class="p">,</span> <span class="n">init_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">init_runs</span><span class="p">,</span>
-        <span class="n">max_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">n_cpus</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span><span class="p">,</span> <span class="n">init_runs</span><span class="o">=</span><span class="n">init_runs</span><span class="p">,</span>
+        <span class="n">max_runs</span><span class="o">=</span><span class="n">max_runs</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"multiflow config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span>
           <span class="o">+</span> <span class="p">(</span><span class="s2">" (only_bal_mode: reusing completed initial designs)"</span> <span class="k">if</span> <span class="n">resume</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
     <span class="n">driver</span> <span class="o">=</span> <span class="n">stage_driver</span><span class="p">(</span><span class="n">multiflow_dir</span><span class="p">,</span> <span class="s2">"bal_telemac_multiflow.py"</span><span class="p">,</span>
@@ -1750,26 +1836,32 @@
 <span class="sd">    Empty when the case names no situation: the calibration is then the single-flow</span>
 <span class="sd">    one of the case's discharge.</span>
 <span class="sd">    """</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationSituation</span>
-
     <span class="n">given</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">situations</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">given</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
     <span class="n">gt</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth</span>
     <span class="k">if</span> <span class="n">gt</span><span class="o">.</span><span class="n">sources</span> <span class="ow">or</span> <span class="n">gt</span><span class="o">.</span><span class="n">measurements</span> <span class="ow">or</span> <span class="n">gt</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
-        <span class="c1"># no sources of its own: its measurements are those of ground_truth, and its</span>
-        <span class="c1"># boundary values are those of the case (the outflow level too, which</span>
-        <span class="c1"># outflow_condition: elevation requires of every situation)</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
-
-        <span class="n">inflows</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
-            <span class="k">else</span> <span class="n">case_inflows</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
-        <span class="n">fixed</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"fixed"</span>
-        <span class="n">given</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ValidationSituation</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="s2">"case discharge"</span><span class="p">,</span> <span class="n">prescribed_flowrate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">,</span>
-            <span class="n">inflows</span><span class="o">=</span><span class="n">inflows</span><span class="p">,</span>
-            <span class="n">prescribed_elevation</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="k">if</span> <span class="n">fixed</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">given</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">case_situation</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">given</span></div>
+
+
+
+<div class="viewcode-block" id="case_situation">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.case_situation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">case_situation</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The situation of the case's own discharge, measured in ``ground_truth``.</span>
+
+<span class="sd">    No sources of its own: its measurements are those of ``ground_truth``, and its boundary values are those of the case (the discharge of each inflow line where the case gives no total, and the outflow level too, which ``outflow_condition: elevation`` requires of every situation).</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationSituation</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
+
+    <span class="n">inflows</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">case_inflows</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">fixed</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"fixed"</span>
+    <span class="k">return</span> <span class="n">ValidationSituation</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"case discharge"</span><span class="p">,</span> <span class="n">prescribed_flowrate</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">,</span>
+        <span class="n">inflows</span><span class="o">=</span><span class="n">inflows</span><span class="p">,</span>
+        <span class="n">prescribed_elevation</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="k">if</span> <span class="n">fixed</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span></div>
 
 
 
@@ -1883,7 +1975,8 @@
                               <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">campaigns</span><span class="o">.</span><span class="n">DEPTH_ERROR_FLOOR</span><span class="p">,</span>
                               <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                               <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                              <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+                              <span class="n">checkout</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="n">extend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Calibrate one set of parameters against the measurements of several situations.</span>
 
 <span class="sd">    Each situation of :func:`calibration_situations` gets its calibration points and</span>
@@ -1944,14 +2037,17 @@
         <span class="n">csvs</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">csv</span>
         <span class="n">tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: Q = </span><span class="si">{</span><span class="n">q</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m3/s, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="si">}</span><span class="s2"> points -&gt; </span><span class="si">{</span><span class="n">cas</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="n">parameters</span> <span class="o">=</span> <span class="n">settle_zone_plan</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">tables</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">settle_zone_plan</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">tables</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span> <span class="ow">or</span> <span class="n">extend</span><span class="p">)</span>
     <span class="n">ready_outflow_offset</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"steady2d-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.cas"</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">])</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">record_run_budget</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">only_bal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">complete</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">only_bal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">budget</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">adaptive</span> <span class="o">=</span> <span class="n">budget</span> <span class="ow">or</span> <span class="p">(</span><span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">runs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">emit_multiflow_config</span><span class="p">(</span>
             <span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">flows</span><span class="p">,</span> <span class="n">csvs</span><span class="p">,</span> <span class="n">n_cpus</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span><span class="p">,</span>
-            <span class="n">init_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span><span class="p">,</span>
-            <span class="n">complete_bal_mode</span><span class="o">=</span><span class="n">complete</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">only_bal</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="n">init_runs</span><span class="o">=</span><span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="o">=</span><span class="n">max_runs</span><span class="p">,</span>
+            <span class="n">complete_bal_mode</span><span class="o">=</span><span class="n">complete</span><span class="p">,</span> <span class="n">only_bal_mode</span><span class="o">=</span><span class="n">only_bal</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">adaptive_init_runs</span><span class="o">=</span><span class="n">adaptive</span><span class="p">)</span>
 
     <span class="n">driver</span> <span class="o">=</span> <span class="n">stage_driver</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="s2">"bal_telemac_multiflow.py"</span><span class="p">,</span> <span class="n">checkout</span><span class="o">=</span><span class="n">checkout</span><span class="p">,</span>
                           <span class="n">also</span><span class="o">=</span><span class="p">(</span><span class="s2">"bal_telemac.py"</span><span class="p">,))</span>
@@ -1959,7 +2055,8 @@
     <span class="n">code</span> <span class="o">=</span> <span class="n">_launch_in_passes</span><span class="p">(</span>
         <span class="n">cfg</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="n">resume</span><span class="p">,</span> <span class="n">prepare_only</span><span class="o">=</span><span class="n">prepare_only</span><span class="p">,</span> <span class="n">emit</span><span class="o">=</span><span class="n">emit</span><span class="p">,</span>
         <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="n">restarts</span><span class="o">=</span><span class="n">restarts</span><span class="p">,</span> <span class="n">csvs</span><span class="o">=</span><span class="n">csvs</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
-        <span class="n">note</span><span class="o">=</span><span class="sa">f</span><span class="s2">"HydroBayesCal calibration at </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">flows</span><span class="p">)</span><span class="si">}</span><span class="s2"> discharges"</span><span class="p">)</span>
+        <span class="n">note</span><span class="o">=</span><span class="sa">f</span><span class="s2">"HydroBayesCal calibration at </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">flows</span><span class="p">)</span><span class="si">}</span><span class="s2"> discharges"</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="n">extend</span><span class="p">,</span>
+        <span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">prepare_only</span><span class="p">:</span>
         <span class="n">report</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">code</span></div>
@@ -1981,6 +2078,49 @@
     <span class="k">if</span> <span class="n">written</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"calibration report -&gt; </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'report'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">written</span></div>
+
+
+
+<span class="c1">#: The run budget of a calibration, next to its driver configuration (:func:`record_run_budget`).</span>
+<span class="n">RUN_BUDGET</span> <span class="o">=</span> <span class="s2">"run-budget.json"</span>
+
+
+<div class="viewcode-block" id="record_run_budget">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.record_run_budget">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">record_run_budget</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The initial runs, the total runs and the first block of a calibration, recorded.</span>
+
+<span class="sd">    From :func:`axqua.calibration.check_run_budget` for the *parameters* calibrated (the</span>
+<span class="sd">    zone plan's), which warns where the case sets fewer initial runs than the rule. The</span>
+<span class="sd">    budget is written to :data:`RUN_BUDGET` in *folder*: the job's progress reads the</span>
+<span class="sd">    total from it, and the report and the user can see how it came about.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">RUNS_PER_PARAMETER</span><span class="p">,</span> <span class="n">check_run_budget</span><span class="p">,</span>
+                                   <span class="n">recommended_initial_runs</span><span class="p">)</span>
+
+    <span class="n">parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">first</span> <span class="o">=</span> <span class="n">check_run_budget</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">))</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"parameters"</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">],</span>
+        <span class="s2">"init_runs"</span><span class="p">:</span> <span class="n">init_runs</span><span class="p">,</span>
+        <span class="s2">"max_runs"</span><span class="p">:</span> <span class="n">max_runs</span><span class="p">,</span>
+        <span class="s2">"first_block"</span><span class="p">:</span> <span class="n">first</span><span class="p">,</span>
+        <span class="s2">"recommended_init_runs"</span><span class="p">:</span> <span class="n">recommended_initial_runs</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)),</span>
+        <span class="s2">"rule"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">RUNS_PER_PARAMETER</span><span class="si">}</span><span class="s2"> initial runs per parameter (Loeppky, Sacks and "</span>
+                <span class="sa">f</span><span class="s2">"Welch 2009), rounded up to a power of two (even Sobol design)"</span><span class="p">,</span>
+        <span class="s2">"init_runs_from"</span><span class="p">:</span> <span class="s2">"case"</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">init_runs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"rule"</span><span class="p">,</span>
+        <span class="s2">"max_runs_from"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"case"</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">max_runs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                          <span class="k">else</span> <span class="s2">"none: until the evidence converges"</span> <span class="k">if</span> <span class="n">max_runs</span> <span class="ow">is</span> <span class="kc">None</span>
+                          <span class="k">else</span> <span class="s2">"rule"</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">folder</span> <span class="o">/</span> <span class="n">RUN_BUDGET</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">limit</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"at most </span><span class="si">{</span><span class="n">max_runs</span><span class="si">}</span><span class="s2"> in total"</span> <span class="k">if</span> <span class="n">max_runs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+             <span class="k">else</span> <span class="s2">"active learning until the evidence converges, without a limit"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"run budget: </span><span class="si">{</span><span class="n">init_runs</span><span class="si">}</span><span class="s2"> initial runs (first block </span><span class="si">{</span><span class="n">first</span><span class="si">}</span><span class="s2">), </span><span class="si">{</span><span class="n">limit</span><span class="si">}</span><span class="s2"> "</span>
+          <span class="sa">f</span><span class="s2">"-&gt; </span><span class="si">{</span><span class="n">folder</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">RUN_BUDGET</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">init_runs</span><span class="p">,</span> <span class="n">max_runs</span><span class="p">,</span> <span class="n">first</span></div>
 
 
 
@@ -2024,10 +2164,146 @@
 
 
 
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># the active learning until it converges (calibration.until_converged)</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1">#: The suffix of the restart files of the initial design, kept when a pass of the</span>
+<span class="c1">#: active learning makes all saved runs the restart design (:func:`extend_restart`):</span>
+<span class="c1">#: the model error of points the simulated flow cannot reach is measured on them.</span>
+<span class="n">DESIGN</span> <span class="o">=</span> <span class="s2">".design"</span>
+<span class="c1">#: The name of an archived BAL dictionary: the one of a finished pass, ``&lt;n&gt;`` runs.</span>
+<span class="n">ARCHIVE</span> <span class="o">=</span> <span class="s2">"BAL_dictionary.upto-</span><span class="si">{runs}</span><span class="s2">.pkl"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_results_folder</span><span class="p">(</span><span class="n">restart</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The results folder of HydroBayesCal that *restart* (``initial-model-outputs.json``) belongs to."""</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">restart</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_calibration_data</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"calibration-data"</span> <span class="o">/</span> <span class="s2">"_"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">calibration_quantities</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="design_outputs">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.design_outputs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">design_outputs</span><span class="p">(</span><span class="n">restart</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The outputs of the initial design: the kept copy once a pass has extended the restart design."""</span>
+    <span class="n">kept</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">restart</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">restart</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="n">DESIGN</span> <span class="o">+</span> <span class="n">Path</span><span class="p">(</span><span class="n">restart</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">kept</span> <span class="k">if</span> <span class="n">kept</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="n">restart</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="runs_saved">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.runs_saved">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">runs_saved</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">restart</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The runs HydroBayesCal has saved for the situation of *restart*: rows of its collocation table."""</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">_calibration_data</span><span class="p">(</span><span class="n">_results_folder</span><span class="p">(</span><span class="n">restart</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"collocation-points-</span><span class="si">{</span><span class="n">folder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.csv"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">table</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="extend_restart">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.extend_restart">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extend_restart</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">restart</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make every saved run of a situation its restart design; returns their number.</span>
+
+<span class="sd">    HydroBayesCal's ``only_bal_mode`` trains the emulator on the restart design and</span>
+<span class="sd">    continues the active learning from there, so a pass that starts from all saved runs</span>
+<span class="sd">    continues the learning instead of repeating it. The restart files of the initial</span>
+<span class="sd">    design are kept beside them with :data:`DESIGN` in their names (once), because the</span>
+<span class="sd">    model error of points the simulated flow cannot reach is measured on them</span>
+<span class="sd">    (:func:`design_outputs`). The saved runs are HydroBayesCal's own tables: the</span>
+<span class="sd">    collocation points and the detailed outputs, one entry per run and point.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+    <span class="n">restart</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">restart</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">_calibration_data</span><span class="p">(</span><span class="n">_results_folder</span><span class="p">(</span><span class="n">restart</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"collocation-points-</span><span class="si">{</span><span class="n">folder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.csv"</span>
+    <span class="n">detailed</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">folder</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*-detailed.json"</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"validation"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">table</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">detailed</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no saved runs to continue from in </span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the calibration without continuing it first."</span><span class="p">)</span>
+    <span class="n">runs</span> <span class="o">=</span> <span class="n">runs_saved</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">restart</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">detailed</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
+    <span class="k">if</span> <span class="n">counts</span> <span class="o">!=</span> <span class="p">{</span><span class="n">runs</span><span class="p">}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">detailed</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> holds </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span><span class="si">}</span><span class="s2"> runs per point, "</span>
+                         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">table</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">runs</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">restart</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">"initial-collocation-points.csv"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">(</span><span class="n">restart</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+        <span class="n">kept</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="n">DESIGN</span> <span class="o">+</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kept</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">kept</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+    <span class="n">restart</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">runs</span></div>
+
+
+
+<div class="viewcode-block" id="evidence_converged">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.evidence_converged">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">evidence_converged</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The verdict of :func:`axqua.calibration_report.convergence` on the calibration in *folder*, over all its passes."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dictionary</span><span class="p">,</span> <span class="n">convergence</span><span class="p">,</span> <span class="n">evidence_history</span>
+
+    <span class="n">found</span> <span class="o">=</span> <span class="n">_dictionary</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">{}</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="n">evidence_history</span><span class="p">(</span><span class="o">*</span><span class="n">found</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">convergence</span><span class="p">(</span><span class="n">history</span><span class="p">[</span><span class="s2">"log_bme"</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="s2">"relative_entropy"</span><span class="p">],</span> <span class="n">history</span><span class="p">[</span><span class="s2">"runs"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">"converged"</span><span class="p">]),</span> <span class="n">state</span></div>
+
+
+
+<div class="viewcode-block" id="archive_dictionary">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.bayescal.archive_dictionary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">archive_dictionary</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Keep the BAL dictionary of a finished pass, before the next pass overwrites it."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dictionary</span>
+
+    <span class="n">found</span> <span class="o">=</span> <span class="n">_dictionary</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">ARCHIVE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">))</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">target</span></div>
+
+
+
+<span class="c1">#: Warnings about the convergence of the active learning; the job copies them into its results.</span>
+<span class="n">convergence_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua.calibration_convergence"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_warn_no_plateau</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Say that the evidence and the relative entropy show no sign of leveling off."""</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"log_bme"</span><span class="p">:</span> <span class="s2">"the log evidence"</span><span class="p">,</span> <span class="s2">"relative_entropy"</span><span class="p">:</span> <span class="s2">"the relative entropy"</span><span class="p">}</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2"> varied by </span><span class="si">{</span><span class="n">last</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> over the last </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">'window'</span><span class="p">]</span><span class="si">}</span><span class="s2"> "</span>
+             <span class="sa">f</span><span class="s2">"iterations, no less than over a typical earlier window (</span><span class="si">{</span><span class="n">typical</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">)"</span>
+             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">typical</span><span class="p">)</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"settling_ranges"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"still_changing"</span><span class="p">,</span> <span class="p">[])]</span>
+    <span class="n">convergence_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s2">"after </span><span class="si">%d</span><span class="s2"> iterations of active learning, the calibration shows no sign of a "</span>
+        <span class="s2">"plateau: </span><span class="si">%s</span><span class="s2">. The active learning continues. Check evidence.png; a parameter "</span>
+        <span class="s2">"range that is too narrow or measurements the model cannot reproduce can keep "</span>
+        <span class="s2">"the evidence from leveling off. A cancelled calibration continues later from "</span>
+        <span class="s2">"all its saved simulations with the job option extend."</span><span class="p">,</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"iterations"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"both still change"</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_launch_in_passes</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resume</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
                       <span class="n">emit</span><span class="p">,</span> <span class="n">driver</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">restarts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
                       <span class="n">csvs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">note</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                      <span class="n">env</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+                      <span class="n">env</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">extend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                      <span class="n">runs</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Launch a HydroBayesCal driver once, or in two passes for the model error.</span>
 
 <span class="sd">    One pass (``structural_error: none``): initial simulations and active learning in</span>
@@ -2038,12 +2314,43 @@
 <span class="sd">    again with the active learning only, on the saved simulations. With *resume*, the</span>
 <span class="sd">    first pass is skipped: the initial simulations of an earlier calibration of the</span>
 <span class="sd">    case are used, which have to exist for every situation (*restarts*: situation -&gt;</span>
-<span class="sd">    HydroBayesCal's ``initial-model-outputs.json``). *emit(complete, only_bal)* writes</span>
-<span class="sd">    the driver configuration for HydroBayesCal's two execution switches.</span>
+<span class="sd">    HydroBayesCal's ``initial-model-outputs.json``). *emit(complete, only_bal,</span>
+<span class="sd">    budget=None)* writes the driver configuration for HydroBayesCal's two execution</span>
+<span class="sd">    switches; *budget* ``(init_runs, max_runs, adaptive)`` replaces the run counts of</span>
+<span class="sd">    the case (``adaptive`` None keeps the case's adaptive initial design). *runs*</span>
+<span class="sd">    ``(init_runs, max_runs)`` are those of :func:`record_run_budget`, by default the</span>
+<span class="sd">    case's own.</span>
+
+<span class="sd">    With ``calibration.until_converged``, the active learning first runs</span>
+<span class="sd">    :data:`axqua.calibration_report.CONVERGENCE_MINIMUM` iterations and then continues</span>
+<span class="sd">    in passes of :data:`~axqua.calibration_report.CONVERGENCE_WINDOW` iterations, each</span>
+<span class="sd">    from all runs saved so far (:func:`extend_restart`, the BAL dictionary of the</span>
+<span class="sd">    finished pass archived by :func:`archive_dictionary`), until</span>
+<span class="sd">    :func:`evidence_converged`, with no limit unless the case sets ``max_runs`` (None in</span>
+<span class="sd">    *runs*). Where the evidence and the relative entropy show no sign of leveling off</span>
+<span class="sd">    (:func:`axqua.calibration_report.settling`), a warning says so at every check and the</span>
+<span class="sd">    learning goes on: the user's rule of 2026-11-23 is enough iterations for them to</span>
+<span class="sd">    converge, not a number fixed beforehand. *extend* continues a finished calibration</span>
+<span class="sd">    of the case from all its saved runs: up to ``max_runs`` in one pass, or in such</span>
+<span class="sd">    passes with ``until_converged``.</span>
 <span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration_report</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONVERGENCE_MINIMUM</span><span class="p">,</span> <span class="n">CONVERGENCE_WINDOW</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
 
     <span class="n">passes</span> <span class="o">=</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"unreachable"</span>
+    <span class="n">until</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="p">,</span> <span class="s2">"until_converged"</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">runs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_budget</span><span class="p">,</span> <span class="n">telemac_parameters</span>
+
+        <span class="n">runs</span> <span class="o">=</span> <span class="n">run_budget</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">telemac_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)))[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">init_runs</span><span class="p">,</span> <span class="n">ceiling</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">runs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">runs</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">ceiling</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">until</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_iterations</span>
+
+        <span class="n">ceiling</span> <span class="o">=</span> <span class="n">init_runs</span> <span class="o">+</span> <span class="n">default_iterations</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">capped</span><span class="p">(</span><span class="n">total</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">total</span> <span class="k">if</span> <span class="n">ceiling</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">ceiling</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">prepare_only</span><span class="p">:</span>
         <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="ow">not</span> <span class="n">passes</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -2051,17 +2358,47 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">"structural_error: unreachable - the driver runs the initial "</span>
                   <span class="s2">"simulations first; the errors are then completed and the active "</span>
                   <span class="s2">"learning runs in a second pass."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">until</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"until_converged: the active learning runs </span><span class="si">{</span><span class="n">CONVERGENCE_MINIMUM</span><span class="si">}</span><span class="s2"> "</span>
+                  <span class="sa">f</span><span class="s2">"iterations, then steps of </span><span class="si">{</span><span class="n">CONVERGENCE_WINDOW</span><span class="si">}</span><span class="s2"> until it converges, "</span>
+                  <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"at most </span><span class="si">{</span><span class="n">ceiling</span><span class="si">}</span><span class="s2"> runs in total."</span> <span class="k">if</span> <span class="n">ceiling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                     <span class="k">else</span> <span class="s2">"without a limit on the number of runs."</span><span class="p">))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">--prepare-only: not launched. Run it with:"</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  cd </span><span class="si">{</span><span class="n">driver</span><span class="o">.</span><span class="n">parent</span><span class="si">}</span><span class="s2"> &amp;&amp; </span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">driver</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> "</span>
               <span class="sa">f</span><span class="s2">"--config </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">saved</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">runs_saved</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">restarts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">misfit</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">"model-error-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">csvs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">apply_unreachable_misfit</span><span class="p">(</span><span class="n">csvs</span><span class="p">,</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">design_outputs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                                            <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">restarts</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+                                     <span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">calibration_quantities</span><span class="p">),</span>
+                                     <span class="n">records</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"the model error could not be computed from the initial "</span>
+                <span class="sa">f</span><span class="s2">"simulations: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"The initial simulations are kept. Correct the cause and "</span>
+                       <span class="s2">"start the calibration again with 'resume'."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"model error at points the simulated flow cannot reach -&gt; </span><span class="si">{</span><span class="n">record</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="n">code</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">with</span> <span class="n">case_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">resume</span><span class="p">:</span>
-            <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="ow">not</span> <span class="n">passes</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">resume</span> <span class="ow">or</span> <span class="n">extend</span><span class="p">):</span>
+            <span class="n">budget</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">until</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">passes</span><span class="p">:</span>
+                <span class="n">budget</span> <span class="o">=</span> <span class="p">(</span><span class="n">init_runs</span><span class="p">,</span> <span class="n">capped</span><span class="p">(</span><span class="n">init_runs</span> <span class="o">+</span> <span class="n">CONVERGENCE_MINIMUM</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="ow">not</span> <span class="n">passes</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">budget</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
                           <span class="n">note</span><span class="o">=</span><span class="n">note</span> <span class="o">+</span> <span class="p">(</span><span class="s2">", initial simulations"</span> <span class="k">if</span> <span class="n">passes</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">code</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">passes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">passes</span> <span class="ow">or</span> <span class="n">until</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">code</span>
         <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">restarts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()]</span>
         <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
@@ -2070,24 +2407,47 @@
                 <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span>
                 <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the calibration without 'resume' first."</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">passes</span><span class="p">:</span>
-            <span class="n">records</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span> <span class="n">Path</span><span class="p">(</span><span class="n">csv</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">"model-error-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span><span class="p">)</span>
-                       <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">csv</span> <span class="ow">in</span> <span class="n">csvs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">apply_unreachable_misfit</span><span class="p">(</span><span class="n">csvs</span><span class="p">,</span> <span class="n">restarts</span><span class="p">,</span>
-                                         <span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">calibration_quantities</span><span class="p">),</span>
-                                         <span class="n">records</span><span class="p">)</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">"the model error could not be computed from the initial "</span>
-                    <span class="sa">f</span><span class="s2">"simulations: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span>
-                    <span class="n">remedy</span><span class="o">=</span><span class="s2">"The initial simulations are kept. Correct the cause and "</span>
-                           <span class="s2">"start the calibration again with 'resume'."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
-            <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"model error at points the model cannot reach -&gt; </span><span class="si">{</span><span class="n">record</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
-                      <span class="n">note</span><span class="o">=</span><span class="n">note</span> <span class="o">+</span> <span class="s2">", active learning on the saved simulations"</span><span class="p">)</span>
+            <span class="n">misfit</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">resume</span> <span class="ow">or</span> <span class="n">extend</span> <span class="ow">or</span> <span class="n">passes</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">extend</span><span class="p">:</span>
+            <span class="n">budget</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">until</span><span class="p">:</span>
+                <span class="n">design</span> <span class="o">=</span> <span class="n">saved</span><span class="p">()</span>
+                <span class="n">budget</span> <span class="o">=</span> <span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">capped</span><span class="p">(</span><span class="n">design</span> <span class="o">+</span> <span class="n">CONVERGENCE_MINIMUM</span><span class="p">),</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">budget</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+                          <span class="n">note</span><span class="o">=</span><span class="n">note</span> <span class="o">+</span> <span class="s2">", active learning on the saved simulations"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">until</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">code</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="n">saved</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">extend</span><span class="p">:</span>
+                <span class="n">converged</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">evidence_converged</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">converged</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"active learning converged after </span><span class="si">{</span><span class="n">done</span><span class="si">}</span><span class="s2"> runs"</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">code</span>
+                <span class="k">if</span> <span class="n">until</span> <span class="ow">and</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"settling"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">_warn_no_plateau</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ceiling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">done</span> <span class="o">&gt;=</span> <span class="n">ceiling</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">until</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the active learning has not converged within </span><span class="si">%d</span><span class="s2"> runs "</span>
+                                <span class="s2">"(calibration.max_runs); the report says how far it is"</span><span class="p">,</span>
+                                <span class="n">ceiling</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">done</span><span class="si">}</span><span class="s2"> runs saved, calibration.max_runs is </span><span class="si">{</span><span class="n">ceiling</span><span class="si">}</span><span class="s2">: "</span>
+                          <span class="s2">"nothing to continue"</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">code</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">capped</span><span class="p">(</span><span class="n">done</span> <span class="o">+</span> <span class="n">CONVERGENCE_WINDOW</span><span class="p">)</span> <span class="k">if</span> <span class="n">until</span> <span class="k">else</span> <span class="n">ceiling</span>
+            <span class="n">archive_dictionary</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">restarts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">extend_restart</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="n">extend</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">emit</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="p">(</span><span class="n">done</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HydroBayesCal config -&gt; </span><span class="si">{</span><span class="n">config_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">launch</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">driver</span><span class="p">,</span> <span class="n">config_path</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+                          <span class="n">note</span><span class="o">=</span><span class="n">note</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">", active learning from </span><span class="si">{</span><span class="n">done</span><span class="si">}</span><span class="s2"> saved runs"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">until</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">code</span>
 </pre></div>
 
            </div>
