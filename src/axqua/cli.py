@@ -50,9 +50,15 @@ from axqua.logsetup import setup_logging
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="axqua",
-        description="Build a calibration-ready TELEMAC-2D/GAIA case from a YAML "
-                    "config and emit a HydroBayesCal config. Use the 'clip' "
-                    "subcommand to only crop a raster to a ROI.",
+        description="Build the TELEMAC case (TELEMAC-2D/3D, GAIA, hydrology mode) of a "
+                    "case file and write the inputs of the HydroBayesCal calibration. "
+                    "aXqua covers the entire modeling procedure, from the geodata to the "
+                    "calibrated, validated and post-processed model; the other steps "
+                    "are commands of their own, for example 'axqua survey', 'axqua "
+                    "submit' (runs, mesh convergence studies, calibrations), 'axqua "
+                    "validation', 'axqua openfoam', 'axqua hydrology' and 'axqua "
+                    "export' (see 'axqua <command> --help'). 'axqua clip' only crops a "
+                    "raster to a region of interest.",
     )
     p.add_argument("config", type=Path, help="path to the YAML configuration file")
     p.add_argument("--no-validate-env", action="store_true",

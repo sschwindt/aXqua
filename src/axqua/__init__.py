@@ -1,10 +1,6 @@
-"""axqua - automated setup of calibration-ready river models.
+"""axqua - the entire modeling procedure for free-surface water bodies and their catchments.
 
-axqua turns user-provided geodata and hydraulic data (DEM, ROI boundary,
-inflow/outflow, measurements) into a production-ready simulation case, plus the
-artifacts a surrogate-assisted Bayesian calibration needs. Two simulation backends
-ship with it - TELEMAC-2D/3D (+GAIA) and OpenFOAM ``interFoam`` - and both are driven
-from **one** case configuration describing the river and the modeling intent.
+axqua walks the modeler from the geodata to the calibrated, validated and post-processed model: it organizes the geodata and the field measurements, plans field surveys, builds the case (terrain, mesh, boundary conditions, steering files), runs mesh convergence studies, calibrates hydrodynamic and morphodynamic models with Bayesian inference assisted by a Gaussian-process surrogate model (HydroBayesCal), validates the calibrated model in another flow situation, simulates rainfall-runoff in catchments together with their rivers and lakes (hydrology mode), and post-processes the results for QGIS, ParaView and VisIt. Two simulation backends ship with it - TELEMAC-2D/3D (+GAIA) and OpenFOAM ``interFoam`` - and both are driven from **one** case configuration describing the water body and the modeling intent.
 
 Layering
 --------

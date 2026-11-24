@@ -1,8 +1,8 @@
 # aXqua
 
-**Automated setup, persistent execution and calibration of models of free-surface water bodies: rivers, lakes, reservoirs and hydraulic structures.**
+**The entire modeling procedure for free-surface water bodies and their catchments (rivers, lakes, reservoirs and hydraulic structures), from the geodata to the calibrated, validated and post-processed model.**
 
-aXqua builds a **TELEMAC-2D/3D** case (optionally with **GAIA**) or an **OpenFOAM** free-surface case from geodata, runs it as a job that outlives the shell or QGIS that started it, and calibrates it with [HydroBayesCal](https://github.com/Ecohydraulics/hydrobayescal) (surrogate-assisted Bayesian calibration with quantified uncertainty). A **QGIS plugin** drives the whole workflow; everything also works from a terminal.
+aXqua builds a **TELEMAC-2D/3D** case (optionally with **GAIA**) or an **OpenFOAM** free-surface case from geodata, runs it as a job that outlives the shell or QGIS that started it, checks it with a mesh convergence study, calibrates it with [HydroBayesCal](https://github.com/Ecohydraulics/hydrobayescal) (surrogate-assisted Bayesian calibration with quantified uncertainty) and validates it in another flow situation. It plans field surveys, simulates rainfall-runoff in catchments together with their rivers and lakes (hydrology mode), and post-processes the results as QGIS maps, for ParaView and VisIt, and as movies. A **QGIS plugin** drives the whole workflow; everything also works from a terminal.
 
 **Documentation:** [axqua.eu](https://axqua.eu) (English), [axqua.eu/de](https://axqua.eu/de/) (Deutsch), [axqua.eu/fr](https://axqua.eu/fr/) (Français), and [axqua.ch](https://axqua.readthedocs.io) (Switzerland).
 
