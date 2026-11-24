@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.5.0
+version=1.5.1
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,32 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.5.0
+changelog=1.5.1
+    - New: calibration of the OpenFOAM model at the discharges of the
+      calibration situations (job openfoam-calibration). TELEMAC runs
+      at each discharge first and seeds the OpenFOAM model, which is
+      calibrated for one ks of the whole bed and the k-epsilon
+      coefficients against the velocity at 0.6 h above the riverbed.
+      Needs HydroBayesCal 1.15.0.
+    - New: validation of the calibrated OpenFOAM model in another flow
+      situation (job openfoam-validation), with the settings of the
+      calibration runs or as the free-surface production model.
+    - New: calibration.gp_mean, the mean of the surrogate model
+      (constant, linear or hydraulic).
+    - The active learning runs until the model evidence and the relative
+      entropy converge, unless Simulations in total limits it, and warns
+      while the two show no sign of leveling off. A calibration that has
+      not converged can continue from all saved simulations (option
+      Continue the active learning from all saved simulations).
+    - Without init_runs, the calibration starts with 10 simulations per
+      parameter, rounded up to a power of two.
+    - Calibration runs last 1.2 residence times of the reach filled to
+      the highest outflow level of the range. The discharge balance of a
+      run is the trend of the stored volume over its last third.
+    - The job list shows the run, the stage and the discharge of a
+      calibration at several discharges.
+    - HydroBayesCal 1.14.1 or newer is required.
+    1.5.0
     - New: import a TELEMAC case (Case Setup > Import TELEMAC case...,
       'axqua case import'). aXqua writes a case for the steering file of
       a TELEMAC case it did not build; its results go on the map, into
