@@ -402,9 +402,15 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_build_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
         <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua"</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">"Build a calibration-ready TELEMAC-2D/GAIA case from a YAML "</span>
-                    <span class="s2">"config and emit a HydroBayesCal config. Use the 'clip' "</span>
-                    <span class="s2">"subcommand to only crop a raster to a ROI."</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Build the TELEMAC case (TELEMAC-2D/3D, GAIA, hydrology mode) of a "</span>
+                    <span class="s2">"case file and write the inputs of the HydroBayesCal calibration. "</span>
+                    <span class="s2">"aXqua covers the entire modeling procedure, from the geodata to the "</span>
+                    <span class="s2">"calibrated, validated and post-processed model; the other steps "</span>
+                    <span class="s2">"are commands of their own, for example 'axqua survey', 'axqua "</span>
+                    <span class="s2">"submit' (runs, mesh convergence studies, calibrations), 'axqua "</span>
+                    <span class="s2">"validation', 'axqua openfoam', 'axqua hydrology' and 'axqua "</span>
+                    <span class="s2">"export' (see 'axqua &lt;command&gt; --help'). 'axqua clip' only crops a "</span>
+                    <span class="s2">"raster to a region of interest."</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"path to the YAML configuration file"</span><span class="p">)</span>
     <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-validate-env"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
