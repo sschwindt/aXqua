@@ -572,6 +572,7 @@ def run_single_flow_calibration(
     # less the zones the points say nothing about (calibration_zones)
     parameters = settle_zone_plan(cfg, [table], Path(cfg.calibration_dir),
                                   resume=resume or extend)
+    check_backwater(cfg, [("the calibration", table)], Path(cfg.calibration_dir))
     if "SCALAR VELOCITY_DATA" in table:
         print(f"  scalar velocity [m/s]: {table['SCALAR VELOCITY_DATA'].min():.3f} .. "
               f"{table['SCALAR VELOCITY_DATA'].max():.3f}")
@@ -1585,6 +1586,8 @@ def run_situation_calibration(cfg: Config, *, calibration_quantities=None,
         tables.append(table)
         print(f"  {situation.name}: Q = {q:g} m3/s, {len(table)} points -> {cas}")
     parameters = settle_zone_plan(cfg, tables, folder, resume=resume or extend)
+    check_backwater(cfg, [(s.name, table) for s, table in zip(situations, tables)],
+                    folder)
     ready_outflow_offset(cfg, parameters, [f"steady2d-{tag}.cas" for tag in tags])
     runs = record_run_budget(cfg, folder, parameters)
 
@@ -1662,6 +1665,21 @@ def record_run_budget(cfg: Config, folder: Path, parameters) -> tuple[int, int |
     print(f"run budget: {init_runs} initial runs (first block {first}), {limit} "
           f"-> {folder / RUN_BUDGET}")
     return init_runs, max_runs, first
+
+
+def check_backwater(cfg: Config, groups, folder: Path) -> None:
+    """How far a change of the outflow level reaches, against the calibration points.
+
+    :func:`axqua.workflow.report_backwater` on the steady result, with the points of
+    each ``(name, table)`` of *groups*, written into *folder*. Points within the reach
+    of an outflow level that the calibration does not vary are warned about (logger
+    ``axqua.backwater``): an error of that level would go into the roughness. Never
+    raises.
+    """
+    from axqua.workflow import report_backwater
+
+    for line in report_backwater(cfg, points=dict(groups), out=folder):
+        print(line)
 
 
 def settle_zone_plan(cfg: Config, tables, folder: Path, *, resume: bool = False) -> list:

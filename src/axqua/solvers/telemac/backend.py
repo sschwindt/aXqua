@@ -580,6 +580,7 @@ class TelemacBackend(BaseBackend):
         if ctx is not None:
             for name in ("wetting-report.csv", "outlet-profile.csv"):
                 ctx.record(name, cfg.model_path(name), kind="table")
+            _record_backwater(Path(cfg.model_dir), ctx)
 
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
         """The number this job was minimizing, when there is one.
@@ -685,6 +686,17 @@ def _write_study_report(report, folder: Path, stem: str, ctx: Any, *,
     write_study_report(report, folder, stem, ctx, readme=readme)
 
 
+def _record_backwater(folder: Path, ctx) -> None:
+    """Put the backwater reach (:mod:`axqua.solvers.telemac.backwater`) of *folder* into
+    the manifest, when the check wrote one."""
+    from axqua.solvers.telemac.backwater import FILE_STEM
+
+    figure = Path(folder) / f"{FILE_STEM}.png"
+    if figure.exists():
+        ctx.record("Backwater reach of the outflow level", figure, kind="figure")
+        ctx.record("Backwater reach (table)", figure.with_suffix(".csv"), kind="table")
+
+
 def _record_calibration_report(cfg, ctx) -> None:
     """Put the calibration report (:mod:`axqua.calibration_report`) into the manifest."""
     from axqua import bayescal
@@ -693,6 +705,7 @@ def _record_calibration_report(cfg, ctx) -> None:
     root = Path(cfg.calibration_dir)
     folder = (root / bayescal.MULTIFLOW if bayescal.calibration_situations(cfg)
               else root) / FOLDER
+    _record_backwater(folder.parent, ctx)
     ctx.record("Calibration: posterior of each parameter", folder / "posteriors.png",
                kind="figure")
     ctx.record("Calibration: roughness zones and their ks", folder / "roughness-zones.png",

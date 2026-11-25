@@ -95,8 +95,10 @@ When the run has finished, aXqua evaluates whether the flow is steady. It reads 
      - Wetted area, divided into flowing water, stagnant thin water films and isolated puddles.
    * - ``outlet-profile.csv``
      - Water surface near the outflow boundary, with a note whether the prescribed water level dams up the flow or draws it down.
+   * - ``backwater-reach.png``, ``backwater-reach.csv``, ``backwater-reach.json``
+     - How far upstream a change of the water level at the outflow boundary reaches, and how much of it remains at the measurement points (:ref:`backwater reach <calibration-backwater>`).
 
-The run is steady when the relative difference between inflow and outflow stays below ``hydrodynamics.flux_tolerance``. If this is not the case at the end of the run, increase ``hydrodynamics.duration`` and repeat the run. The wetting report complements this criterion: a simulation can have balanced discharges and still show water in places where the real reach is dry. Large areas of stagnant film usually indicate a start with too much water or a downstream water level that is too high.
+The run is steady when the relative difference between inflow and outflow stays below ``hydrodynamics.flux_tolerance``. If this is not the case at the end of the run, increase ``hydrodynamics.duration`` and repeat the run. The wetting report complements this criterion: a simulation can have balanced discharges and still show water in places where the real reach is dry. Large areas of stagnant film usually indicate a start with too much water or a downstream water level that is too high. The backwater reach answers a question of the calibration: whether the measurement points lie where the water level at the outflow boundary, which is an assumption of the model, still acts on the flow.
 
 *Load results* adds the result (``r2d.slf``) to the QGIS project as water depth and flow velocity layers.
 

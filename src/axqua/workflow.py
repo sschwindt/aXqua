@@ -397,10 +397,12 @@ def report_wetting(cfg: Config) -> list[str]:
     film is still draining or has plateaued (a 2D model has neither infiltration nor
     evaporation, so water perched above the converged surface never leaves). The
     outlet profile then says whether the prescribed downstream stage is holding water
-    up over ground that should be dry.
+    up over ground that should be dry, and the backwater reach
+    (:func:`report_backwater`) how far upstream a change of that stage reaches.
 
-    Writes ``wetting-report.csv`` and ``outlet-profile.csv`` into ``model_dir`` and
-    returns report lines. Never raises: a diagnostic must not fail a successful run.
+    Writes ``wetting-report.csv``, ``outlet-profile.csv`` and ``backwater-reach.*`` into
+    ``model_dir`` and returns report lines. Never raises: a diagnostic must not fail a
+    successful run.
     """
     from axqua.wetting import outlet_profile, wetting_report
 
@@ -431,7 +433,56 @@ def report_wetting(cfg: Config) -> list[str]:
     else:
         lines.append(f"outlet profile -> {cfg.model_path('outlet-profile.csv')}")
         lines += [f"  {ln}" for ln in prof.summary()]
+    lines += report_backwater(cfg)
     return lines
+
+
+def case_points(cfg: Config) -> dict:
+    """The measurement points of the case's ground truth, by survey: ``{name: table}``.
+
+    Only positions are read, and only when the case names its ground truth (as for the
+    probes of the mesh study, :func:`axqua.convergence.default_probes`). Empty when
+    there is none.
+    """
+    named = getattr(cfg, "ground_truth", None)
+    configured = (named is None or getattr(named, "measurements", None) is not None
+                  or bool(getattr(named, "sources", None)))
+    path = cfg.ground_truth_path if configured else None
+    if path is None or not Path(path).exists():
+        return {}
+    from axqua import ground_truth
+
+    return {name: table for name, table in ground_truth.read_tidy(path).items()
+            if {"x", "y"} <= set(table.columns)}
+
+
+def report_backwater(cfg: Config, points=None, out: Path | None = None) -> list[str]:
+    """How far upstream a change of the outflow level reaches, on the steady result.
+
+    :func:`axqua.solvers.telemac.backwater.check` with the points of the case's ground
+    truth (or *points*), written as ``backwater-reach.csv``, ``.json`` and ``.png`` into
+    *out* (default ``model_dir``). Points within the reach of an outflow level that is
+    not calibrated are warned about. Never raises.
+    """
+    from axqua.solvers.telemac import backwater
+
+    results = cfg.model_path(cfg.results_slf)
+    if not Path(results).exists():
+        return []
+    out = Path(out) if out is not None else Path(cfg.model_dir)
+    try:
+        if points is None:
+            try:
+                points = case_points(cfg)
+            except Exception as exc:  # noqa: BLE001 - the reach without points
+                log.debug("backwater reach without points (%s)", exc)
+                points = {}
+        reach = backwater.check(cfg, results, geometry=cfg.model_path(cfg.geometry_slf),
+                                points=points, out=out)
+    except Exception as exc:  # noqa: BLE001 - a diagnostic of a finished run
+        return [f"backwater reach skipped: {type(exc).__name__}: {exc}"]
+    return [f"backwater reach -> {out / (backwater.FILE_STEM + '.png')}"] + \
+        [f"  {ln}" for ln in reach.summary()]
 
 
 def report_sections(cfg: Config, out_name: str = "baffle-XS-q.csv") -> list[str]:

@@ -293,7 +293,9 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
 
             status.transition(JobState.POSTPROCESSING)
             status_sink.state_changed()
-            _postprocess(backend, cfg, ctx, manifest, artifacts)
+            # the reports after the run warn too (the backwater reach of a steady run)
+            with _surfaced(manifest):
+                _postprocess(backend, cfg, ctx, manifest, artifacts)
 
             results.write_manifest(jd, manifest)
             status.artifacts.update(_artifact_map(jd))
@@ -332,7 +334,8 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
 #: Loggers whose warnings the user has to see, not only find in the log: the plugin
 #: shows the ``warnings`` of the result manifest when the results are loaded.
 SURFACED_LOGGERS = ("axqua.near_boundary", "axqua.calibration_zones",
-                    "axqua.calibration_design", "axqua.calibration_convergence")
+                    "axqua.calibration_design", "axqua.calibration_convergence",
+                    "axqua.backwater")
 
 
 class _Collector(logging.Handler):
